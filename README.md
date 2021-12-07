@@ -8,10 +8,11 @@ Greaper currently supports Windows using 64bits, 32bits needs testing, and Linux
 
 I've been a programmer for long time now (about 11 years), I started with programming PICAXE microcontrollers in BASIC and later in C. Then I moved to graphics and game programming in Java and later in C++ and currently I'm developing a Game using Unity therefore C#.
 What I mean by explainig my background is that I've touched from very low-level stuff to a fairly high-level, meaning that I can understand the concernings from a Low-level programmer to the concernings from a fairly high-level programmer, and I think that this is implemented in Greaper.
+I've been merging all my experince into a library and thats how Greaper started! At the beginning was my own toy graphics engine, but it grew probably too much.
 
 ## What is Greaper?
 
-I've been merging all my experince into a library and that how Greaper started! At the beginning was my own toy graphics engine, but it grew probably too much. That's why I say that Greaper is not an Engine because the main target is any type of application but real-time graphics applications will have support first but it will not end there.
+Greaper is a super modular application framework, with cross-platform between Windows and Linux.
 
 ## Why so much modularity?
 
@@ -55,6 +56,7 @@ In the future I'll make some modules that I'll not share their implementations b
 ## Wanna collaborate?
 
 I would be really thankfull if that's your willing! Greaper is a huge project and can scare a lot of developers to start, but I will inquire you, once is stable, to develop a module and test it!
+I urge you to follow this [Code Style](CodeStyle.md) if you want to collaborate on the Greaper project.
 
 ## Contact
 
