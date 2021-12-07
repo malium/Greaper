@@ -40,13 +40,15 @@ Files must start with a header comment where you can state who belongs that file
 - header files: The same rules as source files applies, but, after the header you must add #pragma once (we assume all compilers support it), after that add the include guards unless certain conditions (its a header implementation file .inl, or a file that may trigger reinclude on purpose).
 The header guards must follow this rule:
 if the file holds a class
+
 		#ifndef PROJECTNAME_CLASS_NAME_H
 		#define PROJECTNAME_CLASS_NAME_H 1
 		
 		...
 		
 		#endif /* PROJECTNAME_CLASS_NAME_H */
-if it does not hold a class, instead of CLASS_NAME, some representative name following the same naming scheme.
+
+If it does not hold a class, instead of CLASS_NAME, some representative name following the same naming scheme.
 After the header guards and before a blank line must follow.
 Then you can start your code, its recomended to start with a namespace, you must not use the 'using namespace ...' in a header unless certain conditions (for example, using namespace std::string_literals is permited but only in one file and must have header guards).
 
@@ -60,6 +62,7 @@ You must let at least an empty line between function declarations so a comment m
 
 ## Examples
 - Header example
+
 		/***********************************************************************************
 		*   Copyright 2021 Marcos Sánchez Torrent.                                         *
 		*   All Rights Reserved.                                                           *
@@ -93,7 +96,9 @@ You must let at least an empty line between function declarations so a comment m
 		}
 		
 		#endif /* CS_EXAMPLE_H */
+
 - Source file example
+
 		/***********************************************************************************
 		*   Copyright 2021 Marcos Sánchez Torrent.                                         *
 		*   All Rights Reserved.                                                           *
