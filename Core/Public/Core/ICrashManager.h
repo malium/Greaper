@@ -12,7 +12,7 @@
 
 namespace greaper
 {
-    class ICrashManager : public TInterface<ICrashManager>
+    class ICrashManager : public IInterface
     {
     public:
         static constexpr Uuid InterfaceUUID = Uuid{ 0xF58F9031, 0xDFD24F1D, 0x86C87C5C, 0xAC411A8F };

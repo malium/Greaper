@@ -45,3 +45,4 @@
 *.exp
 *.recipe
 obj/**
+bin/**

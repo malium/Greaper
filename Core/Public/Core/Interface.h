@@ -12,7 +12,6 @@
 
 namespace greaper
 {
-	struct EmptyConfig {  };
 	/**
 	 * @brief Base class of all manager and factories
 	 * 
@@ -54,6 +53,10 @@ namespace greaper
 
 		virtual void OnDeactivate() = 0;
 
+		virtual void InitProperties() = 0;
+
+		virtual void DeinitProperties() = 0;
+
 		virtual bool IsActive()const = 0;
 		
 		virtual bool IsInitialized()const = 0;
@@ -73,19 +76,8 @@ namespace greaper
 		virtual void OnChangingDefault(IInterface* newDefault) = 0;
 
 		virtual ChangingDefaultEvt_t* const GetChangingDefaultEvent() = 0;
-	};
 
-	template<class InterfaceClass, class InterfaceConfig = EmptyConfig>
-	class TInterface : public IInterface
-	{
-	public:
-		using ConfigType = InterfaceConfig;
-
-		virtual ~TInterface()noexcept = default;
-
-		virtual void SetConfig(InterfaceConfig config) = 0;
-
-		virtual const InterfaceConfig& GetConfig()const = 0;
+		virtual CRange<IProperty*> GetProperties()const = 0;
 	};
 
 	template<class T>

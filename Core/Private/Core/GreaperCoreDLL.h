@@ -25,7 +25,7 @@ namespace greaper::core
 	{
 		EmptyResult RegisterProperty(IProperty* property)override;
 		IApplication* m_Application = nullptr;
-		Library m_Library;
+		Library* m_Library = nullptr;
 		ILogManager* m_LogManager = nullptr;
 		bool m_LogManagerActivated = false;
 		EventHandler<IInterface*> m_OnNewLogManager;
@@ -44,7 +44,7 @@ namespace greaper::core
 		
 		GreaperCoreLibrary() = default;
 
-		void InitLibrary(Library lib, IApplication* app)override;
+		void InitLibrary(Library* lib, IApplication* app)override;
 
 		void InitManagers()override;
 
@@ -53,6 +53,8 @@ namespace greaper::core
 		void InitReflection()override;
 
 		void DeinitReflection()override;
+
+		void DeinitProperties()override;
 
 		void DeinitManagers()override;
 
@@ -64,7 +66,7 @@ namespace greaper::core
 
 		IApplication* GetApplication()const override { return m_Application; }
 
-		const Library* GetOSLibrary()const override { return &m_Library; }
+		const Library* GetOSLibrary()const override { return m_Library; }
 
 		CRange<IProperty*> GetPropeties()const override;
 

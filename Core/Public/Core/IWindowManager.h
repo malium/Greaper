@@ -16,7 +16,7 @@
 
 namespace greaper
 {
-	class IWindowManager : public TInterface<IWindowManager>
+	class IWindowManager : public IInterface
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0x9FFF5170, 0x9A5E4E9C, 0x9CFD0FAB, 0xBF2C3E75 };

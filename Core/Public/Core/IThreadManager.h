@@ -16,7 +16,7 @@
 
 namespace greaper
 {
-	class IThreadManager : public TInterface<IThreadManager>
+	class IThreadManager : public IInterface
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0x284B5BAD, 0x9B004E76, 0x8B7F76DD, 0xB45D740F };

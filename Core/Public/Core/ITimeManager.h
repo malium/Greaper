@@ -18,7 +18,7 @@ namespace greaper
 		float FixedDeltaSeconds = 0.02f;
 	};
 
-	class ITimeManager : public TInterface<ITimeManager>
+	class ITimeManager : public IInterface
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0x7646A5C7, 0x81254E1C, 0x80D21DEE, 0x3ADAAAA4 };

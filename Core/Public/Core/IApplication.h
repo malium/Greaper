@@ -16,17 +16,21 @@ namespace greaper
 	struct ApplicationConfig
 	{
 		StringView ApplicationName = "unnamed"sv;
-		int32 ApplicationVersion = 0;
+		uint32 ApplicationVersion = 0;
 		
 		sizet GreaperLibraryCount = 0;
 		WStringView* GreaperLibraries = nullptr;
 	};
 
-	class IApplication : public TInterface<IApplication, ApplicationConfig>
+	class IApplication : public IInterface
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xF79C882D, 0x506B4307, 0xBE036194, 0x9F58B3BC };
 		static constexpr StringView InterfaceName = "Application"sv;
+		using ApplicationNameProp_t = TProperty<String>;
+		using CompilationinfoProp_t = TProperty<String>;
+		using ApplicationVersionProp_t = TProperty<uint32>;
+		using LoadedLibrariesProp_t = TProperty<WStringVec>;
 		
 		using OnCloseEvent_t = Event<void>;
 
@@ -74,13 +78,13 @@ namespace greaper
 
 		virtual OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() = 0;
 
-		virtual const StringView& GetApplicationName()const = 0;
+		virtual ApplicationNameProp_t* GetApplicationName() = 0;
 
-		virtual int32 GetApplicationVersion()const = 0;
+		virtual CompilationinfoProp_t* GetCompilationInfo() = 0;
 
-		virtual int32 GetGreaperVersion()const = 0;
-		
-		virtual const StringView& GetCompilationInfo()const = 0;
+		virtual ApplicationVersionProp_t* GetApplicationVersion() = 0;
+
+		virtual LoadedLibrariesProp_t* GetLoadedLibrariesNames() = 0;
 
 		template<class T>
 		Result<T*> RegisterGreaperLibraryT(const WStringView& libPath)
@@ -116,18 +120,6 @@ namespace greaper
 				return CopyFailure<T*>(res);
 			T* lib = reinterpret_cast<T*>(res.GetValue());
 			return CreateResult(lib);
-		}
-
-		template<class T, class ConfigType>
-		EmptyResult RegisterInterfaceT(TInterface<T, ConfigType>* interface, ConfigType config = ConfigType{})
-		{
-			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to register an Interface "
-				"but its implementation doesn't derive from IInterface.");
-			const auto res = RegisterInterface(interface);
-			if(res.HasFailed())
-				return res;
-			interface->SetConfig(config);
-			return res;
 		}
 
 		template<class T>

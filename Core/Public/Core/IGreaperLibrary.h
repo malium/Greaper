@@ -14,6 +14,7 @@
 
 namespace greaper
 {
+	class IInterface;
 	class IGreaperLibrary
 	{
 	protected:
@@ -25,7 +26,7 @@ namespace greaper
 
 		virtual ~IGreaperLibrary() = default;
 
-		virtual void InitLibrary(Library lib, IApplication* app) = 0;
+		virtual void InitLibrary(Library* lib, IApplication* app) = 0;
 
 		virtual void InitManagers() = 0;
 
@@ -34,6 +35,8 @@ namespace greaper
 		virtual void InitReflection() = 0;
 
 		virtual void DeinitReflection() = 0;
+
+		virtual void DeinitProperties() = 0;
 
 		virtual void DeinitManagers() = 0;
 
@@ -46,6 +49,8 @@ namespace greaper
 		virtual IApplication* GetApplication()const = 0;
 
 		virtual const Library* GetOSLibrary()const = 0;
+
+		virtual CRange<IInterface*> GetManagers()const = 0;
 
 		virtual CRange<IProperty*> GetPropeties()const = 0;
 

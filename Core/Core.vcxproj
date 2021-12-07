@@ -503,6 +503,7 @@
     <ClInclude Include="Public\Core\Win\Prerequisites.h" />
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
+    <ClInclude Include="Public\Core\IObjectFactory.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl" />

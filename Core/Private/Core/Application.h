@@ -48,6 +48,7 @@ namespace greaper::core
 
 		void AddGreaperLibrary(IGreaperLibrary* library);
 		void LoadConfigLibraries();
+		void UpdateConfigProperties();
 
 	public:
 		Application();
@@ -83,9 +84,9 @@ namespace greaper::core
 
 		ActivationEvt_t* const GetActivationEvent()override { return &m_OnActivation; }
 
-		void SetConfig(ApplicationConfig config)override;
+		/*void SetConfig(ApplicationConfig config)override;
 
-		const ApplicationConfig& GetConfig()const override { return m_Config; }
+		const ApplicationConfig& GetConfig()const override { return m_Config; }*/
 
 		void OnChangingDefault(IInterface* newDefault)override
 		{
@@ -133,7 +134,7 @@ namespace greaper::core
 
 		OnCloseEvent_t* const GetOnCloseEvent()override { return &m_OnClose; }
 
-		OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() { return nullptr; }
+		OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() { return &m_OnInterfaceActivation; }
 
 		const StringView& GetApplicationName()const override { return m_Config.ApplicationName; }
 

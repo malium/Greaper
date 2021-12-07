@@ -16,7 +16,7 @@ namespace greaper
 {
     ENUMERATION(DeferredUpdate, PreUpdate, Update, PostUpdate, Fixed);
 
-    class IDeferredCallManager : public TInterface<IDeferredCallManager>
+    class IDeferredCallManager : public IInterface
     {
     public:
         static constexpr Uuid InterfaceUUID = Uuid{ 0x07C76D1A, 0xF08C4F0B, 0x8870B912, 0xE75E481E };

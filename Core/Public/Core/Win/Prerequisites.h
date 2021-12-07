@@ -9,8 +9,12 @@ struct WinTypes : BasicTypes
 {
 	typedef unsigned __int64	uint64_t;
 	typedef signed __int64		int64_t;
+#if ARCHITECTURE_X64
+	typedef uint64_t			ptruint_t;
+	typedef int64_t				ptrint_t;
 	typedef uint64_t			sizetype;
 	typedef int64_t				ssizetype;
+#endif
 };
 
 typedef WinTypes PlatformTypes;

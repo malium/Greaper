@@ -9,6 +9,7 @@
 #define CORE_LIBRARY_H 1
 
 #include "CorePrerequisites.h"
+#include "Memory.h"
 
 #if PLT_WINDOWS
 #include "Win/WinLibrary.h"
@@ -94,6 +95,11 @@ namespace greaper
 		INLINE constexpr bool IsOpen()const noexcept
 		{
 			return m_Handle != nullptr;
+		}
+
+		INLINE OSLibrary::LibraryHandle GetOSHandle()const noexcept
+		{
+			return m_Handle;
 		}
 
 		INLINE FuncPtr GetFunction(StringView funcName)const noexcept

@@ -34,9 +34,17 @@ void Application::LoadConfigLibraries()
 	}
 }
 
+void Application::UpdateConfigProperties()
+{
+
+}
+
 Application::Application()
 	:m_Library(nullptr)
-	,m_OnClose("OnClose"sv)
+	, m_OnClose("OnClose"sv)
+	, m_OnInterfaceActivation("OnInterfaceActivation"sv)
+	, m_OnInitialization("OnInitialization"sv)
+	, m_OnActivation("OnActivation"sv)
 	,m_IsActive(false)
 	,m_IsInitialized(false)
 	,m_HasToStop(false)
@@ -115,16 +123,19 @@ void Application::FixedUpdate()
 	// No-op
 }
 
-void Application::SetConfig(ApplicationConfig config)
-{
-	m_Config = std::move(config);
-	// Apply config
-	LoadConfigLibraries();
-}
+//void Application::SetConfig(ApplicationConfig config)
+//{
+//	m_Config = std::move(config);
+//	// Update Properties
+//	UpdateConfigProperties();
+//	// Apply config
+//	LoadConfigLibraries();
+//}
 
 Result<IGreaperLibrary*> Application::RegisterGreaperLibrary(const WStringView& libPath)
 {
 	Library lib{ libPath };
+
 	if (!lib.IsOpen())
 	{
 		return CreateFailure<IGreaperLibrary*>(Format(
@@ -160,7 +171,7 @@ Result<IGreaperLibrary*> Application::RegisterGreaperLibrary(const WStringView& 
 	}
 
 	AddGreaperLibrary(gLib);
-	gLib->InitLibrary(std::move(lib), this);
+	gLib->InitLibrary(Construct<Library>(lib.GetOSHandle()), this);
 	gLib->InitManagers();
 	gLib->InitProperties();
 	gLib->InitReflection();

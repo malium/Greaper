@@ -100,9 +100,9 @@ void greaper::core::GreaperCoreLibrary::OnLogActivation(bool activated)
 	DumpLogsToLogManager();
 }
 
-void greaper::core::GreaperCoreLibrary::InitLibrary(Library lib, IApplication* app)
+void greaper::core::GreaperCoreLibrary::InitLibrary(Library* lib, IApplication* app)
 {
-	m_Library = std::move(lib);
+	m_Library = lib;
 	m_Application = app;
 }
 
@@ -126,10 +126,17 @@ void greaper::core::GreaperCoreLibrary::InitProperties()
 
 void greaper::core::GreaperCoreLibrary::InitReflection()
 {
+
 }
 
 void greaper::core::GreaperCoreLibrary::DeinitReflection()
 {
+
+}
+
+void greaper::core::GreaperCoreLibrary::DeinitProperties()
+{
+
 }
 
 void greaper::core::GreaperCoreLibrary::DeinitManagers()
@@ -139,7 +146,8 @@ void greaper::core::GreaperCoreLibrary::DeinitManagers()
 
 void greaper::core::GreaperCoreLibrary::DeinitLibrary()
 {
-	
+	if(m_Application != nullptr)
+		Destroy(m_Application);
 }
 
 greaper::CRange<greaper::IProperty*> greaper::core::GreaperCoreLibrary::GetPropeties() const
