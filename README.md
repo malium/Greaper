@@ -1,22 +1,21 @@
 # Greaper
 
+## What is Greaper?
+
+Greaper is a super modular application framework, with cross-platform between Windows and Linux.
 Greaper is an application framework, which enables the creation of these types of applications, real-time applications or event-based applications (In progress). This framework provides from the basic OS abstractions to a full modular approach to application creation.
 The main focus of Greaper is the hability to create an application from different modules and enable the interchange of modules at runtime. 
 Greaper currently supports Windows using 64bits, 32bits needs testing, and Linux based OS but needs testing too. Mac and another Apple platforms won't be supported.
+
+## Why so much modularity?
+
+Well you program applications that their scope is big, you need to try its components alone and test different implementations of a component, having an extensive modular framework allows easier testing and easier adaptation to different target platforms.
 
 ## Background
 
 I've been a programmer for long time now (about 11 years), I started with programming PICAXE microcontrollers in BASIC and later in C. Then I moved to graphics and game programming in Java and later in C++ and currently I'm developing a Game using Unity therefore C#.
 What I mean by explainig my background is that I've touched from very low-level stuff to a fairly high-level, meaning that I can understand the concernings from a Low-level programmer to the concernings from a fairly high-level programmer, and I think that this is implemented in Greaper.
 I've been merging all my experince into a library and thats how Greaper started! At the beginning was my own toy graphics engine, but it grew probably too much.
-
-## What is Greaper?
-
-Greaper is a super modular application framework, with cross-platform between Windows and Linux.
-
-## Why so much modularity?
-
-Well you program applications that their scope is big, you need to try its components alone and test different implementations of a component, having an extensive modular framework allows easier testing and easier adaptation to different target platforms.
 
 ## Current development status
 
