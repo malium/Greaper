@@ -46,3 +46,16 @@ Empty checkboxes represent in progress features.
 * [ ] InputManager that will hook to the created windows enabling input pooling and manipulation.
 * [ ] ResourceManager that will handle resources, its IE (Import/Export) methods, its resource links, unique IDs and can use SerializationManager to import/export complex resources or use IE to import/export raw resources.
 * [X] Properties, a class that will store data like a database but can be easily extended giving own types, also they are (TODO)de/serialized automatically if their configuration allows it as configuration for the application and its libraries.
+
+## License
+
+I want Greaper to be open source, at least the whole application framework, so any one can make applications on top of it and custom modules.
+In the future I'll make some modules that I'll not share their implementations but I will share their interfaces so they can be extended.
+
+## Wanna collaborate?
+
+I would be really thankfull if that's your willing! Greaper is a huge project and can scare a lot of developers to start, but I will inquire you, once is stable, to develop a module and test it!
+
+## Contact
+
+Have you found a bug? open a ticket on github or message me throgh here I'll also have my twitter were I sometimes answer technical stuff, were I'm open for DMs.
