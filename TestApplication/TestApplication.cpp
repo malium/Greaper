@@ -6,6 +6,7 @@
 #include <Core/CorePrerequisites.h>
 #include <Core/IGreaperLibrary.h>
 #include <Core/IApplication.h>
+#include <Core/Property.h>
 #include <iostream>
 
 #if ARCHITECTURE_X64
@@ -28,11 +29,12 @@ greaper::IApplication* gApplication = nullptr;
 
 int main()
 {
-	gCoreLib = greaper::Construct<greaper::Library>(CORE_LIB_NAME);
+	using namespace greaper;
+	gCoreLib = Construct<Library>(CORE_LIB_NAME);
 	auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
 
 	// init Greaper
-	gCore = static_cast<greaper::IGreaperLibrary*>(libFN());
+	gCore = static_cast<IGreaperLibrary*>(libFN());
 	gCore->InitLibrary(gCoreLib, nullptr);
 	gCore->InitManagers();
 	gCore->InitProperties();
@@ -40,14 +42,15 @@ int main()
 
 	gApplication = gCore->GetApplication();
 	//gApplication->SetConfig({.ApplicationName = "TestApplication"sv, .ApplicationVersion = 0, .GreaperLibraryCount = 0, .GreaperLibraries = nullptr, });
-
-	std::cout << "Successfully started " << gApplication->GetApplicationName() << " Version " << gApplication->GetApplicationVersion() << std::endl;
-
+	gApplication->GetApplicationName()->SetValue(String{ "TestApplication"sv });
+	gApplication->GetApplicationVersion()->SetValue(0);
+	gApplication->GetLoadedLibrariesNames()->SetValue({});
+	std::cout << "Successfully started!\n " << gApplication->GetApplicationName()->GetStringValue() << " Version " << gApplication->GetApplicationVersion()->GetStringValue() << std::endl;
+	
+	std::cout << "Enter anything to shutdown" << std::endl;
 	gApplication->StartApplication();
-	while (!gApplication->AppHasToStop())
-	{
-		gApplication->Update();
-	}
+	achar a;
+	std::cin >> a;
 
 	gApplication->StopApplication();
 
@@ -59,7 +62,7 @@ int main()
 	gApplication = nullptr;
 	gCore = nullptr;
 	gCoreLib->Close();
-	greaper::Destroy(gCoreLib);
+	Destroy(gCoreLib);
 	gCoreLib = nullptr;
 
 	return EXIT_SUCCESS;

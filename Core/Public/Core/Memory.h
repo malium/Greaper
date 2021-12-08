@@ -360,8 +360,8 @@ template<class T, class _Alloc_> friend void greaper::Destroy(T*, sizet)
 	Range<T> CreateRange(Vector<T, A>& vec)
 	{
 		Range<T> r;
-		r.SizeFn = [&vec]() { return vec.size(); };
-		r.GetItemFn = [&vec](std::size_t idx){ return vec[idx]; };
+		r.SizeFn = std::bind(&Vector<T, A>::size, &vec);
+		r.GetItemFn = std::bind([](Vector<T, A>& v, std::size_t i) -> T& { return v[i]; }, vec, std::placeholders::_1);
 		return r;
 	}
 
@@ -369,8 +369,8 @@ template<class T, class _Alloc_> friend void greaper::Destroy(T*, sizet)
 	CRange<T> CreateRange(const Vector<T, A>& vec)
 	{
 		CRange<T> r;
-		r.SizeFn = [&vec]() { return vec.size(); };
-		r.GetItemFn = [&vec](std::size_t idx) { return vec[idx]; };
+		r.SizeFn = std::bind(&Vector<T, A>::size, &vec);
+		r.GetItemFn = std::bind([](const Vector<T, A>& v, std::size_t i) -> const T& { return v[i]; }, vec, std::placeholders::_1);
 		return r;
 	}
 

@@ -67,7 +67,7 @@ namespace greaper
 		virtual void LogCritical(const String& message) = 0;
 
 		template<class T, class _Alloc_>
-		friend Result<TProperty<T>*> CreateProperty(greaper::IGreaperLibrary*, const StringView&, T, const StringView&,
+		friend Result<TProperty<T>*> CreateProperty(IGreaperLibrary*, StringView, T, StringView,
 			bool, bool, TPropertyValidator<T>*);
 	};
 

@@ -35,6 +35,8 @@ namespace greaper::core
 		void OnLogActivation(bool activated);
 		Vector<greaper::LogData> m_InitLogs;
 
+		Vector<IInterface*> m_Managers;
+
 		UnorderedMap<StringView, sizet> m_PropertyMap;
 		Vector<IProperty*> m_Properties;
 
@@ -81,6 +83,8 @@ namespace greaper::core
 		void LogError(const String& message)override;
 
 		void LogCritical(const String& message)override;
+
+		CRange<IInterface*> GetManagers() const override;
 	};
 }
 

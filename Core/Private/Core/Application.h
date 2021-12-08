@@ -16,12 +16,25 @@ namespace greaper::core
 {
 	class Application final : public IApplication
 	{
+		enum PropertiesIndices
+		{
+			ApplicationName,
+			ApplicationVersion,
+			CompilationInfo,
+			LoadedLibraries,
+
+			COUNT
+		};
+
 		IGreaperLibrary* m_Library;
 		ApplicationConfig m_Config;
 		OnCloseEvent_t m_OnClose;
 		OnInterfaceActivationEvent_t m_OnInterfaceActivation;
 		InitializationEvt_t m_OnInitialization;
 		ActivationEvt_t m_OnActivation;
+
+		Vector<IProperty*> m_Properties;
+
 		bool m_IsActive;
 		bool m_IsInitialized;
 		bool m_HasToStop;
@@ -67,6 +80,10 @@ namespace greaper::core
 		void OnActivate()override;
 
 		void OnDeactivate()override;
+
+		void InitProperties()override;
+
+		void DeinitProperties()override;
 
 		bool IsActive()const override { return m_IsActive; }
 
@@ -136,25 +153,16 @@ namespace greaper::core
 
 		OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() { return &m_OnInterfaceActivation; }
 
-		const StringView& GetApplicationName()const override { return m_Config.ApplicationName; }
+		ApplicationNameProp_t* GetApplicationName()override { return reinterpret_cast<ApplicationNameProp_t*>(m_Properties[(sizet)ApplicationName]); }
 
-		int32 GetApplicationVersion()const override { return m_Config.ApplicationVersion; }
+		CompilationinfoProp_t* GetCompilationInfo()override { return reinterpret_cast<CompilationinfoProp_t*>(m_Properties[(sizet)CompilationInfo]); }
 
-		int32 GetGreaperVersion()const override { return GREAPER_CORE_VERSION; }
+		ApplicationVersionProp_t* GetApplicationVersion()override { return reinterpret_cast<ApplicationVersionProp_t*>(m_Properties[(sizet)ApplicationVersion]); }
 
-		const StringView& GetCompilationInfo()const override
-		{
-			static constexpr StringView gCompilationInfo = 
-#if GREAPER_DEBUG
-			"DEBUG"sv;
-#elif GREAPER_FRELEASE
-			"PUBLIC"sv;
-#else
-			"RELEASE"sv;
-#endif
-			return gCompilationInfo;
-		}
-	};
+		LoadedLibrariesProp_t* GetLoadedLibrariesNames()override { return reinterpret_cast<LoadedLibrariesProp_t*>(m_Properties[(sizet)LoadedLibraries]); }
+
+		CRange<IProperty*> GetProperties() const override;
+};
 }
 
 #endif /* CORE_APPLICATION_H */

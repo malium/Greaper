@@ -5,6 +5,7 @@
 
 #include "Application.h"
 #include <Core/IGreaperLibrary.h>
+#include <Core/Property.h>
 
 using namespace greaper;
 using namespace greaper::core;
@@ -101,6 +102,84 @@ void Application::OnDeactivate()
 
 	m_OnActivation.Trigger(false);
 	m_IsActive = false;
+}
+
+void Application::InitProperties()
+{
+	if (m_Library == nullptr)
+		return; // no base library weird
+
+	if (m_Properties.size() != (sizet)COUNT)
+		m_Properties.resize((sizet)COUNT, nullptr);
+
+	static constexpr auto appName = "ApplicationName"sv;
+	ApplicationNameProp_t* appNameProp = nullptr;
+	auto result = m_Library->GetProperty(appName);
+	if (result.IsOk())
+		appNameProp = reinterpret_cast<ApplicationNameProp_t*>(result.GetValue());
+
+	if (appNameProp == nullptr)
+	{
+		auto appNameResult = CreateProperty<greaper::String>(m_Library, appName, {}, ""sv, false, true, nullptr);
+		Verify(appNameResult.IsOk(), "Couldn't create the property '%s' msg: %s", appName.data(), appNameResult.GetFailMessage().c_str());
+		appNameProp = appNameResult.GetValue();
+	}
+	m_Properties[(sizet)ApplicationName] = appNameProp;
+
+	static constexpr auto appVersion = "ApplicationVersion"sv;
+	ApplicationVersionProp_t* appVersionProp = nullptr;
+	result = m_Library->GetProperty(appVersion);
+	if (result.IsOk())
+		appVersionProp = reinterpret_cast<ApplicationVersionProp_t*>(result.GetValue());
+
+	if (appVersionProp == nullptr)
+	{
+		auto appVersionResult = CreateProperty<uint32>(m_Library, appVersion, 0, ""sv, false, true, nullptr);
+		Verify(appVersionResult.IsOk(), "Couldn't create the property '%s' msg: %s", appVersion.data(), appVersionResult.GetFailMessage().c_str());
+		appVersionProp = appVersionResult.GetValue();
+	}
+	m_Properties[(sizet)ApplicationVersion] = appVersionProp;
+
+	static constexpr auto compilationInfo = "CompilationInfo"sv;
+	CompilationinfoProp_t* compilationInfoProp = nullptr;
+	result = m_Library->GetProperty(compilationInfo);
+	if (result.IsOk())
+		compilationInfoProp = reinterpret_cast<CompilationinfoProp_t*>(result.GetValue());
+
+	if (compilationInfoProp == nullptr)
+	{
+		static constexpr StringView gCompilationInfo =
+#if GREAPER_DEBUG
+			"DEBUG"sv;
+#elif GREAPER_FRELEASE
+			"PUBLIC"sv;
+#else
+			"RELEASE"sv;
+#endif
+		auto comilationInfoResult = CreateProperty<greaper::String>(m_Library, compilationInfo, greaper::String{ gCompilationInfo }, ""sv, true, true, nullptr);
+		Verify(comilationInfoResult.IsOk(), "Couldn't create the property '%s' msg: %s", compilationInfo.data(), comilationInfoResult.GetFailMessage().c_str());
+		compilationInfoProp = comilationInfoResult.GetValue();
+	}
+	m_Properties[(sizet)CompilationInfo] = compilationInfoProp;
+
+	static constexpr auto loadedLibraries = "LoadedLibraries"sv;
+	LoadedLibrariesProp_t* loadedLibrariesProp = nullptr;
+	result = m_Library->GetProperty(loadedLibraries);
+	if (result.IsOk())
+		loadedLibrariesProp = reinterpret_cast<LoadedLibrariesProp_t*>(result.GetValue());
+
+	if (loadedLibrariesProp == nullptr)
+	{
+		auto loadedLibrariesResult = CreateProperty<greaper::WStringVec>(m_Library, loadedLibraries, {}, ""sv, false, true, nullptr);
+		Verify(loadedLibrariesResult.IsOk(), "Couldn't create the property '%s' msg: %s", loadedLibraries.data(), loadedLibrariesResult.GetFailMessage().c_str());
+		loadedLibrariesProp = loadedLibrariesResult.GetValue();
+	}
+	m_Properties[(sizet)LoadedLibraries] = loadedLibrariesProp;
+}
+
+void Application::DeinitProperties()
+{
+
 }
 
 void Application::PreUpdate()
@@ -585,4 +664,9 @@ void Application::StopApplication()
 
 	m_HasToStop = true;
 	m_OnClose.Trigger();
+}
+
+CRange<IProperty*> greaper::core::Application::GetProperties() const
+{
+	return CRange<IProperty*>();
 }

@@ -113,15 +113,23 @@ void greaper::core::GreaperCoreLibrary::InitManagers()
 		LogError(Format("Trying to Initialize the Managers of the GreaperLibrary '%s', but IApplication was already initialized.", LibraryName.data()));
 		return;
 	}
+
 	m_Application = Construct<Application>();
 	m_Application->GetOnInterfaceActivationEvent()->Connect(m_OnNewLogManager,
 		std::bind(&GreaperCoreLibrary::OnNewLogManager, this, std::placeholders::_1));
-	m_Application->Initialize(this);
+	m_Managers.push_back(m_Application);
+
+	// add more managers
+
+
+	for (auto* mgr : m_Managers)
+		mgr->Initialize(this);
 }
 
 void greaper::core::GreaperCoreLibrary::InitProperties()
 {
-
+	for (auto* mgr : m_Managers)
+		mgr->InitProperties();
 }
 
 void greaper::core::GreaperCoreLibrary::InitReflection()
@@ -142,6 +150,9 @@ void greaper::core::GreaperCoreLibrary::DeinitProperties()
 void greaper::core::GreaperCoreLibrary::DeinitManagers()
 {
 	m_Application->Deinitialize();
+
+
+	m_Managers.clear();
 }
 
 void greaper::core::GreaperCoreLibrary::DeinitLibrary()
@@ -204,6 +215,11 @@ void greaper::core::GreaperCoreLibrary::LogCritical(const String& message)
 		m_LogManager->Log(LogLevel_t::CRITICAL, message);
 	else
 		m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::CRITICAL });
+}
+
+greaper::CRange<greaper::IInterface*> greaper::core::GreaperCoreLibrary::GetManagers() const
+{
+	return CreateRange(m_Managers);
 }
 
 #else

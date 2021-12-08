@@ -259,6 +259,7 @@ namespace greaper::StringUtils
 			it = Impl::WIDEToUTF32(it, str.end(), c32);
 			Impl::UTF32To8(c32, backInserter, 4);
 		}
+		return output;
 	}
 
 	/**
@@ -428,8 +429,8 @@ namespace greaper::StringUtils
 	std::vector<BasicString<T, _Alloca_>, _VAlloca_> Tokenize(const BasicString<T, _Alloca_>& str, T token)
 	{
 		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Trying to Tokenize and convert a string at the same time");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type>, "Trying to Tokenize and convert a string at the same time");
-
+		static_assert(std::is_same_v<T, _VAlloca_::value_type::value_type>, "Trying to Tokenize and convert a string at the same time");
+		
 		std::vector<BasicString<T, _Alloca_>, _VAlloca_> rtn;
 		if (str.empty())
 			return rtn;

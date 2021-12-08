@@ -94,8 +94,9 @@ namespace greaper
 		}
 
 		template<class T, class _Alloc_>
-		friend Result<TProperty<T>*> CreateProperty(greaper::IGreaperLibrary*, const StringView&, T, const StringView&,
+		friend Result<TProperty<T>*> CreateProperty(IGreaperLibrary*, StringView, T, StringView,
 			bool, bool, TPropertyValidator<T>*);
+		MemoryFriend();
 	public:
 		using value_type = T;
 
@@ -197,10 +198,10 @@ namespace greaper
 	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 
 	template<class T, class _Alloc_ = greaper::GenericAllocator>
-	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
+	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
 		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr)
 	{
-		TProperty<T>* property = Construct<TProperty<T>, _Alloc_>(propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
+		TProperty<T>* property = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
 		EmptyResult res = library->RegisterProperty((IProperty*)property);
 		if (res.HasFailed())
 		{
