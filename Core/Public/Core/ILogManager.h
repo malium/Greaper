@@ -33,17 +33,13 @@ namespace greaper
 		LogLevel_t Level;
 	};
 
-	struct LogManagerConfig
-	{
-		bool CreateDefaultLogger = true;
-		bool AsyncronousLogging = true;
-	};
-
 	class ILogManager : public IInterface
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xB05DBD1D, 0x83FE42E1, 0x90CFF1EE, 0x2434CD0D };
 		static constexpr StringView InterfaceName = StringView{ "LogManager" };
+
+		using AsyncLogProp_t = TProperty<bool>;
 
 		using LogEvent_t = Event<const LogData&>;
 		using LogEventHandler_t = LogEvent_t::HandlerType;
@@ -52,6 +48,8 @@ namespace greaper
 		virtual ~ILogManager()noexcept = default;
 
 		virtual LogEvent_t*const GetLogEvent() = 0;
+
+		virtual AsyncLogProp_t* GetAsyncLog() = 0;
 
 		virtual void Log(LogLevel_t level, const String& message) = 0;
 
