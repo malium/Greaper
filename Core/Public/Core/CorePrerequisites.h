@@ -16,6 +16,8 @@
 #endif
 #define GREAPER_CORE_VERSION VERSION_SETTER(0, 2, 7, 0)
 
+#define DEF_PROP(name, type) static constexpr StringView name##Name = #name; using name##Prop_t = TProperty<type>
+
 namespace greaper
 {
 	using Clock_t = std::chrono::high_resolution_clock;
@@ -27,7 +29,6 @@ namespace greaper
 	class ILogManager;
 	class IThreadManager;
 	class ITimeManager;
-	class ILibrary;
 	class IGreaperLibrary;
 	class IProperty;
 	template<class T> class TProperty;

@@ -13,24 +13,16 @@
 
 namespace greaper
 {
-	struct ApplicationConfig
-	{
-		StringView ApplicationName = "unnamed"sv;
-		uint32 ApplicationVersion = 0;
-		
-		sizet GreaperLibraryCount = 0;
-		WStringView* GreaperLibraries = nullptr;
-	};
-
 	class IApplication : public IInterface
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xF79C882D, 0x506B4307, 0xBE036194, 0x9F58B3BC };
 		static constexpr StringView InterfaceName = "Application"sv;
-		using ApplicationNameProp_t = TProperty<String>;
-		using CompilationinfoProp_t = TProperty<String>;
-		using ApplicationVersionProp_t = TProperty<uint32>;
-		using LoadedLibrariesProp_t = TProperty<WStringVec>;
+
+		DEF_PROP(ApplicationName, String);
+		DEF_PROP(CompilationInfo, String);
+		DEF_PROP(ApplicationVersion, uint32);
+		DEF_PROP(LoadedLibraries, WStringVec);
 		
 		using OnCloseEvent_t = Event<void>;
 
@@ -80,7 +72,7 @@ namespace greaper
 
 		virtual ApplicationNameProp_t* GetApplicationName() = 0;
 
-		virtual CompilationinfoProp_t* GetCompilationInfo() = 0;
+		virtual CompilationInfoProp_t* GetCompilationInfo() = 0;
 
 		virtual ApplicationVersionProp_t* GetApplicationVersion() = 0;
 

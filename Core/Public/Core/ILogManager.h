@@ -39,7 +39,7 @@ namespace greaper
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xB05DBD1D, 0x83FE42E1, 0x90CFF1EE, 0x2434CD0D };
 		static constexpr StringView InterfaceName = StringView{ "LogManager" };
 
-		using AsyncLogProp_t = TProperty<bool>;
+		DEF_PROP(AsyncLog, bool);
 
 		using LogEvent_t = Event<const LogData&>;
 		using LogEventHandler_t = LogEvent_t::HandlerType;

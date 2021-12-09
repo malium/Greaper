@@ -27,7 +27,6 @@ namespace greaper::core
 		};
 
 		IGreaperLibrary* m_Library;
-		ApplicationConfig m_Config;
 		OnCloseEvent_t m_OnClose;
 		OnInterfaceActivationEvent_t m_OnInterfaceActivation;
 		InitializationEvt_t m_OnInitialization;
@@ -61,7 +60,6 @@ namespace greaper::core
 
 		void AddGreaperLibrary(IGreaperLibrary* library);
 		void LoadConfigLibraries();
-		void UpdateConfigProperties();
 
 	public:
 		Application();
@@ -155,13 +153,13 @@ namespace greaper::core
 
 		ApplicationNameProp_t* GetApplicationName()override { return reinterpret_cast<ApplicationNameProp_t*>(m_Properties[(sizet)ApplicationName]); }
 
-		CompilationinfoProp_t* GetCompilationInfo()override { return reinterpret_cast<CompilationinfoProp_t*>(m_Properties[(sizet)CompilationInfo]); }
+		CompilationInfoProp_t* GetCompilationInfo()override { return reinterpret_cast<CompilationInfoProp_t*>(m_Properties[(sizet)CompilationInfo]); }
 
 		ApplicationVersionProp_t* GetApplicationVersion()override { return reinterpret_cast<ApplicationVersionProp_t*>(m_Properties[(sizet)ApplicationVersion]); }
 
 		LoadedLibrariesProp_t* GetLoadedLibrariesNames()override { return reinterpret_cast<LoadedLibrariesProp_t*>(m_Properties[(sizet)LoadedLibraries]); }
 
-		CRange<IProperty*> GetProperties() const override;
+		CRange<IProperty*> GetProperties() const override { return CreateRange(m_Properties); }
 };
 }
 

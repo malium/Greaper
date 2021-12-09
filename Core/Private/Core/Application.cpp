@@ -22,7 +22,7 @@ void Application::AddGreaperLibrary(IGreaperLibrary* library)
 
 void Application::LoadConfigLibraries()
 {
-	if (m_Config.GreaperLibraries == nullptr)
+	/*if (m_Config.GreaperLibraries == nullptr)
 		return;
 	for (uint32 i = 0; i < m_Config.GreaperLibraryCount; ++i)
 	{
@@ -32,12 +32,7 @@ void Application::LoadConfigLibraries()
 			m_Library->LogWarning(res.GetFailMessage());
 			continue;
 		}
-	}
-}
-
-void Application::UpdateConfigProperties()
-{
-
+	}*/
 }
 
 Application::Application()
@@ -112,39 +107,36 @@ void Application::InitProperties()
 	if (m_Properties.size() != (sizet)COUNT)
 		m_Properties.resize((sizet)COUNT, nullptr);
 
-	static constexpr auto appName = "ApplicationName"sv;
 	ApplicationNameProp_t* appNameProp = nullptr;
-	auto result = m_Library->GetProperty(appName);
+	auto result = m_Library->GetProperty(ApplicationNameName);
 	if (result.IsOk())
 		appNameProp = reinterpret_cast<ApplicationNameProp_t*>(result.GetValue());
 
 	if (appNameProp == nullptr)
 	{
-		auto appNameResult = CreateProperty<greaper::String>(m_Library, appName, {}, ""sv, false, true, nullptr);
-		Verify(appNameResult.IsOk(), "Couldn't create the property '%s' msg: %s", appName.data(), appNameResult.GetFailMessage().c_str());
+		auto appNameResult = CreateProperty<greaper::String>(m_Library, ApplicationNameName, {}, ""sv, false, true, nullptr);
+		Verify(appNameResult.IsOk(), "Couldn't create the property '%s' msg: %s", ApplicationNameName.data(), appNameResult.GetFailMessage().c_str());
 		appNameProp = appNameResult.GetValue();
 	}
 	m_Properties[(sizet)ApplicationName] = appNameProp;
 
-	static constexpr auto appVersion = "ApplicationVersion"sv;
 	ApplicationVersionProp_t* appVersionProp = nullptr;
-	result = m_Library->GetProperty(appVersion);
+	result = m_Library->GetProperty(ApplicationVersionName);
 	if (result.IsOk())
 		appVersionProp = reinterpret_cast<ApplicationVersionProp_t*>(result.GetValue());
 
 	if (appVersionProp == nullptr)
 	{
-		auto appVersionResult = CreateProperty<uint32>(m_Library, appVersion, 0, ""sv, false, true, nullptr);
-		Verify(appVersionResult.IsOk(), "Couldn't create the property '%s' msg: %s", appVersion.data(), appVersionResult.GetFailMessage().c_str());
+		auto appVersionResult = CreateProperty<uint32>(m_Library, ApplicationVersionName, 0, ""sv, false, true, nullptr);
+		Verify(appVersionResult.IsOk(), "Couldn't create the property '%s' msg: %s", ApplicationVersionName.data(), appVersionResult.GetFailMessage().c_str());
 		appVersionProp = appVersionResult.GetValue();
 	}
 	m_Properties[(sizet)ApplicationVersion] = appVersionProp;
 
-	static constexpr auto compilationInfo = "CompilationInfo"sv;
-	CompilationinfoProp_t* compilationInfoProp = nullptr;
-	result = m_Library->GetProperty(compilationInfo);
+	CompilationInfoProp_t* compilationInfoProp = nullptr;
+	result = m_Library->GetProperty(CompilationInfoName);
 	if (result.IsOk())
-		compilationInfoProp = reinterpret_cast<CompilationinfoProp_t*>(result.GetValue());
+		compilationInfoProp = reinterpret_cast<CompilationInfoProp_t*>(result.GetValue());
 
 	if (compilationInfoProp == nullptr)
 	{
@@ -156,22 +148,21 @@ void Application::InitProperties()
 #else
 			"RELEASE"sv;
 #endif
-		auto comilationInfoResult = CreateProperty<greaper::String>(m_Library, compilationInfo, greaper::String{ gCompilationInfo }, ""sv, true, true, nullptr);
-		Verify(comilationInfoResult.IsOk(), "Couldn't create the property '%s' msg: %s", compilationInfo.data(), comilationInfoResult.GetFailMessage().c_str());
+		auto comilationInfoResult = CreateProperty<greaper::String>(m_Library, CompilationInfoName, greaper::String{ gCompilationInfo }, ""sv, true, true, nullptr);
+		Verify(comilationInfoResult.IsOk(), "Couldn't create the property '%s' msg: %s", CompilationInfoName.data(), comilationInfoResult.GetFailMessage().c_str());
 		compilationInfoProp = comilationInfoResult.GetValue();
 	}
 	m_Properties[(sizet)CompilationInfo] = compilationInfoProp;
 
-	static constexpr auto loadedLibraries = "LoadedLibraries"sv;
 	LoadedLibrariesProp_t* loadedLibrariesProp = nullptr;
-	result = m_Library->GetProperty(loadedLibraries);
+	result = m_Library->GetProperty(LoadedLibrariesName);
 	if (result.IsOk())
 		loadedLibrariesProp = reinterpret_cast<LoadedLibrariesProp_t*>(result.GetValue());
 
 	if (loadedLibrariesProp == nullptr)
 	{
-		auto loadedLibrariesResult = CreateProperty<greaper::WStringVec>(m_Library, loadedLibraries, {}, ""sv, false, true, nullptr);
-		Verify(loadedLibrariesResult.IsOk(), "Couldn't create the property '%s' msg: %s", loadedLibraries.data(), loadedLibrariesResult.GetFailMessage().c_str());
+		auto loadedLibrariesResult = CreateProperty<greaper::WStringVec>(m_Library, LoadedLibrariesName, {}, ""sv, false, true, nullptr);
+		Verify(loadedLibrariesResult.IsOk(), "Couldn't create the property '%s' msg: %s", LoadedLibrariesName.data(), loadedLibrariesResult.GetFailMessage().c_str());
 		loadedLibrariesProp = loadedLibrariesResult.GetValue();
 	}
 	m_Properties[(sizet)LoadedLibraries] = loadedLibrariesProp;
@@ -184,22 +175,22 @@ void Application::DeinitProperties()
 
 void Application::PreUpdate()
 {
-	// No-op
+	Break("Trying to call a PreUpdate to Application, which is forbidden.");
 }
 
 void Application::Update()
 {
-	// No-op
+	Break("Trying to call a Update to Application, which is forbidden.");
 }
 
 void Application::PostUpdate()
 {
-	// No-op
+	Break("Trying to call a PostUpdate to Application, which is forbidden.");
 }
 
 void Application::FixedUpdate()
 {
-	// No-op
+	Break("Trying to call a FixedUpdate to Application, which is forbidden.");
 }
 
 //void Application::SetConfig(ApplicationConfig config)
@@ -654,19 +645,14 @@ Result<IInterface*> Application::GetInterface(const StringView& interfaceName, c
 
 void Application::StartApplication()
 {
-	m_Library->Log(Format("Starting %s...", m_Config.ApplicationName.data()));
+	m_Library->Log(Format("Starting %s...", GetApplicationName()->GetValue().c_str()));
 
 }
 
 void Application::StopApplication()
 {
-	m_Library->Log(Format("Stopping %s...", m_Config.ApplicationName.data()));
+	m_Library->Log(Format("Stopping %s...", GetApplicationName()->GetValue().c_str()));
 
 	m_HasToStop = true;
 	m_OnClose.Trigger();
-}
-
-CRange<IProperty*> greaper::core::Application::GetProperties() const
-{
-	return CRange<IProperty*>();
 }
