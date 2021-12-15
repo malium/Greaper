@@ -11,7 +11,6 @@
 template<typename T>
 INLINE constexpr bool IsWithin(const T& value, const T& min, const T& max)
 {
-	constexpr auto x = __PRETTY_FUNCTION__;
 	return value > min && value <= max;
 }
 /** Checks if a value is within range [min, max], inclusive on max and min */

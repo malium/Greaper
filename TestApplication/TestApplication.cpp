@@ -32,6 +32,8 @@ greaper::Library* gCoreLib = nullptr;
 greaper::IGreaperLibrary* gCore = nullptr;
 greaper::IApplication* gApplication = nullptr;
 
+#define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
+
 int main()
 {
 	using namespace greaper;
@@ -40,15 +42,12 @@ int main()
 
 	// init Greaper
 	gCore = static_cast<IGreaperLibrary*>(libFN());
-	gCore->InitLibrary(gCoreLib, nullptr);
-	gCore->InitManagers();
-	gCore->InitProperties();
-	gCore->InitReflection();
+	gCore->Initialize(gCoreLib, nullptr);
 
 	gApplication = gCore->GetApplication();
-	//gApplication->SetConfig({.ApplicationName = "TestApplication"sv, .ApplicationVersion = 0, .GreaperLibraryCount = 0, .GreaperLibraries = nullptr, });
+
 	gApplication->GetApplicationName()->SetValue(String{ "TestApplication"sv });
-	gApplication->GetApplicationVersion()->SetValue(0);
+	gApplication->GetApplicationVersion()->SetValue(APPLICATION_VERSION);
 	gApplication->GetLoadedLibrariesNames()->SetValue({});
 	std::cout << "Successfully started!\n " << gApplication->GetApplicationName()->GetStringValue() << " Version " << gApplication->GetApplicationVersion()->GetStringValue() << std::endl;
 	
@@ -59,10 +58,7 @@ int main()
 
 	gApplication->StopApplication();
 
-	gCore->DeinitReflection();
-	gCore->DeinitProperties();
-	gCore->DeinitManagers();
-	gCore->DeinitLibrary();
+	gCore->Deinitialize();
 	
 	gApplication = nullptr;
 	gCore = nullptr;

@@ -42,6 +42,22 @@ namespace greaper
 
 		virtual void DeinitLibrary() = 0;
 
+		INLINE void Initialize(Library* lib, IApplication* app)
+		{
+			InitLibrary(lib, app);
+			InitManagers();
+			InitProperties();
+			InitReflection();
+		}
+
+		INLINE void Deinitialize()
+		{
+			DeinitReflection();
+			DeinitProperties();
+			DeinitManagers();
+			DeinitLibrary();
+		}
+
 		virtual const Uuid& GetLibraryUuid()const = 0;
 
 		virtual const StringView& GetLibraryName()const = 0;
