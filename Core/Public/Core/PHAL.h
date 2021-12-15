@@ -201,7 +201,7 @@
 
 #ifndef PlatformAlloc
 #define PlatformAlloc(bytes) ::malloc(bytes)
-#define PlatormDealloc(mem) ::free(mem)
+#define PlatformDealloc(mem) ::free(mem)
 #endif
 #ifndef PlatformAlignedAlloc
 #define PlatformAlignedAlloc(bytes, alignment) ::aligned_alloc(alignment, bytes)

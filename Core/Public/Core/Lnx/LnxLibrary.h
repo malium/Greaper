@@ -18,12 +18,12 @@ namespace greaper
 	public:
 		using LibraryHandle = void*;
 
-		static LibraryHandle Load(const achar* libraryName)
+		static LibraryHandle Load(StringView libraryName)
 		{
-			return dlopen(libraryName, RTLD_LAZY | RTLD_LOCAL);
+			return dlopen(libraryName.data(), RTLD_LAZY | RTLD_LOCAL);
 		}
 
-		static LibraryHandle Load(const wchar* libraryName)
+		static LibraryHandle Load(WStringView libraryName)
 		{
             const auto libName = StringUtils::FromWIDE(WString{libraryName});
             return dlopen(libName.c_str(), RTLD_LAZY | RTLD_LOCAL);
@@ -34,9 +34,9 @@ namespace greaper
             dlclose(handle);
 		}
 
-		static FuncPtr FuncLoad(LibraryHandle handle, const achar* procName)
+		static FuncPtr FuncLoad(LibraryHandle handle, StringView procName)
 		{
-			const auto proc = dlsym(handle, procName);
+			const auto proc = dlsym(handle, procName.data());
 			/*if (proc == nullptr)
 				return nullptr;*/
 			return reinterpret_cast<FuncPtr>(proc);

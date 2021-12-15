@@ -5,10 +5,13 @@
 
 #pragma once
 
+#include <cstring>
+
 /** Checks if a value is within range (min,max], inclusive on max and min */
 template<typename T>
 INLINE constexpr bool IsWithin(const T& value, const T& min, const T& max)
 {
+	constexpr auto x = __PRETTY_FUNCTION__;
 	return value > min && value <= max;
 }
 /** Checks if a value is within range [min, max], inclusive on max and min */
@@ -19,7 +22,16 @@ INLINE constexpr bool IsWithinInclusive(const T& value, const T& min, const T& m
 }
 INLINE constexpr uint32 BitsLog2(uint32 v)
 {
-	if (v == 16) return 4; if (v == 32) return 5; if (v == 64) return 6; return 3;
+	switch(v)
+	{
+	case 16:
+		return 4;
+	case 32:
+		return 5;
+	case 64:
+		return 6;
+	};
+	return 3;
 }
 /** Checks if a number is a power of two */
 template<typename T>
@@ -137,7 +149,7 @@ INLINE bool GetBitValue(const uint8* ptr, const uint32 index)noexcept
 	return (*bytePtr & mask) != 0;
 }
 /** Set the boolean value to a flag */
-INLINE bool SetBitValue(uint8* ptr, const uint32 index, const bool set)noexcept
+INLINE void SetBitValue(uint8* ptr, const uint32 index, const bool set)noexcept
 {
 	const auto bytePtr = ptr + index / 8;
 	const uint8 mask = 1 << (index & 0x7);

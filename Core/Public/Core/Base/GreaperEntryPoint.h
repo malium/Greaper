@@ -22,7 +22,7 @@ namespace nspace																  \
 
 
 //#define GetGreaperEntrypoint(nspace)											  \
-//BEGIN_C																			  \
+//BEGIN_C																		  \
 //namespace nspace																  \
 //{																				  \
 //	DLLIMPORT void* CDECL _Greaper();											  \

@@ -48,7 +48,7 @@ namespace greaper
 	{
 		struct WinMutexImpl
 		{
-			static constexpr bool IsValid(const MutexHandle& handle) noexcept
+			static bool IsValid(const MutexHandle& handle) noexcept
 			{
 				return handle.Ptr != reinterpret_cast<PVOID>(-1);
 			}
@@ -87,7 +87,7 @@ namespace greaper
 
 		struct WinRecursiveMutexImpl
 		{
-			static constexpr bool IsValid(const RecursiveMutexHandle& handle) noexcept
+			static bool IsValid(const RecursiveMutexHandle& handle) noexcept
 			{
 				return handle.LockSemaphore != INVALID_HANDLE_VALUE;
 			}
@@ -126,7 +126,7 @@ namespace greaper
 
 		struct WinRWMutexImpl
 		{
-			static constexpr bool IsValid(const RWMutexHandle& handle) noexcept
+			static bool IsValid(const RWMutexHandle& handle) noexcept
 			{
 				return handle.Ptr != reinterpret_cast<PVOID>(-1);
 			}
@@ -180,7 +180,7 @@ namespace greaper
 
 		struct WinSignalImpl
 		{
-			static constexpr bool IsValid(const SignalHandle& handle) noexcept
+			static bool IsValid(const SignalHandle& handle) noexcept
 			{
 				return handle.Ptr != reinterpret_cast<PVOID>(-1);
 			}

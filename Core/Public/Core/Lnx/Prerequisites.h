@@ -40,4 +40,4 @@ typedef LnxTypes PlatformTypes;
 #define PATH_SEPARATOR_WIDE L'/'
 #endif
 
-#define FUNCTION_FULL __PRETTY_FUNCTION__
+#define FUNCTION_FULL "" 

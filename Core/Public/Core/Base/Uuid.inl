@@ -272,37 +272,37 @@ namespace greaper
 	{
 		return !(left < right);
 	}
-}
 
-INLINE constexpr bool greaper::operator==(const greaper::Uuid& left, const greaper::Uuid& right)noexcept
-{
-	return left.m_Data[0] == right.m_Data[0] && left.m_Data[1] == right.m_Data[1]
-		&& left.m_Data[2] == right.m_Data[2] && left.m_Data[3] == right.m_Data[3];
-}
+	INLINE constexpr bool operator==(const Uuid& left, const Uuid& right)noexcept
+	{
+		return left.m_Data[0] == right.m_Data[0] && left.m_Data[1] == right.m_Data[1]
+			&& left.m_Data[2] == right.m_Data[2] && left.m_Data[3] == right.m_Data[3];
+	}
 
-INLINE constexpr bool greaper::operator<(const greaper::Uuid& left, const greaper::Uuid& right)noexcept
-{
-	if (left.m_Data[0] < right.m_Data[0])
-		return true;
-	else if (left.m_Data[0] > right.m_Data[0])
-		return false;
+	INLINE constexpr bool operator<(const Uuid& left, const Uuid& right)noexcept
+	{
+		if (left.m_Data[0] < right.m_Data[0])
+			return true;
+		else if (left.m_Data[0] > right.m_Data[0])
+			return false;
 
-	if (left.m_Data[1] < right.m_Data[1])
-		return true;
-	else if (left.m_Data[1] > right.m_Data[1])
-		return false;
+		if (left.m_Data[1] < right.m_Data[1])
+			return true;
+		else if (left.m_Data[1] > right.m_Data[1])
+			return false;
 
-	if (left.m_Data[2] < right.m_Data[2])
-		return true;
-	else if (left.m_Data[2] > right.m_Data[2])
-		return false;
+		if (left.m_Data[2] < right.m_Data[2])
+			return true;
+		else if (left.m_Data[2] > right.m_Data[2])
+			return false;
 
-	if (left.m_Data[3] < right.m_Data[3])
-		return true;
-	else if (left.m_Data[3] > right.m_Data[3])
-		return false;
+		if (left.m_Data[3] < right.m_Data[3])
+			return true;
+		else if (left.m_Data[3] > right.m_Data[3])
+			return false;
 
-	return false; // Equal
+		return false; // Equal
+	}
 }
 
 namespace std

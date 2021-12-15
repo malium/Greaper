@@ -115,7 +115,7 @@ namespace greaper
 			//if (!IsOpen())
 			//	return nullptr;
 
-			return reinterpret_cast<FuncType<retType, types...>::Type>(GetFunction(funcName));
+			return reinterpret_cast<typename FuncType<retType, types...>::Type>(GetFunction(funcName));
 		}
 
 		Library(const Library&) = delete;

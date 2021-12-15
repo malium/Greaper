@@ -110,21 +110,15 @@ namespace greaper
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE T* AllocT()
+	INLINE T* AllocN(sizet N)
 	{
-		return static_cast<T*>(MemoryAllocator<_Alloc_>::Allocate(sizeof(T)));
+		return static_cast<T*>(Alloc<_Alloc_>(sizeof(T) * N));
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE T* AllocN(sizet N)
+	INLINE T* AllocT()
 	{
-		return static_cast<T*>(MemoryAllocator<_Alloc_>::Allocate(sizeof(T) * N));
-	}
-
-	template<class T, class _Alloc_ = GenericAllocator, class... Args>
-	INLINE T* Construct(Args&&... args)
-	{
-		return ConstructN<T, _Alloc_>(1, args...);
+		return AllocN<T, _Alloc_>(1);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
@@ -134,6 +128,12 @@ namespace greaper
 		for (sizet i = 0; i < count; ++i)
 			new (reinterpret_cast<void*>(&mem[i]))T(std::forward<Args>(args)...);
 		return mem;
+	}
+
+	template<class T, class _Alloc_ = GenericAllocator, class... Args>
+	INLINE T* Construct(Args&&... args)
+	{
+		return ConstructN<T, _Alloc_>(1, args...);
 	}
 	
 	template<class _Alloc_ = GenericAllocator>
@@ -147,7 +147,7 @@ namespace greaper
 	{
 		for (sizet i = 0; i < count; ++i)
 			ptr[i].~T();
-		MemoryAllocator<_Alloc_>::Deallocate(ptr);
+		Dealloc<_Alloc_>(ptr);
 	}
 
 /**
@@ -155,7 +155,6 @@ namespace greaper
  * 
  */
 #define MemoryFriend() \
-template<class T, class _Alloc_, class... Args> friend T* greaper::Construct(Args&&...); \
 template<class T, class _Alloc_, class... Args> friend T* greaper::ConstructN(sizet, Args&&...); \
 template<class T, class _Alloc_> friend void greaper::Destroy(T*, sizet)
 
@@ -403,7 +402,7 @@ template<class T, class _Alloc_> friend void greaper::Destroy(T*, sizet)
 	};
 
 	template<typename T, class _Alloc_ = GenericAllocator>
-	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const T* fmt, ...)FUNCTION_VARARGS_END(1, 2)
+	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const T* fmt, ...)//FUNCTION_VARARGS_END(1, 2)
 	{
 		va_list argList;
 		va_start(argList, fmt);
@@ -507,7 +506,6 @@ void greaper::MemoryAllocator<T>::Deallocate(void* mem)
 		return;
 	}
 #endif
-
 	PlatformDealloc(mem);
 }
 
@@ -554,7 +552,7 @@ namespace std
 		}
 	};
 
-	template<>
+	/*template<>
 	struct hash<greaper::StringView>
 	{
 		INLINE size_t operator()(const greaper::StringView& str)const noexcept
@@ -578,7 +576,7 @@ namespace std
 			return std::_Hash_bytes(str.data(), str.size(), 0);
 #endif
 		}
-	};
+	};*/
 }
 
 

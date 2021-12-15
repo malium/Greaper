@@ -81,7 +81,7 @@ namespace greaper
 
         struct LnxRecursiveMutexImpl
 		{
-			static constexpr bool IsValid(const RecursiveMutexHandle& handle) noexcept
+			static bool IsValid(const RecursiveMutexHandle& handle) noexcept
 			{
 				return !IsMemoryCleared(handle);
 			}
@@ -124,7 +124,7 @@ namespace greaper
 
         struct LnxRWMutexImpl
 		{
-			static constexpr bool IsValid(const RWMutexHandle& handle) noexcept
+			static bool IsValid(const RWMutexHandle& handle) noexcept
 			{
 				return !IsMemoryCleared(handle);
 			}
@@ -178,7 +178,7 @@ namespace greaper
 
         struct LnxSignalImpl
 		{
-			static constexpr bool IsValid(const SignalHandle& handle) noexcept
+			static bool IsValid(const SignalHandle& handle) noexcept
 			{
                 return !IsMemoryCleared(handle);
 			}
@@ -221,11 +221,13 @@ namespace greaper
                 const auto nanos = (std::chrono::nanoseconds)std::chrono::milliseconds(millis);
                 const auto abs = (timePoint.time_since_epoch() + nanos).count();
                 t.tv_nsec = abs;
-                pthread_cond_timedwait(&handle, &mutexHandle, &t);
+                const auto rc = pthread_cond_timedwait(&handle, &mutexHandle, &t);
+				return rc == 0;
 			}
 			static bool WaitForRW(SignalHandle& handle, RWMutexHandle mutexHandle, uint32 millis) noexcept
 			{
                 Break("ConditionVariables and RWMutex don't currently work together under Linux.");
+				return true;
 			}
 			static bool WaitForRecursive(SignalHandle& handle, RecursiveMutexHandle mutexHandle, uint32 millis) noexcept
 			{
@@ -234,11 +236,13 @@ namespace greaper
                 const auto nanos = (std::chrono::nanoseconds)std::chrono::milliseconds(millis);
                 const auto abs = (timePoint.time_since_epoch() + nanos).count();
                 t.tv_nsec = abs;
-                pthread_cond_timedwait(&handle, &mutexHandle, &t);
+                const auto rc = pthread_cond_timedwait(&handle, &mutexHandle, &t);
+				return rc == 0;
 			}
 			static bool WaitForShared(SignalHandle& handle, RWMutexHandle& mutexHandle, uint32 millis) noexcept
 			{
                 Break("ConditionVariables and RWMutex don't currently work together under Linux.");
+				return true;
 			}
 			static void Invalidate(SignalHandle& handle) noexcept
 			{

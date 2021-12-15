@@ -248,7 +248,7 @@ namespace greaper::StringUtils
 		static_assert(std::is_same_v<wchar, _Allocw_::value_type>, "Bad WIDE allocator type");
 		static_assert(std::is_same_v<achar, _Alloca_::value_type>, "Bad ANSI allocator type");
 		
-		std::basic_string<achar, std::char_traits<achar>, _Alloca_> output;
+		BasicString<achar, _Alloca_> output;
 		output.reserve(str.size());
 
 		auto backInserter = std::back_inserter(output);
@@ -273,10 +273,10 @@ namespace greaper::StringUtils
 	template<class _Allocw_ = StdAlloc<wchar>, class _Alloca_ = StdAlloc<achar>>
 	BasicString<wchar, _Allocw_> ToWIDE(const BasicString<achar, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<wchar, _Allocw_::value_type>, "Bad WIDE allocator type");
-		static_assert(std::is_same_v<achar, _Alloca_::value_type>, "Bad ANSI allocator type");
+		static_assert(std::is_same_v<wchar, typename _Allocw_::value_type>, "Bad WIDE allocator type");
+		static_assert(std::is_same_v<achar, typename _Alloca_::value_type>, "Bad ANSI allocator type");
 
-		std::basic_string<wchar, std::char_traits<wchar>, _Allocw_> output;
+		BasicString<wchar, _Allocw_> output;
 		output.reserve(str.size());
 
 		auto backInserter = std::back_inserter(output);
@@ -304,7 +304,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	sizet Contains(const BasicString<T, _Alloca_>& str, T token)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Trying to Contains and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Trying to Contains and convert a string at the same time");
 		
 		sizet count = 0;
 		for (const T c : str)
@@ -328,8 +328,8 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>, class _AllocT_ = StdAlloc<T>>
 	sizet Contains(const BasicString<T, _Alloca_>& str, const BasicString<T, _AllocT_>& token)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Trying to Contains and convert a string at the same time");
-		static_assert(std::is_same_v<T, _AllocT_::value_type>, "Trying to Contains and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Trying to Contains and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _AllocT_::value_type>, "Trying to Contains and convert a string at the same time");
 		
 		sizet count = 0;
 		for (auto it = str.begin(); it != str.end(); ++it)
@@ -364,8 +364,8 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>, class _VAlloca_ = StdAlloc<BasicString<T, _Alloca_>>>
 	BasicString<T, _Alloca_> ComposeString(const std::vector<BasicString<T, _Alloca_>, _VAlloca_>& vec, T separator = T(0))
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::value_type>, "Trying to ComposeString and convert a string at the same time");
 		
 		BasicString<T, _Alloca_> rtn;
 		if(separator != T(0))
@@ -401,9 +401,9 @@ namespace greaper::StringUtils
 	BasicString<T, _Alloca_> ComposeString(const std::vector<BasicString<T, _Alloca_>, _VAlloca_>& vec,
 		const BasicString<T, _SAlloca_>& separator)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
-		static_assert(std::is_same_v<T, _SAlloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _SAlloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
 		
 		BasicString<T, _Alloca_> rtn;
 		for (sizet i = 0; i < vec.size(); ++i)
@@ -428,8 +428,8 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>, class _VAlloca_ = StdAlloc<BasicString<T, _Alloca_>>>
 	std::vector<BasicString<T, _Alloca_>, _VAlloca_> Tokenize(const BasicString<T, _Alloca_>& str, T token)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Trying to Tokenize and convert a string at the same time");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type::value_type>, "Trying to Tokenize and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Trying to Tokenize and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::value_type>, "Trying to Tokenize and convert a string at the same time");
 		
 		std::vector<BasicString<T, _Alloca_>, _VAlloca_> rtn;
 		if (str.empty())
@@ -463,9 +463,9 @@ namespace greaper::StringUtils
 	std::vector<BasicString<T, _Alloca_>, _VAlloca_> Tokenize(const BasicString<T, _Alloca_>& str,
 		const BasicString<T, _TAlloca_>& token)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type::value_type>, "Bad StringVec allocator type");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type::allocator_type::value_type>, "Bad StringVec allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::value_type>, "Bad StringVec allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::allocator_type::value_type>, "Bad StringVec allocator type");
 		
 		std::vector<BasicString<T, _Alloca_>, _VAlloca_> rtn;
 		if (str.empty())
@@ -512,9 +512,9 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>, class _VAlloca_ = StdAlloc<BasicString<T, _Alloca_>>>
 	std::vector<BasicString<T, _Alloca_>, _VAlloca_> SeparateBySpace(const BasicString<T, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type::value_type>, "Bad StringVec allocator");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type::allocator_type::value_type>, "Bad StringVec allocator");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::value_type>, "Bad StringVec allocator");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::allocator_type::value_type>, "Bad StringVec allocator");
 
 		return Tokenize(str, T(' '));
 	}
@@ -535,8 +535,8 @@ namespace greaper::StringUtils
 	BasicString<T, _Alloca_>& TrimSelf(BasicString<T, _Alloca_>& str, const Vector<T, _VAlloca_>& delims,
 		bool left = true, bool right = true)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type>, "Bad string alloator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type>, "Bad string alloator type");
 
 		if (right)
 			str.erase(str.find_last_not_of(delims.data(), 0, delims.size()) + 1);
@@ -561,8 +561,8 @@ namespace greaper::StringUtils
 	BasicString<T, _Alloca_> Trim(const BasicString<T, _Alloca_>& str, const Vector<T, _VAlloca_>& delims,
 		bool left = true, bool right = true)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
-		static_assert(std::is_same_v<T, _VAlloca_::value_type>, "Bad string alloator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type>, "Bad string alloator type");
 
 		BasicString<T, _Alloca_> cpy{str};
 
@@ -583,7 +583,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_>& TrimSelf(BasicString<T, _Alloca_>& str, bool left = true, bool right = true)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		//static constexpr T delims[] = { T(' '), T('\t'), T('\r'), T('\000') };
 		static constexpr Vector<T, _Alloca_> delims {T(' '), T('\t', T('\r'), T('\n'))};
@@ -603,7 +603,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_> Trim(const BasicString<T, _Alloca_>& str, bool left = true, bool right = true)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		static constexpr Vector<T, _Alloca_> delims {T(' '), T('\t', T('\r'), T('\n'))};
 		return Trim(str, delims, left, right);
@@ -622,7 +622,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_> Replace(const BasicString<T, _Alloca_>& str, T toReplace, T replacement)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		return ComposeString(Tokenize(str, toReplace), replacement);
 	}
@@ -643,9 +643,9 @@ namespace greaper::StringUtils
 	BasicString<T, _Alloca_> Replace(const BasicString<T, _Alloca_>& str,
 		const BasicString<T, _TAlloca_>& toReplace, const BasicString<T, _RAlloca_>& replacement)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
-		static_assert(std::is_same_v<T, _TAlloca_::value_type>, "Bad string allocator type");
-		static_assert(std::is_same_v<T, _RAlloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _TAlloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _RAlloca_::value_type>, "Bad string allocator type");
 
 		return ComposeString(Tokenize(str, toReplace), replacement);
 	}
@@ -661,7 +661,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_>& ToLowerSelf(BasicString<T, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		Impl::CaseImpl<T> caseTransform;
 		for (T& c : str)
@@ -680,7 +680,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_> ToLower(const BasicString<T, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		BasicString<T, _Alloca_> temp{ str.c_str(), str.size() };
 		return ToLowerSelf(temp);
@@ -697,7 +697,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_>& ToUpperSelf(BasicString<T, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		Impl::CaseImpl<T> caseTransform;
 		for (T& c : str)
@@ -716,7 +716,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	BasicString<T, _Alloca_> ToUpper(const BasicString<T, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 
 		BasicString<T, _Alloca_> temp{ str.c_str(), str.size() };
 		return ToUpperSelf(temp);
@@ -734,7 +734,7 @@ namespace greaper::StringUtils
 	template<typename T, class _Alloca_ = StdAlloc<T>>
 	bool StringNumber(const BasicString<T, _Alloca_>& str)
 	{
-		static_assert(std::is_same_v<T, _Alloca_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Bad string allocator type");
 		
 		for (auto& chr : str)
 		{

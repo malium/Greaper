@@ -8,7 +8,15 @@
 namespace greaper
 {
 	template<typename T>
-	INLINE IStream& IStream::operator>>(T& val)const
+	INLINE const IStream& IStream::operator>>(T& val)const
+	{
+		const auto read = Read((void*)&val, sizeof(val));
+		VerifyEqual(read, sizeof(val), "Couldn't read the whole value from the stream, Size:%d Read:%d.", sizeof(val), read);
+		return *this;
+	}
+
+	template<typename T>
+	INLINE IStream& IStream::operator>>(T& val)
 	{
 		const auto read = Read((void*)&val, sizeof(val));
 		VerifyEqual(read, sizeof(val), "Couldn't read the whole value from the stream, Size:%d Read:%d.", sizeof(val), read);

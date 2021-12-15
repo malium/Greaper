@@ -358,19 +358,19 @@ namespace greaper
 		}
 		bool WaitFor(const UniqueLock<Mutex>& lock, const uint32 millis) noexcept
 		{
-			Impl::SignalImpl::WaitFor(m_Handle, *lock.mutex()->GetHandle(), millis);
+			return Impl::SignalImpl::WaitFor(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
 		bool WaitFor(const UniqueLock<RWMutex>& lock, const uint32 millis) noexcept
 		{
-			Impl::SignalImpl::WaitForRW(m_Handle, *lock.mutex()->GetHandle(), millis);
+			return Impl::SignalImpl::WaitForRW(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
 		bool WaitFor(const UniqueLock<RecursiveMutex>& lock, const uint32 millis) noexcept
 		{
-			Impl::SignalImpl::WaitForRecursive(m_Handle, *lock.mutex()->GetHandle(), millis);
+			return Impl::SignalImpl::WaitForRecursive(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
 		bool WaitForShared(const UniqueLock<RWMutex>& lock, const uint32 millis) noexcept
 		{
-			Impl::SignalImpl::WaitForShared(m_Handle, *lock.mutex()->GetHandle(), millis);
+			return Impl::SignalImpl::WaitForShared(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
 
 	public:

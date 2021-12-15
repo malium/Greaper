@@ -44,7 +44,10 @@ namespace greaper
 		virtual bool IsFile()const noexcept = 0;
 
 		template<typename T>
-		IStream& operator>>(T& val)const;
+		const IStream& operator>>(T& val)const;
+
+		template<typename T>
+		IStream& operator>>(T& val);
 
 		template<typename T>
 		IStream& operator<<(const T& val);

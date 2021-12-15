@@ -9,6 +9,11 @@
 #include <Core/Property.h>
 #include <iostream>
 
+#if PLT_WINDOWS
+#define PLT_NAME "Win"
+#else
+#define PLT_NAME "Lnx"
+#endif
 #if ARCHITECTURE_X64
 #define ARCH_NAME "64"
 #else
@@ -20,7 +25,7 @@
 #define CONF_NAME "ReleaseDLL"
 #endif
 
-#define CORE_LIBRARY_NAME "Core" ARCH_NAME "_" CONF_NAME ".dll"
+#define CORE_LIBRARY_NAME "Core" PLT_NAME ARCH_NAME "_" CONF_NAME GREAPER_DLLEXT
 constexpr greaper::StringView CORE_LIB_NAME = CORE_LIBRARY_NAME;
 constexpr greaper::StringView LibFnName = "_Greaper";
 greaper::Library* gCoreLib = nullptr;

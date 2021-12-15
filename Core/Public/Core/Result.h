@@ -13,6 +13,7 @@
 
 namespace greaper
 {
+	template<class T> class Result;
 	struct EmptyStruct {  };
 	template<class T>
 	class Result
@@ -21,9 +22,9 @@ namespace greaper
 		T m_Value;
 		bool m_Failure = false;
 
-		template<class T> friend Result<T> CreateResult(T) noexcept;
-		template<class T> friend Result<T> CreateFailure(String) noexcept;
-		template<class T> friend Result<T> CreateFailure(StringView) noexcept;
+		template<> friend Result<T> CreateResult(T) noexcept;
+		template<> friend Result<T> CreateFailure(String) noexcept;
+		template<> friend Result<T> CreateFailure(StringView) noexcept;
 
 		Result() = default;
 

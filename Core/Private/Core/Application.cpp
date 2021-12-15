@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos Sánchez Torrent.                                         *
+*   Copyright 2021 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -176,6 +176,7 @@ void Application::DeinitProperties()
 void Application::PreUpdate()
 {
 	Break("Trying to call a PreUpdate to Application, which is forbidden.");
+	
 }
 
 void Application::Update()
