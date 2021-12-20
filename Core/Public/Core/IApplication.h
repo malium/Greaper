@@ -115,10 +115,10 @@ namespace greaper
 		}
 
 		template<class T>
-		Result<T*> GetInterfaceT(const Uuid& interfaceUUID)const
+		Result<T*> GetActiveInterfaceT(const Uuid& interfaceUUID)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
-			auto res = GetInterface(interfaceUUID);
+			auto res = GetActiveInterface(interfaceUUID);
 			if(res.HasFailed())
 				return CopyFailure<T*>(res);
 			T* interface = reinterpret_cast<T*>(res.GetValue());
@@ -126,10 +126,10 @@ namespace greaper
 		}
 
 		template<class T>
-		Result<T*> GetInterfaceT(const StringView& interfaceName)const
+		Result<T*> GetActiveInterfaceT(const StringView& interfaceName)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
-			auto res = GetInterface(interfaceName);
+			auto res = GetActiveInterface(interfaceName);
 			if(res.HasFailed())
 				return CopyFailure<T*>(res);
 			T* interface = reinterpret_cast<T*>(res.GetValue());

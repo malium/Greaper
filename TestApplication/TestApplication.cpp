@@ -6,6 +6,7 @@
 #include <Core/CorePrerequisites.h>
 #include <Core/IGreaperLibrary.h>
 #include <Core/IApplication.h>
+#include <Core/Reflection/ReflectedPlainContainer.h>
 #include <Core/Property.h>
 #include <iostream>
 

@@ -93,9 +93,9 @@ namespace greaper
 			//m_StringValue = TPropertyConverter<T>::ToString(m_Value);
 		}
 
-		template<class T, class _Alloc_>
-		friend Result<TProperty<T>*> CreateProperty(IGreaperLibrary*, StringView, T, StringView,
-			bool, bool, TPropertyValidator<T>*);
+		template<class _T_, class _Alloc_>
+		friend Result<TProperty<_T_>*> CreateProperty(IGreaperLibrary*, StringView, _T_, StringView,
+			bool, bool, TPropertyValidator<_T_>*);
 		MemoryFriend();
 	public:
 		using value_type = T;

@@ -22,8 +22,8 @@ namespace greaper
 		T m_Value;
 		bool m_Failure = false;
 
-		template<typename T> friend Result<T> CreateResult(T) noexcept;
-		template<typename T> friend Result<T> CreateFailure(StringView) noexcept;
+		template<class _T_> friend Result<_T_> CreateResult(_T_) noexcept;
+		template<class _T_> friend Result<_T_> CreateFailure(StringView) noexcept;
 
 		Result() = default;
 

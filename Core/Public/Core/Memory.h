@@ -155,8 +155,8 @@ namespace greaper
  * 
  */
 #define MemoryFriend() \
-template<class T, class _Alloc_, class... Args> friend T* greaper::ConstructN(sizet, Args&&...); \
-template<class T, class _Alloc_> friend void greaper::Destroy(T*, sizet)
+template<class _T_, class _Alloc_, class... Args> friend _T_* greaper::ConstructN(sizet, Args&&...); \
+template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 	template<typename T>
 	using SPtr = std::shared_ptr<T>;
