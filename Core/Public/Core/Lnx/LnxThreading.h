@@ -23,17 +23,17 @@ namespace greaper
 
     using SignalHandle = pthread_cond_t;
 
-    ThreadID_t CUR_THID() noexcept
+    INLINE ThreadID_t CUR_THID() noexcept
 	{
 		return static_cast<ThreadID_t>(::pthread_self());
 	}
 
-	ThreadHandle CUR_THHND() noexcept
+	INLINE ThreadHandle CUR_THHND() noexcept
 	{
 		return CUR_THID();
 	}
 
-    void THREAD_YIELD() noexcept
+    INLINE void THREAD_YIELD() noexcept
 	{
 		::pthread_yield();
 	}

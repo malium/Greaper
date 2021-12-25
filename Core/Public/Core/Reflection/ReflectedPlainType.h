@@ -67,69 +67,70 @@ namespace greaper
 }
 
 template<class T>
-inline greaper::ReflectedSize_t greaper::ReflectedPlainType<T>::ToStream(const T& data, IStream& stream)
+INLINE greaper::ReflectedSize_t greaper::ReflectedPlainType<T>::ToStream(const T& data, IStream& stream)
 {
 	return stream.Write(&data, GetSize(data));
 }
 
 template<class T>
-inline greaper::ReflectedSize_t greaper::ReflectedPlainType<T>::FromStream(T& data, IStream& stream)
+INLINE greaper::ReflectedSize_t greaper::ReflectedPlainType<T>::FromStream(T& data, IStream& stream)
 {
 	return stream.Read(&data, GetSize(data));
 }
 
 template<class T>
-inline greaper::String greaper::ReflectedPlainType<T>::ToString(const T& data) 
+INLINE greaper::String greaper::ReflectedPlainType<T>::ToString(const T& data) 
 {
-	static_assert(false, "ReflectedPlainType with no ToString specialization for type T");
+	//static_assert(false, "ReflectedPlainType with no ToString specialization for type T");
+	Break("ReflectedPlainType with no ToString specialization for type T");
 	return greaper::String{};
 }
 
-
 template<class T>
-inline void greaper::ReflectedPlainType<T>::FromString(T& data, const String& str) 
+INLINE void greaper::ReflectedPlainType<T>::FromString(T& data, const String& str) 
 {
-	static_assert(false, "ReflectedPlainType with no FromString specialization for type T");
+	//static_assert(false, "ReflectedPlainType with no FromString specialization for type T");
+	Break("ReflectedPlainType with no FromString specialization for type T");
 }
 
 template<class T>
-inline greaper::ReflectedSize_t greaper::ReflectedPlainType<T>::GetSize(const T& data)
+INLINE greaper::ReflectedSize_t greaper::ReflectedPlainType<T>::GetSize(const T& data)
 {
 	return sizeof(data);
 }
 
 template<typename T>
-greaper::ReflectedSize_t greaper::ReflectedSize(const T& data)
+INLINE greaper::ReflectedSize_t greaper::ReflectedSize(const T& data)
 {
 	return ReflectedPlainType<T>::GetSize(data);
 }
 
 template<typename T>
-greaper::ReflectedSize_t greaper::ReflectedWrite(const T& data, IStream& stream)
+INLINE greaper::ReflectedSize_t greaper::ReflectedWrite(const T& data, IStream& stream)
 {
 	return ReflectedPlainType<T>::ToStream(data, stream);
 }
 
 template<typename T>
-greaper::ReflectedSize_t greaper::ReflectedRead(T& data, IStream& stream)
+INLINE greaper::ReflectedSize_t greaper::ReflectedRead(T& data, IStream& stream)
 {
 	return ReflectedPlainType<T>::FromStream(data, stream);
 }
 
 template<typename T>
-greaper::String greaper::ReflectedToString(const T& data)
+INLINE greaper::String greaper::ReflectedToString(const T& data)
 {
 	return ReflectedPlainType<T>::ToString(data);
 }
 
 template<typename T>
-void greaper::ReflectedFromString(T& data, const String& str)
+INLINE void greaper::ReflectedFromString(T& data, const String& str)
 {
 	ReflectedPlainType<T>::FromString(data, str);
 }
 
 template<class T>
-greaper::ReflectedSize_t greaper::ReflectedWriteWithSizeHeader(IStream& stream, const T& data, std::function<ReflectedSize_t()> fn)
+INLINE greaper::ReflectedSize_t greaper::ReflectedWriteWithSizeHeader(IStream& stream, const T& data, std::function<ReflectedSize_t()> fn)
 {
 	UNUSED(data);
 	const auto sizePos = stream.Tell();
@@ -143,13 +144,13 @@ greaper::ReflectedSize_t greaper::ReflectedWriteWithSizeHeader(IStream& stream, 
 	return size;
 }
 
-greaper::ReflectedSize_t greaper::ReflectedReadSizeHeader(IStream& stream, ReflectedSize_t& size)
+INLINE greaper::ReflectedSize_t greaper::ReflectedReadSizeHeader(IStream& stream, ReflectedSize_t& size)
 {
 	const auto byteSize = stream.Read(&size, sizeof(size));
 	return byteSize;
 }
 
-void greaper::ReflectedAddHeaderSize(ReflectedSize_t& size)
+INLINE void greaper::ReflectedAddHeaderSize(ReflectedSize_t& size)
 {
 	size += sizeof(size);
 }

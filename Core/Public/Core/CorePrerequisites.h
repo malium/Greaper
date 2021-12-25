@@ -25,6 +25,7 @@ namespace greaper
 	using Duration_t = Clock_t::duration;
 	
 	// fwd
+	class GenericAllocator;
 	class IApplication;
 	class ILogManager;
 	class IThreadManager;

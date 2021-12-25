@@ -94,8 +94,8 @@ namespace greaper
 		}
 
 		template<class _T_, class _Alloc_>
-		friend Result<TProperty<_T_>*> CreateProperty(IGreaperLibrary*, StringView, _T_, StringView,
-			bool, bool, TPropertyValidator<_T_>*);
+		friend Result<TProperty<_T_>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
+			bool isConstant, bool isStatic, TPropertyValidator<_T_>* validator);
 		MemoryFriend();
 	public:
 		using value_type = T;
@@ -197,9 +197,9 @@ namespace greaper
 	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 
-	template<class T, class _Alloc_ = greaper::GenericAllocator>
-	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
-		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr)
+	template<class T, class _Alloc_>
+	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, T initialValue, StringView propertyInfo,
+		bool isConstant, bool isStatic, TPropertyValidator<T>* validator)
 	{
 		TProperty<T>* property = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
 		EmptyResult res = library->RegisterProperty((IProperty*)property);

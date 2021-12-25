@@ -42,7 +42,7 @@ namespace greaper
 	using EmptyResult = Result<EmptyStruct>;
 
 	template<class T>
-	Result<T> CreateResult(T value) noexcept
+	INLINE Result<T> CreateResult(T value) noexcept
 	{
 		Result<T> res;
 		res.m_Value = std::move(value);
@@ -50,13 +50,13 @@ namespace greaper
 		return res;
 	}
 
-	Result<EmptyStruct> CreateEmptyResult() noexcept
+	INLINE Result<EmptyStruct> CreateEmptyResult() noexcept
 	{
 		return CreateResult<EmptyStruct>(EmptyStruct{});
 	}
 
 	template<class T>
-	Result<T> CreateFailure(StringView errorMessage) noexcept
+	INLINE Result<T> CreateFailure(StringView errorMessage) noexcept
 	{
 		Result<T> res;
 		res.m_FailMessage.assign(errorMessage);
@@ -65,13 +65,13 @@ namespace greaper
 		//return std::move(res);
 	}
 
-	Result<EmptyStruct> CreateEmptyFailure(StringView errorMessage) noexcept
+	INLINE Result<EmptyStruct> CreateEmptyFailure(StringView errorMessage) noexcept
 	{
 		return CreateFailure<EmptyStruct>(std::move(errorMessage));
 	}
 
 	template<class T, class U = T>
-	Result<T> CopyFailure(Result<U> res) noexcept
+	INLINE Result<T> CopyFailure(Result<U> res) noexcept
 	{
 		Result<T> r;
 		r.m_Failure = true;

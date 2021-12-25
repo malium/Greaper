@@ -46,3 +46,4 @@
 *.recipe
 obj/**
 bin/**
+build/**

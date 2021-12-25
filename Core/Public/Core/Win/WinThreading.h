@@ -29,17 +29,17 @@ namespace greaper
 	using SignalHandle = CONDITION_VARIABLE;
 	constexpr SignalHandle* InvalidSignalHandle = nullptr;
 
-	ThreadID_t CUR_THID() noexcept
+	INLINE ThreadID_t CUR_THID() noexcept
 	{
 		return static_cast<ThreadID_t>(::GetCurrentThreadId());
 	}
 
-	ThreadHandle CUR_THHND() noexcept
+	INLINE ThreadHandle CUR_THHND() noexcept
 	{
 		return static_cast<ThreadHandle>(::GetCurrentThread());
 	}
 
-	void THREAD_YIELD() noexcept
+	INLINE void THREAD_YIELD() noexcept
 	{
 		::SwitchToThread();
 	}

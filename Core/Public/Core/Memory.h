@@ -373,33 +373,44 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		return r;
 	}
 
-	template<typename T>
 	struct Snprintf
 	{
-		static int Fn(T* buffer, size_t bufferCount, const T* fmt, va_list argList)
+		static int Fn(achar* buffer, size_t bufferLen, const achar* fmt, va_list argList)
 		{
-			static_assert(false, "Unsupported character type.");
-			return -1;
+			return vsnprintf(buffer, bufferLen, fmt, argList);
+		}
+		static int Fn(wchar* buffer, size_t bufferLen, const wchar* fmt, va_list argList)
+		{
+			return vswprintf(buffer, bufferLen, fmt, argList);
 		}
 	};
-
-	template<>
-	struct Snprintf<achar>
-	{
-		static int Fn(achar* buffer, size_t bufferCount, const achar* fmt, va_list argList)
-		{
-			return vsnprintf(buffer, bufferCount, fmt, argList);
-		}
-	};
-	
-	template<>
-	struct Snprintf<wchar>
-	{
-		static int Fn(wchar* buffer, size_t bufferCount, const wchar* fmt, va_list argList)
-		{
-			return vswprintf(buffer, bufferCount, fmt, argList);
-		}
-	};
+	//template<typename T>
+	//struct Snprintf
+	//{
+	//	static int Fn(T* buffer, size_t bufferCount, const T* fmt, va_list argList)
+	//	{
+	//		static_assert(false, "Unsupported character type.");
+	//		return -1;
+	//	}
+	//};
+	//
+	//template<>
+	//struct Snprintf<achar>
+	//{
+	//	static int Fn(achar* buffer, size_t bufferCount, const achar* fmt, va_list argList)
+	//	{
+	//		return vsnprintf(buffer, bufferCount, fmt, argList);
+	//	}
+	//};
+	//
+	//template<>
+	//struct Snprintf<wchar>
+	//{
+	//	static int Fn(wchar* buffer, size_t bufferCount, const wchar* fmt, va_list argList)
+	//	{
+	//		return vswprintf(buffer, bufferCount, fmt, argList);
+	//	}
+	//};
 
 	template<typename T, class _Alloc_ = GenericAllocator>
 	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const T* fmt, ...)//FUNCTION_VARARGS_END(1, 2)
@@ -407,21 +418,27 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		va_list argList;
 		va_start(argList, fmt);
 
-		const auto size = Snprintf<T>::Fn(nullptr, 0, fmt, argList);
+		const auto size = Snprintf::Fn((T*)nullptr, 0, fmt, argList);
 
 		VerifyGreaterEqual(size, 0, "Error while formatting");
 
 		va_end(argList);
 		va_start(argList, fmt);
 
-		auto str = BasicString<T, StdAlloc<T, _Alloc_>>(size, (achar)0);
+		BasicString<T, StdAlloc<T, _Alloc_>> str {};
+		str.resize(size, (T)0);
 
-		Snprintf<T>::Fn(str.data(), str.size(), fmt, argList);
+		Snprintf::Fn(str.data(), str.size(), fmt, argList);
 
 		va_end(argList);
 
 		return str;
 	}
+
+	// Fwd declarations that need container types
+	template<class T, class _Alloc_ = GenericAllocator>
+	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
+		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
 }
 
 namespace greaper::Impl

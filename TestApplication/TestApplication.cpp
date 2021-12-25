@@ -35,17 +35,23 @@ greaper::IApplication* gApplication = nullptr;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
+#define TRYEXP(exp, msg) { if(!exp) { std::cout << msg << "\nEnter any character to stop app." << std::endl; int a; std::cin >> a; exit(EXIT_FAILURE); } }
+
 int main()
 {
 	using namespace greaper;
 	gCoreLib = Construct<Library>(CORE_LIB_NAME);
+	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
+
 	auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
+	TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function");
 
 	// init Greaper
 	gCore = static_cast<IGreaperLibrary*>(libFN());
 	gCore->Initialize(gCoreLib, nullptr);
 
 	gApplication = gCore->GetApplication();
+	TRYEXP(gApplication, CORE_LIBRARY_NAME " does not have an Application.");
 
 	gApplication->GetApplicationName()->SetValue(String{ "TestApplication"sv });
 	gApplication->GetApplicationVersion()->SetValue(APPLICATION_VERSION);
