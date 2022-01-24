@@ -511,6 +511,7 @@
     <None Include="Public\Core\Base\MemoryStream.inl" />
     <None Include="Public\Core\Base\Stream.inl" />
     <None Include="Public\Core\Base\Uuid.inl" />
+    <None Include="Public\Core\Win\WinPlatform.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core\Application.cpp" />

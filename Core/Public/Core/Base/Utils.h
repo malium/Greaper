@@ -47,7 +47,7 @@ INLINE constexpr T RoundUp(const T number, const T multiple)
 	static_assert(number <= result && result < number + multiple, "");
 	return result;
 }
-
+/** Computes the factor that tells by how much is bigger/smaller */
 template<typename T>
 INLINE constexpr T DivideAndRoundUp(T n, T d) noexcept
 {
