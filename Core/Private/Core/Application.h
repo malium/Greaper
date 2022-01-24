@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos S�nchez Torrent.                                         *
+*   Copyright 2021 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -14,6 +14,8 @@
 
 namespace greaper::core
 {
+	inline constexpr sizet StoredFrameTimeCount = 20;
+
 	class Application final : public IApplication
 	{
 		enum PropertiesIndices
@@ -22,9 +24,13 @@ namespace greaper::core
 			ApplicationVersion,
 			CompilationInfo,
 			LoadedLibraries,
+			FixedUpdateMaxRate,
+			UpdateMaxRate,
 
 			COUNT
 		};
+		static constexpr uint32 MAX_ACCUM_FIXED_UPDATES = 200;
+		static constexpr uint32 NEW_FIXED_UPDATES_PER_FRAME = 4;
 
 		IGreaperLibrary* m_Library;
 		OnCloseEvent_t m_OnClose;
@@ -40,7 +46,7 @@ namespace greaper::core
 
 		struct LibInfo
 		{
-			IGreaperLibrary* Lib;
+			IGreaperLibrary* Lib = nullptr;
 			UnorderedMap<StringView, size_t> IntefaceNameMap;
 			UnorderedMap<Uuid, size_t> InterfaceUuidMap;
 			Vector<IInterface*> Interfaces;
@@ -55,11 +61,54 @@ namespace greaper::core
 		UnorderedMap<Uuid, size_t> m_ActiveInterfaceUuidMap;
 		Vector<IInterface*> m_ActiveInterfaces;
 
-		mutable Mutex m_ToAddMutex;
+		Vector<IInterface*> m_InterfaceToChange;
+		Vector<IInterface*> m_InterfacesToRemove;
 		Vector<IInterface*> m_InterfacesToAdd;
+
+		Timepoint_t m_StartTime;
+		Timepoint_t m_LastUpdateTime;
+		Timepoint_t m_LastFixedUpdateTime;
+		uint64 m_FrameCount;
+		float m_UpdateStep;
+		std::chrono::nanoseconds m_UpdateStepNanos;
+		float m_FixedUpdateStep;
+		std::chrono::nanoseconds m_FixedUpdateStepNanos;
+		float m_LastUpdateDelta;
+		float m_FrameTimes[StoredFrameTimeCount];
+		float m_UpdateDeltaAvg;
+		float m_UpdateDeltaMin;
+		float m_UpdateDeltaMax;
+		uint32 m_RemainingFixedUpdates;
+		IProperty::ModificationEventHandler_t m_OnUpdateMaxRateEvtHnd;
+		IProperty::ModificationEventHandler_t m_OnFixedUpdateMaxRateEvtHnd;
 
 		void AddGreaperLibrary(IGreaperLibrary* library);
 		void LoadConfigLibraries();
+
+		void ClearFrameTimes()noexcept;
+		void UpdateFrameTimes()noexcept;
+
+		void OnUpdateMaxRateChange(IProperty* prop)
+		{
+			UNUSED(prop);
+			const auto value = GetUpdateMaxRate()->GetValue();
+			if (value == 0)
+				m_UpdateStep = 0.f;
+			else
+				m_UpdateStep = 1.f / value;
+		}
+		void OnFixedUpdateMaxRateChange(IProperty* prop)
+		{
+			UNUSED(prop);
+			const auto value = GetFixedUpdateMaxRate()->GetValue();
+			if (value == 0)
+				m_FixedUpdateStep = 0.f;
+			else
+				m_FixedUpdateStep = 1.f / value;
+		}
+		void UpdateActiveInterfaceList();
+		void UpdateTick();
+		void ComputeFixedUpdateStep(uint64& step, uint32& iterations);
 
 	public:
 		Application();
@@ -141,8 +190,6 @@ namespace greaper::core
 
 		Result<IInterface*> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
 
-		void StartApplication()override;
-
 		bool AppHasToStop()const override { return m_HasToStop; }
 
 		void StopApplication()override;
@@ -160,7 +207,27 @@ namespace greaper::core
 		LoadedLibrariesProp_t* GetLoadedLibrariesNames()override { return reinterpret_cast<LoadedLibrariesProp_t*>(m_Properties[(sizet)LoadedLibraries]); }
 
 		CRange<IProperty*> GetProperties() const override { return CreateRange(m_Properties); }
-};
+		
+		Timepoint_t GetStartTime()const override { return m_StartTime; }
+
+		Timepoint_t GetLastUpdateTime()const override { return m_LastUpdateTime; }
+
+		Timepoint_t GetLastFixedUpdateTime()const override { return m_LastFixedUpdateTime; }
+
+		uint64 GetFrameCount()const override { return m_FrameCount; }
+
+		float GetUpdateDelta()const override { return m_LastUpdateDelta; }
+
+		float GetAvgUpdateDelta()const override { return m_UpdateDeltaAvg; }
+
+		float GetMinUpdateDelta()const override { return m_UpdateDeltaMin; }
+
+		float GetMaxUpdateDelta()const override { return m_UpdateDeltaMax; }
+
+		FixedUpdateMaxRateProp_t* GetFixedUpdateMaxRate() override { return (FixedUpdateMaxRateProp_t*)m_Properties[(sizet)FixedUpdateMaxRate]; }
+
+		UpdateMaxRateProp_t* GetUpdateMaxRate() override { return (UpdateMaxRateProp_t*)m_Properties[(sizet)UpdateMaxRate]; }
+	};
 }
 
 #endif /* CORE_APPLICATION_H */

@@ -482,6 +482,12 @@ HeapFree(
 	DWORD dwFlags,
 	LPVOID lpMem
 );
+WINBASEAPI
+VOID
+WINAPI
+Sleep(
+	DWORD dwMilliseconds
+);
 }
 #else
 #include <Windows.h>

@@ -477,15 +477,16 @@
     <ClInclude Include="Public\Core\ILogManager.h" />
     <ClInclude Include="Public\Core\Interface.h" />
     <ClInclude Include="Public\Core\IThreadManager.h" />
-    <ClInclude Include="Public\Core\ITimeManager.h" />
     <ClInclude Include="Public\Core\IWindowManager.h" />
     <ClInclude Include="Public\Core\Library.h" />
     <ClInclude Include="Public\Core\Lnx\LnxLibrary.h" />
+    <ClInclude Include="Public\Core\Lnx\LnxPlatform.h" />
     <ClInclude Include="Public\Core\Lnx\LnxThreading.h" />
     <ClInclude Include="Public\Core\Lnx\Prerequisites.h" />
     <ClInclude Include="Public\Core\Memory.h" />
     <ClInclude Include="Public\Core\MemoryStream.h" />
     <ClInclude Include="Public\Core\PHAL.h" />
+    <ClInclude Include="Public\Core\Platform.h" />
     <ClInclude Include="Public\Core\Property.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedField.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedPlainContainer.h" />
@@ -502,6 +503,7 @@
     <ClInclude Include="Public\Core\Win\MinWinHeader.h" />
     <ClInclude Include="Public\Core\Win\Prerequisites.h" />
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
+    <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
     <ClInclude Include="Public\Core\IObjectFactory.h" />
   </ItemGroup>

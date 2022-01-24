@@ -4,6 +4,7 @@
 ***********************************************************************************/
 
 #include "Application.h"
+#include <Core/Platform.h>
 #include <Core/IGreaperLibrary.h>
 #include <Core/Property.h>
 
@@ -35,6 +36,144 @@ void Application::LoadConfigLibraries()
 	}*/
 }
 
+void Application::ClearFrameTimes()noexcept
+{
+	ClearMemory(m_FrameTimes);
+	m_UpdateDeltaMin = FLT_MAX;
+	m_UpdateDeltaMax = FLT_MIN;
+	m_UpdateDeltaAvg = 0.f;
+}
+
+void Application::UpdateActiveInterfaceList()
+{
+	LOCK(m_ActiveMutex);
+
+	for (sizet i = 0; i < m_InterfacesToRemove.size(); ++i)
+	{
+		auto* iface = m_InterfacesToRemove[i];
+		const auto ifaceIDX = IndexOf(m_ActiveInterfaces, iface);
+		if (ifaceIDX < 0)
+			continue; // Not in vector
+
+		m_ActiveInterfaces[ifaceIDX] = nullptr;
+		iface->OnDeactivate();
+	}
+	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
+	{
+		auto* iface = m_InterfacesToAdd[i];
+		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
+		sizet ifaceIDX;
+		if (uuidIT == m_ActiveInterfaceUuidMap.end())
+		{
+			ifaceIDX = m_ActiveInterfaces.size();
+			m_ActiveInterfaces.push_back(nullptr);
+			m_ActiveInterfaceNameMap.insert_or_assign(iface->GetInterfaceName(), ifaceIDX);
+			m_ActiveInterfaceUuidMap.insert_or_assign(iface->GetInterfaceUUID(), ifaceIDX);
+		}
+		else
+		{
+			ifaceIDX = uuidIT->second;
+		}
+		m_ActiveInterfaces[ifaceIDX] = iface;
+		iface->OnActivate();
+	}
+
+	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
+	{
+		auto* iface = m_InterfaceToChange[i];
+		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
+		VerifyInequal(uuidIT, m_ActiveInterfaceUuidMap.end(), "Couldn't find the Active interafce with UUID '%s' on the ActiveInterfaces.", iface->GetInterfaceUUID().ToString().c_str());
+		const auto ifaceIDX = uuidIT->second;
+		auto* oiFace = m_ActiveInterfaces[ifaceIDX];
+		oiFace->OnChangingDefault(iface);
+		oiFace->OnDeactivate();
+		m_ActiveInterfaces[ifaceIDX];
+		iface->OnActivate();
+	}
+}
+
+void Application::UpdateTick()
+{
+	// We start a new Frame/Tick
+	++m_FrameCount;
+
+	UpdateActiveInterfaceList();
+
+	// PreUpdate
+	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
+	{
+		auto* iface = m_ActiveInterfaces[i];
+		iface->PreUpdate();
+	}
+
+	// FixedUpdate
+	uint64 step; uint32 iterations;
+	ComputeFixedUpdateStep(step, iterations);
+	const auto stepSecs = float(step) * 1e-9f;
+	for (uint32 i = 0; i < iterations; ++i)
+	{
+		for (sizet j = 0; j < m_ActiveInterfaces.size(); ++j)
+		{
+			auto* iface = m_ActiveInterfaces[j];
+			iface->FixedUpdate();
+		}
+
+		m_LastFixedUpdateTime += std::chrono::nanoseconds(step);
+	}
+
+	// Update
+	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
+	{
+		auto* iface = m_ActiveInterfaces[i];
+		iface->Update();
+	}
+
+	// PostUpdate
+	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
+	{
+		auto* iface = m_ActiveInterfaces[i];
+		iface->PostUpdate();
+	}
+}
+
+void Application::ComputeFixedUpdateStep(uint64& step, uint32& iterations)
+{
+	const auto nextFrameTime = m_LastFixedUpdateTime + m_FixedUpdateStepNanos;
+	if (nextFrameTime <= m_LastUpdateTime)
+	{
+		const auto simAccum = Max(m_LastUpdateTime - m_LastFixedUpdateTime, m_FixedUpdateStepNanos);
+		auto stepn = m_FixedUpdateStepNanos.count();
+		iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
+
+		if (iterations > m_RemainingFixedUpdates)
+		{
+			stepn = DivideAndRoundUp(simAccum.count(), (int64)m_RemainingFixedUpdates);
+			iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
+		}
+		VerifyLessEqual(iterations, m_RemainingFixedUpdates, "");
+		m_RemainingFixedUpdates -= iterations;
+		m_RemainingFixedUpdates = Min(MAX_ACCUM_FIXED_UPDATES, m_RemainingFixedUpdates + NEW_FIXED_UPDATES_PER_FRAME);
+		step = (uint64)stepn;
+	}
+	step = 0;
+	iterations = 0;
+}
+
+static constexpr float StoredFrameINV = 1.f / StoredFrameTimeCount;
+
+void Application::UpdateFrameTimes()noexcept
+{
+	m_FrameTimes[m_FrameCount % StoredFrameTimeCount] = m_LastUpdateDelta;
+
+	float accum = 0.f;
+	for (int i = 0; i < StoredFrameTimeCount; ++i)
+		accum += m_FrameTimes[i];
+	
+	m_UpdateDeltaAvg = accum * StoredFrameINV;
+	m_UpdateDeltaMax = Max(m_UpdateDeltaMax, m_LastUpdateDelta);
+	m_UpdateDeltaMin = Min(m_UpdateDeltaMin, m_LastUpdateDelta);
+}
+
 Application::Application()
 	:m_Library(nullptr)
 	, m_OnClose("OnClose"sv)
@@ -44,6 +183,14 @@ Application::Application()
 	,m_IsActive(false)
 	,m_IsInitialized(false)
 	,m_HasToStop(false)
+	,m_FrameCount(0)
+	,m_UpdateStep(1.f / 200.f)
+	,m_FixedUpdateStep(1.f / 50.f)
+	,m_LastUpdateDelta(0.f)
+	,m_FrameTimes()
+	,m_UpdateDeltaAvg(0.f)
+	,m_UpdateDeltaMin(0.f)
+	,m_UpdateDeltaMax(0.f)
 {
 
 }
@@ -59,6 +206,14 @@ void Application::Initialize(IGreaperLibrary* library)
 		return;
 
 	m_Library = library;
+
+	// Reset timings...
+	m_StartTime = Clock_t::now();
+	ClearFrameTimes();
+	m_LastUpdateDelta = m_UpdateDeltaAvg = m_UpdateDeltaMin = m_UpdateDeltaMax = 0.f;
+	m_FrameCount = 0;
+	m_LastUpdateTime = m_StartTime;
+	m_LastFixedUpdateTime = m_StartTime;
 
 	// Initialize...
 
@@ -166,6 +321,34 @@ void Application::InitProperties()
 		loadedLibrariesProp = loadedLibrariesResult.GetValue();
 	}
 	m_Properties[(sizet)LoadedLibraries] = loadedLibrariesProp;
+
+	UpdateMaxRateProp_t* updateMaxRateProp = nullptr;
+	result = m_Library->GetProperty(UpdateMaxRateName);
+	if (result.IsOk())
+		updateMaxRateProp = reinterpret_cast<UpdateMaxRateProp_t*>(result.GetValue());
+
+	if (updateMaxRateProp == nullptr)
+	{
+		auto updateMaxRateResult = CreateProperty<uint32>(m_Library, UpdateMaxRateName, 200, "Maximum amount of updates per second."sv, false, false, nullptr);
+		Verify(updateMaxRateResult.IsOk(), "Couldn't create the property '%s' msg: %s", UpdateMaxRateName.data(), updateMaxRateResult.GetFailMessage().c_str());
+		updateMaxRateProp = updateMaxRateResult.GetValue();
+	}
+	updateMaxRateProp->GetOnModificationEvent()->Connect(m_OnUpdateMaxRateEvtHnd, std::bind(&Application::OnUpdateMaxRateChange, this, std::placeholders::_1));
+	m_Properties[(sizet)UpdateMaxRate] = updateMaxRateProp;
+
+	FixedUpdateMaxRateProp_t* fixedUpdateMaxRateProp = nullptr;
+	result = m_Library->GetProperty(FixedUpdateMaxRateName);
+	if (result.IsOk())
+		fixedUpdateMaxRateProp = reinterpret_cast<FixedUpdateMaxRateProp_t*>(result.GetValue());
+
+	if (fixedUpdateMaxRateProp == nullptr)
+	{
+		auto fixedDeltaMaxRateResult = CreateProperty<uint32>(m_Library, FixedUpdateMaxRateName, 50, "Maximum amount of fixed updates per second."sv, false, false, nullptr);
+		Verify(fixedDeltaMaxRateResult.IsOk(), "Couldn't create the property '%s' msg: %s", FixedUpdateMaxRateName.data(), fixedDeltaMaxRateResult.GetFailMessage().c_str());
+		fixedUpdateMaxRateProp = fixedDeltaMaxRateResult.GetValue();
+	}
+	fixedUpdateMaxRateProp->GetOnModificationEvent()->Connect(m_OnFixedUpdateMaxRateEvtHnd, std::bind(&Application::OnFixedUpdateMaxRateChange, this, std::placeholders::_1));
+	m_Properties[(sizet)FixedUpdateMaxRate] = fixedUpdateMaxRateProp;
 }
 
 void Application::DeinitProperties()
@@ -181,7 +364,33 @@ void Application::PreUpdate()
 
 void Application::Update()
 {
-	Break("Trying to call a Update to Application, which is forbidden.");
+	auto curTime = Clock_t::now();
+	auto frameNum = m_FrameCount;
+	
+	if (m_UpdateStep > 0.f)
+	{
+		const auto nextFrameTime = m_LastUpdateTime + std::chrono::nanoseconds(m_UpdateStepNanos);
+		while (nextFrameTime > curTime)
+		{
+			const auto waitTimeNanos = nextFrameTime - curTime;
+			const auto waitTimeMillis = (uint32)(waitTimeNanos.count() / 1'000'000);
+
+			if (waitTimeMillis >= 2)
+			{
+				OSPlatform::Sleep(waitTimeMillis);
+				curTime = Clock_t::now();
+			}
+			else
+			{
+				while (nextFrameTime > curTime) //! Spin to wait the exactly time needed
+					curTime = Clock_t::now();
+			}
+		}
+	}
+	const auto timeDiff = curTime - m_LastUpdateTime;
+	m_LastUpdateDelta = (double)timeDiff.count() * 1e-9;
+	m_LastUpdateTime = curTime;
+
 }
 
 void Application::PostUpdate()
@@ -451,38 +660,75 @@ EmptyResult Application::ActivateInterface(IInterface* interface)
 	if (interface == nullptr)
 		return CreateEmptyFailure("Trying to make default a nullptr interface, if you want to remove an Active interface call StopInterfaceDefault.");
 
-	LOCK(m_ToAddMutex);
+	LOCK(m_ActiveMutex);
 	
+	const auto toRemoveIdx = IndexOf(m_InterfacesToRemove, interface);
+	if (toRemoveIdx >= 0)
+	{
+		m_InterfacesToRemove.erase(m_InterfacesToRemove.begin() + toRemoveIdx);
+	}
+
+	if (Contains(m_InterfaceToChange, interface))
+	{
+		return CreateEmptyResult();
+	}
+
 	if(Contains(m_InterfacesToAdd, interface))
 	{
 		return CreateEmptyResult();
 	}
 
-	m_InterfacesToAdd.push_back(interface);
+	const auto existsAnother = m_ActiveInterfaceUuidMap.contains(interface->GetInterfaceUUID());
 
-	auto* iface = interface;
-	m_OnInterfaceActivation.Trigger(std::move(iface));
-	
+	if (existsAnother)
+		m_InterfaceToChange.push_back(interface);
+	else
+		m_InterfacesToAdd.push_back(interface);
+
 	return CreateEmptyResult();
 }
 
 EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 {
 	LOCK(m_ActiveMutex);
-	const auto uuidIT = m_ActiveInterfaceUuidMap.find(interfaceUUID);
-	if (uuidIT == m_ActiveInterfaceUuidMap.end())
+	IInterface* interface = nullptr;
+	// Remove it from toAdd and toChange
+	bool removed = false;
+	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
+	{
+		auto* iface = m_InterfacesToAdd[i];
+		if (iface->GetInterfaceUUID() == interfaceUUID)
+		{
+			m_InterfacesToAdd.erase(m_InterfacesToAdd.begin() + i);
+			removed = true;
+			break;
+		}
+	}
+	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
+	{
+		auto* iface = m_InterfaceToChange[i];
+		if (iface->GetInterfaceUUID() == interfaceUUID)
+		{
+			m_InterfaceToChange.erase(m_InterfaceToChange.begin() + i);
+			removed = true;
+			break;
+		}
+	}
+
+	const auto activeIT = m_ActiveInterfaceUuidMap.find(interfaceUUID);
+	if (activeIT != m_ActiveInterfaceUuidMap.end())
+	{
+		interface = m_ActiveInterfaces[activeIT->second];
+	}
+
+	if (interface == nullptr)
+	{
+		if (removed)
+			return CreateEmptyResult(); // removed from activation
+
 		return CreateEmptyFailure(Format("Trying to deactivate an Interface with UUID '%s', but was not active.", interfaceUUID.ToString().c_str()));
-	
-	const auto index = uuidIT->second;
-
-	if (index >= m_ActiveInterfaces.size())
-		return CreateEmptyFailure(Format("Trying to deactivate an Interface with UUID '%s', but its index was out of bounds.", interfaceUUID.ToString().c_str()));
-
-	auto* iface = m_ActiveInterfaces[index];
-	if (iface == nullptr)
-		return CreateEmptyResult(); // Was already stopped
-
-	iface->OnChangingDefault(nullptr);
+	}
+	m_InterfacesToRemove.push_back(interface);
 
 	return CreateEmptyResult();
 }
@@ -490,20 +736,44 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 {
 	LOCK(m_ActiveMutex);
-	const auto nameIT = m_ActiveInterfaceNameMap.find(interfaceName);
-	if (nameIT == m_ActiveInterfaceNameMap.end())
+	IInterface* interface = nullptr;
+	// Remove it from toAdd and toChange
+	bool removed = false;
+	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
+	{
+		auto* iface = m_InterfacesToAdd[i];
+		if (iface->GetInterfaceName() == interfaceName)
+		{
+			m_InterfacesToAdd.erase(m_InterfacesToAdd.begin() + i);
+			removed = true;
+			break;
+		}
+	}
+	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
+	{
+		auto* iface = m_InterfaceToChange[i];
+		if (iface->GetInterfaceName() == interfaceName)
+		{
+			m_InterfaceToChange.erase(m_InterfaceToChange.begin() + i);
+			removed = true;
+			break;
+		}
+	}
+	const auto activeIT = m_ActiveInterfaceNameMap.find(interfaceName);
+	if (activeIT != m_ActiveInterfaceNameMap.end())
+	{
+		interface = m_ActiveInterfaces[activeIT->second];
+	}
+
+	if (interface == nullptr)
+	{
+		if (removed)
+			return CreateEmptyResult(); // Removed from activation
+
 		return CreateEmptyFailure(Format("Trying to deactivate an Interface with name '%s', but was not active.", interfaceName.data()));
+	}
 
-	const auto index = nameIT->second;
-
-	if (index >= m_ActiveInterfaces.size())
-		return CreateEmptyFailure(Format("Trying to deactivate an Interface with name '%s', but its index was out of bounds.", interfaceName.data()));
-
-	auto* iface = m_ActiveInterfaces[index];
-	if (iface == nullptr)
-		return CreateEmptyResult(); // Was already stopped
-
-	iface->OnChangingDefault(nullptr);
+	m_InterfacesToRemove.push_back(interface);
 
 	return CreateEmptyResult();
 }
@@ -642,12 +912,6 @@ Result<IInterface*> Application::GetInterface(const StringView& interfaceName, c
 
 	auto* iface = libInfo.Interfaces[ifaceNameIT->second];
 	return CreateResult(iface);
-}
-
-void Application::StartApplication()
-{
-	m_Library->Log(Format("Starting %s...", GetApplicationName()->GetValue().c_str()));
-
 }
 
 void Application::StopApplication()

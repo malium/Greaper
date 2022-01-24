@@ -59,7 +59,6 @@ int main()
 	std::cout << "Successfully started!\n " << gApplication->GetApplicationName()->GetStringValue() << " Version " << gApplication->GetApplicationVersion()->GetStringValue() << std::endl;
 	
 	std::cout << "Enter anything to shutdown" << std::endl;
-	gApplication->StartApplication();
 	achar a;
 	std::cin >> a;
 

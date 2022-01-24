@@ -47,6 +47,12 @@ INLINE constexpr T RoundUp(const T number, const T multiple)
 	static_assert(number <= result && result < number + multiple, "");
 	return result;
 }
+
+template<typename T>
+INLINE constexpr T DivideAndRoundUp(T n, T d) noexcept
+{
+	return (n + d - 1) / d;
+}
 /** Rounds the given number up to the next higher power of two */
 template<typename T>
 INLINE constexpr T RoundUpToPowerOf2(T val)

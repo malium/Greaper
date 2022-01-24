@@ -33,6 +33,7 @@ namespace greaper
 
 	INLINE IStream::IStream(const uint16 accessMode)
 		:m_Access(accessMode)
+		,m_Size(0)
 	{
 
 	}
@@ -40,6 +41,7 @@ namespace greaper
 	INLINE IStream::IStream(StringView name, const uint16 accessMode)
 		:m_Name(name)
 		,m_Access(accessMode)
+		,m_Size(0)
 	{
 
 	}
