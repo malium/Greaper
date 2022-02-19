@@ -18,6 +18,10 @@ namespace greaper
 	 * 
 	 * Instead of the typical 8-4-4-4-12 representation it uses 8-8-8-8 representation,
 	 * it is used across all interfaces, libraries and resources.
+	 * In order to convert from 8-4-4-4-12 to 8-8-8-8:
+	 * ED4FE4FA-0800-416F-ABDA-E666DACE6688
+	 * ED4FE4FA-0800416F-ABDAE666-DACE6688
+	 * There's a code example on greaper::Uuid::GenerateRandom()
 	 */
 	class Uuid
 	{

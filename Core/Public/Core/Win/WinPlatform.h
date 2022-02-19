@@ -19,4 +19,6 @@ namespace greaper
 	using OSPlatform = WinOSPlatform;
 }
 
+#include "WinPlatform.inl"
+
 #endif /* CORE_WIN_PLATFORM_H */

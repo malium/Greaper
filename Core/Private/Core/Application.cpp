@@ -87,7 +87,7 @@ void Application::UpdateActiveInterfaceList()
 		auto* oiFace = m_ActiveInterfaces[ifaceIDX];
 		oiFace->OnChangingDefault(iface);
 		oiFace->OnDeactivate();
-		m_ActiveInterfaces[ifaceIDX];
+		m_ActiveInterfaces[ifaceIDX] = iface;
 		iface->OnActivate();
 	}
 }
@@ -185,12 +185,15 @@ Application::Application()
 	,m_HasToStop(false)
 	,m_FrameCount(0)
 	,m_UpdateStep(1.f / 200.f)
+	,m_UpdateStepNanos((uint64)(1e9/200.0))
 	,m_FixedUpdateStep(1.f / 50.f)
+	,m_FixedUpdateStepNanos((uint64)(1e9/50.0))
 	,m_LastUpdateDelta(0.f)
 	,m_FrameTimes()
 	,m_UpdateDeltaAvg(0.f)
 	,m_UpdateDeltaMin(0.f)
 	,m_UpdateDeltaMax(0.f)
+	,m_RemainingFixedUpdates(MAX_ACCUM_FIXED_UPDATES)
 {
 
 }
@@ -365,7 +368,6 @@ void Application::PreUpdate()
 void Application::Update()
 {
 	auto curTime = Clock_t::now();
-	auto frameNum = m_FrameCount;
 	
 	if (m_UpdateStep > 0.f)
 	{
@@ -388,9 +390,10 @@ void Application::Update()
 		}
 	}
 	const auto timeDiff = curTime - m_LastUpdateTime;
-	m_LastUpdateDelta = (double)timeDiff.count() * 1e-9;
+	m_LastUpdateDelta = (float)((double)timeDiff.count() * 1e-9);
 	m_LastUpdateTime = curTime;
 
+	UpdateTick();
 }
 
 void Application::PostUpdate()

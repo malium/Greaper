@@ -10,7 +10,7 @@
 
 #include "ImplPrerequisites.h"
 #include <Core/IApplication.h>
-#include <Core/Event.h>
+#include <Core/Property.h>
 
 namespace greaper::core
 {
@@ -215,6 +215,8 @@ namespace greaper::core
 		Timepoint_t GetLastFixedUpdateTime()const override { return m_LastFixedUpdateTime; }
 
 		uint64 GetFrameCount()const override { return m_FrameCount; }
+
+		float GetFixedUpdateDelta()const override { return m_FixedUpdateStep; }
 
 		float GetUpdateDelta()const override { return m_LastUpdateDelta; }
 
