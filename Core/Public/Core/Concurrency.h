@@ -20,8 +20,22 @@
 #include <functional>
 #include <any>
 
+/*** Cross-platform concurrency primitives and utilites
+*	
+*	Greaper requires some concurrency primities to work and that those work as similar as possible
+*	on each platform Greaper is supported
+*	
+*	Currently, Linux platform does not support RWMutex interaction with Signals
+*/
 namespace greaper
 {
+	/*** Typical Mutex
+	*
+	*	To be added:
+	*	In debug builds or activated by configuration, information of
+	*	which thread owns the mutex, so when a deadlock occurs we can 
+	*	see which threads are colliding with their info
+	*/
 	class Mutex
 	{
 		MutexHandle m_Handle;
@@ -84,6 +98,15 @@ namespace greaper
 		}
 	};
 
+	/*** Mutex that allows recursion
+	*	Multiple locking by the same thread -> expects the same unlockings afterwards
+	*
+	*	To be added:
+	*	In debug builds or activated by configuration, information of
+	*	which thread owns the mutex, so when a deadlock occurs we can
+	*	see which threads are colliding with their info. Also a counter
+	*	that tells how many lockings have done the lock thread.
+	*/
 	class RecursiveMutex
 	{
 		RecursiveMutexHandle m_Handle;
@@ -147,6 +170,14 @@ namespace greaper
 		}
 	};
 
+	/*** Read-Write Mutex
+	*	A lightweight mutex to avoid locking when we are just reading
+	*
+	*	To be added:
+	*	In debug builds or activated by configuration, information of
+	*	which thread owns the mutex, so when a deadlock occurs we can
+	*	see which threads are colliding with their info
+	*/
 	class RWMutex
 	{
 		RWMutexHandle m_Handle;
@@ -229,6 +260,16 @@ namespace greaper
 		}
 	};
 
+	/*** The lightweightest Mutex
+	*	It's the mutex that guaranties the lowest latency, but in exchange of huge
+	*	CPU cost if its waiting on big tasks. Better be used to protect small and 
+	*	fast tasks.
+	*
+	*	To be added:
+	*	In debug builds or activated by configuration, information of
+	*	which thread owns the mutex, so when a deadlock occurs we can
+	*	see which threads are colliding with their info
+	*/
 	class SpinLock
 	{
 		static constexpr uint32 SpinCount = 4000;
@@ -266,7 +307,8 @@ namespace greaper
 	};
 
 	struct AdoptLock { explicit AdoptLock() = default; };
-
+	
+	/*** Locks a given mutex and unlocks it when out of scope */
 	template<class Mtx>
 	class Lock
 	{
@@ -298,9 +340,11 @@ namespace greaper
 
 #define LOCK(MUTEX) greaper::Lock<decltype(MUTEX)> lck(MUTEX)
 
+	/*** Locks a mutex and unlocks it when out of scope, but ensures mutex uniqueness by allowing mutex ownership */
 	template<class Mtx>
 	using UniqueLock = std::unique_lock<Mtx>;
 
+	/*** Locks a given read-write mutex on its shared configuration and unlocks it when out of scope */
 	class SharedLock
 	{
 		RWMutex& m_Mutex;
@@ -336,6 +380,15 @@ namespace greaper
 
 #define SHAREDLOCK(MUTEX) SharedLock lck(MUTEX);
 
+	/*** Also called ConditionVariable
+	*	Handles syncronization between multiple threads by signaling when
+	*	the protected resource is available.
+	*	Signals work only with Greaper primitives and uses OS primitives
+	* 
+	*	To be added:
+	*	In debug builds or activated by configuration, information of
+	*	the threads that are waiting on the signal
+	*/
 	class Signal
 	{
 		SignalHandle m_Handle;
@@ -543,6 +596,7 @@ namespace greaper
 		}
 	};
 
+	/*** Allows syncronization for multiple resources by different threads */
 	class Semaphore
 	{
 		Mutex m_Mutex;
@@ -551,7 +605,7 @@ namespace greaper
 		const sizet m_MaxCount;
 
 	public:
-		Semaphore(sizet maxCount = 0)
+		Semaphore(sizet maxCount = 0) noexcept
 			:m_Count(maxCount)
 			,m_MaxCount(maxCount)
 		{
@@ -565,21 +619,21 @@ namespace greaper
 
 		INLINE void notify()
 		{
-			UniqueLock<Mutex> lck(m_Mutex);
+			auto lck = UniqueLock<Mutex>(m_Mutex); // can throw
 			++m_Count;
 			m_Signal.notify_one();
 		}
 
 		INLINE void wait()
 		{
-			UniqueLock<Mutex> lck(m_Mutex);
+			UniqueLock<Mutex> lck(m_Mutex); // can throw
 			m_Signal.wait(lck, [&]{return m_Count > 0;});
 			--m_Count;
 		}
 
 		INLINE bool try_wait()
 		{
-			Lock<Mutex> lck(m_Mutex);
+			Lock<Mutex> lck(m_Mutex); // can throw
 			if(m_Count > 0)
 			{
 				--m_Count;
@@ -588,15 +642,17 @@ namespace greaper
 			return false;
 		}
 
-		[[nodiscard]] INLINE sizet GetMaxCount()const { return m_MaxCount; }
+		[[nodiscard]] INLINE sizet GetMaxCount()const noexcept { return m_MaxCount; }
 
-		[[nodiscard]] INLINE const Signal& GetSignal()const { return m_Signal; }
-		[[nodiscard]] INLINE Signal& GetSignal() { return m_Signal; }
-		[[nodiscard]] INLINE const Mutex& GetMutex()const { return m_Mutex; }
-		[[nodiscard]] INLINE Mutex& GetMutex() { return m_Mutex; }
+		[[nodiscard]] INLINE const Signal& GetSignal()const noexcept { return m_Signal; }
+		[[nodiscard]] INLINE Signal& GetSignal() noexcept { return m_Signal; }
+		[[nodiscard]] INLINE const Mutex& GetMutex()const noexcept { return m_Mutex; }
+		[[nodiscard]] INLINE Mutex& GetMutex() noexcept { return m_Mutex; }
 	};
 
-	// from: https://stackoverflow.com/a/27118537
+	/*** Sets a place where the threads will wait until all of them have reached that place
+	*	Was adapted from: https://stackoverflow.com/a/27118537
+	*/
 	class Barrier
 	{
 		Mutex m_Mutex;
@@ -646,6 +702,10 @@ namespace greaper
 
 	struct AsyncOpEmpty {  };
 
+	/*** Allows intant return on functions that have to wait a resource to be processed
+	*	this class will guarantee that you get that resource and if you want wait on it
+	*	be processed.
+	*/
 	class IAsyncOp
 	{
 		struct OpData
