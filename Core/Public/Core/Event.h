@@ -17,6 +17,9 @@ namespace greaper
 	template<class... Args>
 	class Event;
 
+	/*** The class that listeners will handle
+	*	Allows on demand event desconnection and desconnection at end-of-life
+	*/
 	template<class... Args>
 	class EventHandler
 	{
@@ -47,6 +50,19 @@ namespace greaper
 		uint32 ID = 0;
 	};
 
+	/*** Handles event creation, trigger and dispatching
+	*	Event provides an easy and multithreaded way of handling event triggering, dispatching and listening
+	*	Also this way of handling events, provide an easy way of sending arguments via template parameters,
+	*	if no parameter is wanted to be send, use Event<void>.
+	*	Events can have a name if wanted, otherwise unnamed will be their name.
+	*	
+	*	Use example:
+	*	Event<uint32, String> testEvent = Event<uint32, String>("Test");
+	*	EventHandler<uint32, String> listener;
+	*	testEvent.Connect(listener, [](uint32 i, String s) { std::cout << i << " " << s << std::endl; });
+	*	
+	*	testEvent.Trigger(0, "hi");
+	*/
 	template<class... Args>
 	class Event
 	{
