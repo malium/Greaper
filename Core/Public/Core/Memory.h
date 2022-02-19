@@ -445,9 +445,14 @@ namespace greaper::Impl
 {
 	INLINE void _LogBreak(const String& str)
 	{
-		UNUSED(str);
+		FILE* file = nullptr;
+		const auto res = fopen_s(&file, "ERROR.log", "w");
+		if(res == 0 && file != nullptr)
+		{
+			const auto written = fwrite(str.data(), sizeof(String::value_type), str.size(), file);
 
-		// TODO: do error log
+			fclose(file);
+		}
 	}
 	
 	INLINE void _TriggerBreak(const String& str)
