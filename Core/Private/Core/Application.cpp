@@ -339,19 +339,19 @@ void Application::InitProperties()
 	updateMaxRateProp->GetOnModificationEvent()->Connect(m_OnUpdateMaxRateEvtHnd, std::bind(&Application::OnUpdateMaxRateChange, this, std::placeholders::_1));
 	m_Properties[(sizet)UpdateMaxRate] = updateMaxRateProp;
 
-	FixedUpdateMaxRateProp_t* fixedUpdateMaxRateProp = nullptr;
-	result = m_Library->GetProperty(FixedUpdateMaxRateName);
+	FixedUpdateRateProp_t* fixedUpdateRateProp = nullptr;
+	result = m_Library->GetProperty(FixedUpdateRateName);
 	if (result.IsOk())
-		fixedUpdateMaxRateProp = reinterpret_cast<FixedUpdateMaxRateProp_t*>(result.GetValue());
+		fixedUpdateRateProp = reinterpret_cast<FixedUpdateRateProp_t*>(result.GetValue());
 
-	if (fixedUpdateMaxRateProp == nullptr)
+	if (fixedUpdateRateProp == nullptr)
 	{
-		auto fixedDeltaMaxRateResult = CreateProperty<uint32>(m_Library, FixedUpdateMaxRateName, 50, "Maximum amount of fixed updates per second."sv, false, false, nullptr);
-		Verify(fixedDeltaMaxRateResult.IsOk(), "Couldn't create the property '%s' msg: %s", FixedUpdateMaxRateName.data(), fixedDeltaMaxRateResult.GetFailMessage().c_str());
-		fixedUpdateMaxRateProp = fixedDeltaMaxRateResult.GetValue();
+		auto fixedDeltaRateResult = CreateProperty<uint32>(m_Library, FixedUpdateRateName, 50, "Amount of fixed updates per second."sv, false, false, nullptr);
+		Verify(fixedDeltaRateResult.IsOk(), "Couldn't create the property '%s' msg: %s", FixedUpdateRateName.data(), fixedDeltaRateResult.GetFailMessage().c_str());
+		fixedUpdateRateProp = fixedDeltaRateResult.GetValue();
 	}
-	fixedUpdateMaxRateProp->GetOnModificationEvent()->Connect(m_OnFixedUpdateMaxRateEvtHnd, std::bind(&Application::OnFixedUpdateMaxRateChange, this, std::placeholders::_1));
-	m_Properties[(sizet)FixedUpdateMaxRate] = fixedUpdateMaxRateProp;
+	fixedUpdateRateProp->GetOnModificationEvent()->Connect(m_OnFixedUpdateMaxRateEvtHnd, std::bind(&Application::OnFixedUpdateRateChange, this, std::placeholders::_1));
+	m_Properties[(sizet)FixedUpdateRate] = fixedUpdateRateProp;
 }
 
 void Application::DeinitProperties()
@@ -362,7 +362,6 @@ void Application::DeinitProperties()
 void Application::PreUpdate()
 {
 	Break("Trying to call a PreUpdate to Application, which is forbidden.");
-	
 }
 
 void Application::Update()

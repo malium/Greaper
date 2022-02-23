@@ -24,7 +24,7 @@ namespace greaper::core
 			ApplicationVersion,
 			CompilationInfo,
 			LoadedLibraries,
-			FixedUpdateMaxRate,
+			FixedUpdateRate,
 			UpdateMaxRate,
 
 			COUNT
@@ -97,10 +97,10 @@ namespace greaper::core
 			else
 				m_UpdateStep = 1.f / value;
 		}
-		void OnFixedUpdateMaxRateChange(IProperty* prop)
+		void OnFixedUpdateRateChange(IProperty* prop)
 		{
 			UNUSED(prop);
-			const auto value = GetFixedUpdateMaxRate()->GetValue();
+			const auto value = GetFixedUpdateRate()->GetValue();
 			if (value == 0)
 				m_FixedUpdateStep = 0.f;
 			else
@@ -226,7 +226,7 @@ namespace greaper::core
 
 		float GetMaxUpdateDelta()const override { return m_UpdateDeltaMax; }
 
-		FixedUpdateMaxRateProp_t* GetFixedUpdateMaxRate() override { return (FixedUpdateMaxRateProp_t*)m_Properties[(sizet)FixedUpdateMaxRate]; }
+		FixedUpdateRateProp_t* GetFixedUpdateRate() override { return (FixedUpdateRateProp_t*)m_Properties[(sizet)FixedUpdateRate]; }
 
 		UpdateMaxRateProp_t* GetUpdateMaxRate() override { return (UpdateMaxRateProp_t*)m_Properties[(sizet)UpdateMaxRate]; }
 	};

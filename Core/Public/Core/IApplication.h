@@ -13,6 +13,25 @@
 
 namespace greaper
 {
+	/*** The base of Greaper, provides all the necesary to run a real-time application
+	*	Providing all the plumbing required to have multiple plugins working at the same time
+	*	and allowing interface interchange at run-time, except for itself.
+	* 
+	*	On a GreaperApplication, all the interfaces are stored here, then you can activate them
+	*	as you will, but only one of each type can be active at once.
+	*	Active interfaces will receive PreUpdate, FixedUpdate, Update and PostUpdate events each 
+	*	update tick.
+	*	Also, GreaperLibraries are stored here, so you can access from anywhere other libraries,
+	*	their Properties or their interfaces.
+	* 
+	*	Application has several Properties:
+	*	- ApplicationName -> Stores the name of this application, mutable static
+	*	- CompilationInfo -> Stores information about the configuration of the compilation, inmutable static
+	*	- ApplicationVersion -> Stores the version of the Application, mutable static
+	*	- LoadedLibraries -> Stores a list of the loaded libraries, mutable static
+	*	- UpdateMaxRate -> Stores the maximum amount of updates per second, mutable external
+	*	- FixedUpdateMaxRate -> Stores the amount of fixed updates per second, mutable external
+	*/
 	class IApplication : public IInterface
 	{
 	public:
@@ -24,7 +43,7 @@ namespace greaper
 		DEF_PROP(ApplicationVersion, uint32);
 		DEF_PROP(LoadedLibraries, WStringVec);
 		DEF_PROP(UpdateMaxRate, uint32);
-		DEF_PROP(FixedUpdateMaxRate, uint32);
+		DEF_PROP(FixedUpdateRate, uint32);
 		
 		using OnCloseEvent_t = Event<void>;
 
@@ -96,7 +115,7 @@ namespace greaper
 
 		virtual float GetMaxUpdateDelta()const = 0;
 
-		virtual FixedUpdateMaxRateProp_t* GetFixedUpdateMaxRate() = 0;
+		virtual FixedUpdateRateProp_t* GetFixedUpdateRate() = 0;
 
 		virtual UpdateMaxRateProp_t* GetUpdateMaxRate() = 0;
 
