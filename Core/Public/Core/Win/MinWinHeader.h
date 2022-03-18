@@ -64,7 +64,11 @@ typedef WCHAR *NWPSTR, *LPWSTR, *PWSTR;
 typedef CONST WCHAR *LPCWSTR, *PCWSTR;
 typedef CONST WCHAR *LPCWCHAR, *PCWCHAR;
 
+typedef long HRESULT;
+
 typedef int                 BOOL;
+typedef BOOL near*			PBOOL;
+typedef BOOL far*			LPBOOL;
 typedef char                CHAR;
 typedef wchar_t				WCHAR;    // wc,   16-bit UNICODE character
 typedef signed char         INT8;
@@ -117,6 +121,8 @@ DECLARE_HANDLE(HWND);
 DECLARE_HANDLE(HINSTANCE);
 DECLARE_HANDLE(HMONITOR);
 typedef HINSTANCE HMODULE;      /* HMODULEs can be used in place of HINSTANCEs */
+typedef HANDLE              HGLOBAL;
+typedef HANDLE              HLOCAL;
 
 typedef struct _RTL_SRWLOCK {
 	PVOID Ptr;
@@ -225,6 +231,89 @@ typedef PRTL_CRITICAL_SECTION LPCRITICAL_SECTION;
 #define IDYES               6
 #define IDNO                7
 
+#define CP_ACP                    0           // default to ANSI code page
+#define CP_OEMCP                  1           // default to OEM  code page
+#define CP_MACCP                  2           // default to MAC  code page
+#define CP_THREAD_ACP             3           // current thread's ANSI code page
+#define CP_SYMBOL                 42          // SYMBOL translations
+
+#define CP_UTF7                   65000       // UTF-7 translation
+#define CP_UTF8                   65001       // UTF-8 translation
+
+#define MB_PRECOMPOSED            0x00000001  // DEPRECATED: use single precomposed characters when possible.
+#define MB_COMPOSITE              0x00000002  // DEPRECATED: use multiple discrete characters when possible.
+#define MB_USEGLYPHCHARS          0x00000004  // DEPRECATED: use glyph chars, not ctrl chars
+#define MB_ERR_INVALID_CHARS      0x00000008  // error for invalid chars
+
+#define SUCCEEDED(hr) (((HRESULT)(hr)) >= 0)
+#define FAILED(hr) (((HRESULT)(hr)) < 0)
+
+#define STDMETHODCALLTYPE       __stdcall
+#define STDMETHODVCALLTYPE      __cdecl
+
+#define STDAPICALLTYPE          __stdcall
+#define STDAPIVCALLTYPE         __cdecl
+
+#define LMEM_FIXED          0x0000
+#define LMEM_MOVEABLE       0x0002
+#define LMEM_NOCOMPACT      0x0010
+#define LMEM_NODISCARD      0x0020
+#define LMEM_ZEROINIT       0x0040
+#define LMEM_MODIFY         0x0080
+#define LMEM_DISCARDABLE    0x0F00
+#define LMEM_VALID_FLAGS    0x0F72
+#define LMEM_INVALID_HANDLE 0x8000
+
+#define LHND                (LMEM_MOVEABLE | LMEM_ZEROINIT)
+#define LPTR                (LMEM_FIXED | LMEM_ZEROINIT)
+
+#define NONZEROLHND         (LMEM_MOVEABLE)
+#define NONZEROLPTR         (LMEM_FIXED)
+
+WINBASEAPI
+DECLSPEC_ALLOCATOR
+HLOCAL
+WINAPI
+LocalAlloc(
+	UINT uFlags,
+	SIZE_T uBytes
+);
+
+WINBASEAPI
+HLOCAL
+WINAPI
+LocalFree(
+	HLOCAL hMem
+);
+
+WINBASEAPI
+BOOL
+WINAPI
+IsDebuggerPresent(
+	VOID
+);
+
+WINBASEAPI
+VOID
+WINAPI
+DebugBreak(
+	VOID
+);
+
+WINBASEAPI
+VOID
+WINAPI
+OutputDebugStringA(
+	LPCSTR lpOutputString
+);
+
+WINBASEAPI
+VOID
+WINAPI
+OutputDebugStringW(
+	LPCWSTR lpOutputString
+);
+
 WINUSERAPI
 int
 WINAPI
@@ -264,12 +353,59 @@ FreeLibrary(
 	);
 
 WINBASEAPI
+HMODULE
+WINAPI
+GetModuleHandleA(
+	LPCSTR lpModuleName
+);
+
+WINBASEAPI
+HMODULE
+WINAPI
+GetModuleHandleW(
+	LPCWSTR lpModuleName
+);
+
+WINBASEAPI
 FARPROC
 WINAPI
 GetProcAddress(
 	HMODULE hModule,
 	LPCSTR lpProcName
 	);
+
+WINBASEAPI
+int
+WINAPI
+MultiByteToWideChar(
+	UINT CodePage,
+	DWORD dwFlags,
+	LPCCH lpMultiByteStr,
+	int cbMultiByte,
+	LPWSTR lpWideCharStr,
+	int cchWideChar
+);
+
+WINBASEAPI
+int
+WINAPI
+WideCharToMultiByte(
+	UINT CodePage,
+	DWORD dwFlags,
+	LPCWCH lpWideCharStr,
+	int cchWideChar,
+	LPSTR lpMultiByteStr,
+	int cbMultiByte,
+	LPCCH lpDefaultChar,
+	LPBOOL lpUsedDefaultChar
+);
+
+DECLSPEC_IMPORT
+LPWSTR*
+STDAPICALLTYPE
+CommandLineToArgvW(
+	LPCWSTR lpCmdLine,
+	int* pNumArgs);
 
 RPCRTAPI
 RPC_STATUS

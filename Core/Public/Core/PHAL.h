@@ -298,9 +298,13 @@
 #define ALIGN_END(n)
 #endif
 #endif
-/* Debug breakpoint */
+/* Compiler Debug breakpoint */
 #ifndef TRIGGER_BREAKPOINT
 #define TRIGGER_BREAKPOINT() 
+#endif
+/* Debug Console Output */
+#ifndef DEBUG_OUTPUT
+#define DEBUG_OUTPUT(x) std::cout << x << std::endl
 #endif
 /* High Performance Graphics enable utility */
 #ifndef USE_HPG

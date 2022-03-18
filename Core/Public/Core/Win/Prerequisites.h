@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <malloc.h>
+
 struct WinTypes : BasicTypes
 {
 	typedef unsigned __int64	uint64_t;
@@ -48,8 +50,10 @@ typedef WinTypes PlatformTypes;
 
 /* Enable triggering a breakpoint in our IDE */
 #ifndef TRIGGER_BREAKPOINT
-extern void CDECL __debugbreak();
-#define TRIGGER_BREAKPOINT() __debugbreak()
+//extern void CDECL __debugbreak();
+//#define TRIGGER_BREAKPOINT() __debugbreak()
+// Use the MinWinHeader import
+#define TRIGGER_BREAKPOINT() DebugBreak()
 #endif
 
 #define NOVTABLE __declspec(novtable)
@@ -77,3 +81,83 @@ extern void CDECL __debugbreak();
 #define PlatformDealloc(mem) HeapFree(GetProcessHeap(), 0, mem)
 #define PlatformAlignedAlloc(bytes, alignment) _aligned_malloc(bytes, alignment)
 #define PlatformAlignedDealloc(mem) _aligned_free(mem)
+#define DEBUG_OUTPUT(x) OutputDebugStringA(x)
+
+LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
+{
+	int retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, nullptr, 0);
+	if (!SUCCEEDED(retVal))
+		return nullptr;
+
+	LPWSTR lpWideCharStr = (LPWSTR)malloc(retVal * sizeof(wchar_t));
+	if (lpWideCharStr == nullptr)
+		return nullptr;
+	retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, lpWideCharStr, retVal);
+	if (!SUCCEEDED(retVal))
+	{
+		free(lpWideCharStr);
+		return nullptr;
+	}
+
+	int numArgs;
+	LPWSTR* args = CommandLineToArgvW(lpWideCharStr, &numArgs);
+	free(lpWideCharStr);
+	if (!args)
+		return nullptr;
+
+	int storage = numArgs * sizeof(LPSTR);
+	for (int i = 0; i < numArgs; ++i)
+	{
+		BOOL lpUsedDefaultChar = FALSE;
+		retVal = WideCharToMultiByte(CP_ACP, 0, args[i], -1, nullptr, 0,
+			nullptr, &lpUsedDefaultChar);
+		if (!SUCCEEDED(retVal))
+		{
+			LocalFree(args);
+			return nullptr;
+		}
+		storage += retVal;
+	}
+	LPSTR* result = (LPSTR*)LocalAlloc(LMEM_FIXED, storage);
+	if (!result)
+	{
+		LocalFree(args);
+		return nullptr;
+	}
+
+	int bufLen = storage - numArgs * sizeof(LPSTR);
+	LPSTR buffer = ((LPSTR)result) + numArgs * sizeof(LPSTR);
+	for (int i = 0; i < numArgs; ++i)
+	{
+		if (bufLen <= 0)
+		{
+			if (IsDebuggerPresent() == TRUE)
+				TRIGGER_BREAKPOINT();
+			return nullptr;
+		}
+		BOOL lpUsedDefaultChar = FALSE;
+		retVal = WideCharToMultiByte(CP_ACP, 0, args[i], -1, buffer, bufLen,
+			nullptr, &lpUsedDefaultChar);
+		if (!SUCCEEDED(retVal))
+		{
+			LocalFree(result);
+			LocalFree(args);
+			return nullptr;
+		}
+
+		result[i] = buffer;
+		buffer += retVal;
+		bufLen -= retVal;
+	}
+
+	LocalFree(args);
+	*pNumArgs = numArgs;
+	return result;
+}
+
+void FreeArgvA(LPSTR* argv)
+{
+	if (argv == nullptr)
+		return;
+	LocalFree(argv);
+}

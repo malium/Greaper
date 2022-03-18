@@ -42,6 +42,7 @@ void Application::ClearFrameTimes()noexcept
 	m_UpdateDeltaMin = FLT_MAX;
 	m_UpdateDeltaMax = FLT_MIN;
 	m_UpdateDeltaAvg = 0.f;
+	m_LastUpdateDelta = 0.f;
 }
 
 void Application::UpdateActiveInterfaceList()
@@ -213,7 +214,6 @@ void Application::Initialize(IGreaperLibrary* library)
 	// Reset timings...
 	m_StartTime = Clock_t::now();
 	ClearFrameTimes();
-	m_LastUpdateDelta = m_UpdateDeltaAvg = m_UpdateDeltaMin = m_UpdateDeltaMax = 0.f;
 	m_FrameCount = 0;
 	m_LastUpdateTime = m_StartTime;
 	m_LastFixedUpdateTime = m_StartTime;
@@ -265,8 +265,20 @@ void Application::InitProperties()
 	if (m_Properties.size() != (sizet)COUNT)
 		m_Properties.resize((sizet)COUNT, nullptr);
 
+	AppInstanceProp_t* appInstanceProp = nullptr;
+	auto result = m_Library->GetProperty(AppInstanceName);
+	if (result.IsOk())
+		appInstanceProp = reinterpret_cast<AppInstanceProp_t*>(result.GetValue());
+	m_Properties[(sizet)AppInstance] = appInstanceProp;
+
+	CommandLineProp_t* commandLineProp = nullptr;
+	result = m_Library->GetProperty(CommandLineName);
+	if (result.IsOk())
+		commandLineProp = reinterpret_cast<CommandLineProp_t*>(result.GetValue());
+	m_Properties[(sizet)CommandLine] = commandLineProp;
+
 	ApplicationNameProp_t* appNameProp = nullptr;
-	auto result = m_Library->GetProperty(ApplicationNameName);
+	result = m_Library->GetProperty(ApplicationNameName);
 	if (result.IsOk())
 		appNameProp = reinterpret_cast<ApplicationNameProp_t*>(result.GetValue());
 

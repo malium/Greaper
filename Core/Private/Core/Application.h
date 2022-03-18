@@ -20,6 +20,8 @@ namespace greaper::core
 	{
 		enum PropertiesIndices
 		{
+			AppInstance,
+			CommandLine,
 			ApplicationName,
 			ApplicationVersion,
 			CompilationInfo,
@@ -229,6 +231,10 @@ namespace greaper::core
 		FixedUpdateRateProp_t* GetFixedUpdateRate() override { return (FixedUpdateRateProp_t*)m_Properties[(sizet)FixedUpdateRate]; }
 
 		UpdateMaxRateProp_t* GetUpdateMaxRate() override { return (UpdateMaxRateProp_t*)m_Properties[(sizet)UpdateMaxRate]; }
+
+		CommandLineProp_t* GetCommandLine() override { return (CommandLineProp_t*)m_Properties[(sizet)CommandLine]; }
+
+		AppInstanceProp_t* GetAppInstance() override { return (AppInstanceProp_t*)m_Properties[(sizet)AppInstance]; }
 	};
 }
 

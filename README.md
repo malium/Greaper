@@ -4,7 +4,7 @@
 
 Greaper is a super modular application framework, with cross-platform between Windows and Linux.
 This framework enables the creation of these types of applications, real-time applications or event-based applications (In progress). Provides utilities from the basic OS abstractions to a full modular approach to application creation.
-The main focus of Greaper is the hability to create an application from different modules and enable the interchange of modules at runtime. 
+The main focus of Greaper is the hability to create an application from different modules and enable the interchange of modules at runtime.
 Greaper currently supports Windows using 64bits, 32bits needs testing, and Linux based OS but needs testing too. Mac and another Apple platforms won't be supported.
 
 ## Why so much modularity?
@@ -41,16 +41,16 @@ Empty checkboxes represent in progress features.
 * [X] WorkerThread spawner in order to enable background long tasks.
 * [ ] ReflectionManager that will store all the type definitions even from the plugins or external libs, via manual reflection.
 * [ ] SerializationManager that using the ReflectionManager will de/serialize types into different formats.
-* [X] TimeManager that provide time information and frame information for realtime applications.
 * [X] WindowManager providing multiple window management and enabling input pooling and rendering.
 * [ ] InputManager that will hook to the created windows enabling input pooling and manipulation.
 * [ ] ResourceManager that will handle resources, its IE (Import/Export) methods, its resource links, unique IDs and can use SerializationManager to import/export complex resources or use IE to import/export raw resources.
 * [X] Properties, a class that will store data like a database but can be easily extended giving own types, also they are (TODO)de/serialized automatically if their configuration allows it as configuration for the application and its libraries.
+* [x] Application, a class that handles the loading and updating of the different Managers and Libraries. As also updates the diferent active managers, has to handle the time and its update schedule.
 
 ## License
 
 I want Greaper to be open source, at least the whole application framework, so any one can make applications on top of it and custom modules.
-In the future I'll make some modules that I'll not share their implementations but I will share their interfaces so they can be extended.
+In the future I'll make some modules that I'll not share their implementations but I will share their interfaces so they can be implemented by other people or even extended.
 
 ## Wanna collaborate?
 

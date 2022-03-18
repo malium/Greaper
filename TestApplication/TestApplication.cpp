@@ -35,9 +35,42 @@ greaper::IApplication* gApplication = nullptr;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
-#define TRYEXP(exp, msg) { if(!exp) { std::cout << msg << "\nEnter any character to stop app." << std::endl; int a; std::cin >> a; exit(EXIT_FAILURE); } }
+#define TRYEXP(exp, msg) { if(!exp) { DEBUG_OUTPUT(msg); TRIGGER_BREAKPOINT(); exit(EXIT_FAILURE); } }
 
-int main()
+static int MainCode(void* hInstance, int argc, char** argv);
+
+#if PLT_WINDOWS
+#ifdef _CONSOLE
+int main(int argc, char* argv[])
+{
+	void* hInstance = nullptr;
+	hInstance = (void*)GetModuleHandleW(nullptr);
+	return MainCode(hInstance, argc, argv);
+}
+#else /* !_CONSOLE */
+INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+{
+	UNUSED(nShowCmd);
+	UNUSED(hPrevInstance);
+	char** argv = nullptr;
+	int argc = 0;
+	argv = (char**)CommandLineToArgvA(lpCmdLine, &argc);
+	if (argv == nullptr)
+		return EXIT_FAILURE;
+	int retVal = MainCode(hInstance, argc, argv);
+	FreeArgvA(argv);
+	return retVal;
+}
+#endif 
+#else /* !PLT_WINDOWS */
+int main(int argc, char* argv[])
+{
+	void* hInstance = nullptr;
+	return MainCode(nullptr, argc, argv);
+}
+#endif
+
+int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
 	gCoreLib = Construct<Library>(CORE_LIB_NAME);
@@ -48,6 +81,15 @@ int main()
 
 	// init Greaper
 	gCore = static_cast<IGreaperLibrary*>(libFN());
+
+	auto propAppInstance = CreateProperty<ptruint>(gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
+
+	StringVec commandLine;
+	commandLine.resize(argc);
+	for (int32 i = 0; i < argc; ++i)
+		commandLine[i] = String{ argv[i] };
+	auto propRes = CreateProperty<StringVec>(gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
+
 	gCore->Initialize(gCoreLib, nullptr);
 
 	gApplication = gCore->GetApplication();

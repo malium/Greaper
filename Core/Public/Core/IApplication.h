@@ -38,6 +38,8 @@ namespace greaper
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xF79C882D, 0x506B4307, 0xBE036194, 0x9F58B3BC };
 		static constexpr StringView InterfaceName = "Application"sv;
 
+		DEF_PROP(CommandLine, StringVec);
+		DEF_PROP(AppInstance, ptruint);
 		DEF_PROP(ApplicationName, String);
 		DEF_PROP(CompilationInfo, String);
 		DEF_PROP(ApplicationVersion, uint32);
@@ -114,6 +116,10 @@ namespace greaper
 		virtual float GetMinUpdateDelta()const = 0;
 
 		virtual float GetMaxUpdateDelta()const = 0;
+
+		virtual AppInstanceProp_t* GetAppInstance() = 0;
+
+		virtual CommandLineProp_t* GetCommandLine() = 0;
 
 		virtual FixedUpdateRateProp_t* GetFixedUpdateRate() = 0;
 
