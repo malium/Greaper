@@ -168,6 +168,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	template<class T, class _Alloc_ = GenericAllocator>
 	class Destructor
 	{
+	public:
 		constexpr Destructor() noexcept = default;
 
 		template<class T2, std::enable_if_t<std::is_convertible<T2*, T*>::value, int> = 0>

@@ -48,17 +48,26 @@ int main(int argc, char* argv[])
 	return MainCode(hInstance, argc, argv);
 }
 #else /* !_CONSOLE */
+class ArgvDestructor
+{
+public:
+	constexpr ArgvDestructor() noexcept = default;
+
+	void operator()(LPSTR* argv)
+	{
+		FreeArgvA(argv);
+	}
+};
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	UNUSED(nShowCmd);
 	UNUSED(hPrevInstance);
-	char** argv = nullptr;
 	int argc = 0;
-	argv = (char**)CommandLineToArgvA(lpCmdLine, &argc);
+
+	auto argv = std::unique_ptr<LPSTR, ArgvDestructor>(CommandLineToArgvA(lpCmdLine, &argc));
 	if (argv == nullptr)
 		return EXIT_FAILURE;
-	int retVal = MainCode(hInstance, argc, argv);
-	FreeArgvA(argv);
+	int retVal = MainCode(hInstance, argc, argv.get());
 	return retVal;
 }
 #endif 
