@@ -11,20 +11,19 @@
 #include "CorePrerequisites.h"
 #include "Result.h"
 #include "Concurrency.h"
+#include "IObject.h"
 
 namespace greaper
 {
 	class IObjectFactory;
-	using ObjectID_t = uint64;
-	inline constexpr ObjectID_t InvalidObjectID = std::numeric_limits<ObjectID_t>::max();
 
 	class ObjectHandle
 	{
 		IObjectFactory* m_Factory;
-		ObjectID_t m_ObjectID;
+		Uuid m_ObjectUUID;
 
 	public:
-		constexpr ObjectHandle(IObjectFactory* factory = nullptr, ObjectID_t objectID = InvalidObjectID) noexcept;
+		constexpr ObjectHandle(IObjectFactory* factory = nullptr, Uuid objectID = IObject::InvalidUUID) noexcept;
 
 		ObjectHandle(const ObjectHandle& other) noexcept;
 		ObjectHandle& operator=(const ObjectHandle& other) noexcept;
@@ -34,13 +33,13 @@ namespace greaper
 
 		~ObjectHandle() noexcept;
 
-		INLINE constexpr ObjectID_t GetObjectID()const noexcept { return m_ObjectID; }
+		INLINE constexpr Uuid GetObjectUUID()const noexcept { return m_ObjectUUID; }
 
 		INLINE constexpr IObjectFactory* GetFactory()const noexcept { return m_Factory; }
 
-		void* GetObject()const noexcept;
+		IObject* GetObject()const noexcept;
 
-		INLINE constexpr bool IsValid()const noexcept { return m_Factory != nullptr && m_ObjectID != InvalidObjectID; }
+		INLINE constexpr bool IsValid()const noexcept { return m_Factory != nullptr && m_ObjectUUID != IObject::InvalidUUID; }
 
 		INLINE constexpr explicit operator bool()const noexcept { return IsValid(); }
 	};
@@ -54,15 +53,15 @@ namespace greaper
 
 		virtual sizet GetObjectCount()const = 0;
 
-		virtual Result<ObjectHandle> GetHandle(ObjectID_t objectID) = 0;
+		virtual Result<ObjectHandle> GetHandle(Uuid objectUUID) = 0;
 
 		virtual void OnHandleDestroyed(const ObjectHandle& handle) = 0;
 
-		virtual Result<ObjectID_t> CreateObject() = 0;
+		virtual Result<Uuid> CreateObject() = 0;
 
 		virtual EmptyResult DestroyObject(const ObjectHandle& handle) = 0;
 
-		virtual void* GetObject(ObjectID_t objectID)const = 0;
+		virtual IObject* GetObject(Uuid objectID)const = 0;
 	};
 
 	template<class TObject>
@@ -115,7 +114,8 @@ namespace greaper
 			int64 RefereceCount;
 		};
 		Vector<ObjectInfo> m_ObjectList;
-		Vector<ObjectID_t> m_FreeList;
+		UnorderedMap<Uuid, sizet> m_UUID2IDX;
+		Vector<sizet> m_FreeIndicesList;
 		mutable Mutex m_Mutex;
 
 	public:
@@ -124,6 +124,8 @@ namespace greaper
 		{
 			LOCK(m_Mutex);
 			m_ObjectList.reserve(capacity);
+			m_UUID2IDX.reserve(capacity);
+			m_FreeIndicesList.reserve(capacity);
 		}
 		TObjectFactory(const TObjectFactory&) = delete;
 		TObjectFactory& operator=(const TObjectFactory&) = delete;
@@ -135,6 +137,7 @@ namespace greaper
 
 		INLINE void ClearFactory()override
 		{
+			LOCK(m_Mutex);
 			for (auto& info : m_ObjectList)
 			{
 				if (info.Obj == nullptr)
@@ -143,6 +146,7 @@ namespace greaper
 			}
 			m_ObjectList.clear();
 			m_FreeList.clear();
+			m_UUID2IDX.clear();
 		}
 
 		INLINE sizet GetObjectCount()const override
@@ -151,24 +155,29 @@ namespace greaper
 			return m_ObjectList.size() - m_FreeList.size();
 		}
 
-		INLINE Result<ObjectHandle> GetHandle(ObjectID_t objectID)override
+		INLINE Result<ObjectHandle> GetHandle(Uuid objectUUID)override
 		{
-			if (objectID == InvalidObjectID)
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle from an InvalidObjectID."sv);
+			if (objectUUID == IObject::InvalidUUID)
+				return CreateFailure<ObjectHandle>("Trying to obtain a handle from an Invalid ObjectUUID."sv);
 
 			LOCK(m_Mutex);
 
-			if (m_ObjectList.size() <= objectID)
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the objectID is outside of bounds."sv);
+			const auto findIT = m_UUID2IDX.find(objectUUID);
+			if(findIT == m_UUID2IDX.end())
+				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the object is not in this Factory."sv);
 
-			ObjectInfo& info = m_ObjectList[objectID];
+			const auto idx = findIT->second;
+			if (m_ObjectList.size() <= idx)
+				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the object is no longer in the Factory."sv);
+
+			ObjectInfo& info = m_ObjectList[idx];
 
 			if (info.Obj == nullptr)
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the objectID points to a null Object."sv);
+				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the given ObjectUUID points to a null Object."sv);
 			
 			++info.RefereceCount;
 
-			return CreateResult(ObjectHandle(this, objectID));
+			return CreateResult(ObjectHandle(this, objectUUID));
 		}
 
 		INLINE void OnHandleDestroyed(const ObjectHandle& handle)override
@@ -181,10 +190,15 @@ namespace greaper
 
 			LOCK(m_Mutex);
 
-			if (m_ObjectList.size() <= handle.GetObjectID())
-				return; // outside of bounds
+			const auto findIT = m_UUID2IDX.find(handle.GetObjectUUID());
+			if (findIT == m_UUID2IDX.end())
+				return; // not in the factory
 
-			ObjectInfo& info = m_ObjectList[handle.GetObjectID()];
+			const auto idx = findIT->second;
+			if (m_ObjectList.size() <= idx)
+				return; // outside of bounds;
+
+			ObjectInfo& info = m_ObjectList[idx];
 
 			if (info.Obj == nullptr)
 				return; // Object already destroyed
@@ -196,30 +210,33 @@ namespace greaper
 			{
 				Destroy(info.Obj);
 				info.Obj = nullptr;
-				m_FreeList.push_back(handle.GetObjectID()); // Add the index to the free list
+				m_UUID2IDX.erase(findIT);
+				m_FreeList.push_back(idx); // Add the index to the free list
 			}
 		}
 
-		INLINE Result<ObjectID_t> CreateObject()override
+		INLINE Result<Uuid> CreateObject()override
 		{
-			auto createFn = [this](ObjectInfo& info)
+			auto createFn = [this](ObjectInfo& info, Uuid objectUUID)
 			{
 				info.Obj = Construct<TObject>();
 				info.RefereceCount = 0;
+				auto obj = reinterpret_cast<IObject*>(info.Obj);
+				obj.m_UUID = objectUUID;
 			};
 			LOCK(m_Mutex);
-			ObjectID_t objectID = InvalidObjectID;
-			if (m_ObjectList.size() != m_ObjectList.max_size())
+			auto objectUUID = Uuid::GenerateRandom();
+			if (m_ObjectList.size() == m_ObjectList.max_size())
 			{
-				if (m_FreeList.empty())
-					return CreateFailure<ObjectID_t>("Trying to create a new Object but the Factory is at its limits!"sv);
+				if (m_FreeIndicesList.empty())
+					return CreateFailure<Uuid>("Trying to create a new Object but the Factory is at its limits!"sv);
 
-				ObjectID_t& freeIndex = m_FreeList.front();
-				m_FreeList.erase(m_FreeList.begin());
+				auto freeIndex = m_FreeIndicesList.front();
+				m_FreeIndicesList.erase(m_FreeIndicesList.begin());
 
 				ObjectInfo& info = m_ObjectList[freeIndex];
-				createFn(info);
-				objectID = freeIndex;
+				createFn(info, objectUUID);
+				m_UUID2IDX.insert_or_assign(objectUUID, freeIndex);
 			}
 			else
 			{
@@ -229,32 +246,38 @@ namespace greaper
 					m_ObjectList.reserve(nCapacity);
 				}
 
-				objectID = m_ObjectList.size();
+				const auto idx = m_ObjectList.size();
 				m_ObjectList.push_back(ObjectInfo{});
 				ObjectInfo& info = m_ObjectList[objectID];
-				createFn(info);
+				
+				createFn(info, objectUUID);
+				m_UUID2IDX.insert_or_assign(objectUUID, idx);
 			}
-			return CreateResult(objectID);
+			return CreateResult(objectUUID);
 		}
 
-		INLINE void* GetObject(ObjectID_t objectID)const override
+		INLINE IObject* GetObject(const ObjectHandle& handle)const override
 		{
-			if (objectID == InvalidObjectID)
+			if (handle.GetObjectUUID() == IObject::InvalidUUID)
 				return nullptr;
 
 			LOCK(m_Mutex);
-			if (m_ObjectList.size() <= objectID)
+			const auto findIT = m_UUID2IDX.find(handle.GetObjectUUID());
+			if (findIT == m_UUID2IDX.end())
 				return nullptr;
 
-			const ObjectInfo& info = m_ObjectList[objectID];
+			const auto idx = findIT->second;
+			if (m_ObjectList.size() <= idx)
+				return nullptr;
+			
+			const ObjectInfo& info = m_ObjectList[idx];
 
 			return info.Obj;
 		}
 	};
-
-	INLINE constexpr ObjectHandle::ObjectHandle(IObjectFactory* factory, ObjectID_t objectID) noexcept
+	INLINE constexpr ObjectHandle::ObjectHandle(IObjectFactory* factory, Uuid objectID) noexcept
 		:m_Factory(factory)
-		, m_ObjectID(objectID)
+		, m_ObjectUUID(objectID)
 	{
 
 	}
@@ -263,7 +286,7 @@ namespace greaper
 	{
 		if (other.IsValid())
 		{
-			auto res = other.GetFactory()->GetHandle(other.GetObjectID()); // Adds a reference
+			auto res = other.GetFactory()->GetHandle(other.GetObjectUUID()); // Adds a reference
 			if (res.IsOk())
 			{
 				*this = std::move(res.GetValue());
@@ -271,7 +294,7 @@ namespace greaper
 			}
 		}
 		m_Factory = nullptr;
-		m_ObjectID = InvalidObjectID;
+		m_ObjectUUID = IObject::InvalidUUID;
 	}
 
 	INLINE ObjectHandle& ObjectHandle::operator=(const ObjectHandle& other) noexcept
@@ -283,7 +306,7 @@ namespace greaper
 
 			if (other.IsValid())
 			{
-				auto res = other.GetFactory()->GetHandle(other.GetObjectID()); // Adds a reference
+				auto res = other.GetFactory()->GetHandle(other.GetObjectUUID()); // Adds a reference
 				if (res.IsOk())
 				{
 					*this = std::move(res.GetValue());
@@ -291,7 +314,7 @@ namespace greaper
 				}
 			}
 			m_Factory = nullptr;
-			m_ObjectID = InvalidObjectID;
+			m_ObjectUUID = IObject::InvalidUUID;
 		}
 		return *this;
 	}
@@ -299,10 +322,10 @@ namespace greaper
 	INLINE ObjectHandle::ObjectHandle(ObjectHandle&& other) noexcept
 	{
 		m_Factory = other.m_Factory;
-		m_ObjectID = other.m_ObjectID;
+		m_ObjectUUID = other.m_ObjectUUID;
 
 		other.m_Factory = nullptr;
-		other.m_ObjectID = InvalidObjectID;
+		other.m_ObjectUUID = IObject::InvalidUUID;
 	}
 
 	INLINE ObjectHandle& ObjectHandle::operator=(ObjectHandle&& other) noexcept
@@ -313,10 +336,10 @@ namespace greaper
 				m_Factory->OnHandleDestroyed(*this);
 
 			m_Factory = other.m_Factory;
-			m_ObjectID = other.m_ObjectID;
+			m_ObjectUUID = other.m_ObjectUUID;
 
 			other.m_Factory = nullptr;
-			other.m_ObjectID = InvalidObjectID;
+			other.m_ObjectUUID = IObject::InvalidUUID;
 		}
 		return *this;
 	}
@@ -327,19 +350,19 @@ namespace greaper
 			m_Factory->OnHandleDestroyed(*this); // Removes a reference
 	}
 
-	INLINE void* ObjectHandle::GetObject()const noexcept
+	INLINE IObject* ObjectHandle::GetObject()const noexcept
 	{
 		if (!IsValid())
 			return nullptr;
 
-		void* object = m_Factory->GetObject(m_ObjectID);
+		IObject* object = m_Factory->GetObject(m_ObjectUUID);
 
 		return object;
 	}
 
 	INLINE constexpr bool operator==(const ObjectHandle& left, const ObjectHandle& right) noexcept
 	{
-		return left.GetFactory() == right.GetFactory() && left.GetObjectID() == right.GetObjectID();
+		return left.GetFactory() == right.GetFactory() && left.GetObjectUUID() == right.GetObjectUUID();
 	}
 
 	INLINE constexpr bool operator!=(const ObjectHandle& left, const ObjectHandle& right) noexcept

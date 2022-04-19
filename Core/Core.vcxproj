@@ -476,6 +476,7 @@
     <ClInclude Include="Public\Core\IGreaperLibrary.h" />
     <ClInclude Include="Public\Core\ILogManager.h" />
     <ClInclude Include="Public\Core\Interface.h" />
+    <ClInclude Include="Public\Core\IObject.h" />
     <ClInclude Include="Public\Core\IThreadManager.h" />
     <ClInclude Include="Public\Core\IWindowManager.h" />
     <ClInclude Include="Public\Core\Library.h" />
