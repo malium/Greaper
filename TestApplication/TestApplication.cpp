@@ -113,7 +113,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 	achar a;
 	std::cin >> a;
 
-	gApplication->StopApplication();
+	/*gApplication->StopApplication();*/
 
 	gCore->Deinitialize();
 	

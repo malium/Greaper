@@ -14,7 +14,7 @@
 
 namespace greaper::core
 {
-	inline constexpr sizet StoredFrameTimeCount = 20;
+	//inline constexpr sizet StoredFrameTimeCount = 20;
 
 	class Application final : public IApplication
 	{
@@ -26,13 +26,13 @@ namespace greaper::core
 			ApplicationVersion,
 			CompilationInfo,
 			LoadedLibraries,
-			FixedUpdateRate,
-			UpdateMaxRate,
+			/*FixedUpdateRate,
+			UpdateMaxRate,*/
 
 			COUNT
 		};
-		static constexpr uint32 MAX_ACCUM_FIXED_UPDATES = 200;
-		static constexpr uint32 NEW_FIXED_UPDATES_PER_FRAME = 4;
+		/*static constexpr uint32 MAX_ACCUM_FIXED_UPDATES = 200;
+		static constexpr uint32 NEW_FIXED_UPDATES_PER_FRAME = 4;*/
 
 		IGreaperLibrary* m_Library;
 		OnCloseEvent_t m_OnClose;
@@ -67,7 +67,7 @@ namespace greaper::core
 		Vector<IInterface*> m_InterfacesToRemove;
 		Vector<IInterface*> m_InterfacesToAdd;
 
-		Timepoint_t m_StartTime;
+		/*Timepoint_t m_StartTime;
 		Timepoint_t m_LastUpdateTime;
 		Timepoint_t m_LastFixedUpdateTime;
 		uint64 m_FrameCount;
@@ -82,15 +82,15 @@ namespace greaper::core
 		float m_UpdateDeltaMax;
 		uint32 m_RemainingFixedUpdates;
 		IProperty::ModificationEventHandler_t m_OnUpdateMaxRateEvtHnd;
-		IProperty::ModificationEventHandler_t m_OnFixedUpdateMaxRateEvtHnd;
+		IProperty::ModificationEventHandler_t m_OnFixedUpdateMaxRateEvtHnd;*/
 
 		void AddGreaperLibrary(IGreaperLibrary* library);
 		void LoadConfigLibraries();
 
-		void ClearFrameTimes()noexcept;
-		void UpdateFrameTimes()noexcept;
+		/*void ClearFrameTimes()noexcept;
+		void UpdateFrameTimes()noexcept;*/
 
-		void OnUpdateMaxRateChange(IProperty* prop)
+		/*void OnUpdateMaxRateChange(IProperty* prop)
 		{
 			UNUSED(prop);
 			const auto value = GetUpdateMaxRate()->GetValue();
@@ -107,10 +107,10 @@ namespace greaper::core
 				m_FixedUpdateStep = 0.f;
 			else
 				m_FixedUpdateStep = 1.f / value;
-		}
+		}*/
 		void UpdateActiveInterfaceList();
-		void UpdateTick();
-		void ComputeFixedUpdateStep(uint64& step, uint32& iterations);
+		/*void UpdateTick();
+		void ComputeFixedUpdateStep(uint64& step, uint32& iterations);*/
 
 	public:
 		Application();
@@ -138,13 +138,13 @@ namespace greaper::core
 
 		bool IsInitialized()const override { return m_IsInitialized; }
 
-		void PreUpdate()override;
+		/*void PreUpdate()override;
 
 		void Update()override;
 
 		void PostUpdate()override;
 
-		void FixedUpdate()override;
+		void FixedUpdate()override;*/
 
 		InitializationEvt_t* const GetInitializationEvent()override { return &m_OnInitialization; }
 
@@ -192,11 +192,11 @@ namespace greaper::core
 
 		Result<IInterface*> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
 
-		bool AppHasToStop()const override { return m_HasToStop; }
+		/*bool AppHasToStop()const override { return m_HasToStop; }
 
 		void StopApplication()override;
 
-		OnCloseEvent_t* const GetOnCloseEvent()override { return &m_OnClose; }
+		OnCloseEvent_t* const GetOnCloseEvent()override { return &m_OnClose; }*/
 
 		OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() { return &m_OnInterfaceActivation; }
 
@@ -210,7 +210,7 @@ namespace greaper::core
 
 		CRange<IProperty*> GetProperties() const override { return CreateRange(m_Properties); }
 		
-		Timepoint_t GetStartTime()const override { return m_StartTime; }
+		/*Timepoint_t GetStartTime()const override { return m_StartTime; }
 
 		Timepoint_t GetLastUpdateTime()const override { return m_LastUpdateTime; }
 
@@ -230,7 +230,7 @@ namespace greaper::core
 
 		FixedUpdateRateProp_t* GetFixedUpdateRate() override { return (FixedUpdateRateProp_t*)m_Properties[(sizet)FixedUpdateRate]; }
 
-		UpdateMaxRateProp_t* GetUpdateMaxRate() override { return (UpdateMaxRateProp_t*)m_Properties[(sizet)UpdateMaxRate]; }
+		UpdateMaxRateProp_t* GetUpdateMaxRate() override { return (UpdateMaxRateProp_t*)m_Properties[(sizet)UpdateMaxRate]; }*/
 
 		CommandLineProp_t* GetCommandLine() override { return (CommandLineProp_t*)m_Properties[(sizet)CommandLine]; }
 

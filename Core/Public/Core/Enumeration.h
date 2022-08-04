@@ -44,20 +44,22 @@ class TEnum
 {
 public:
 	using EnumType = T;
-	static_assert(false, "Trying to use IEnum as standalone type.");
-
+	
 	static constexpr greaper::StringView ToString(T type) noexcept
 	{
+		static_assert(false, "Trying to use IEnum as standalone type.");
 		return greaper::StringView{};
 	}
 
 	static constexpr T FromString(const greaper::String& str) noexcept
 	{
+		static_assert(false, "Trying to use IEnum as standalone type.");
 		return T();
 	}
 
 	static constexpr T FromString(const greaper::StringView& str) noexcept
 	{
+		static_assert(false, "Trying to use IEnum as standalone type.");
 		return T();
 	}
 };

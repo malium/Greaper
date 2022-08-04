@@ -44,8 +44,8 @@ namespace greaper
 		DEF_PROP(CompilationInfo, String);
 		DEF_PROP(ApplicationVersion, uint32);
 		DEF_PROP(LoadedLibraries, WStringVec);
-		DEF_PROP(UpdateMaxRate, uint32);
-		DEF_PROP(FixedUpdateRate, uint32);
+		/*DEF_PROP(UpdateMaxRate, uint32);
+		DEF_PROP(FixedUpdateRate, uint32);*/
 		
 		using OnCloseEvent_t = Event<void>;
 
@@ -83,11 +83,11 @@ namespace greaper
 
 		virtual Result<IInterface*> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const = 0;
 
-		virtual bool AppHasToStop()const = 0;
+		/*virtual bool AppHasToStop()const = 0;
 
 		virtual void StopApplication() = 0;
 
-		virtual OnCloseEvent_t*const GetOnCloseEvent() = 0;
+		virtual OnCloseEvent_t*const GetOnCloseEvent() = 0;*/
 
 		virtual OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() = 0;
 
@@ -99,7 +99,7 @@ namespace greaper
 
 		virtual LoadedLibrariesProp_t* GetLoadedLibrariesNames() = 0;
 
-		virtual Timepoint_t GetStartTime()const = 0;
+		/*virtual Timepoint_t GetStartTime()const = 0;
 
 		virtual Timepoint_t GetLastUpdateTime()const = 0;
 
@@ -115,15 +115,15 @@ namespace greaper
 
 		virtual float GetMinUpdateDelta()const = 0;
 
-		virtual float GetMaxUpdateDelta()const = 0;
+		virtual float GetMaxUpdateDelta()const = 0;*/
 
 		virtual AppInstanceProp_t* GetAppInstance() = 0;
 
 		virtual CommandLineProp_t* GetCommandLine() = 0;
 
-		virtual FixedUpdateRateProp_t* GetFixedUpdateRate() = 0;
+		/*virtual FixedUpdateRateProp_t* GetFixedUpdateRate() = 0;
 
-		virtual UpdateMaxRateProp_t* GetUpdateMaxRate() = 0;
+		virtual UpdateMaxRateProp_t* GetUpdateMaxRate() = 0;*/
 
 		template<class T>
 		Result<T*> RegisterGreaperLibraryT(const WStringView& libPath)

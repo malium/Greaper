@@ -132,9 +132,6 @@
     <ClInclude Include="Public\Core\ICrashManager.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Core\IDeferredCallManager.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Core\IGreaperLibrary.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -201,6 +198,12 @@
     <ClInclude Include="Public\Core\IObject.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Private\Core\LogManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Private\Core\ThreadManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -215,12 +218,24 @@
     <None Include="Public\Core\Win\WinPlatform.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
+    <None Include="Public\Core\Win\WinThreadImpl.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Lnx\LnxThreadImpl.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core\Application.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="Private\Core\GreaperCoreDLL.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Core\LogManager.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Private\Core\ThreadManager.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>

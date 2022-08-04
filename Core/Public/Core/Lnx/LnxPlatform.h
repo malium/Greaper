@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos Sánchez Torrent.                                         *
+*   Copyright 2021 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -17,5 +17,6 @@ namespace greaper
 		static void Sleep(uint32 millis) noexcept;
 	};
 	using OSPlatform = LnxOSPlatform;
+}
 
 #endif /* CORE_LNX_PLATFORM_H */

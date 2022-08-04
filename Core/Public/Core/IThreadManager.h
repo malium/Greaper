@@ -13,6 +13,7 @@
 #include "Base/IThread.h"
 #include "Base/IThreadPool.h"
 #include "Result.h"
+#include "Event.h"
 
 namespace greaper
 {
@@ -21,6 +22,9 @@ namespace greaper
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0x284B5BAD, 0x9B004E76, 0x8B7F76DD, 0xB45D740F };
 		static constexpr StringView InterfaceName = "ThreadManager"sv;
+
+		using ThreadEvent_t = Event<IThread*>;
+		using ThreadPoolEvent_t = Event<IThreadPool*>;
 
 		virtual ~IThreadManager()noexcept = default;
 
@@ -32,11 +36,15 @@ namespace greaper
 
 		virtual void DestroyThread(IThread* thread) = 0;
 
+		virtual ThreadEvent_t* const GetThreadEvent() = 0;
+
 		virtual Result<IThreadPool*> GetThreadPool(const String& poolName)const = 0;
 
 		virtual Result<IThreadPool*> CreateThreadPool(const ThreadPoolConfig& config) = 0;
 
 		virtual void DestroyThreadPool(IThreadPool* pool) = 0;
+
+		virtual ThreadPoolEvent_t* const GetThreadPoolEvent() = 0;
 	};
 }
 

@@ -41,3 +41,7 @@ typedef LnxTypes PlatformTypes;
 #endif
 
 #define FUNCTION_FULL "" 
+
+#ifndef PTHREAD_STACK_MIN
+#define PTHREAD_STACK_MIN	16384
+#endif

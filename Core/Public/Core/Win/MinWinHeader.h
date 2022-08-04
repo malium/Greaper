@@ -15,12 +15,14 @@ extern "C" {
 #define RPCRTAPI DECLSPEC_IMPORT
 #define WINUSERAPI DECLSPEC_IMPORT
 #define WINBASEAPI DECLSPEC_IMPORT
+//#define _ACRTIMP DECLSPEC_IMPORT
 #define WINAPI      __stdcall
 #define RESTRICTED_POINTER
 #define FALSE 0
 #define TRUE 1
 #define INFINITE            0xFFFFFFFF  // Infinite timeout
 #define RTL_CONDITION_VARIABLE_LOCKMODE_SHARED  0x1     
+#define CREATE_SUSPENDED                  0x00000004
 #define CONDITION_VARIABLE_LOCKMODE_SHARED RTL_CONDITION_VARIABLE_LOCKMODE_SHARED
 #define DECLSPEC_ALLOCATOR __declspec(allocator)
 
@@ -31,7 +33,8 @@ typedef long RPC_STATUS;
 #define far                 
 #define near                
 #define FAR                 
-#define NEAR                
+#define NEAR         
+#define MAX_PATH          260
 
 typedef struct _GUID {
 	unsigned long  Data1;
@@ -178,6 +181,14 @@ typedef struct tagPOINT
 	LONG  y;
 } POINT, *PPOINT, NEAR *NPPOINT, FAR *LPPOINT;
 
+typedef struct _VCRT_ALIGN(16) _SETJMP_FLOAT128
+{
+	unsigned __int64 Part[2];
+} SETJMP_FLOAT128;
+
+#define _JBLEN  16
+typedef SETJMP_FLOAT128 _JBTYPE;
+
 #define MB_OK                       0x00000000L
 #define MB_OKCANCEL                 0x00000001L
 #define MB_ABORTRETRYIGNORE         0x00000002L
@@ -269,6 +280,14 @@ typedef PRTL_CRITICAL_SECTION LPCRITICAL_SECTION;
 
 #define NONZEROLHND         (LMEM_MOVEABLE)
 #define NONZEROLPTR         (LMEM_FIXED)
+
+#define STATUS_WAIT_0                           ((DWORD   )0x00000000L) 
+#define STATUS_ABANDONED_WAIT_0          ((DWORD   )0x00000080L)    
+#define WAIT_FAILED ((DWORD)0xFFFFFFFF)
+#define WAIT_OBJECT_0       ((STATUS_WAIT_0 ) + 0 )
+#define WAIT_ABANDONED         ((STATUS_ABANDONED_WAIT_0 ) + 0 )
+#define WAIT_ABANDONED_0       ((STATUS_ABANDONED_WAIT_0 ) + 0 )
+#define WAIT_TIMEOUT                     258L
 
 WINBASEAPI
 DECLSPEC_ALLOCATOR
@@ -624,7 +643,87 @@ WINAPI
 Sleep(
 	DWORD dwMilliseconds
 );
+typedef unsigned(__stdcall* _beginthreadex_proc_type)(void*);
+_ACRTIMP uintptr_t __cdecl _beginthreadex(
+	void* _Security,
+	unsigned                 _StackSize,
+	_beginthreadex_proc_type _StartAddress,
+	void* _ArgList,
+	unsigned                 _InitFlag,
+	unsigned* _ThrdAddr
+);
+_ACRTIMP void __cdecl _endthreadex(
+	unsigned _ReturnCode
+);
+
+WINBASEAPI
+DWORD
+WINAPI
+WaitForSingleObject(
+	HANDLE hHandle,
+	DWORD dwMilliseconds
+);
+
+WINBASEAPI
+BOOL
+WINAPI
+TerminateThread(
+	HANDLE hThread,
+	DWORD dwExitCode
+);
+
+WINBASEAPI
+DWORD
+WINAPI
+ResumeThread(
+	HANDLE hThread
+);
+
+WINBASEAPI
+DWORD
+WINAPI
+GetLastError(
+	VOID
+);
+
+WINBASEAPI
+VOID
+WINAPI
+RaiseException(
+	DWORD dwExceptionCode,
+	DWORD dwExceptionFlags,
+	DWORD nNumberOfArguments,
+	CONST ULONG_PTR* lpArguments
+);
+
+#define GetExceptionCode            _exception_code
+#define exception_code              _exception_code
+#define GetExceptionInformation()   ((struct _EXCEPTION_POINTERS *)_exception_info())
+#define exception_info()            ((struct _EXCEPTION_POINTERS *)_exception_info())
+#define AbnormalTermination         _abnormal_termination
+#define abnormal_termination        _abnormal_termination
+
+unsigned long __cdecl _exception_code(void);
+void* __cdecl _exception_info(void);
+int           __cdecl _abnormal_termination(void);
+
+#define EXCEPTION_EXECUTE_HANDLER      1
+#define EXCEPTION_CONTINUE_SEARCH      0
+#define EXCEPTION_CONTINUE_EXECUTION (-1)
+
+#ifndef _JMP_BUF_DEFINED
+#define _JMP_BUF_DEFINED
+typedef _JBTYPE jmp_buf[_JBLEN];
+#endif
+int __cdecl setjmp(
+	jmp_buf _Buf
+);
 }
+
+__declspec(noreturn) void __cdecl longjmp(
+	jmp_buf _Buf,
+	int     _Value
+) noexcept(false);
 #else
 #include <Windows.h>
 #include <rpc.h>

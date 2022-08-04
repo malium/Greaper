@@ -58,6 +58,8 @@ namespace greaper
 			DeinitLibrary();
 		}
 
+		virtual int GetLibraryVersion()const = 0;
+
 		virtual const Uuid& GetLibraryUuid()const = 0;
 
 		virtual const StringView& GetLibraryName()const = 0;

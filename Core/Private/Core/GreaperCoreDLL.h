@@ -62,6 +62,8 @@ namespace greaper::core
 
 		void DeinitLibrary()override;
 
+		int GetLibraryVersion()const override { return 0; }
+
 		const Uuid& GetLibraryUuid()const override { return LibraryUUID; }
 
 		const StringView& GetLibraryName()const override { return LibraryName; }

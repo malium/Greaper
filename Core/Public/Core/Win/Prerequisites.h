@@ -83,7 +83,7 @@ typedef WinTypes PlatformTypes;
 #define PlatformAlignedDealloc(mem) _aligned_free(mem)
 #define DEBUG_OUTPUT(x) OutputDebugStringA(x)
 
-LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
+INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 {
 	int retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, nullptr, 0);
 	if (!SUCCEEDED(retVal))
@@ -155,7 +155,7 @@ LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 	return result;
 }
 
-void FreeArgvA(LPSTR* argv)
+INLINE void FreeArgvA(LPSTR* argv)
 {
 	if (argv == nullptr)
 		return;

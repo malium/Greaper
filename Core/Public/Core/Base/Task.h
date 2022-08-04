@@ -20,16 +20,16 @@ namespace greaper
 		StringView m_Name;
 
 	public:
-		explicit Task(std::function<void()> function = nullptr, StringView name = "unnamed"sv);
+		INLINE explicit Task(std::function<void()> function = nullptr, StringView name = "unnamed"sv);
 
-		void operator()() noexcept;
+		INLINE void operator()() noexcept;
 
-		Duration_t GetTaskDuration()const noexcept { return m_Duration; }
+		INLINE Duration_t GetTaskDuration()const noexcept { return m_Duration; }
 
-		const StringView& GetName()const noexcept { return m_Name; }
+		INLINE const StringView& GetName()const noexcept { return m_Name; }
 	};
 
-	Task::Task(std::function<void()> function, StringView name)
+	INLINE Task::Task(std::function<void()> function, StringView name)
 		:m_Function(std::move(function))
 		,m_Name(std::move(name))
 		,m_Duration(0)
@@ -37,7 +37,7 @@ namespace greaper
 
 	}
 
-	void Task::operator()() noexcept
+	INLINE void Task::operator()() noexcept
 		{
 			VerifyNotNull(m_Function, "Trying to execute a nullptr task");
 			const auto before = Clock_t::now();

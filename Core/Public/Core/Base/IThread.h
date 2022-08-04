@@ -16,6 +16,8 @@
 #include "../Lnx/LnxThreading.h"
 #endif
 #include <functional>
+#include "../Interface.h"
+#include "../IGreaperLibrary.h"
 #include "../Enumeration.h"
 
 namespace greaper
@@ -42,6 +44,8 @@ namespace greaper
 
 		virtual bool Joinable()const noexcept = 0;
 
+		virtual bool TryJoin() = 0;
+
 		virtual ThreadHandle GetOSHandle()const noexcept = 0;
 
 		virtual void Terminate() = 0;
@@ -50,10 +54,15 @@ namespace greaper
 
 		virtual ThreadID_t GetID()const noexcept = 0;
 
-		virtual const String& GetName()const noexcept = 0;
+		virtual const ThreadConfig& GetConfiguration()const noexcept = 0;
 
 		virtual ThreadState_t GetState()const noexcept = 0;
 	};
 }
+//#if PLT_WINDOWS
+//#include "../Win/WinThreadImpl.inl"
+//#elif PLT_LINUX
+//#incldue "../Lnx/LnxThreadImpl.inl"
+//#endif
 
 #endif /* CORE_I_THREAD_H */

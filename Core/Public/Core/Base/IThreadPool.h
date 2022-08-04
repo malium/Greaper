@@ -12,7 +12,7 @@
 
 namespace greaper
 {
-	class IPooledThread;
+	/*class IPooledThread;
 
 	class HPooledTask
 	{
@@ -90,7 +90,17 @@ namespace greaper
 			return;
 
 		m_Thread->BlockUntilComplete();
-	}
+	}*/
+
+	struct ThreadPoolConfig
+	{
+		StringView Name = "unnamed"sv;
+		uint32 DefaultCapacity = 1;
+		uint32 MaxCapacity = 1;
+		uint32 IdleTimeoutSeconds = 60;
+	};
+
+	class IThreadPool;
 }
 
 #endif /* CORE_I_THREAD_POOL_H */

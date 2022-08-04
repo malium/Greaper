@@ -405,6 +405,7 @@
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
       <EnableModules>false</EnableModules>
+      <IncludeInUnityFile>true</IncludeInUnityFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -448,6 +449,8 @@
     <ClInclude Include="Private\Core\Application.h" />
     <ClInclude Include="Private\Core\GreaperCoreDLL.h" />
     <ClInclude Include="Private\Core\ImplPrerequisites.h" />
+    <ClInclude Include="Private\Core\LogManager.h" />
+    <ClInclude Include="Private\Core\ThreadManager.h" />
     <ClInclude Include="Public\Core\Base\BasicTypeInfo.h" />
     <ClInclude Include="Public\Core\Base\BasicTypes.h" />
     <ClInclude Include="Public\Core\Base\Config.h" />
@@ -472,7 +475,6 @@
     <ClInclude Include="Public\Core\IApplication.h" />
     <ClInclude Include="Public\Core\ICommandManager.h" />
     <ClInclude Include="Public\Core\ICrashManager.h" />
-    <ClInclude Include="Public\Core\IDeferredCallManager.h" />
     <ClInclude Include="Public\Core\IGreaperLibrary.h" />
     <ClInclude Include="Public\Core\ILogManager.h" />
     <ClInclude Include="Public\Core\Interface.h" />
@@ -512,11 +514,15 @@
     <None Include="Public\Core\Base\MemoryStream.inl" />
     <None Include="Public\Core\Base\Stream.inl" />
     <None Include="Public\Core\Base\Uuid.inl" />
+    <None Include="Public\Core\Lnx\LnxThreadImpl.inl" />
     <None Include="Public\Core\Win\WinPlatform.inl" />
+    <None Include="Public\Core\Win\WinThreadImpl.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core\Application.cpp" />
     <ClCompile Include="Private\Core\GreaperCoreDLL.cpp" />
+    <ClCompile Include="Private\Core\LogManager.cpp" />
+    <ClCompile Include="Private\Core\ThreadManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

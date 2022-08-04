@@ -36,14 +36,14 @@ void Application::LoadConfigLibraries()
 	}*/
 }
 
-void Application::ClearFrameTimes()noexcept
-{
-	ClearMemory(m_FrameTimes);
-	m_UpdateDeltaMin = FLT_MAX;
-	m_UpdateDeltaMax = FLT_MIN;
-	m_UpdateDeltaAvg = 0.f;
-	m_LastUpdateDelta = 0.f;
-}
+//void Application::ClearFrameTimes()noexcept
+//{
+//	ClearMemory(m_FrameTimes);
+//	m_UpdateDeltaMin = FLT_MAX;
+//	m_UpdateDeltaMax = FLT_MIN;
+//	m_UpdateDeltaAvg = 0.f;
+//	m_LastUpdateDelta = 0.f;
+//}
 
 void Application::UpdateActiveInterfaceList()
 {
@@ -93,87 +93,87 @@ void Application::UpdateActiveInterfaceList()
 	}
 }
 
-void Application::UpdateTick()
-{
-	// We start a new Frame/Tick
-	++m_FrameCount;
+//void Application::UpdateTick()
+//{
+//	// We start a new Frame/Tick
+//	++m_FrameCount;
+//
+//	UpdateActiveInterfaceList();
+//
+//	// PreUpdate
+//	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
+//	{
+//		auto* iface = m_ActiveInterfaces[i];
+//		iface->PreUpdate();
+//	}
+//
+//	// FixedUpdate
+//	uint64 step; uint32 iterations;
+//	ComputeFixedUpdateStep(step, iterations);
+//	const auto stepSecs = float(step) * 1e-9f;
+//	for (uint32 i = 0; i < iterations; ++i)
+//	{
+//		for (sizet j = 0; j < m_ActiveInterfaces.size(); ++j)
+//		{
+//			auto* iface = m_ActiveInterfaces[j];
+//			iface->FixedUpdate();
+//		}
+//
+//		m_LastFixedUpdateTime += std::chrono::nanoseconds(step);
+//	}
+//
+//	// Update
+//	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
+//	{
+//		auto* iface = m_ActiveInterfaces[i];
+//		iface->Update();
+//	}
+//
+//	// PostUpdate
+//	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
+//	{
+//		auto* iface = m_ActiveInterfaces[i];
+//		iface->PostUpdate();
+//	}
+//}
+//
+//void Application::ComputeFixedUpdateStep(uint64& step, uint32& iterations)
+//{
+//	const auto nextFrameTime = m_LastFixedUpdateTime + m_FixedUpdateStepNanos;
+//	if (nextFrameTime <= m_LastUpdateTime)
+//	{
+//		const auto simAccum = Max(m_LastUpdateTime - m_LastFixedUpdateTime, m_FixedUpdateStepNanos);
+//		auto stepn = m_FixedUpdateStepNanos.count();
+//		iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
+//
+//		if (iterations > m_RemainingFixedUpdates)
+//		{
+//			stepn = DivideAndRoundUp(simAccum.count(), (int64)m_RemainingFixedUpdates);
+//			iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
+//		}
+//		VerifyLessEqual(iterations, m_RemainingFixedUpdates, "");
+//		m_RemainingFixedUpdates -= iterations;
+//		m_RemainingFixedUpdates = Min(MAX_ACCUM_FIXED_UPDATES, m_RemainingFixedUpdates + NEW_FIXED_UPDATES_PER_FRAME);
+//		step = (uint64)stepn;
+//	}
+//	step = 0;
+//	iterations = 0;
+//}
 
-	UpdateActiveInterfaceList();
+//static constexpr float StoredFrameINV = 1.f / StoredFrameTimeCount;
 
-	// PreUpdate
-	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
-	{
-		auto* iface = m_ActiveInterfaces[i];
-		iface->PreUpdate();
-	}
-
-	// FixedUpdate
-	uint64 step; uint32 iterations;
-	ComputeFixedUpdateStep(step, iterations);
-	const auto stepSecs = float(step) * 1e-9f;
-	for (uint32 i = 0; i < iterations; ++i)
-	{
-		for (sizet j = 0; j < m_ActiveInterfaces.size(); ++j)
-		{
-			auto* iface = m_ActiveInterfaces[j];
-			iface->FixedUpdate();
-		}
-
-		m_LastFixedUpdateTime += std::chrono::nanoseconds(step);
-	}
-
-	// Update
-	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
-	{
-		auto* iface = m_ActiveInterfaces[i];
-		iface->Update();
-	}
-
-	// PostUpdate
-	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
-	{
-		auto* iface = m_ActiveInterfaces[i];
-		iface->PostUpdate();
-	}
-}
-
-void Application::ComputeFixedUpdateStep(uint64& step, uint32& iterations)
-{
-	const auto nextFrameTime = m_LastFixedUpdateTime + m_FixedUpdateStepNanos;
-	if (nextFrameTime <= m_LastUpdateTime)
-	{
-		const auto simAccum = Max(m_LastUpdateTime - m_LastFixedUpdateTime, m_FixedUpdateStepNanos);
-		auto stepn = m_FixedUpdateStepNanos.count();
-		iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
-
-		if (iterations > m_RemainingFixedUpdates)
-		{
-			stepn = DivideAndRoundUp(simAccum.count(), (int64)m_RemainingFixedUpdates);
-			iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
-		}
-		VerifyLessEqual(iterations, m_RemainingFixedUpdates, "");
-		m_RemainingFixedUpdates -= iterations;
-		m_RemainingFixedUpdates = Min(MAX_ACCUM_FIXED_UPDATES, m_RemainingFixedUpdates + NEW_FIXED_UPDATES_PER_FRAME);
-		step = (uint64)stepn;
-	}
-	step = 0;
-	iterations = 0;
-}
-
-static constexpr float StoredFrameINV = 1.f / StoredFrameTimeCount;
-
-void Application::UpdateFrameTimes()noexcept
-{
-	m_FrameTimes[m_FrameCount % StoredFrameTimeCount] = m_LastUpdateDelta;
-
-	float accum = 0.f;
-	for (int i = 0; i < StoredFrameTimeCount; ++i)
-		accum += m_FrameTimes[i];
-	
-	m_UpdateDeltaAvg = accum * StoredFrameINV;
-	m_UpdateDeltaMax = Max(m_UpdateDeltaMax, m_LastUpdateDelta);
-	m_UpdateDeltaMin = Min(m_UpdateDeltaMin, m_LastUpdateDelta);
-}
+//void Application::UpdateFrameTimes()noexcept
+//{
+//	m_FrameTimes[m_FrameCount % StoredFrameTimeCount] = m_LastUpdateDelta;
+//
+//	float accum = 0.f;
+//	for (int i = 0; i < StoredFrameTimeCount; ++i)
+//		accum += m_FrameTimes[i];
+//	
+//	m_UpdateDeltaAvg = accum * StoredFrameINV;
+//	m_UpdateDeltaMax = Max(m_UpdateDeltaMax, m_LastUpdateDelta);
+//	m_UpdateDeltaMin = Min(m_UpdateDeltaMin, m_LastUpdateDelta);
+//}
 
 Application::Application()
 	:m_Library(nullptr)
@@ -184,7 +184,7 @@ Application::Application()
 	,m_IsActive(false)
 	,m_IsInitialized(false)
 	,m_HasToStop(false)
-	,m_FrameCount(0)
+	/*,m_FrameCount(0)
 	,m_UpdateStep(1.f / 200.f)
 	,m_UpdateStepNanos((uint64)(1e9/200.0))
 	,m_FixedUpdateStep(1.f / 50.f)
@@ -194,7 +194,7 @@ Application::Application()
 	,m_UpdateDeltaAvg(0.f)
 	,m_UpdateDeltaMin(0.f)
 	,m_UpdateDeltaMax(0.f)
-	,m_RemainingFixedUpdates(MAX_ACCUM_FIXED_UPDATES)
+	,m_RemainingFixedUpdates(MAX_ACCUM_FIXED_UPDATES)*/
 {
 
 }
@@ -212,11 +212,11 @@ void Application::Initialize(IGreaperLibrary* library)
 	m_Library = library;
 
 	// Reset timings...
-	m_StartTime = Clock_t::now();
+	/*m_StartTime = Clock_t::now();
 	ClearFrameTimes();
 	m_FrameCount = 0;
 	m_LastUpdateTime = m_StartTime;
-	m_LastFixedUpdateTime = m_StartTime;
+	m_LastFixedUpdateTime = m_StartTime;*/
 
 	// Initialize...
 
@@ -337,7 +337,7 @@ void Application::InitProperties()
 	}
 	m_Properties[(sizet)LoadedLibraries] = loadedLibrariesProp;
 
-	UpdateMaxRateProp_t* updateMaxRateProp = nullptr;
+	/*UpdateMaxRateProp_t* updateMaxRateProp = nullptr;
 	result = m_Library->GetProperty(UpdateMaxRateName);
 	if (result.IsOk())
 		updateMaxRateProp = reinterpret_cast<UpdateMaxRateProp_t*>(result.GetValue());
@@ -363,7 +363,7 @@ void Application::InitProperties()
 		fixedUpdateRateProp = fixedDeltaRateResult.GetValue();
 	}
 	fixedUpdateRateProp->GetOnModificationEvent()->Connect(m_OnFixedUpdateMaxRateEvtHnd, std::bind(&Application::OnFixedUpdateRateChange, this, std::placeholders::_1));
-	m_Properties[(sizet)FixedUpdateRate] = fixedUpdateRateProp;
+	m_Properties[(sizet)FixedUpdateRate] = fixedUpdateRateProp;*/
 }
 
 void Application::DeinitProperties()
@@ -371,51 +371,51 @@ void Application::DeinitProperties()
 
 }
 
-void Application::PreUpdate()
-{
-	Break("Trying to call a PreUpdate to Application, which is forbidden.");
-}
-
-void Application::Update()
-{
-	auto curTime = Clock_t::now();
-	
-	if (m_UpdateStep > 0.f)
-	{
-		const auto nextFrameTime = m_LastUpdateTime + std::chrono::nanoseconds(m_UpdateStepNanos);
-		while (nextFrameTime > curTime)
-		{
-			const auto waitTimeNanos = nextFrameTime - curTime;
-			const auto waitTimeMillis = (uint32)(waitTimeNanos.count() / 1'000'000);
-
-			if (waitTimeMillis >= 2)
-			{
-				OSPlatform::Sleep(waitTimeMillis);
-				curTime = Clock_t::now();
-			}
-			else
-			{
-				while (nextFrameTime > curTime) //! Spin to wait the exactly time needed
-					curTime = Clock_t::now();
-			}
-		}
-	}
-	const auto timeDiff = curTime - m_LastUpdateTime;
-	m_LastUpdateDelta = (float)((double)timeDiff.count() * 1e-9);
-	m_LastUpdateTime = curTime;
-
-	UpdateTick();
-}
-
-void Application::PostUpdate()
-{
-	Break("Trying to call a PostUpdate to Application, which is forbidden.");
-}
-
-void Application::FixedUpdate()
-{
-	Break("Trying to call a FixedUpdate to Application, which is forbidden.");
-}
+//void Application::PreUpdate()
+//{
+//	Break("Trying to call a PreUpdate to Application, which is forbidden.");
+//}
+//
+//void Application::Update()
+//{
+//	//auto curTime = Clock_t::now();
+//	//
+//	//if (m_UpdateStep > 0.f)
+//	//{
+//	//	const auto nextFrameTime = m_LastUpdateTime + std::chrono::nanoseconds(m_UpdateStepNanos);
+//	//	while (nextFrameTime > curTime)
+//	//	{
+//	//		const auto waitTimeNanos = nextFrameTime - curTime;
+//	//		const auto waitTimeMillis = (uint32)(waitTimeNanos.count() / 1'000'000);
+//
+//	//		if (waitTimeMillis >= 2)
+//	//		{
+//	//			OSPlatform::Sleep(waitTimeMillis);
+//	//			curTime = Clock_t::now();
+//	//		}
+//	//		else
+//	//		{
+//	//			while (nextFrameTime > curTime) //! Spin to wait the exactly time needed
+//	//				curTime = Clock_t::now();
+//	//		}
+//	//	}
+//	//}
+//	//const auto timeDiff = curTime - m_LastUpdateTime;
+//	//m_LastUpdateDelta = (float)((double)timeDiff.count() * 1e-9);
+//	//m_LastUpdateTime = curTime;
+//
+//	//UpdateTick();
+//}
+//
+//void Application::PostUpdate()
+//{
+//	Break("Trying to call a PostUpdate to Application, which is forbidden.");
+//}
+//
+//void Application::FixedUpdate()
+//{
+//	Break("Trying to call a FixedUpdate to Application, which is forbidden.");
+//}
 
 //void Application::SetConfig(ApplicationConfig config)
 //{
@@ -928,10 +928,10 @@ Result<IInterface*> Application::GetInterface(const StringView& interfaceName, c
 	return CreateResult(iface);
 }
 
-void Application::StopApplication()
-{
-	m_Library->Log(Format("Stopping %s...", GetApplicationName()->GetValue().c_str()));
-
-	m_HasToStop = true;
-	m_OnClose.Trigger();
-}
+//void Application::StopApplication()
+//{
+//	m_Library->Log(Format("Stopping %s...", GetApplicationName()->GetValue().c_str()));
+//
+//	m_HasToStop = true;
+//	m_OnClose.Trigger();
+//}
