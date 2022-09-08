@@ -16,67 +16,67 @@ namespace greaper::core
 {
 	class ThreadManager final : public IThreadManager
 	{
-		IGreaperLibrary* m_Library;
+		WGreaperLib m_Library;
 		bool m_IsActive;
 		bool m_IsInitialized;
-		InitializationEvt_t m_OnInitialization;
-		ActivationEvt_t m_OnActivation;
-		ChangingDefaultEvt_t m_OnChangingDefault;
-		ThreadEvent_t m_ThreadEvent;
-		ThreadPoolEvent_t m_ThreadPoolEvent;
+		mutable InitializationEvt_t m_OnInitialization;
+		mutable ActivationEvt_t m_OnActivation;
+		mutable ChangingDefaultEvt_t m_OnChangingDefault;
+		mutable ThreadEvent_t m_ThreadEvent;
+		//ThreadPoolEvent_t m_ThreadPoolEvent;
 
 	public:
-		const Uuid& GetInterfaceUUID()const override { return InterfaceUUID; }
+		const Uuid& GetInterfaceUUID()const noexcept override { return InterfaceUUID; }
 
-		const StringView& GetInterfaceName()const override { return InterfaceName; }
+		const StringView& GetInterfaceName()const noexcept override { return InterfaceName; }
 
-		IGreaperLibrary* GetLibrary()const override { return m_Library; }
+		WGreaperLib GetLibrary()const noexcept override { return m_Library; }
 
-		void Initialize(IGreaperLibrary* library)override;
+		void Initialize(WGreaperLib library)noexcept override;
 
-		void Deinitialize()override;
+		void Deinitialize()noexcept override;
 
-		void OnActivate()override;
+		void OnActivate()noexcept override;
 
-		void OnDeactivate()override;
+		void OnDeactivate()noexcept override;
 
-		void InitProperties()override;
+		void InitProperties()noexcept override;
 
-		void DeinitProperties()override;
+		void DeinitProperties()noexcept override;
 
-		bool IsActive()const override { return m_IsActive; }
+		bool IsActive()const noexcept override { return m_IsActive; }
 
-		bool IsInitialized()const override { return m_IsInitialized; }
+		bool IsInitialized()const noexcept override { return m_IsInitialized; }
 
-		InitializationEvt_t* const GetInitializationEvent()override { return &m_OnInitialization; }
+		InitializationEvt_t* GetInitializationEvent()const noexcept override { return &m_OnInitialization; }
 
-		ActivationEvt_t* const GetActivationEvent()override { return &m_OnActivation; }
+		ActivationEvt_t* GetActivationEvent()const noexcept override { return &m_OnActivation; }
 
-		void OnChangingDefault(IInterface* newDefault)override;
+		void OnChangingDefault(WInterface newDefault)noexcept override;
 
-		ChangingDefaultEvt_t* const GetChangingDefaultEvent() { return &m_OnChangingDefault; }
+		ChangingDefaultEvt_t* GetChangingDefaultEvent()const noexcept { return &m_OnChangingDefault; }
 
 		ThreadManager();
 
 		~ThreadManager()noexcept;
 
-		Result<IThread*> GetThread(ThreadID_t id)const override;
+		Result<WThread> GetThread(ThreadID_t id)const noexcept override;
 
-		Result<IThread*> GetThread(const String& threadName)const override;
+		Result<WThread> GetThread(const String& threadName)const noexcept override;
 
-		Result<IThread*> CreateThread(const ThreadConfig& config)override;
+		Result<PThread> CreateThread(const ThreadConfig& config)noexcept override;
 
-		void DestroyThread(IThread* thread)override;
+		void DestroyThread(PThread thread)noexcept override;
 
-		ThreadEvent_t* const GetThreadEvent()override { return &m_ThreadEvent; }
+		ThreadEvent_t* GetThreadEvent()const noexcept override { return &m_ThreadEvent; }
 
-		Result<IThreadPool*> GetThreadPool(const String& poolName)const override;
+		/*Result<IThreadPool*> GetThreadPool(const String& poolName)const override;
 
 		Result<IThreadPool*> CreateThreadPool(const ThreadPoolConfig& config)override;
 
 		void DestroyThreadPool(IThreadPool* pool)override;
 
-		ThreadPoolEvent_t* const GetThreadPoolEvent()override { return &m_ThreadPoolEvent; }
+		ThreadPoolEvent_t* const GetThreadPoolEvent()override { return &m_ThreadPoolEvent; }*/
 	};
 }
 

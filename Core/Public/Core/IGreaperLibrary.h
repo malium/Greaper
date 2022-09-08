@@ -18,7 +18,7 @@ namespace greaper
 	class IGreaperLibrary
 	{
 	protected:
-		virtual EmptyResult RegisterProperty(IProperty* property) = 0;
+		virtual EmptyResult RegisterProperty(SPtr<IProperty> property) = 0;
 
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{  };
@@ -26,7 +26,7 @@ namespace greaper
 
 		virtual ~IGreaperLibrary() = default;
 
-		virtual void InitLibrary(Library* lib, IApplication* app) = 0;
+		virtual void InitLibrary(PLibrary lib, WPtr<IApplication> app) = 0;
 
 		virtual void InitManagers() = 0;
 
@@ -42,7 +42,7 @@ namespace greaper
 
 		virtual void DeinitLibrary() = 0;
 
-		INLINE void Initialize(Library* lib, IApplication* app)
+		INLINE void Initialize(PLibrary lib, WPtr<IApplication> app)
 		{
 			InitLibrary(lib, app);
 			InitManagers();
@@ -64,15 +64,15 @@ namespace greaper
 
 		virtual const StringView& GetLibraryName()const = 0;
 
-		virtual IApplication* GetApplication()const = 0;
+		virtual WPtr<IApplication> GetApplication()const = 0;
 
-		virtual const Library* GetOSLibrary()const = 0;
+		virtual WPtr<Library> GetOSLibrary()const = 0;
 
-		virtual CRange<IInterface*> GetManagers()const = 0;
+		virtual CRange<SPtr<IInterface>> GetManagers()const = 0;
 
-		virtual CRange<IProperty*> GetPropeties()const = 0;
+		virtual CRange<SPtr<IProperty>> GetPropeties()const = 0;
 
-		virtual Result<IProperty*> GetProperty(const StringView& name)const = 0;
+		virtual Result<WPtr<IProperty>> GetProperty(const StringView& name)const = 0;
 
 		virtual void LogVerbose(const String& message) = 0;
 
@@ -85,9 +85,12 @@ namespace greaper
 		virtual void LogCritical(const String& message) = 0;
 
 		template<class T, class _Alloc_>
-		friend Result<TProperty<T>*> CreateProperty(IGreaperLibrary*, StringView, T, StringView,
+		friend Result<SPtr<TProperty<T>>> CreateProperty(const WPtr<IGreaperLibrary>&, StringView, T, StringView,
 			bool, bool, TPropertyValidator<T>*);
 	};
+
+	using PGreaperLib = SPtr<IGreaperLibrary>;
+	using WGreaperLib = WPtr<IGreaperLibrary>;
 
 	template<class T>
 	struct ValidGreaperLibrary

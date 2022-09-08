@@ -27,6 +27,9 @@ namespace greaper
 
         virtual String GetStackTrace() = 0;
     };
+
+    using WCrashManager = WPtr<ICrashManager>;
+    using PCrashManager = SPtr<ICrashManager>;
 }
 
 #endif /* CORE_I_CRASH_MANAGER_H */

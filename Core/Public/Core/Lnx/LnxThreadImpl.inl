@@ -14,27 +14,35 @@
 
 namespace greaper
 {
-
 	class LnxThreadImpl : IThread
 	{
-		IThreadManager* m_Manager;
+		WThreadManager m_Manager;
 		ThreadConfig m_Config;
 		ThreadHandle m_Handle;
 		ThreadID_t m_ID;
 		std::atomic_int8_t m_State;
+		std::function<void()> m_ThreadFn;
+		bool m_JoinsAtDestruction;
+		String m_Name;
 
 		static inline void* RunFn(void* data)
 		{
-			auto* th = (LnxThreadImpl*)data;
+			//auto* th = (LnxThreadImpl*)data;
+			auto* wThis = (WThread*)data;
+			auto th = (SPtr<LnxThreadImpl>)wThis->Lock();
 			if (th == nullptr)
 				return;
 
-			th->m_Manager->GetThreadEvent()->Trigger(th);
+			{
+				auto mgr = th->m_Manager.Lock();
+				mgr->GetThreadEvent()->Trigger((PThread)th);
+			}
 
 			while (th->GetState() != ThreadState_t::RUNNING)
 				THREAD_YIELD();
 
-			th->GetConfiguration().ThreadFN();
+			if(th->m_ThreadFn != nullptr)
+				th->m_ThreadFn();
 
 			th->m_State = ThreadState_t::STOPPED;
 
@@ -43,12 +51,15 @@ namespace greaper
 		}
 
 	public:
-		LnxThreadImpl(IThreadManager* manager, ThreadConfig config)
+		LnxThreadImpl(WThreadManager manager, WThread self, ThreadConfig config)
 			:m_Manager(manager)
 			,m_Config(std::move(config))
 			,m_State(ThreadState_t::SUSPENDED)
+			,m_ThreadFn(config.ThreadFN)
+			,m_JoinsAtDestruction(config.JoinAtDestruction)
+			,m_Name(config.Name)
 		{
-			if (manager == nullptr || m_Config.ThreadFN == nullptr)
+			if (m_Manager == nullptr || m_ThreadFn == nullptr)
 			{
 				m_State = ThreadState_t::STOPPED;
 				return;
@@ -58,27 +69,27 @@ namespace greaper
 			auto ret = pthread_attr_init(&threadAttrib);
 			VerifyEqual(ret, 0, "Trying to create a thread, but something went wrong creating its attributes, error:'%d'.", ret);
 
-			if(m_Config.StackSize > 0 && m_Config.StackSize >= PTHREAD_STACK_MIN)
+			if(config.StackSize > 0 && config.StackSize >= PTHREAD_STACK_MIN)
 			{
-				ret = pthread_attr_setstacksize(&threadAttrib, m_Config.StackSize);
+				ret = pthread_attr_setstacksize(&threadAttrib, config.StackSize);
 				VerifyEqual(ret, 0, "Trying to create a thread, but something went wrong setting it stack size, error:'%d'.", ret);
 			}
 			
-			ret = pthread_create(&m_Handle, &threadAttrib, &LnxThreadImpl::RunFn, this);
+			ret = pthread_create(&m_Handle, &threadAttrib, &LnxThreadImpl::RunFn, &self);
 			VerifyEqual(ret, 0, "Trying to create a thread, but something went wrong, error:'%d'.", ret);
 
-			ret = pthread_setname_np(m_Handle, m_Config.Name.data());
+			ret = pthread_setname_np(m_Handle, m_Name.c_str());
 
 			ret = pthread_attr_destroy(&threadAttrib);
 
 			m_ID = m_Handle;
-			if(!m_Config.StartSuspended)
+			if(!config.StartSuspended)
 				m_State = ThreadState_t::RUNNING;
 		}
 
 		~LnxThreadImpl()
 		{
-			if (m_Config.JoinAtDestruction && Joinable())
+			if (m_JoinsAtDestruction && Joinable())
 				Join();
 		}
 
@@ -134,7 +145,9 @@ namespace greaper
 
 		ThreadID_t GetID()const noexcept override { return m_ID; }
 
-		const ThreadConfig& GetConfiguration()const noexcept override { return m_Config; }
+		bool JoinsAtDestruction()const noexcept override { return m_JoinsAtDestruction; }
+
+		const String& GetName()const noexcept override { return m_Name; }
 
 		ThreadState_t GetState()const noexcept override { return (ThreadState_t)m_State.load(); }
 	};

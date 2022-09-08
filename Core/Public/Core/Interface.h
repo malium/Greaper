@@ -32,34 +32,34 @@ namespace greaper
 	public:
 		using InitializationEvt_t = Event<bool>;
 		using ActivationEvt_t = Event<bool>;
-		using ChangingDefaultEvt_t = Event<IInterface, IInterface>;
+		using ChangingDefaultEvt_t = Event<IInterface*, WPtr<IInterface>>;
 
 		virtual ~IInterface()noexcept = default;
 
 		static constexpr Uuid InterfaceUUID = Uuid{  };
 		static constexpr StringView InterfaceName = StringView{ "INullInterface" };
 
-		virtual const Uuid& GetInterfaceUUID()const = 0;
+		virtual const Uuid& GetInterfaceUUID()const noexcept = 0;
 		
-		virtual const StringView& GetInterfaceName()const = 0;
+		virtual const StringView& GetInterfaceName()const noexcept = 0;
 		
-		virtual IGreaperLibrary* GetLibrary()const = 0;
+		virtual WPtr<IGreaperLibrary> GetLibrary()const noexcept = 0;
 
-		virtual void Initialize(IGreaperLibrary* library) = 0;
+		virtual void Initialize(WPtr<IGreaperLibrary> library)noexcept = 0;
 
-		virtual void Deinitialize() = 0;
+		virtual void Deinitialize()noexcept = 0;
 
-		virtual void OnActivate() = 0;
+		virtual void OnActivate()noexcept = 0;
 
-		virtual void OnDeactivate() = 0;
+		virtual void OnDeactivate()noexcept = 0;
 
-		virtual void InitProperties() = 0;
+		virtual void InitProperties()noexcept = 0;
 
-		virtual void DeinitProperties() = 0;
+		virtual void DeinitProperties()noexcept = 0;
 
-		virtual bool IsActive()const = 0;
+		virtual bool IsActive()const noexcept = 0;
 		
-		virtual bool IsInitialized()const = 0;
+		virtual bool IsInitialized()const noexcept = 0;
 
 		/*virtual void PreUpdate() = 0;
 
@@ -69,16 +69,19 @@ namespace greaper
 
 		virtual void FixedUpdate() = 0;*/
 
-		virtual InitializationEvt_t* const GetInitializationEvent() = 0;
+		virtual InitializationEvt_t* GetInitializationEvent()const noexcept = 0;
 
-		virtual ActivationEvt_t* const GetActivationEvent() = 0;
+		virtual ActivationEvt_t* GetActivationEvent()const noexcept = 0;
 
-		virtual void OnChangingDefault(IInterface* newDefault) = 0;
+		virtual void OnChangingDefault(WPtr<IInterface> newDefault)noexcept = 0;
 
-		virtual ChangingDefaultEvt_t* const GetChangingDefaultEvent() = 0;
+		virtual ChangingDefaultEvt_t* GetChangingDefaultEvent()const noexcept = 0;
 
-		virtual CRange<IProperty*> GetProperties()const = 0;
+		virtual CRange<WPtr<IProperty>> GetProperties()const noexcept = 0;
 	};
+
+	using PInterface = SPtr<IInterface>;
+	using WInterface = WPtr<IInterface>;
 
 	template<class T>
 	struct IsInterface

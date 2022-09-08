@@ -8,7 +8,8 @@
 #include <Core/Property.h>
 
 #if GREAPER_CORE_DLL
-extern greaper::core::GreaperCoreLibrary* gCoreLibrary = nullptr;
+//extern greaper::core::GreaperCoreLibrary* gCoreLibrary = nullptr;
+extern greaper::SPtr<greaper::core::GreaperCoreLibrary> gCoreLibrary = greaper::SPtr<greaper::core::GreaperCoreLibrary>();
 #if PLT_WINDOWS
 #define DLL_PROCESS_ATTACH   1
 #define DLL_THREAD_ATTACH    2
@@ -41,12 +42,12 @@ void* _Greaper()
 {
 	if (gCoreLibrary == nullptr)
 	{
-		gCoreLibrary = greaper::Construct<greaper::core::GreaperCoreLibrary>();
+		gCoreLibrary.Reset(greaper::Construct<greaper::core::GreaperCoreLibrary>());
 	}
-	return gCoreLibrary;
+	return &gCoreLibrary;
 }
 
-greaper::EmptyResult greaper::core::GreaperCoreLibrary::RegisterProperty(IProperty* property)
+greaper::EmptyResult greaper::core::GreaperCoreLibrary::RegisterProperty(SPtr<IProperty> property)
 {
 	const auto nameIT = m_PropertyMap.find(property->GetPropertyName());
 	if (nameIT != m_PropertyMap.end())
@@ -54,7 +55,7 @@ greaper::EmptyResult greaper::core::GreaperCoreLibrary::RegisterProperty(IProper
 		const auto index = nameIT->second;
 		if (index < m_Properties.size())
 		{
-			auto* oProp = m_Properties[index];
+			auto oProp = m_Properties[index];
 			if (oProp == nullptr)
 			{
 				m_Properties[index] = property;
@@ -80,11 +81,13 @@ void greaper::core::GreaperCoreLibrary::DumpLogsToLogManager()
 	}
 }
 
-void greaper::core::GreaperCoreLibrary::OnNewLogManager(greaper::IInterface* nLog)
+void greaper::core::GreaperCoreLibrary::OnNewLogManager(WInterface wLog)
 {
-	if (nLog == nullptr || nLog->GetInterfaceUUID() != ILogManager::InterfaceUUID)
+	if (wLog.Expired())
 		return;
-	m_LogManager = reinterpret_cast<ILogManager*>(nLog);
+	
+	m_LogManager = (PLogManager)wLog.Lock();
+
 	m_LogManagerActivated = m_LogManager->IsActive();
 
 	m_OnLogActivation.Disconnect();
@@ -100,10 +103,10 @@ void greaper::core::GreaperCoreLibrary::OnLogActivation(bool activated)
 	DumpLogsToLogManager();
 }
 
-void greaper::core::GreaperCoreLibrary::InitLibrary(Library* lib, IApplication* app)
+void greaper::core::GreaperCoreLibrary::InitLibrary(PLibrary lib, WPtr<IApplication> app)
 {
 	m_Library = lib;
-	m_Application = app;
+	Verify(app.Expired(), "Trying to assing an IApplication interface to a GreaperLibrary that creates an IApplication.");
 }
 
 void greaper::core::GreaperCoreLibrary::InitManagers()
@@ -114,21 +117,23 @@ void greaper::core::GreaperCoreLibrary::InitManagers()
 		return;
 	}
 
-	m_Application = Construct<Application>();
-	m_Application->GetOnInterfaceActivationEvent()->Connect(m_OnNewLogManager,
+	auto app = PApplication(Construct<Application>());
+	app->GetOnInterfaceActivationEvent()->Connect(m_OnNewLogManager,
 		std::bind(&GreaperCoreLibrary::OnNewLogManager, this, std::placeholders::_1));
-	m_Managers.push_back(m_Application);
+	
+	m_Application = app;
+	m_Managers.push_back(app);
 
 	// add more managers
 
 
-	for (auto* mgr : m_Managers)
-		mgr->Initialize(this);
+	for (auto mgr : m_Managers)
+		mgr->Initialize(gCoreLibrary);
 }
 
 void greaper::core::GreaperCoreLibrary::InitProperties()
 {
-	for (auto* mgr : m_Managers)
+	for (auto mgr : m_Managers)
 		mgr->InitProperties();
 }
 
@@ -144,42 +149,45 @@ void greaper::core::GreaperCoreLibrary::DeinitReflection()
 
 void greaper::core::GreaperCoreLibrary::DeinitProperties()
 {
+	for (auto it = m_Managers.rend(); it < m_Managers.rbegin(); ++it)
+		(*it)->DeinitProperties();
 
+	m_Properties.clear();
+	m_PropertyMap.clear();
 }
 
 void greaper::core::GreaperCoreLibrary::DeinitManagers()
 {
-	m_Application->Deinitialize();
-
+	for (auto it = m_Managers.rend(); it < m_Managers.rbegin(); ++it)
+		(*it)->Deinitialize();
 
 	m_Managers.clear();
 }
 
 void greaper::core::GreaperCoreLibrary::DeinitLibrary()
 {
-	if(m_Application != nullptr)
-		Destroy(m_Application);
+	gCoreLibrary.Reset(nullptr);
 }
 
-greaper::CRange<greaper::IProperty*> greaper::core::GreaperCoreLibrary::GetPropeties() const
+greaper::CRange<greaper::PIProperty> greaper::core::GreaperCoreLibrary::GetPropeties() const
 {
 	return CreateRange(m_Properties);
 }
 
-greaper::Result<greaper::IProperty*> greaper::core::GreaperCoreLibrary::GetProperty(const StringView& name) const
+greaper::Result<greaper::WIProperty> greaper::core::GreaperCoreLibrary::GetProperty(const StringView& name) const
 {
 	const auto nameIT = m_PropertyMap.find(name);
 	if (nameIT == m_PropertyMap.end())
-		return CreateFailure<greaper::IProperty*>(Format("Couldn't find the property '%s' registered in the GreaperLibrary '%s'.", name.data(), GetLibraryName().data()));
+		return CreateFailure<greaper::WIProperty>(Format("Couldn't find the property '%s' registered in the GreaperLibrary '%s'.", name.data(), GetLibraryName().data()));
 	if(nameIT->second >= m_Properties.size())
-		return CreateFailure<greaper::IProperty*>(Format("The property '%s' registered in the GreaperLibrary '%s', is registered to an out of bounds index.", name.data(), GetLibraryName().data()));
-	auto* prop = m_Properties[nameIT->second];
-	return CreateResult(prop);
+		return CreateFailure<greaper::WIProperty>(Format("The property '%s' registered in the GreaperLibrary '%s', is registered to an out of bounds index.", name.data(), GetLibraryName().data()));
+	auto prop = m_Properties[nameIT->second];
+	return CreateResult<greaper::WIProperty>(prop);
 }
 
 void greaper::core::GreaperCoreLibrary::LogVerbose(const String& message)
 {
-	if (m_LogManager != nullptr && m_LogManagerActivated)
+	if (m_LogManagerActivated && m_LogManager != nullptr)
 		m_LogManager->Log(LogLevel_t::VERBOSE, message);
 	else
 		m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::VERBOSE });
@@ -187,7 +195,7 @@ void greaper::core::GreaperCoreLibrary::LogVerbose(const String& message)
 
 void greaper::core::GreaperCoreLibrary::Log(const String& message)
 {
-	if (m_LogManager != nullptr && m_LogManagerActivated)
+	if (m_LogManagerActivated && m_LogManager != nullptr)
 		m_LogManager->Log(LogLevel_t::INFORMATIVE, message);
 	else
 		m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::INFORMATIVE });
@@ -195,7 +203,7 @@ void greaper::core::GreaperCoreLibrary::Log(const String& message)
 
 void greaper::core::GreaperCoreLibrary::LogWarning(const String& message)
 {
-	if (m_LogManager != nullptr && m_LogManagerActivated)
+	if (m_LogManagerActivated && m_LogManager != nullptr)
 		m_LogManager->Log(LogLevel_t::WARNING, message);
 	else
 		m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::WARNING });
@@ -203,7 +211,7 @@ void greaper::core::GreaperCoreLibrary::LogWarning(const String& message)
 
 void greaper::core::GreaperCoreLibrary::LogError(const String& message)
 {
-	if (m_LogManager != nullptr && m_LogManagerActivated)
+	if (m_LogManagerActivated && m_LogManager != nullptr)
 		m_LogManager->Log(LogLevel_t::LL_ERROR, message);
 	else
 		m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::LL_ERROR });
@@ -211,13 +219,13 @@ void greaper::core::GreaperCoreLibrary::LogError(const String& message)
 
 void greaper::core::GreaperCoreLibrary::LogCritical(const String& message)
 {
-	if (m_LogManager != nullptr && m_LogManagerActivated)
+	if (m_LogManagerActivated && m_LogManager != nullptr)
 		m_LogManager->Log(LogLevel_t::CRITICAL, message);
 	else
 		m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::CRITICAL });
 }
 
-greaper::CRange<greaper::IInterface*> greaper::core::GreaperCoreLibrary::GetManagers() const
+greaper::CRange<greaper::PInterface> greaper::core::GreaperCoreLibrary::GetManagers() const
 {
 	return CreateRange(m_Managers);
 }

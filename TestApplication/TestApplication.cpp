@@ -29,9 +29,9 @@
 #define CORE_LIBRARY_NAME "Core" PLT_NAME ARCH_NAME "_" CONF_NAME GREAPER_DLLEXT
 constexpr greaper::StringView CORE_LIB_NAME = CORE_LIBRARY_NAME;
 constexpr greaper::StringView LibFnName = "_Greaper";
-greaper::Library* gCoreLib = nullptr;
-greaper::IGreaperLibrary* gCore = nullptr;
-greaper::IApplication* gApplication = nullptr;
+greaper::PLibrary gCoreLib;
+greaper::PGreaperLib gCore;
+greaper::PApplication gApplication;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
@@ -48,26 +48,16 @@ int main(int argc, char* argv[])
 	return MainCode(hInstance, argc, argv);
 }
 #else /* !_CONSOLE */
-class ArgvDestructor
-{
-public:
-	constexpr ArgvDestructor() noexcept = default;
-
-	void operator()(LPSTR* argv)
-	{
-		FreeArgvA(argv);
-	}
-};
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
 	UNUSED(nShowCmd);
 	UNUSED(hPrevInstance);
 	int argc = 0;
 
-	auto argv = std::unique_ptr<LPSTR, ArgvDestructor>(CommandLineToArgvA(lpCmdLine, &argc));
+	auto argv = greaper::UPtr<LPSTR>(CommandLineToArgvA(lpCmdLine, &argc), &FreeArgvA);
 	if (argv == nullptr)
 		return EXIT_FAILURE;
-	int retVal = MainCode(hInstance, argc, argv.get());
+	int retVal = MainCode(hInstance, argc, argv.Get());
 	return retVal;
 }
 #endif 
@@ -79,49 +69,59 @@ int main(int argc, char* argv[])
 }
 #endif
 
-int MainCode(void* hInstance, int argc, char** argv)
+void Init(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
-	gCoreLib = Construct<Library>(CORE_LIB_NAME);
+	gCoreLib.Reset(Construct<Library>(CORE_LIB_NAME));
 	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
 	auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
-	TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function");
+	TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function.");
 
 	// init Greaper
-	gCore = static_cast<IGreaperLibrary*>(libFN());
+	auto* corePtr = static_cast<PGreaperLib*>(libFN());
+	TRYEXP(corePtr, CORE_LIBRARY_NAME " does not return a IGreaperLibrary.");
+	gCore = *corePtr;
 
-	auto propAppInstance = CreateProperty<ptruint>(gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
+	auto propAppInstanceRes = CreateProperty<ptruint>(gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
 
 	StringVec commandLine;
 	commandLine.resize(argc);
 	for (int32 i = 0; i < argc; ++i)
 		commandLine[i] = String{ argv[i] };
-	auto propRes = CreateProperty<StringVec>(gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
+	auto propCmdLineRes = CreateProperty<StringVec>(gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
 
-	gCore->Initialize(gCoreLib, nullptr);
+	gCore->Initialize(gCoreLib, WApplication());
 
-	gApplication = gCore->GetApplication();
-	TRYEXP(gApplication, CORE_LIBRARY_NAME " does not have an Application.");
+	auto app = gCore->GetApplication();
+	TRYEXP(!app.Expired(), CORE_LIBRARY_NAME " does not have an Application.");
+	gApplication = app.Lock();
+	gApplication->GetApplicationName().Lock()->SetValue(String{ "TestApplication"sv });
+	gApplication->GetApplicationVersion().Lock()->SetValue(APPLICATION_VERSION);
+	gApplication->GetLoadedLibrariesNames().Lock()->SetValue({});
+}
 
-	gApplication->GetApplicationName()->SetValue(String{ "TestApplication"sv });
-	gApplication->GetApplicationVersion()->SetValue(APPLICATION_VERSION);
-	gApplication->GetLoadedLibrariesNames()->SetValue({});
-	std::cout << "Successfully started!\n " << gApplication->GetApplicationName()->GetStringValue() << " Version " << gApplication->GetApplicationVersion()->GetStringValue() << std::endl;
+void Deinit()
+{
+	gApplication.Reset(nullptr);
+	gCore->Deinitialize();
+	gCore.Reset(nullptr);
+
+	gCoreLib->Close();
+	gCoreLib.Reset(nullptr);
+}
+
+int MainCode(void* hInstance, int argc, char** argv)
+{
+	Init(hInstance, argc, argv);
+	
+	std::cout << "Successfully started!\n " << gApplication->GetApplicationName().Lock()->GetStringValue() << " Version " << gApplication->GetApplicationVersion().Lock()->GetStringValue() << std::endl;
 	
 	std::cout << "Enter anything to shutdown" << std::endl;
 	achar a;
 	std::cin >> a;
 
-	/*gApplication->StopApplication();*/
-
-	gCore->Deinitialize();
-	
-	gApplication = nullptr;
-	gCore = nullptr;
-	gCoreLib->Close();
-	Destroy(gCoreLib);
-	gCoreLib = nullptr;
+	Deinit();
 
 	return EXIT_SUCCESS;
 }

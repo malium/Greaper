@@ -36,6 +36,9 @@ namespace greaper
 
 		virtual const DisplayAdapter& GetDefaultDisplayAdapter()const = 0;
 	};
+
+	using WWindowManager = WPtr<IWindowManager>;
+	using PWindowManager = SPtr<IWindowManager>;
 }
 
 #endif /* CORE_I_WINDOW_MANAGER_H */

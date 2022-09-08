@@ -22,7 +22,7 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
-#include <memory>
+//#include <memory>
 #include <cstdarg>
 #include <functional>
 #if PLT_LINUX
@@ -158,12 +158,12 @@ namespace greaper
 template<class _T_, class _Alloc_, class... Args> friend _T_* greaper::ConstructN(sizet, Args&&...); \
 template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
-	template<typename T>
+	/*template<typename T>
 	using SPtr = std::shared_ptr<T>;
 	template<typename T>
 	using WeakSPtr = std::weak_ptr<T>;
 	template<typename T>
-	using UPtr = std::unique_ptr<T>;
+	using UPtr = std::unique_ptr<T>;*/
 
 	template<class T, class _Alloc_ = GenericAllocator>
 	class Destructor
@@ -213,7 +213,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 				return nullptr;
 
 			void*const p = AllocN<T, _Alloc_>(num);
-			if (!p)
+			if (p == nullptr)
 				return nullptr;
 			return static_cast<T*>(p);
 		}
@@ -435,10 +435,17 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 		return str;
 	}
+}
 
+#include "Base/UPtr.h"
+#include "Base/SPtr.h"
+#include "Base/WPtr.h"
+
+namespace greaper
+{
 	// Fwd declarations that need container types
 	template<class T, class _Alloc_ = GenericAllocator>
-	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
+	Result<SPtr<TProperty<T>>> CreateProperty(const WPtr<IGreaperLibrary>& library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
 		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
 }
 
@@ -575,33 +582,35 @@ namespace std
 		}
 	};
 
-	/*template<>
-	struct hash<greaper::StringView>
+	template<class T>
+	struct hash<greaper::UPtr<T>>
 	{
-		INLINE size_t operator()(const greaper::StringView& str)const noexcept
+		INLINE size_t operator()(const greaper::UPtr<T>& ptr)const noexcept
 		{
-#if PLT_WINDOWS
-			return std::_Hash_array_representation(str.data(), str.size());
-#else
-			return std::_Hash_bytes(str.data(), str.size(), 0);
-#endif
+			return std::hash<T>()(ptr.Get());
 		}
 	};
 
-	template<>
-	struct hash<greaper::WStringView>
+	template<class T>
+	struct hash<greaper::SharedPointer<T>>
 	{
-		INLINE size_t operator()(const greaper::WStringView& str)const noexcept
+		INLINE size_t operator()(const greaper::SharedPointer<T>& ptr)const noexcept
 		{
-#if PLT_WINDOWS
-			return std::_Hash_array_representation(str.data(), str.size());
-#else
-			return std::_Hash_bytes(str.data(), str.size(), 0);
-#endif
+			return std::hash<T>()(ptr.Get());
 		}
-	};*/
-}
+	};
 
+	template<class T>
+	struct hash<greaper::WeakPointer<T>>
+	{
+		INLINE size_t operator()(const greaper::WeakPointer<T>& ptr)const noexcept
+		{
+			if (!ptr.Expired())
+				return std::hash<greaper::SharedPointer<T>>()(ptr.Lock());
+			return std::hash<ptruint>()(0);
+		}
+	};
+}
 
 /***********************************************************************************
 *                            CONTAINER HELPER FUNCITONS                            *

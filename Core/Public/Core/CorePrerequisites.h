@@ -23,7 +23,7 @@ namespace greaper
 	using Clock_t = std::chrono::high_resolution_clock;
 	using Timepoint_t = Clock_t::time_point;
 	using Duration_t = Clock_t::duration;
-	
+
 	// fwd
 	class GenericAllocator;
 	class IApplication;

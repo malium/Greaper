@@ -21,9 +21,6 @@
 #endif
 #define GREAPER_PHAL_VERSION VERSION_SETTER(1, 6, 1, 0)
 
-// Include configuration
-#include "Base/Config.h"
-
 /***********************************************************************************
 *                            LANGUAJE DETECTION                                    *
 ***********************************************************************************/
@@ -315,5 +312,6 @@ DLLEXPORT int AmdPowerXpressRequestHighPerformance = 1
 
 using FuncPtr = void(*)();
 
+#include "Base/Config.h"
 #include "Base/BasicTypeInfo.h"
 #include "Base/Utils.h"

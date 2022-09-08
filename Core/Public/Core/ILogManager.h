@@ -47,14 +47,17 @@ namespace greaper
 
 		virtual ~ILogManager()noexcept = default;
 
-		virtual LogEvent_t*const GetLogEvent() = 0;
+		virtual LogEvent_t* GetLogEvent()const noexcept = 0;
 
-		virtual AsyncLogProp_t* GetAsyncLog() = 0;
+		virtual WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept = 0;
 
-		virtual void Log(LogLevel_t level, const String& message) = 0;
+		virtual void Log(LogLevel_t level, const String& message)noexcept = 0;
 
-		virtual void _Log(const LogData& data) = 0;
+		virtual void _Log(const LogData& data)noexcept = 0;
 	};
+
+	using WLogManager = WPtr<ILogManager>;
+	using PLogManager = SPtr<ILogManager>;
 }
 
 #endif /* CORE_I_LOG_MANAGER_H */

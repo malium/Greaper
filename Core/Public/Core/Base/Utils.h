@@ -6,6 +6,7 @@
 #pragma once
 
 #include <cstring>
+#include <type_traits>
 
 /** Checks if a value is within range (min,max], inclusive on max and min */
 template<typename T>
@@ -215,8 +216,7 @@ INLINE void ClearMemory(T& obj, sizet count = 1) noexcept
 template<class T, size_t N>
 INLINE void ClearMemory(T(&arr)[N]) noexcept
 {
-	using Type = std::remove_extent_t<T>;
-	memset(&arr[0], 0, sizeof(Type) * N);
+	memset(&arr[0], 0, sizeof(std::remove_extent<T>::type) * N);
 }
 template<class T>
 INLINE void DuplicateMemory(const T& source, T& dst) noexcept

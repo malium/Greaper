@@ -49,6 +49,9 @@ namespace greaper
             Destroy<T, _Alloc_>((T*)cmd);
         return mgr->AddCommand(cmd);
     }
+
+    using WCommandManager = WPtr<ICommandManager>;
+    using PCommandManager = SPtr<ICommandManager>;
 }
 
 #endif /* CORE_I_COMMAND_MANAGER_H */

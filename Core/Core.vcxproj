@@ -465,9 +465,14 @@
     <ClInclude Include="Public\Core\Base\PropertyValidator.h" />
     <ClInclude Include="Public\Core\Base\Rect.h" />
     <ClInclude Include="Public\Core\Base\ReflectedConversions.h" />
+    <ClInclude Include="Public\Core\Base\SPtr.h" />
     <ClInclude Include="Public\Core\Base\Task.h" />
+    <ClInclude Include="Public\Core\Base\TaskScheduler.h" />
+    <ClInclude Include="Public\Core\Base\ThreadPool.h" />
+    <ClInclude Include="Public\Core\Base\UPtr.h" />
     <ClInclude Include="Public\Core\Base\Utils.h" />
     <ClInclude Include="Public\Core\Base\VideoMode.h" />
+    <ClInclude Include="Public\Core\Base\WPtr.h" />
     <ClInclude Include="Public\Core\Concurrency.h" />
     <ClInclude Include="Public\Core\CorePrerequisites.h" />
     <ClInclude Include="Public\Core\Enumeration.h" />

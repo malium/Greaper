@@ -38,8 +38,8 @@ namespace greaper
 		virtual bool IsStatic()const noexcept = 0;
 		virtual bool SetValueFromString(const String& value) noexcept = 0;
 		virtual const String& GetStringValue()const noexcept = 0;
-		virtual ModificationEvent_t*const GetOnModificationEvent() noexcept = 0;
-		virtual IGreaperLibrary* GetLibrary()const noexcept = 0;
+		virtual ModificationEvent_t* GetOnModificationEvent()const noexcept = 0;
+		virtual WGreaperLib GetLibrary()const noexcept = 0;
 	};
 
 	/**
@@ -65,15 +65,15 @@ namespace greaper
 		String m_PropertyName;
 		String m_PropertyInfo;
 		String m_StringValue;	// When a property is changed, needs to update this value
-		ModificationEvent_t m_OnModificationEvent;
+		mutable ModificationEvent_t m_OnModificationEvent;
 		TPropertyValidator<T>* m_PropertyValidator;
-		IGreaperLibrary* m_Library;
+		WGreaperLib m_Library;
 		mutable RWMutex m_Mutex;
 
 		bool m_Static;		// Created at the start of the program cannot be saved
 		bool m_Constant;	// Cannot be modified
 
-		TProperty(IGreaperLibrary* library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
+		TProperty(const WPtr<IGreaperLibrary>& library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
 			bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr) noexcept
 			:m_Value(std::move(initialValue))
 			, m_PropertyName(propertyName)
@@ -94,7 +94,7 @@ namespace greaper
 		}
 
 		template<class _T_, class _Alloc_>
-		friend Result<TProperty<_T_>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
+		friend Result<SPtr<TProperty<T>>> CreateProperty(const WPtr<IGreaperLibrary>& library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
 			bool isConstant, bool isStatic, TPropertyValidator<_T_>* validator);
 		MemoryFriend();
 	public:
@@ -125,9 +125,11 @@ namespace greaper
 		}
 		bool SetValue(const T& value, bool triggerEvent = true) noexcept
 		{
+			VerifyNot(m_Library.Expired(), "Trying to set a value to a disconnected Property.");
+			auto lib = m_Library.Lock();
 			if (m_Constant)
 			{
-				m_Library->LogWarning(Format("Trying to change a constant property, '%s'.", m_PropertyName.c_str()));
+				lib->LogWarning(Format("Trying to change a constant property, '%s'.", m_PropertyName.c_str()));
 				return false;
 			}
 			auto lock = Lock<RWMutex>(m_Mutex);
@@ -137,7 +139,7 @@ namespace greaper
 			{
 				//const String nValueStr = TPropertyConverter<T>::ToString(value);
 				const String nValueStr = ReflectedPlainType<T>::ToString(m_Value);
-				m_Library->LogWarning(Format("Couldn't validate the new value of Property '%s', oldValue '%s', newValue '%s'.",
+				lib->LogWarning(Format("Couldn't validate the new value of Property '%s', oldValue '%s', newValue '%s'.",
 					m_PropertyName.c_str(), m_StringValue.c_str(), nValueStr.c_str()));
 				return false;
 			}
@@ -146,14 +148,14 @@ namespace greaper
 			{
 				//const String nValueStr = TPropertyConverter<T>::ToString(value);
 				const String nValueStr = ReflectedPlainType<T>::ToString(m_Value);
-				m_Library->LogVerbose(Format("Property '%s', has mantain the same value, current '%s', tried '%s'.",
+				lib->LogVerbose(Format("Property '%s', has mantain the same value, current '%s', tried '%s'.",
 					m_PropertyName.c_str(), m_StringValue.c_str(), nValueStr.c_str()));
 				return false; // Property has not changed;
 			}
 			const auto oldStringValue = String{ m_StringValue };
 			//m_StringValue = TPropertyConverter<T>::ToString(m_Value);
 			m_StringValue = ReflectedPlainType<T>::ToString(m_Value);
-			m_Library->LogVerbose(Format("Property '%s', has changed from '%s' to '%s'.",
+			lib->LogVerbose(Format("Property '%s', has changed from '%s' to '%s'.",
 				m_PropertyName.c_str(), oldStringValue.c_str(), m_StringValue.c_str()));
 			if (triggerEvent)
 				m_OnModificationEvent.Trigger(this);
@@ -176,14 +178,8 @@ namespace greaper
 			auto lock = SharedLock(m_Mutex);
 			return m_StringValue;
 		}
-		[[nodiscard]] ModificationEvent_t*const GetOnModificationEvent() noexcept override
-		{
-			return &m_OnModificationEvent;
-		}
-		[[nodiscard]] IGreaperLibrary* GetLibrary()const noexcept override
-		{
-			return m_Library;
-		}
+		[[nodiscard]] ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
+		[[nodiscard]] WGreaperLib GetLibrary()const noexcept override { return m_Library; }
 	};
 
 	// Greaper Core specialization
@@ -193,28 +189,45 @@ namespace greaper
 	using PropertyString = TProperty<String>;
 	using PropertyStringVec = TProperty<StringVec>;
 
+	using PIProperty = SPtr<IProperty>;
+	using WIProperty = WPtr<IProperty>;
+	template<class T>
+	using PProperty = SPtr<TProperty<T>>;
+	template<class T>
+	using WProperty = WPtr<TProperty<T>>;
+
 	// A way to retrieve the RTI_ID from the type Property
 	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 
 	template<class T, class _Alloc_>
-	Result<TProperty<T>*> CreateProperty(IGreaperLibrary* library, StringView propertyName, T initialValue, StringView propertyInfo,
+	Result<SPtr<TProperty<T>>> CreateProperty(const WPtr<IGreaperLibrary>& library, StringView propertyName, T initialValue, StringView propertyInfo,
 		bool isConstant, bool isStatic, TPropertyValidator<T>* validator)
 	{
-		TProperty<T>* property = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
-		EmptyResult res = library->RegisterProperty((IProperty*)property);
+		auto lib = library.Lock();
+		if (lib == nullptr)
+			return CreateFailure<PProperty<T>>("Couldn't create the property, expired library given");
+
+		auto* propPtr = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
+		auto prop = PProperty<T>(propPtr);
+
+		const auto res = lib->RegisterProperty((PIProperty)prop);
 		if (res.HasFailed())
 		{
-			Destroy<TProperty<T>, _Alloc_>(property);
-			return CreateFailure<TProperty<T>*>("Couldn't register the property\n" + res.GetFailMessage());
+			//Destroy<TProperty<T>, _Alloc_>(property);
+			return CreateFailure<PProperty<T>>("Couldn't register the property\n" + res.GetFailMessage());
 		}
-		return CreateResult(property);
+		return CreateResult(prop);
 	}
 
 	template<class T>
-	Result<TProperty<T>*> GetProperty(IGreaperLibrary* library, const String& name)
+	Result<WProperty<T>> GetProperty(WPtr<IGreaperLibrary> library, const String& name)
 	{
-		auto res = library->GetProperty(name);
+		auto lib = library.Lock();
+		if (lib == nullptr)
+			return CreateFailure<WProperty<T>>("Couldn't retrieve the property, expired library given.");
+
+		auto res = lib->GetProperty(name);
 		if (res.HasFailed())
 			return CopyFailure<TProperty<T>*>(res);
 		return CreateResult(reinterpret_cast<TProperty<T>*>(res.GetValue()));

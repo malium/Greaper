@@ -49,39 +49,39 @@ namespace greaper
 		
 		using OnCloseEvent_t = Event<void>;
 
-		using OnInterfaceActivationEvent_t = Event<IInterface*>;
+		using OnInterfaceActivationEvent_t = Event<WInterface>;
 
 		virtual ~IApplication()noexcept = default;
 
-		virtual Result<IGreaperLibrary*> RegisterGreaperLibrary(const WStringView& libPath) = 0;
+		virtual Result<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath) = 0;
 
-		virtual Result<IGreaperLibrary*> GetGreaperLibrary(const StringView& libraryName) = 0;
+		virtual Result<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName) = 0;
 
-		virtual Result<IGreaperLibrary*> GetGreaperLibrary(const Uuid& libraryUUID) = 0;
+		virtual Result<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID) = 0;
 
-		virtual EmptyResult UnregisterGreaperLibrary(IGreaperLibrary* library) = 0;
+		virtual EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library) = 0;
 
-		virtual EmptyResult RegisterInterface(IInterface* interface) = 0;
+		virtual EmptyResult RegisterInterface(PInterface interface) = 0;
 
-		virtual EmptyResult UnregisterInterface(IInterface* interface) = 0;
+		virtual EmptyResult UnregisterInterface(PInterface interface) = 0;
 
-		virtual EmptyResult ActivateInterface(IInterface* interface) = 0;
+		virtual EmptyResult ActivateInterface(PInterface interface) = 0;
 		
 		virtual EmptyResult DeactivateInterface(const Uuid& interfaceUUID) = 0;
 
 		virtual EmptyResult DeactivateInterface(const StringView& interfaceName) = 0;
 
-		virtual Result<IInterface*> GetActiveInterface(const Uuid& interfaceUUID)const = 0;
+		virtual Result<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const = 0;
 
-		virtual Result<IInterface*> GetActiveInterface(const StringView& interfaceName)const = 0;
+		virtual Result<PInterface> GetActiveInterface(const StringView& interfaceName)const = 0;
 
-		virtual Result<IInterface*> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const = 0;
+		virtual Result<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const = 0;
 
-		virtual Result<IInterface*> GetInterface(const StringView& interfaceName, const StringView& libraryName)const = 0;
+		virtual Result<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const = 0;
 
-		virtual Result<IInterface*> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const = 0;
+		virtual Result<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const = 0;
 
-		virtual Result<IInterface*> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const = 0;
+		virtual Result<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const = 0;
 
 		/*virtual bool AppHasToStop()const = 0;
 
@@ -89,15 +89,15 @@ namespace greaper
 
 		virtual OnCloseEvent_t*const GetOnCloseEvent() = 0;*/
 
-		virtual OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() = 0;
+		virtual OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept = 0;
 
-		virtual ApplicationNameProp_t* GetApplicationName() = 0;
+		virtual WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept = 0;
 
-		virtual CompilationInfoProp_t* GetCompilationInfo() = 0;
+		virtual WPtr<CompilationInfoProp_t> GetCompilationInfo()const noexcept = 0;
 
-		virtual ApplicationVersionProp_t* GetApplicationVersion() = 0;
+		virtual WPtr<ApplicationVersionProp_t> GetApplicationVersion()const noexcept = 0;
 
-		virtual LoadedLibrariesProp_t* GetLoadedLibrariesNames() = 0;
+		virtual WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept = 0;
 
 		/*virtual Timepoint_t GetStartTime()const = 0;
 
@@ -117,116 +117,118 @@ namespace greaper
 
 		virtual float GetMaxUpdateDelta()const = 0;*/
 
-		virtual AppInstanceProp_t* GetAppInstance() = 0;
+		virtual WPtr<AppInstanceProp_t> GetAppInstance()const noexcept = 0;
 
-		virtual CommandLineProp_t* GetCommandLine() = 0;
+		virtual WPtr<CommandLineProp_t> GetCommandLine()const noexcept = 0;
 
 		/*virtual FixedUpdateRateProp_t* GetFixedUpdateRate() = 0;
 
 		virtual UpdateMaxRateProp_t* GetUpdateMaxRate() = 0;*/
 
 		template<class T>
-		Result<T*> RegisterGreaperLibraryT(const WStringView& libPath)
+		Result<SPtr<T>> RegisterGreaperLibraryT(const WStringView& libPath)
 		{
 			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to register a GreaperLibrary "
 				"but its implementation doesn't derive from IGreaperLibrary.");
 			auto res = RegisterGreaperLibrary(libPath);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* lib = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> lib = (SPtr<T>)res.GetValue();
 			return CreateResult(lib);
 		}
 
 		template<class T>
-		Result<T*> GetGreaperLibraryT(const StringView& libraryName)
+		Result<WPtr<T>> GetGreaperLibraryT(const StringView& libraryName)
 		{
 			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to get a GreaperLibrary "
 				"but its implementation doesn't derive from IGreaperLibrary.");
 			auto res = GetGreaperLibrary(libraryName);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* lib = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<WPtr<T>>(res);
+			WPtr<T> lib = (WPtr<T>)res.GetValue();
 			return CreateResult(lib);
 		}
 
 		template<class T>
-		Result<T*> GetGreaperLibraryT(const Uuid& libraryUUID)
+		Result<WPtr<T>> GetGreaperLibraryT(const Uuid& libraryUUID)
 		{
 			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to get a GreaperLibrary "
 				"but its implementation doesn't derive from IGreaperLibrary.");
 			auto res = GetGreaperLibrary(libraryUUID);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* lib = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<WPtr<T>>(res);
+			WPtr<T> lib = (WPtr<T>)res.GetValue();
 			return CreateResult(lib);
 		}
 
 		template<class T>
-		Result<T*> GetActiveInterfaceT(const Uuid& interfaceUUID)const
+		Result<SPtr<T>> GetActiveInterfaceT(const Uuid& interfaceUUID)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetActiveInterface(interfaceUUID);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* interface = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
 		template<class T>
-		Result<T*> GetActiveInterfaceT(const StringView& interfaceName)const
+		Result<SPtr<T>> GetActiveInterfaceT(const StringView& interfaceName)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetActiveInterface(interfaceName);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* interface = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
 		template<class T>
-		Result<T*> GetInterfaceT(const Uuid& interfaceUUID, const Uuid& libraryUUID)const
+		Result<SPtr<T>> GetInterfaceT(const Uuid& interfaceUUID, const Uuid& libraryUUID)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceUUID, libraryUUID);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* interface = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
 		template<class T>
-		Result<T*> GetInterfaceT(const StringView& interfaceName, const StringView& libraryName)const
+		Result<SPtr<T>> GetInterfaceT(const StringView& interfaceName, const StringView& libraryName)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceName, libraryName);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* interface = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
 		template<class T>
-		Result<T*> GetInterfaceT(const Uuid& interfaceUUID, const StringView& libraryName)const
+		Result<SPtr<T>> GetInterfaceT(const Uuid& interfaceUUID, const StringView& libraryName)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceUUID, libraryName);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* interface = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
 		template<class T>
-		Result<T*> GetInterfaceT(const StringView& interfaceName, const Uuid& libraryUUID)const
+		Result<SPtr<T>> GetInterfaceT(const StringView& interfaceName, const Uuid& libraryUUID)const
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceName, libraryUUID);
 			if(res.HasFailed())
-				return CopyFailure<T*>(res);
-			T* interface = reinterpret_cast<T*>(res.GetValue());
+				return CopyFailure<SPtr<T>>(res);
+			SPtr<T> interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 	};
+	using WApplication = WPtr<IApplication>;
+	using PApplication = SPtr<IApplication>;
 }
 
 #endif /* CORE_I_APPLICATION_H */

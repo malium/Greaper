@@ -16,7 +16,7 @@
 using namespace greaper;
 using namespace greaper::core;
 
-void ThreadManager::Initialize(IGreaperLibrary* library)
+void ThreadManager::Initialize(WGreaperLib library)noexcept
 {
 	if (m_IsInitialized)
 		return;
@@ -26,7 +26,7 @@ void ThreadManager::Initialize(IGreaperLibrary* library)
 	m_IsInitialized = true;
 }
 
-void ThreadManager::Deinitialize()
+void ThreadManager::Deinitialize()noexcept
 {
 	if (!m_IsInitialized)
 		return;
@@ -34,7 +34,7 @@ void ThreadManager::Deinitialize()
 	m_IsInitialized = false;
 }
 
-void greaper::core::ThreadManager::OnActivate()
+void greaper::core::ThreadManager::OnActivate()noexcept
 {
 	if (m_IsActive)
 		return;
@@ -42,7 +42,7 @@ void greaper::core::ThreadManager::OnActivate()
 	m_IsActive = true;
 }
 
-void greaper::core::ThreadManager::OnDeactivate()
+void greaper::core::ThreadManager::OnDeactivate()noexcept
 {
 	if (!m_IsActive)
 		return;
@@ -50,15 +50,15 @@ void greaper::core::ThreadManager::OnDeactivate()
 	m_IsActive = false;
 }
 
-void greaper::core::ThreadManager::InitProperties()
+void greaper::core::ThreadManager::InitProperties()noexcept
 {
 }
 
-void greaper::core::ThreadManager::DeinitProperties()
+void greaper::core::ThreadManager::DeinitProperties()noexcept
 {
 }
 
-void greaper::core::ThreadManager::OnChangingDefault(IInterface* newDefault)
+void greaper::core::ThreadManager::OnChangingDefault(WInterface newDefault)noexcept
 {
 }
 
@@ -70,35 +70,35 @@ greaper::core::ThreadManager::~ThreadManager() noexcept
 {
 }
 
-Result<IThread*> greaper::core::ThreadManager::GetThread(ThreadID_t id) const
+Result<WThread> greaper::core::ThreadManager::GetThread(ThreadID_t id) const noexcept
 {
-	return CreateFailure<IThread*>("Not Implemented"sv);
+	return CreateFailure<WThread>("Not Implemented"sv);
 }
 
-Result<IThread*> greaper::core::ThreadManager::GetThread(const String& threadName) const
+Result<WThread> greaper::core::ThreadManager::GetThread(const String& threadName) const noexcept
 {
-	return CreateFailure<IThread*>("Not Implemented"sv);
+	return CreateFailure<WThread>("Not Implemented"sv);
 }
 
-Result<IThread*> greaper::core::ThreadManager::CreateThread(const ThreadConfig& config)
+Result<PThread> greaper::core::ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 {
-	return CreateFailure<IThread*>("Not Implemented"sv);
+	return CreateFailure<PThread>("Not Implemented"sv);
 }
 
-void greaper::core::ThreadManager::DestroyThread(IThread* thread)
+void greaper::core::ThreadManager::DestroyThread(PThread thread) noexcept
 {
 }
 
-Result<IThreadPool*> greaper::core::ThreadManager::GetThreadPool(const String& poolName) const
-{
-	return CreateFailure<IThreadPool*>("Not Implemented"sv);
-}
-
-Result<IThreadPool*> greaper::core::ThreadManager::CreateThreadPool(const ThreadPoolConfig& config)
-{
-	return CreateFailure<IThreadPool*>("Not Implemented"sv);
-}
-
-void greaper::core::ThreadManager::DestroyThreadPool(IThreadPool* pool)
-{
-}
+//Result<IThreadPool*> greaper::core::ThreadManager::GetThreadPool(const String& poolName) const
+//{
+//	return CreateFailure<IThreadPool*>("Not Implemented"sv);
+//}
+//
+//Result<IThreadPool*> greaper::core::ThreadManager::CreateThreadPool(const ThreadPoolConfig& config)
+//{
+//	return CreateFailure<IThreadPool*>("Not Implemented"sv);
+//}
+//
+//void greaper::core::ThreadManager::DestroyThreadPool(IThreadPool* pool)
+//{
+//}

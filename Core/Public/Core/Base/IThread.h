@@ -54,10 +54,15 @@ namespace greaper
 
 		virtual ThreadID_t GetID()const noexcept = 0;
 
-		virtual const ThreadConfig& GetConfiguration()const noexcept = 0;
+		virtual bool JoinsAtDestruction()const noexcept = 0;
+
+		virtual const String& GetName()const noexcept = 0;
 
 		virtual ThreadState_t GetState()const noexcept = 0;
 	};
+
+	using PThread = SPtr<IThread>;
+	using WThread = WPtr<IThread>;
 }
 //#if PLT_WINDOWS
 //#include "../Win/WinThreadImpl.inl"

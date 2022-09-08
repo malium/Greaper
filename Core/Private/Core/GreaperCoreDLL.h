@@ -23,22 +23,22 @@ namespace greaper::core
 {
 	class GreaperCoreLibrary : public IGreaperLibrary
 	{
-		EmptyResult RegisterProperty(IProperty* property)override;
-		IApplication* m_Application = nullptr;
-		Library* m_Library = nullptr;
-		ILogManager* m_LogManager = nullptr;
+		EmptyResult RegisterProperty(SPtr<IProperty> property)override;
+		PApplication m_Application;
+		mutable PLibrary m_Library;
+		PLogManager m_LogManager;
 		bool m_LogManagerActivated = false;
-		EventHandler<IInterface*> m_OnNewLogManager;
+		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewLogManager;
 		EventHandler<bool> m_OnLogActivation;
-		void DumpLogsToLogManager();
-		void OnNewLogManager(greaper::IInterface* nlog);
-		void OnLogActivation(bool activated);
+		
 		Vector<greaper::LogData> m_InitLogs;
-
-		Vector<IInterface*> m_Managers;
-
+		Vector<PInterface> m_Managers;
 		UnorderedMap<StringView, sizet> m_PropertyMap;
-		Vector<IProperty*> m_Properties;
+		Vector<PIProperty> m_Properties;
+
+		void DumpLogsToLogManager();
+		void OnNewLogManager(WInterface nlog);
+		void OnLogActivation(bool activated);
 
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{ 0xDAC703FC, 0x16BD4F59, 0xB62D28ED, 0x3C9DE087 };
@@ -46,7 +46,7 @@ namespace greaper::core
 		
 		GreaperCoreLibrary() = default;
 
-		void InitLibrary(Library* lib, IApplication* app)override;
+		void InitLibrary(PLibrary lib, WPtr<IApplication> app)override;
 
 		void InitManagers()override;
 
@@ -68,13 +68,13 @@ namespace greaper::core
 
 		const StringView& GetLibraryName()const override { return LibraryName; }
 
-		IApplication* GetApplication()const override { return m_Application; }
+		WPtr<IApplication> GetApplication()const override { return m_Application; }
 
-		const Library* GetOSLibrary()const override { return m_Library; }
+		WPtr<Library> GetOSLibrary()const override { return m_Library; }
 
-		CRange<IProperty*> GetPropeties()const override;
+		CRange<SPtr<IProperty>> GetPropeties()const override;
 
-		Result<IProperty*> GetProperty(const StringView& name)const override;
+		Result<WPtr<IProperty>> GetProperty(const StringView& name)const override;
 
 		void LogVerbose(const String& message)override;
 
@@ -86,7 +86,7 @@ namespace greaper::core
 
 		void LogCritical(const String& message)override;
 
-		CRange<IInterface*> GetManagers() const override;
+		CRange<SPtr<IInterface>> GetManagers() const override;
 	};
 }
 

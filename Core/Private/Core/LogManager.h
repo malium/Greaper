@@ -13,72 +13,71 @@
 #include <Core/Property.h>
 #include <Core/Concurrency.h>
 #include <Core/IThreadManager.h>
+#include <Core/Base/TaskScheduler.h>
 
 namespace greaper::core
 {
 	class LogManager final : public ILogManager
 	{
-		IGreaperLibrary* m_Library;
+		WGreaperLib m_Library;
 		bool m_IsActive;
 		bool m_IsInitialized;
-		InitializationEvt_t m_OnInitialization;
-		ActivationEvt_t m_OnActivation;
-		ChangingDefaultEvt_t m_OnChangingDefault;
-		LogEvent_t m_OnLogMessage;
+		mutable InitializationEvt_t m_OnInitialization;
+		mutable ActivationEvt_t m_OnActivation;
+		mutable ChangingDefaultEvt_t m_OnChangingDefault;
+		mutable LogEvent_t m_OnLogMessage;
 		AsyncLogProp_t::ModificationEventHandler_t m_OnAsyncProp;
-		AsyncLogProp_t* m_AsyncProp;
+		WPtr<AsyncLogProp_t> m_AsyncProp;
 
 		Vector<LogData> m_QueuedMessages;
 		std::atomic_bool m_Threaded;
-		Mutex m_Mutex;
-		Signal m_MessageSignal;
-		IThread* m_AsyncThread;
+		//TaskScheduler m_Scheduler;
 
 		void OnAsyncChanged(IProperty* prop);
 		void RunFn();
 
 	public:
-		const Uuid& GetInterfaceUUID()const override { return InterfaceUUID; }
+		const Uuid& GetInterfaceUUID()const noexcept override { return InterfaceUUID; }
 
-		const StringView& GetInterfaceName()const override { return InterfaceName; }
+		const StringView& GetInterfaceName()const noexcept override { return InterfaceName; }
 
-		IGreaperLibrary* GetLibrary()const override { return m_Library; }
+		WGreaperLib GetLibrary()const noexcept override { return m_Library; }
 
-		void Initialize(IGreaperLibrary* library)override;
+		void Initialize(WPtr<IGreaperLibrary> library)noexcept override;
 
-		void Deinitialize()override;
+		void Deinitialize()noexcept override;
 
-		void OnActivate()override;
+		void OnActivate()noexcept override;
 
-		void OnDeactivate()override;
+		void OnDeactivate()noexcept override;
 
-		void InitProperties()override;
+		void InitProperties()noexcept override;
 
-		void DeinitProperties()override;
+		void DeinitProperties()noexcept override;
 
-		bool IsActive()const override { return m_IsActive; }
+		bool IsActive()const noexcept override { return m_IsActive; }
 
-		bool IsInitialized()const override { return m_IsInitialized; }
+		bool IsInitialized()const noexcept override { return m_IsInitialized; }
 
-		InitializationEvt_t* const GetInitializationEvent()override { return &m_OnInitialization; }
+		InitializationEvt_t* GetInitializationEvent()const noexcept override { return &m_OnInitialization; }
 
-		ActivationEvt_t* const GetActivationEvent()override { return &m_OnActivation; }
+		ActivationEvt_t* GetActivationEvent()const noexcept override { return &m_OnActivation; }
 
-		void OnChangingDefault(IInterface* newDefault)override;
+		void OnChangingDefault(WInterface newDefault)noexcept override;
 
-		ChangingDefaultEvt_t* const GetChangingDefaultEvent() { return &m_OnChangingDefault; }
+		ChangingDefaultEvt_t* GetChangingDefaultEvent()const noexcept { return &m_OnChangingDefault; }
 
 		LogManager();
 
 		~LogManager()noexcept;
 
-		LogEvent_t* const GetLogEvent()override { return &m_OnLogMessage; }
+		LogEvent_t* GetLogEvent()const noexcept override { return &m_OnLogMessage; }
 
-		AsyncLogProp_t* GetAsyncLog()override { return m_AsyncProp; }
+		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return m_AsyncProp; }
 
-		void Log(LogLevel_t level, const String& message)override;
+		void Log(LogLevel_t level, const String& message)noexcept override;
 
-		void _Log(const LogData& data)override;
+		void _Log(const LogData& data)noexcept override;
 	};
 }
 

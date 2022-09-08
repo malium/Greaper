@@ -5,7 +5,7 @@
 
 #pragma once
 //#include "../PHAL.h"
-#include <memory>
+//#include <memory>
 
 using uint8 = PlatformTypes::uint8_t;
 using uint16 = PlatformTypes::uint16_t;
@@ -25,7 +25,7 @@ using ptrint = PlatformTypes::ptrint_t;
 using sizet = PlatformTypes::sizetype;
 using ssizet = PlatformTypes::ssizetype;
 
-template<class T>
-using SPtr = std::shared_ptr<T>;
-template<class T>
-using UPtr = std::unique_ptr<T>;
+//template<class T>
+//using SPtr = std::shared_ptr<T>;
+//template<class T>
+//using UPtr = std::unique_ptr<T>;

@@ -20,29 +20,32 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 
 	m_Threaded = async->GetValue();
 
+	VerifyNot(m_Library.Expired(), "Trying to change async LogManager, but its library has expired.");
+	auto lib = m_Library.Lock();
+	auto wApp = lib->GetApplication();
+
 	if (async->GetValue()) // init threaded mode
 	{
-		VerifyNotNull(m_Library, "");
-		auto* app = m_Library->GetApplication();
-		if (app == nullptr)
+		if (wApp.Expired())
 		{
-			m_Library->LogError("Trying to enable async LogManager, but this library does not have an application connected.");
+			lib->LogError("Trying to enable async LogManager, but this library does not have an application connected.");
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
 		}
+		auto app = wApp.Lock();
 		auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
 		if (thmgrRes.HasFailed())
 		{
-			m_Library->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
+			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
 		}
-		auto* thmgr = (IThreadManager*)thmgrRes.GetValue();
+		auto thmgr = (PThreadManager)thmgrRes.GetValue();
 		if (thmgr == nullptr)
 		{
-			m_Library->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
+			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager.");
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
@@ -53,37 +56,36 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 		auto thRes = thmgr->CreateThread(thcfg);
 		if (thRes.HasFailed())
 		{
-			m_Library->LogError("Trying to enable async LogManager, but couldn't create a Thread, reason: " + thRes.GetFailMessage());
+			lib->LogError("Trying to enable async LogManager, but couldn't create a Thread, reason: " + thRes.GetFailMessage());
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
 		}
-		m_AsyncThread = thRes.GetValue();
+		//m_AsyncThread = thRes.GetValue();
 	}
 	else // stop threaded mode
 	{
-		if (m_AsyncThread == nullptr)
-			return;
+		//if (m_AsyncThread == nullptr)
+		//	return;
 
-		VerifyNotNull(m_Library, "");
-		auto* app = m_Library->GetApplication();
-		if (app == nullptr)
+		if (wApp.Expired())
 		{
-			m_Library->LogError("Trying to disable async LogManager, but this library does not have an application connected.");
+			lib->LogError("Trying to disable async LogManager, but this library does not have an application connected.");
 			return;
 		}
+		auto app = wApp.Lock();
 		auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
 		if (thmgrRes.HasFailed())
 		{
-			m_Library->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
+			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
 		}
-		auto* thmgr = (IThreadManager*)thmgrRes.GetValue();
+		auto thmgr = (PThreadManager)thmgrRes.GetValue();
 		if (thmgr == nullptr)
 		{
-			m_Library->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
+			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
@@ -96,7 +98,7 @@ void greaper::core::LogManager::RunFn()
 
 }
 
-void LogManager::Initialize(IGreaperLibrary* library)
+void LogManager::Initialize(WGreaperLib library)noexcept
 {
 	if (m_IsInitialized)
 		return;
@@ -107,7 +109,7 @@ void LogManager::Initialize(IGreaperLibrary* library)
 	m_IsInitialized = true;
 }
 
-void LogManager::Deinitialize()
+void LogManager::Deinitialize()noexcept
 {
 	if (!m_IsInitialized)
 		return;
@@ -115,7 +117,7 @@ void LogManager::Deinitialize()
 	m_IsInitialized = false;
 }
 
-void LogManager::OnActivate()
+void LogManager::OnActivate()noexcept
 {
 	if (m_IsActive)
 		return;
@@ -123,7 +125,7 @@ void LogManager::OnActivate()
 	m_IsActive = true;
 }
 
-void LogManager::OnDeactivate()
+void LogManager::OnDeactivate()noexcept
 {
 	if (!m_IsActive)
 		return;
@@ -131,30 +133,28 @@ void LogManager::OnDeactivate()
 	m_IsActive = false;
 }
 
-void LogManager::InitProperties()
+void LogManager::InitProperties()noexcept
 {
 
 }
 
-void LogManager::DeinitProperties()
+void LogManager::DeinitProperties()noexcept
 {
 
 }
 
-void LogManager::OnChangingDefault(IInterface* newDefault)
+void LogManager::OnChangingDefault(WInterface newDefault)noexcept
 {
 
 }
 
 LogManager::LogManager()
-	:m_Library(nullptr)
-	,m_IsActive(false)
+	:m_IsActive(false)
 	,m_IsInitialized(false)
 	,m_OnInitialization("OnInitialization"sv)
 	,m_OnActivation("OnActivation"sv)
 	,m_OnChangingDefault("OnChangingDefault"sv)
 	,m_OnLogMessage("OnLogMessage"sv)
-	,m_AsyncProp(nullptr)
 	,m_Threaded(false)
 {
 
@@ -165,12 +165,12 @@ LogManager::~LogManager() noexcept
 
 }
 
-void LogManager::Log(LogLevel_t level, const String& message)
+void LogManager::Log(LogLevel_t level, const String& message)noexcept
 {
 
 }
 
-void LogManager::_Log(const LogData& data)
+void LogManager::_Log(const LogData& data)noexcept
 {
 
 }

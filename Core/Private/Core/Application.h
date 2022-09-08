@@ -34,13 +34,13 @@ namespace greaper::core
 		/*static constexpr uint32 MAX_ACCUM_FIXED_UPDATES = 200;
 		static constexpr uint32 NEW_FIXED_UPDATES_PER_FRAME = 4;*/
 
-		IGreaperLibrary* m_Library;
+		WGreaperLib m_Library;
 		OnCloseEvent_t m_OnClose;
-		OnInterfaceActivationEvent_t m_OnInterfaceActivation;
-		InitializationEvt_t m_OnInitialization;
-		ActivationEvt_t m_OnActivation;
+		mutable OnInterfaceActivationEvent_t m_OnInterfaceActivation;
+		mutable InitializationEvt_t m_OnInitialization;
+		mutable ActivationEvt_t m_OnActivation;
 
-		Vector<IProperty*> m_Properties;
+		Vector<WIProperty> m_Properties;
 
 		bool m_IsActive;
 		bool m_IsInitialized;
@@ -48,10 +48,10 @@ namespace greaper::core
 
 		struct LibInfo
 		{
-			IGreaperLibrary* Lib = nullptr;
+			PGreaperLib Lib;
 			UnorderedMap<StringView, size_t> IntefaceNameMap;
 			UnorderedMap<Uuid, size_t> InterfaceUuidMap;
-			Vector<IInterface*> Interfaces;
+			Vector<PInterface> Interfaces;
 		};
 
 		UnorderedMap<StringView, size_t> m_LibraryNameMap;
@@ -61,11 +61,11 @@ namespace greaper::core
 		mutable Mutex m_ActiveMutex;
 		UnorderedMap<StringView, size_t> m_ActiveInterfaceNameMap;
 		UnorderedMap<Uuid, size_t> m_ActiveInterfaceUuidMap;
-		Vector<IInterface*> m_ActiveInterfaces;
+		Vector<PInterface> m_ActiveInterfaces;
 
-		Vector<IInterface*> m_InterfaceToChange;
-		Vector<IInterface*> m_InterfacesToRemove;
-		Vector<IInterface*> m_InterfacesToAdd;
+		Vector<PInterface> m_InterfaceToChange;
+		Vector<PInterface> m_InterfacesToRemove;
+		Vector<PInterface> m_InterfacesToAdd;
 
 		/*Timepoint_t m_StartTime;
 		Timepoint_t m_LastUpdateTime;
@@ -84,8 +84,8 @@ namespace greaper::core
 		IProperty::ModificationEventHandler_t m_OnUpdateMaxRateEvtHnd;
 		IProperty::ModificationEventHandler_t m_OnFixedUpdateMaxRateEvtHnd;*/
 
-		void AddGreaperLibrary(IGreaperLibrary* library);
-		void LoadConfigLibraries();
+		void AddGreaperLibrary(PGreaperLib library)noexcept;
+		void LoadConfigLibraries()noexcept;
 
 		/*void ClearFrameTimes()noexcept;
 		void UpdateFrameTimes()noexcept;*/
@@ -108,7 +108,7 @@ namespace greaper::core
 			else
 				m_FixedUpdateStep = 1.f / value;
 		}*/
-		void UpdateActiveInterfaceList();
+		void UpdateActiveInterfaceList()noexcept;
 		/*void UpdateTick();
 		void ComputeFixedUpdateStep(uint64& step, uint32& iterations);*/
 
@@ -116,27 +116,27 @@ namespace greaper::core
 		Application();
 		~Application();
 
-		const Uuid& GetInterfaceUUID()const override { return InterfaceUUID; }
+		const Uuid& GetInterfaceUUID()const noexcept override { return InterfaceUUID; }
 
-		const StringView& GetInterfaceName()const override { return InterfaceName; }
+		const StringView& GetInterfaceName()const noexcept override { return InterfaceName; }
 
-		IGreaperLibrary* GetLibrary()const override { return m_Library; }
+		WGreaperLib GetLibrary()const noexcept override { return m_Library; }
 
-		void Initialize(IGreaperLibrary* library)override;
+		void Initialize(WPtr<IGreaperLibrary> library)noexcept override;
 
-		void Deinitialize()override;
+		void Deinitialize()noexcept override;
 
-		void OnActivate()override;
+		void OnActivate()noexcept override;
 
-		void OnDeactivate()override;
+		void OnDeactivate()noexcept override;
 
-		void InitProperties()override;
+		void InitProperties()noexcept override;
 
-		void DeinitProperties()override;
+		void DeinitProperties()noexcept override;
 
-		bool IsActive()const override { return m_IsActive; }
+		bool IsActive()const noexcept override { return m_IsActive; }
 
-		bool IsInitialized()const override { return m_IsInitialized; }
+		bool IsInitialized()const noexcept override { return m_IsInitialized; }
 
 		/*void PreUpdate()override;
 
@@ -146,51 +146,51 @@ namespace greaper::core
 
 		void FixedUpdate()override;*/
 
-		InitializationEvt_t* const GetInitializationEvent()override { return &m_OnInitialization; }
+		InitializationEvt_t* GetInitializationEvent()const noexcept override { return &m_OnInitialization; }
 
-		ActivationEvt_t* const GetActivationEvent()override { return &m_OnActivation; }
+		ActivationEvt_t* GetActivationEvent()const noexcept override { return &m_OnActivation; }
 
 		/*void SetConfig(ApplicationConfig config)override;
 
 		const ApplicationConfig& GetConfig()const override { return m_Config; }*/
 
-		void OnChangingDefault(IInterface* newDefault)override
+		void OnChangingDefault(WInterface newDefault)noexcept override
 		{
 			UNUSED(newDefault);
 			Break("Cannot change the full application at runtime.");
 		}
 
-		ChangingDefaultEvt_t* const GetChangingDefaultEvent() { return nullptr; }
+		ChangingDefaultEvt_t* GetChangingDefaultEvent()const noexcept override { return nullptr; }
 
-		Result<IGreaperLibrary*> RegisterGreaperLibrary(const WStringView& libPath)override;
+		Result<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)override;
 
-		Result<IGreaperLibrary*> GetGreaperLibrary(const StringView& libraryName)override;
+		Result<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)override;
 
-		Result<IGreaperLibrary*> GetGreaperLibrary(const Uuid& libraryUUID)override;
+		Result<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)override;
 
-		EmptyResult UnregisterGreaperLibrary(IGreaperLibrary* library)override;
+		EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)override;
 
-		EmptyResult RegisterInterface(IInterface* interface)override;
+		EmptyResult RegisterInterface(PInterface interface)override;
 
-		EmptyResult UnregisterInterface(IInterface* interface)override;
+		EmptyResult UnregisterInterface(PInterface interface)override;
 
-		EmptyResult ActivateInterface(IInterface* interface)override;
+		EmptyResult ActivateInterface(PInterface interface)override;
 
 		EmptyResult DeactivateInterface(const Uuid& interfaceUUID)override;
 
 		EmptyResult DeactivateInterface(const StringView& interfaceName)override;
 
-		Result<IInterface*> GetActiveInterface(const Uuid& interfaceUUID)const  override;
+		Result<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const  override;
 
-		Result<IInterface*> GetActiveInterface(const StringView& interfaceName)const override;
+		Result<PInterface> GetActiveInterface(const StringView& interfaceName)const override;
 
-		Result<IInterface*> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const override;
+		Result<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const override;
 
-		Result<IInterface*> GetInterface(const StringView& interfaceName, const StringView& libraryName)const override;
+		Result<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const override;
 
-		Result<IInterface*> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const override;
+		Result<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const override;
 
-		Result<IInterface*> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
+		Result<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
 
 		/*bool AppHasToStop()const override { return m_HasToStop; }
 
@@ -198,17 +198,17 @@ namespace greaper::core
 
 		OnCloseEvent_t* const GetOnCloseEvent()override { return &m_OnClose; }*/
 
-		OnInterfaceActivationEvent_t* const GetOnInterfaceActivationEvent() { return &m_OnInterfaceActivation; }
+		OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept { return &m_OnInterfaceActivation; }
 
-		ApplicationNameProp_t* GetApplicationName()override { return reinterpret_cast<ApplicationNameProp_t*>(m_Properties[(sizet)ApplicationName]); }
+		WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept override { return m_Properties[(sizet)ApplicationName]; }
 
-		CompilationInfoProp_t* GetCompilationInfo()override { return reinterpret_cast<CompilationInfoProp_t*>(m_Properties[(sizet)CompilationInfo]); }
+		WPtr<CompilationInfoProp_t> GetCompilationInfo()const noexcept override { return m_Properties[(sizet)CompilationInfo]; }
 
-		ApplicationVersionProp_t* GetApplicationVersion()override { return reinterpret_cast<ApplicationVersionProp_t*>(m_Properties[(sizet)ApplicationVersion]); }
+		WPtr<ApplicationVersionProp_t> GetApplicationVersion()const noexcept override { return m_Properties[(sizet)ApplicationVersion]; }
 
-		LoadedLibrariesProp_t* GetLoadedLibrariesNames()override { return reinterpret_cast<LoadedLibrariesProp_t*>(m_Properties[(sizet)LoadedLibraries]); }
+		WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept override { return m_Properties[(sizet)LoadedLibraries]; }
 
-		CRange<IProperty*> GetProperties() const override { return CreateRange(m_Properties); }
+		CRange<WPtr<IProperty>> GetProperties()const noexcept override { return CreateRange(m_Properties); }
 		
 		/*Timepoint_t GetStartTime()const override { return m_StartTime; }
 
@@ -232,9 +232,9 @@ namespace greaper::core
 
 		UpdateMaxRateProp_t* GetUpdateMaxRate() override { return (UpdateMaxRateProp_t*)m_Properties[(sizet)UpdateMaxRate]; }*/
 
-		CommandLineProp_t* GetCommandLine() override { return (CommandLineProp_t*)m_Properties[(sizet)CommandLine]; }
+		WPtr<CommandLineProp_t> GetCommandLine()const noexcept override { return m_Properties[(sizet)CommandLine]; }
 
-		AppInstanceProp_t* GetAppInstance() override { return (AppInstanceProp_t*)m_Properties[(sizet)AppInstance]; }
+		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return m_Properties[(sizet)AppInstance]; }
 	};
 }
 

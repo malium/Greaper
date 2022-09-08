@@ -725,7 +725,7 @@ namespace greaper
 
 	public:
 		IAsyncOp()
-			:m_Data(std::make_shared<OpData>())
+			:m_Data(Construct<OpData>())
 		{
 
 		}
@@ -736,7 +736,7 @@ namespace greaper
 		}
 
 		IAsyncOp(const SPtr<AsyncOpSyncData>& syncData)
-			:m_Data(std::make_shared<OpData>())
+			:m_Data(Construct<OpData>())
 			,m_SyncData(syncData)
 		{
 
