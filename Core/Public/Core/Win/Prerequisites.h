@@ -89,19 +89,19 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 	if (!SUCCEEDED(retVal))
 		return nullptr;
 
-	LPWSTR lpWideCharStr = (LPWSTR)malloc(retVal * sizeof(wchar_t));
+	LPWSTR lpWideCharStr = (LPWSTR)PlatformAlloc(retVal * sizeof(wchar_t));
 	if (lpWideCharStr == nullptr)
 		return nullptr;
 	retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, lpWideCharStr, retVal);
 	if (!SUCCEEDED(retVal))
 	{
-		free(lpWideCharStr);
+		PlatformDealloc(lpWideCharStr);
 		return nullptr;
 	}
 
 	int numArgs;
 	LPWSTR* args = CommandLineToArgvW(lpWideCharStr, &numArgs);
-	free(lpWideCharStr);
+	PlatformDealloc(lpWideCharStr);
 	if (!args)
 		return nullptr;
 
