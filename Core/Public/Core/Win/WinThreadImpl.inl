@@ -34,7 +34,7 @@ namespace greaper
 
 			{
 				auto mgr = th->m_Manager.Lock();
-				mgr->GetThreadEvent()->Trigger((PThread)th);
+				mgr->GetThreadCreationEvent()->Trigger((PThread)th);
 			}
 
 			while (th->GetState() != ThreadState_t::RUNNING)
@@ -44,6 +44,11 @@ namespace greaper
 				th->m_ThreadFn();
 
 			th->m_State = ThreadState_t::STOPPED;
+
+			{
+				auto mgr = th->m_Manager.Lock();
+				mgr->GetThreadDestructionEvent()->Trigger((PThread)th);
+			}
 
 			return EXIT_SUCCESS;
 		}

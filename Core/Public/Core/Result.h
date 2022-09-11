@@ -22,8 +22,10 @@ namespace greaper
 		T m_Value;
 		bool m_Failure = false;
 
-		template<class _T_> friend Result<_T_> CreateResult(_T_) noexcept;
-		template<class _T_> friend Result<_T_> CreateFailure(StringView) noexcept;
+		template<class _T_> friend Result<_T_> CreateResult(_T_)noexcept;
+		template<class _T_> friend Result<_T_> CreateFailure(StringView)noexcept;
+		template<class _T_> friend Result<_T_> CreateFailure(String)noexcept;
+		template<class _T_, class _U_> friend Result<_T_> CopyFailure(Result<_U_>)noexcept;
 
 		Result() = default;
 
@@ -60,6 +62,16 @@ namespace greaper
 	{
 		Result<T> res;
 		res.m_FailMessage.assign(errorMessage);
+		res.m_Failure = true;
+		return res;
+		//return std::move(res);
+	}
+
+	template<class T>
+	INLINE Result<T> CreateFailure(String errorMessage) noexcept
+	{
+		Result<T> res;
+		res.m_FailMessage = std::move(errorMessage);
 		res.m_Failure = true;
 		return res;
 		//return std::move(res);

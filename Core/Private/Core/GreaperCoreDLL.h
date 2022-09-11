@@ -24,7 +24,7 @@ namespace greaper::core
 	class GreaperCoreLibrary : public IGreaperLibrary
 	{
 		EmptyResult RegisterProperty(SPtr<IProperty> property)override;
-		PApplication m_Application;
+		SPtr<Application> m_Application;
 		mutable PLibrary m_Library;
 		PLogManager m_LogManager;
 		bool m_LogManagerActivated = false;

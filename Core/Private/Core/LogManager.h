@@ -19,6 +19,13 @@ namespace greaper::core
 {
 	class LogManager final : public ILogManager
 	{
+		enum PropertiesIndices
+		{
+			AsyncProp,
+
+			COUNT
+		};
+
 		WGreaperLib m_Library;
 		bool m_IsActive;
 		bool m_IsInitialized;
@@ -27,7 +34,7 @@ namespace greaper::core
 		mutable ChangingDefaultEvt_t m_OnChangingDefault;
 		mutable LogEvent_t m_OnLogMessage;
 		AsyncLogProp_t::ModificationEventHandler_t m_OnAsyncProp;
-		WPtr<AsyncLogProp_t> m_AsyncProp;
+		Vector<WIProperty> m_Properties;
 
 		Vector<LogData> m_QueuedMessages;
 		std::atomic_bool m_Threaded;
@@ -73,7 +80,9 @@ namespace greaper::core
 
 		LogEvent_t* GetLogEvent()const noexcept override { return &m_OnLogMessage; }
 
-		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return m_AsyncProp; }
+		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return m_Properties[(sizet)AsyncProp]; }
+
+		CRange<WPtr<IProperty>> GetProperties()const noexcept override { return CreateRange(m_Properties); }
 
 		void Log(LogLevel_t level, const String& message)noexcept override;
 

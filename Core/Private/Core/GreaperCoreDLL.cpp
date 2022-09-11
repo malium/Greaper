@@ -5,6 +5,8 @@
 
 #include "GreaperCoreDLL.h"
 #include "Application.h"
+#include "LogManager.h"
+#include "ThreadManager.h"
 #include <Core/Property.h>
 
 #if GREAPER_CORE_DLL
@@ -117,22 +119,28 @@ void greaper::core::GreaperCoreLibrary::InitManagers()
 		return;
 	}
 
-	auto app = PApplication(Construct<Application>());
-	app->GetOnInterfaceActivationEvent()->Connect(m_OnNewLogManager,
+	m_Application.Reset(Construct<Application>());
+	m_Application->GetOnInterfaceActivationEvent()->Connect(m_OnNewLogManager,
 		std::bind(&GreaperCoreLibrary::OnNewLogManager, this, std::placeholders::_1));
 	
-	m_Application = app;
-	m_Managers.push_back(app);
+	m_Application->Initialize(gCoreLibrary);
 
 	// add more managers
+	m_Managers.push_back(SPtr<LogManager>(Construct<LogManager>()));
+	m_Managers.push_back(SPtr<ThreadManager>(Construct<ThreadManager>()));
+
 
 
 	for (auto mgr : m_Managers)
+	{
 		mgr->Initialize(gCoreLibrary);
+		m_Application->RegisterInterface(mgr);
+	}
 }
 
 void greaper::core::GreaperCoreLibrary::InitProperties()
 {
+	m_Application->InitProperties();
 	for (auto mgr : m_Managers)
 		mgr->InitProperties();
 }
@@ -152,6 +160,8 @@ void greaper::core::GreaperCoreLibrary::DeinitProperties()
 	for (auto it = m_Managers.rend(); it < m_Managers.rbegin(); ++it)
 		(*it)->DeinitProperties();
 
+	m_Application->DeinitProperties();
+
 	m_Properties.clear();
 	m_PropertyMap.clear();
 }
@@ -161,7 +171,10 @@ void greaper::core::GreaperCoreLibrary::DeinitManagers()
 	for (auto it = m_Managers.rend(); it < m_Managers.rbegin(); ++it)
 		(*it)->Deinitialize();
 
+	m_Application->Deinitialize();
+
 	m_Managers.clear();
+	m_Application.Reset(nullptr);
 }
 
 void greaper::core::GreaperCoreLibrary::DeinitLibrary()

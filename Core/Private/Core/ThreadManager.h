@@ -22,8 +22,24 @@ namespace greaper::core
 		mutable InitializationEvt_t m_OnInitialization;
 		mutable ActivationEvt_t m_OnActivation;
 		mutable ChangingDefaultEvt_t m_OnChangingDefault;
-		mutable ThreadEvent_t m_ThreadEvent;
-		//ThreadPoolEvent_t m_ThreadPoolEvent;
+		mutable ThreadCreationEvent_t m_ThreadCreationEvent;
+		mutable ThreadDestructionEvent_t m_ThreadDestructionEvent;
+
+		mutable RWMutex m_ThreadMutex;
+		Vector<PThread> m_Threads;
+		UnorderedMap<String, sizet> m_ThreadNameMap;
+		UnorderedMap<ThreadID_t, sizet> m_ThreadIDMap;
+
+		std::size_t GetThreadCount()const noexcept
+		{
+			SharedLock lock(m_ThreadMutex);
+			return m_Threads.size();
+		}
+		const PThread& GetThreadIdx(std::size_t idx)const noexcept
+		{
+			SharedLock lock(m_ThreadMutex);
+			return m_Threads[idx];
+		}
 
 	public:
 		const Uuid& GetInterfaceUUID()const noexcept override { return InterfaceUUID; }
@@ -68,7 +84,13 @@ namespace greaper::core
 
 		void DestroyThread(PThread thread)noexcept override;
 
-		ThreadEvent_t* GetThreadEvent()const noexcept override { return &m_ThreadEvent; }
+		ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept override { return &m_ThreadCreationEvent; }
+		
+		ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
+
+		CRange<WPtr<IProperty>> GetProperties()const noexcept override { return CRange<WPtr<IProperty>>(); }
+
+		CRange<PThread> GetThreads()const noexcept override { return CRange<PThread>(); }
 
 		/*Result<IThreadPool*> GetThreadPool(const String& poolName)const override;
 

@@ -206,7 +206,7 @@ namespace greaper
 	{
 		auto lib = library.Lock();
 		if (lib == nullptr)
-			return CreateFailure<PProperty<T>>("Couldn't create the property, expired library given");
+			return CreateFailure<PProperty<T>>("Couldn't create the property, expired library given"sv);
 
 		auto* propPtr = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
 		auto prop = PProperty<T>(propPtr);

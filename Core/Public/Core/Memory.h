@@ -331,11 +331,16 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		std::function<std::size_t()> SizeFn;
 		std::function<T&(std::size_t idx)> GetItemFn;
 
-		T* begin()const noexcept
+		INLINE operator bool()const noexcept
+		{
+			return SizeFn != nullptr && GetItemFn != nullptr;
+		}
+
+		INLINE T* begin()const noexcept
 		{
 			return &GetItemFn(0);
 		}
-		T* end()const noexcept
+		INLINE T* end()const noexcept
 		{
 			return &GetItemFn(SizeFn() - 1) + 1;
 		}
@@ -343,14 +348,19 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	template<typename T>
 	struct CRange
 	{
-		std::function<std::size_t()> SizeFn;
-		std::function<const T& (std::size_t idx)> GetItemFn;
+		std::function<std::size_t()> SizeFn = nullptr;
+		std::function<const T& (std::size_t idx)> GetItemFn = nullptr;
 
-		const T* begin()const noexcept
+		INLINE operator bool()const noexcept
+		{
+			return SizeFn != nullptr && GetItemFn != nullptr;
+		}
+
+		INLINE const T* begin()const noexcept
 		{
 			return &GetItemFn(0);
 		}
-		const T* end()const noexcept
+		INLINE const T* end()const noexcept
 		{
 			return &GetItemFn(SizeFn() - 1) + 1;
 		}

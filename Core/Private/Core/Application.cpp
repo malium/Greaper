@@ -23,6 +23,33 @@ void Application::AddGreaperLibrary(PGreaperLib library) noexcept
 	m_Libraries.push_back(std::move(info));
 }
 
+EmptyResult Application::RegisterGreaperLibrary(PGreaperLib gLib)
+{
+	auto uLib = GetGreaperLibrary(gLib->GetLibraryUuid());
+	if (uLib.IsOk() && uLib.GetValue() != nullptr)
+	{
+		return CreateEmptyFailure(Format(
+			"Trying to register a GreaperLibrary, but its UUID '%s' its already registered.",
+			gLib->GetLibraryUuid().ToString().c_str()));
+	}
+	auto nLib = GetGreaperLibrary(gLib->GetLibraryName());
+	if (nLib.IsOk() && nLib.GetValue() != nullptr)
+	{
+		return CreateEmptyFailure(Format(
+			"Trying to register a GreaperLibrary, but its name '%s' its already registered.",
+			gLib->GetLibraryName().data()));
+	}
+
+	const auto id = m_Libraries.size();
+	m_LibraryNameMap.insert_or_assign(gLib->GetLibraryName(), id);
+	m_LibraryUuidMap.insert_or_assign(gLib->GetLibraryUuid(), id);
+	LibInfo info;
+	info.Lib = gLib;
+	m_Libraries.push_back(std::move(info));
+
+	return CreateEmptyResult();
+}
+
 void Application::LoadConfigLibraries() noexcept
 {
 	/*if (m_Config.GreaperLibraries == nullptr)
@@ -214,6 +241,8 @@ void Application::Initialize(WPtr<IGreaperLibrary> library)noexcept
 	VerifyNot(m_Library.Expired(), "Trying to initialize an application with an expired GreaperLib.");
 	auto lib = m_Library.Lock();
 	gApplication = lib->GetApplication().Lock();
+
+	RegisterGreaperLibrary(lib);
 
 	// Reset timings...
 	/*m_StartTime = Clock_t::now();
@@ -458,24 +487,13 @@ Result<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringV
 			libPath.data()));
 	}
 	auto gLib = PGreaperLib(*gLibPtr);
-	auto uLib = GetGreaperLibrary(gLib->GetLibraryUuid());
-	if (uLib.IsOk() && uLib.GetValue() != nullptr)
-	{
-		return CreateFailure<SPtr<IGreaperLibrary>>(Format(
-			"Trying to register a GreaperLibrary with path '%S', but its UUID '%s' its already registered.",
-			libPath.data(), gLib->GetLibraryUuid().ToString().c_str()));
-	}
-	auto nLib = GetGreaperLibrary(gLib->GetLibraryName());
-	if (nLib.IsOk() && nLib.GetValue() != nullptr)
-	{
-		return CreateFailure<SPtr<IGreaperLibrary>>(Format(
-			"Trying to register a GreaperLibrary with path '%S', but its name '%s' its already registered.",
-			libPath.data(), gLib->GetLibraryName().data()));
-	}
+	auto res = RegisterGreaperLibrary(gLib);
+	
+	if (res.HasFailed())
+		return CopyFailure<SPtr<IGreaperLibrary>>(res);
 
-	AddGreaperLibrary(gLib);
 	gLib->Initialize(lib, gApplication);
-	gLib->InitLibrary(lib, gApplication);
+	
 	return CreateResult(gLib);
 }
 
@@ -612,8 +630,8 @@ EmptyResult Application::RegisterInterface(PInterface interface)
 	libInfo.IntefaceNameMap.insert_or_assign(interface->GetInterfaceName(), index);
 	libInfo.InterfaceUuidMap.insert_or_assign(interface->GetInterfaceUUID(), index);
 
-	if (!interface->IsInitialized())
-		interface->Initialize(std::move(pLib));
+	/*if (!interface->IsInitialized())
+		interface->Initialize(std::move(pLib));*/
 	return CreateEmptyResult();
 }
 

@@ -65,7 +65,7 @@ namespace greaper
 
 					if (m_WeakReferences <= 0)
 					{
-						PlatformAlignedDealloc(this);
+						PlatformDealloc(this);
 					}
 				}
 			}
@@ -78,7 +78,7 @@ namespace greaper
 				--m_WeakReferences;
 				if (m_WeakReferences <= 0 && m_SharedReferences <= 0)
 				{
-					PlatformAlignedDealloc(this);
+					PlatformDealloc(this);
 				}
 			}
 			INLINE uint32 SharedRefCount()const noexcept { return m_SharedReferences; }
@@ -119,7 +119,7 @@ namespace greaper
 
 					if (m_WeakReferences <= 0)
 					{
-						PlatformAlignedDealloc(this);
+						PlatformDealloc(this);
 					}
 				}
 			}
@@ -132,7 +132,7 @@ namespace greaper
 				--m_WeakReferences;
 				if (m_WeakReferences <= 0 && m_SharedReferences <= 0)
 				{
-					PlatformAlignedDealloc(this);
+					PlatformDealloc(this);
 				}
 			}
 			INLINE uint32 SharedRefCount()const noexcept { return m_SharedReferences; }
@@ -155,16 +155,17 @@ namespace greaper
 		void CreateControl(Impl::SPtrDeleterFn_t<T> deleter, Impl::SPtrType threading)
 		{
 			using namespace Impl;
+
 			if (threading == SPtrType::MultiThread)
 			{
-				void* mem = PlatformAlignedAlloc(sizeof(SharedPointerControlMT<T>), 16);
+				void* mem = PlatformAlloc(sizeof(SharedPointerControlMT<T>));// , 16);
 				new(mem)SharedPointerControlMT<T>(m_Value, deleter);
 				m_Control = (SharedPointerControlMT<T>*)mem;
 				m_Control->AddSharedReference();
 			}
 			else if (threading == SPtrType::SingleThread)
 			{
-				void* mem = PlatformAlignedAlloc(sizeof(SharedPointerControlST<T>), 16);
+				void* mem = PlatformAlloc(sizeof(SharedPointerControlST<T>));// , 16);
 				new(mem)SharedPointerControlST<T>(m_Value, deleter);
 				m_Control = (SharedPointerControlST<T>*)mem;
 				m_Control->AddSharedReference();
@@ -184,7 +185,7 @@ namespace greaper
 		{
 
 		}
-		explicit INLINE SharedPointer(T* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)
+		explicit INLINE SharedPointer(T* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
 			: m_Value(value)
 			, m_Control(nullptr)
 		{
@@ -192,7 +193,7 @@ namespace greaper
 				CreateControl(deleter, threading);
 		}
 		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
-		explicit INLINE SharedPointer(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)
+		explicit INLINE SharedPointer(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
 			:m_Value((T*)value)
 			,m_Control(nullptr)
 		{
@@ -214,7 +215,7 @@ namespace greaper
 			if (m_Value != nullptr && m_Control != nullptr)
 				m_Control->AddSharedReference();
 		}
-		INLINE SharedPointer(SharedPointer&& other)
+		INLINE SharedPointer(SharedPointer&& other)noexcept
 			:m_Value(other.m_Value)
 			,m_Control(other.m_Control)
 		{

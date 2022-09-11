@@ -135,7 +135,28 @@ void LogManager::OnDeactivate()noexcept
 
 void LogManager::InitProperties()noexcept
 {
+	if (m_Library == nullptr)
+		return; // no base library weird
 
+	auto lib = m_Library.Lock();
+
+	if (m_Properties.size() != (sizet)COUNT)
+		m_Properties.resize((sizet)COUNT, WIProperty());
+
+	WPtr<AsyncLogProp_t> asyncLogProp;
+	auto result = lib->GetProperty(AsyncLogName);
+	if (result.IsOk())
+	{
+		asyncLogProp = result.GetValue();
+	}
+	else
+	{
+		auto asyncLogResult = CreateProperty<bool>(m_Library, AsyncLogName, false, ""sv, false, true, nullptr);
+		Verify(asyncLogResult.IsOk(), "Couldn't create the property '%s' msg: %s", AsyncLogName.data(), asyncLogResult.GetFailMessage().c_str());
+		asyncLogProp = asyncLogResult.GetValue();
+	}
+
+	m_Properties[(sizet)AsyncProp] = asyncLogProp;
 }
 
 void LogManager::DeinitProperties()noexcept

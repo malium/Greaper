@@ -85,6 +85,7 @@ namespace greaper::core
 		IProperty::ModificationEventHandler_t m_OnFixedUpdateMaxRateEvtHnd;*/
 
 		void AddGreaperLibrary(PGreaperLib library)noexcept;
+		EmptyResult RegisterGreaperLibrary(PGreaperLib gLib);
 		void LoadConfigLibraries()noexcept;
 
 		/*void ClearFrameTimes()noexcept;

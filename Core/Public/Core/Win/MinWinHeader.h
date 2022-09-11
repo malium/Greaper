@@ -637,6 +637,23 @@ HeapFree(
 	DWORD dwFlags,
 	LPVOID lpMem
 );
+
+WINBASEAPI
+HANDLE
+WINAPI
+HeapCreate(
+	DWORD flOptions,
+	SIZE_T dwInitialSize,
+	SIZE_T dwMaximumSize
+);
+
+WINBASEAPI
+BOOL
+WINAPI
+HeapDestroy(
+	HANDLE hHeap
+);
+
 WINBASEAPI
 VOID
 WINAPI

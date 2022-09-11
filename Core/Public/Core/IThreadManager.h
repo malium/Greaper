@@ -24,7 +24,8 @@ namespace greaper
 		static constexpr Uuid InterfaceUUID = Uuid{ 0x284B5BAD, 0x9B004E76, 0x8B7F76DD, 0xB45D740F };
 		static constexpr StringView InterfaceName = "ThreadManager"sv;
 
-		using ThreadEvent_t = Event<PThread>;
+		using ThreadCreationEvent_t = Event<PThread>;
+		using ThreadDestructionEvent_t = Event<PThread>;
 
 		virtual ~IThreadManager()noexcept = default;
 
@@ -36,9 +37,11 @@ namespace greaper
 
 		virtual void DestroyThread(PThread thread)noexcept = 0;
 
-		virtual ThreadEvent_t* GetThreadEvent()const noexcept = 0;
+		virtual ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept = 0;
 
-		virtual Range<PThread> GetThreads()noexcept = 0;
+		virtual ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept = 0;
+
+		virtual CRange<PThread> GetThreads()const noexcept = 0;
 	};
 
 	using WThreadManager = WPtr<IThreadManager>;
