@@ -28,26 +28,28 @@ namespace greaper
 		{
 			//auto* th = (WinThreadImpl*)data;
 			auto* wThis = (WThread*)data;
-			auto th = (SPtr<WinThreadImpl>)wThis->Lock();
-			if (th == nullptr)
+			auto pThread = wThis->lock();
+			auto winThread = (SPtr<WinThreadImpl>)pThread;
+			//auto th = (SPtr<WinThreadImpl>)wThis->lock();
+			if (winThread == nullptr)
 				return EXIT_FAILURE;
 
 			{
-				auto mgr = th->m_Manager.Lock();
-				mgr->GetThreadCreationEvent()->Trigger((PThread)th);
+				auto mgr = winThread->m_Manager.lock();
+				mgr->GetThreadCreationEvent()->Trigger((PThread)pThread);
 			}
 
-			while (th->GetState() != ThreadState_t::RUNNING)
+			while (winThread->GetState() != ThreadState_t::RUNNING)
 				THREAD_YIELD();
 
-			if(th->m_ThreadFn != nullptr)
-				th->m_ThreadFn();
+			if(winThread->m_ThreadFn != nullptr)
+				winThread->m_ThreadFn();
 
-			th->m_State = ThreadState_t::STOPPED;
+			winThread->m_State = ThreadState_t::STOPPED;
 
 			{
-				auto mgr = th->m_Manager.Lock();
-				mgr->GetThreadDestructionEvent()->Trigger((PThread)th);
+				auto mgr = winThread->m_Manager.lock();
+				mgr->GetThreadDestructionEvent()->Trigger((PThread)pThread);
 			}
 
 			return EXIT_SUCCESS;
@@ -109,7 +111,7 @@ namespace greaper
 			,m_JoinsAtDestruction(config.JoinAtDestruction)
 			,m_Name(config.Name)
 		{
-			if (m_Manager == nullptr || m_ThreadFn == nullptr)
+			if (m_Manager.expired() || m_ThreadFn == nullptr)
 			{
 				m_State = ThreadState_t::STOPPED;
 				return;
@@ -122,11 +124,10 @@ namespace greaper
 			{
 				m_State = ThreadState_t::STOPPED;
 				m_ID = InvalidThreadID;
-				VerifyNotNull(m_Manager, "Something went wrong trying to create a WinThread.");
-				auto mgr = (PInterface)m_Manager.Lock();
+				auto mgr = (PInterface)m_Manager.lock();
 				auto wlib = mgr->GetLibrary();
-				VerifyNotNull(wlib, "Something went wrong trying to create a WinThread.");
-				auto lib = wlib.Lock();
+				VerifyNot(wlib.expired(), "Something went wrong trying to create a WinThread.");
+				auto lib = wlib.lock();
 				lib->LogError(
 					Format("Trying to create a thread named '%s', but something went wrong '%s'.", m_Name.c_str(), strerror(errno))
 				);

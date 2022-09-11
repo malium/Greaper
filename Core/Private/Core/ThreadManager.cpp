@@ -16,70 +16,59 @@
 using namespace greaper;
 using namespace greaper::core;
 
-void ThreadManager::Initialize(WGreaperLib library)noexcept
+void ThreadManager::OnInitialization() noexcept
 {
-	if (m_IsInitialized)
-		return;
 
-	m_Library = library;
-
-	m_IsInitialized = true;
 }
 
-void ThreadManager::Deinitialize()noexcept
+void ThreadManager::OnDeinitialization() noexcept
 {
-	if (!m_IsInitialized)
-		return;
 
-	m_IsInitialized = false;
 }
 
-void greaper::core::ThreadManager::OnActivate()noexcept
+void ThreadManager::OnActivation(SPtr<IInterface> oldDefault) noexcept
 {
-	if (m_IsActive)
-		return;
 
-	m_IsActive = true;
 }
 
-void greaper::core::ThreadManager::OnDeactivate()noexcept
+void ThreadManager::OnDeactivation(SPtr<IInterface> newDefault) noexcept
 {
-	if (!m_IsActive)
-		return;
 
-	m_IsActive = false;
 }
 
-void greaper::core::ThreadManager::InitProperties()noexcept
+void ThreadManager::InitProperties()noexcept
 {
+
 }
 
-void greaper::core::ThreadManager::DeinitProperties()noexcept
+void ThreadManager::DeinitProperties()noexcept
 {
+
 }
 
-void greaper::core::ThreadManager::OnChangingDefault(WInterface newDefault)noexcept
+void ThreadManager::InitSerialization() noexcept
 {
+
 }
 
-greaper::core::ThreadManager::ThreadManager()
-	:m_IsActive(false)
-	,m_IsInitialized(false)
-	,m_OnInitialization("OnInitialization"sv)
-	,m_OnActivation("OnActivation"sv)
-	,m_OnChangingDefault("OnChangingDefault"sv)
-	,m_ThreadCreationEvent("OnNewThread"sv)
+void ThreadManager::DeinitSerialization() noexcept
+{
+
+}
+
+ThreadManager::ThreadManager()
+	:m_ThreadCreationEvent("OnNewThread"sv)
 	,m_ThreadDestructionEvent("OnThreadFinish"sv)
 {
 
 }
 
-greaper::core::ThreadManager::~ThreadManager() noexcept
+ThreadManager::~ThreadManager() noexcept
 {
 
 }
 
-Result<WThread> greaper::core::ThreadManager::GetThread(ThreadID_t id) const noexcept
+Result<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
 {
 	SharedLock lock(m_ThreadMutex);
 
@@ -97,7 +86,7 @@ Result<WThread> greaper::core::ThreadManager::GetThread(ThreadID_t id) const noe
 	return CreateResult<WThread>(thread);
 }
 
-Result<WThread> greaper::core::ThreadManager::GetThread(const String& threadName) const noexcept
+Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcept
 {
 	SharedLock lock(m_ThreadMutex);
 
@@ -115,26 +104,12 @@ Result<WThread> greaper::core::ThreadManager::GetThread(const String& threadName
 	return CreateResult<WThread>(thread);
 }
 
-Result<PThread> greaper::core::ThreadManager::CreateThread(const ThreadConfig& config) noexcept
+Result<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 {
 	return CreateFailure<PThread>("Not Implemented"sv);
 }
 
-void greaper::core::ThreadManager::DestroyThread(PThread thread) noexcept
+void ThreadManager::DestroyThread(PThread thread) noexcept
 {
 
 }
-
-//Result<IThreadPool*> greaper::core::ThreadManager::GetThreadPool(const String& poolName) const
-//{
-//	return CreateFailure<IThreadPool*>("Not Implemented"sv);
-//}
-//
-//Result<IThreadPool*> greaper::core::ThreadManager::CreateThreadPool(const ThreadPoolConfig& config)
-//{
-//	return CreateFailure<IThreadPool*>("Not Implemented"sv);
-//}
-//
-//void greaper::core::ThreadManager::DestroyThreadPool(IThreadPool* pool)
-//{
-//}

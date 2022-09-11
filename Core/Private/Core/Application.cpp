@@ -65,15 +65,6 @@ void Application::LoadConfigLibraries() noexcept
 	}*/
 }
 
-//void Application::ClearFrameTimes()noexcept
-//{
-//	ClearMemory(m_FrameTimes);
-//	m_UpdateDeltaMin = FLT_MAX;
-//	m_UpdateDeltaMax = FLT_MIN;
-//	m_UpdateDeltaAvg = 0.f;
-//	m_LastUpdateDelta = 0.f;
-//}
-
 void Application::UpdateActiveInterfaceList()noexcept 
 {
 	LOCK(m_ActiveMutex);
@@ -85,8 +76,8 @@ void Application::UpdateActiveInterfaceList()noexcept
 		if (ifaceIDX < 0)
 			continue; // Not in vector
 
-		m_ActiveInterfaces[ifaceIDX].Reset(nullptr);
-		iface->OnDeactivate();
+		m_ActiveInterfaces[ifaceIDX].reset();
+		iface->Deactivate(PInterface());
 	}
 	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
 	{
@@ -105,7 +96,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 			ifaceIDX = uuidIT->second;
 		}
 		m_ActiveInterfaces[ifaceIDX] = iface;
-		iface->OnActivate();
+		iface->Activate(PInterface());
 	}
 
 	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
@@ -115,114 +106,15 @@ void Application::UpdateActiveInterfaceList()noexcept
 		VerifyInequal(uuidIT, m_ActiveInterfaceUuidMap.end(), "Couldn't find the Active interafce with UUID '%s' on the ActiveInterfaces.", iface->GetInterfaceUUID().ToString().c_str());
 		const auto ifaceIDX = uuidIT->second;
 		auto oiFace = m_ActiveInterfaces[ifaceIDX];
-		oiFace->OnChangingDefault(iface);
-		oiFace->OnDeactivate();
+		iface->Activate(oiFace);
 		m_ActiveInterfaces[ifaceIDX] = iface;
-		iface->OnActivate();
+		oiFace->Deactivate(iface);
 	}
 }
-
-//void Application::UpdateTick()
-//{
-//	// We start a new Frame/Tick
-//	++m_FrameCount;
-//
-//	UpdateActiveInterfaceList();
-//
-//	// PreUpdate
-//	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
-//	{
-//		auto* iface = m_ActiveInterfaces[i];
-//		iface->PreUpdate();
-//	}
-//
-//	// FixedUpdate
-//	uint64 step; uint32 iterations;
-//	ComputeFixedUpdateStep(step, iterations);
-//	const auto stepSecs = float(step) * 1e-9f;
-//	for (uint32 i = 0; i < iterations; ++i)
-//	{
-//		for (sizet j = 0; j < m_ActiveInterfaces.size(); ++j)
-//		{
-//			auto* iface = m_ActiveInterfaces[j];
-//			iface->FixedUpdate();
-//		}
-//
-//		m_LastFixedUpdateTime += std::chrono::nanoseconds(step);
-//	}
-//
-//	// Update
-//	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
-//	{
-//		auto* iface = m_ActiveInterfaces[i];
-//		iface->Update();
-//	}
-//
-//	// PostUpdate
-//	for (sizet i = 0; i < m_ActiveInterfaces.size(); ++i)
-//	{
-//		auto* iface = m_ActiveInterfaces[i];
-//		iface->PostUpdate();
-//	}
-//}
-//
-//void Application::ComputeFixedUpdateStep(uint64& step, uint32& iterations)
-//{
-//	const auto nextFrameTime = m_LastFixedUpdateTime + m_FixedUpdateStepNanos;
-//	if (nextFrameTime <= m_LastUpdateTime)
-//	{
-//		const auto simAccum = Max(m_LastUpdateTime - m_LastFixedUpdateTime, m_FixedUpdateStepNanos);
-//		auto stepn = m_FixedUpdateStepNanos.count();
-//		iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
-//
-//		if (iterations > m_RemainingFixedUpdates)
-//		{
-//			stepn = DivideAndRoundUp(simAccum.count(), (int64)m_RemainingFixedUpdates);
-//			iterations = (uint32)DivideAndRoundUp(simAccum.count(), stepn);
-//		}
-//		VerifyLessEqual(iterations, m_RemainingFixedUpdates, "");
-//		m_RemainingFixedUpdates -= iterations;
-//		m_RemainingFixedUpdates = Min(MAX_ACCUM_FIXED_UPDATES, m_RemainingFixedUpdates + NEW_FIXED_UPDATES_PER_FRAME);
-//		step = (uint64)stepn;
-//	}
-//	step = 0;
-//	iterations = 0;
-//}
-
-//static constexpr float StoredFrameINV = 1.f / StoredFrameTimeCount;
-
-//void Application::UpdateFrameTimes()noexcept
-//{
-//	m_FrameTimes[m_FrameCount % StoredFrameTimeCount] = m_LastUpdateDelta;
-//
-//	float accum = 0.f;
-//	for (int i = 0; i < StoredFrameTimeCount; ++i)
-//		accum += m_FrameTimes[i];
-//	
-//	m_UpdateDeltaAvg = accum * StoredFrameINV;
-//	m_UpdateDeltaMax = Max(m_UpdateDeltaMax, m_LastUpdateDelta);
-//	m_UpdateDeltaMin = Min(m_UpdateDeltaMin, m_LastUpdateDelta);
-//}
 
 Application::Application()
 	:m_OnClose("OnClose"sv)
 	,m_OnInterfaceActivation("OnInterfaceActivation"sv)
-	,m_OnInitialization("OnInitialization"sv)
-	,m_OnActivation("OnActivation"sv)
-	,m_IsActive(false)
-	,m_IsInitialized(false)
-	,m_HasToStop(false)
-	/*,m_FrameCount(0)
-	,m_UpdateStep(1.f / 200.f)
-	,m_UpdateStepNanos((uint64)(1e9/200.0))
-	,m_FixedUpdateStep(1.f / 50.f)
-	,m_FixedUpdateStepNanos((uint64)(1e9/50.0))
-	,m_LastUpdateDelta(0.f)
-	,m_FrameTimes()
-	,m_UpdateDeltaAvg(0.f)
-	,m_UpdateDeltaMin(0.f)
-	,m_UpdateDeltaMax(0.f)
-	,m_RemainingFixedUpdates(MAX_ACCUM_FIXED_UPDATES)*/
 {
 
 }
@@ -232,71 +124,36 @@ Application::~Application()
 	// No-op
 }
 
-void Application::Initialize(WPtr<IGreaperLibrary> library)noexcept
+void Application::OnInitialization() noexcept
 {
-	if (m_IsInitialized)
-		return;
-
-	m_Library = library;
-	VerifyNot(m_Library.Expired(), "Trying to initialize an application with an expired GreaperLib.");
-	auto lib = m_Library.Lock();
-	gApplication = lib->GetApplication().Lock();
+	VerifyNot(m_Library.expired(), "Trying to initialize an application with an expired GreaperLib.");
+	auto lib = m_Library.lock();
+	gApplication = lib->GetApplication().lock();
 
 	RegisterGreaperLibrary(lib);
-
-	// Reset timings...
-	/*m_StartTime = Clock_t::now();
-	ClearFrameTimes();
-	m_FrameCount = 0;
-	m_LastUpdateTime = m_StartTime;
-	m_LastFixedUpdateTime = m_StartTime;*/
-
-	// Initialize...
-
-	m_OnInitialization.Trigger(true);
-	m_IsInitialized = true;
 }
 
-void Application::Deinitialize()noexcept
+void Application::OnDeinitialization() noexcept
 {
-	if (!m_IsInitialized)
-		return;
-	
-	// Deinitialize...
-	m_Library.Reset();
-	gApplication.Reset(nullptr);
-	m_OnInitialization.Trigger(false);
-	m_IsInitialized = false;
+	gApplication.reset();
 }
 
-void Application::OnActivate()noexcept
+void Application::OnActivation(SPtr<IInterface> oldDefault) noexcept
 {
-	if (m_IsActive)
-		return;
-
-	// Activate...
-
-	m_OnActivation.Trigger(true);
-	m_IsActive = true;
+	/* No-op */
 }
 
-void Application::OnDeactivate()noexcept
+void Application::OnDeactivation(SPtr<IInterface> newDefault) noexcept
 {
-	if (!m_IsActive)
-		return;
-
-	// Deactivate...
-
-	m_OnActivation.Trigger(false);
-	m_IsActive = false;
+	/* No-op */
 }
 
 void Application::InitProperties()noexcept
 {
-	if (m_Library == nullptr)
+	if (m_Library.expired())
 		return; // no base library weird
 
-	auto lib = m_Library.Lock();
+	auto lib = m_Library.lock();
 
 	if (m_Properties.size() != (sizet)COUNT)
 		m_Properties.resize((sizet)COUNT, WIProperty());
@@ -318,7 +175,7 @@ void Application::InitProperties()noexcept
 	if (result.IsOk())
 		appNameProp = result.GetValue();
 
-	if (appNameProp == nullptr)
+	if (appNameProp.expired())
 	{
 		auto appNameResult = CreateProperty<greaper::String>(m_Library, ApplicationNameName, {}, ""sv, false, true, nullptr);
 		Verify(appNameResult.IsOk(), "Couldn't create the property '%s' msg: %s", ApplicationNameName.data(), appNameResult.GetFailMessage().c_str());
@@ -331,7 +188,7 @@ void Application::InitProperties()noexcept
 	if (result.IsOk())
 		appVersionProp = result.GetValue();
 
-	if (appVersionProp == nullptr)
+	if (appVersionProp.expired())
 	{
 		auto appVersionResult = CreateProperty<uint32>(m_Library, ApplicationVersionName, 0, ""sv, false, true, nullptr);
 		Verify(appVersionResult.IsOk(), "Couldn't create the property '%s' msg: %s", ApplicationVersionName.data(), appVersionResult.GetFailMessage().c_str());
@@ -344,7 +201,7 @@ void Application::InitProperties()noexcept
 	if (result.IsOk())
 		compilationInfoProp = result.GetValue();
 
-	if (compilationInfoProp == nullptr)
+	if (compilationInfoProp.expired())
 	{
 		static constexpr StringView gCompilationInfo =
 #if GREAPER_DEBUG
@@ -365,7 +222,7 @@ void Application::InitProperties()noexcept
 	if (result.IsOk())
 		loadedLibrariesProp = result.GetValue();
 
-	if (loadedLibrariesProp == nullptr)
+	if (loadedLibrariesProp.expired())
 	{
 		auto loadedLibrariesResult = CreateProperty<greaper::WStringVec>(m_Library, LoadedLibrariesName, {}, ""sv, false, true, nullptr);
 		Verify(loadedLibrariesResult.IsOk(), "Couldn't create the property '%s' msg: %s", LoadedLibrariesName.data(), loadedLibrariesResult.GetFailMessage().c_str());
@@ -405,63 +262,17 @@ void Application::InitProperties()noexcept
 void Application::DeinitProperties()noexcept
 {
 	for (auto& prop : m_Properties)
-		prop.Reset();
+		prop.reset();
 }
 
-//void Application::PreUpdate()
-//{
-//	Break("Trying to call a PreUpdate to Application, which is forbidden.");
-//}
-//
-//void Application::Update()
-//{
-//	//auto curTime = Clock_t::now();
-//	//
-//	//if (m_UpdateStep > 0.f)
-//	//{
-//	//	const auto nextFrameTime = m_LastUpdateTime + std::chrono::nanoseconds(m_UpdateStepNanos);
-//	//	while (nextFrameTime > curTime)
-//	//	{
-//	//		const auto waitTimeNanos = nextFrameTime - curTime;
-//	//		const auto waitTimeMillis = (uint32)(waitTimeNanos.count() / 1'000'000);
-//
-//	//		if (waitTimeMillis >= 2)
-//	//		{
-//	//			OSPlatform::Sleep(waitTimeMillis);
-//	//			curTime = Clock_t::now();
-//	//		}
-//	//		else
-//	//		{
-//	//			while (nextFrameTime > curTime) //! Spin to wait the exactly time needed
-//	//				curTime = Clock_t::now();
-//	//		}
-//	//	}
-//	//}
-//	//const auto timeDiff = curTime - m_LastUpdateTime;
-//	//m_LastUpdateDelta = (float)((double)timeDiff.count() * 1e-9);
-//	//m_LastUpdateTime = curTime;
-//
-//	//UpdateTick();
-//}
-//
-//void Application::PostUpdate()
-//{
-//	Break("Trying to call a PostUpdate to Application, which is forbidden.");
-//}
-//
-//void Application::FixedUpdate()
-//{
-//	Break("Trying to call a FixedUpdate to Application, which is forbidden.");
-//}
+void Application::InitSerialization() noexcept
+{
 
-//void Application::SetConfig(ApplicationConfig config)
-//{
-//	m_Config = std::move(config);
-//	// Update Properties
-//	UpdateConfigProperties();
-//	// Apply config
-//	LoadConfigLibraries();
-//}
+}
+
+void Application::DeinitSerialization() noexcept
+{
+}
 
 Result<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringView& libPath)
 {
@@ -492,7 +303,7 @@ Result<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringV
 	if (res.HasFailed())
 		return CopyFailure<SPtr<IGreaperLibrary>>(res);
 
-	gLib->Initialize(lib, gApplication);
+	gLib->InitLibrary(lib, (SPtr<IApplication>)gApplication);
 	
 	return CreateResult(gLib);
 }
@@ -549,7 +360,7 @@ EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 		m_LibraryUuidMap.erase(uuidIT);
 	}
 
-	auto lib = m_Library.Lock();
+	auto lib = m_Library.lock();
 	VerifyNotNull(lib, "Trying to unregister a GreaperLibrary, but the Application library is expired.");
 
 	if (nIndex != uIndex)
@@ -584,10 +395,8 @@ EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 			iface->Deinitialize();
 		}
 	}
-	libInfo.Lib->DeinitReflection();
-	libInfo.Lib->DeinitManagers();
 	libInfo.Lib->DeinitLibrary();
-	libInfo.Lib.Reset(nullptr);
+	libInfo.Lib.reset();
 	libInfo.IntefaceNameMap.clear();
 	libInfo.InterfaceUuidMap.clear();
 	libInfo.Interfaces.clear();
@@ -600,11 +409,11 @@ EmptyResult Application::RegisterInterface(PInterface interface)
 		return CreateEmptyFailure("Trying to register a nullptr interface.");
 
 	auto wLib = interface->GetLibrary();
-	if (wLib.Expired())
+	if (wLib.expired())
 	{
 		return CreateEmptyFailure("Trying to register an Interface without GreaperLibrary.");
 	}
-	auto pLib = wLib.Lock();
+	auto pLib = wLib.lock();
 	
 	const auto findIT = m_LibraryUuidMap.find(pLib->GetLibraryUuid());
 	if (findIT == m_LibraryUuidMap.end())
@@ -641,11 +450,11 @@ EmptyResult Application::UnregisterInterface(PInterface interface)
 		return CreateEmptyFailure("Trying to unregister a nullptr interface.");
 
 	auto wLib = interface->GetLibrary();
-	if (wLib.Expired())
+	if (wLib.expired())
 	{
 		return CreateEmptyFailure("Trying to unregister an Interface without GreaperLibrary.");
 	}
-	auto pLib = wLib.Lock();
+	auto pLib = wLib.lock();
 
 	const auto findIT = m_LibraryUuidMap.find(pLib->GetLibraryUuid());
 	if (findIT == m_LibraryUuidMap.end())
@@ -673,7 +482,7 @@ EmptyResult Application::UnregisterInterface(PInterface interface)
 		m_LibraryUuidMap.erase(uuidIT);
 	}
 
-	auto lib = m_Library.Lock();
+	auto lib = m_Library.lock();
 	VerifyNotNull(lib, "Trying to unregister a GreaperLibrary, but the Application library is expired.");
 
 	if (nIndex != uIndex)
@@ -698,7 +507,7 @@ EmptyResult Application::UnregisterInterface(PInterface interface)
 		DeactivateInterface(interface->GetInterfaceUUID());
 	if (interface->IsInitialized())
 		interface->Deinitialize();
-	libInfo.Interfaces[index].Reset(nullptr);
+	libInfo.Interfaces[index].reset();
 	return CreateEmptyResult();
 }
 
@@ -960,11 +769,3 @@ Result<PInterface> Application::GetInterface(const StringView& interfaceName, co
 	auto iface = libInfo.Interfaces[ifaceNameIT->second];
 	return CreateResult(iface);
 }
-
-//void Application::StopApplication()
-//{
-//	m_Library->Log(Format("Stopping %s...", GetApplicationName()->GetValue().c_str()));
-//
-//	m_HasToStop = true;
-//	m_OnClose.Trigger();
-//}

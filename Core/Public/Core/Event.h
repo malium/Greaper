@@ -23,13 +23,16 @@ namespace greaper
 	template<class... Args>
 	class EventHandler
 	{
-		Event<Args...>* m_Event = nullptr;
+		//Event<Args...>* m_Event = nullptr;
+		WPtr<Event<Args...>> m_Event;
 		uint32 m_ID = 0;
 		
 	public:
 		~EventHandler();
 
 		void Disconnect();
+
+		bool IsConnected()const noexcept;
 
 		friend class Event<Args...>;
 	};
@@ -50,6 +53,24 @@ namespace greaper
 		uint32 ID = 0;
 	};
 
+	template<class T>
+	struct DeleterEmpty
+	{
+		constexpr DeleterEmpty()noexcept = default;
+
+		template<class T2, std::enable_if_t<std::is_convertible<T2*, T*>::value, int> = 0>
+		constexpr DeleterEmpty(const DeleterEmpty<T2>& other)noexcept
+		{
+			UNUSED(other);
+		}
+
+		void operator()(T* ptr)const
+		{
+			UNUSED(ptr);
+			/* No-op */
+		}
+	};
+
 	/*** Handles event creation, trigger and dispatching
 	*	Event provides an easy and multithreaded way of handling event triggering, dispatching and listening
 	*	Also this way of handling events, provide an easy way of sending arguments via template parameters,
@@ -68,6 +89,8 @@ namespace greaper
 	{
 		Mutex m_Mutex;
 		Vector<EventHandlerID<Args...>> m_Handlers;
+		SPtr<Event<Args...>> m_This;
+
 		String m_Name;
 		uint32 m_LastID;
 
@@ -98,11 +121,18 @@ namespace greaper
 	template<class... Args>
 	void EventHandler<Args...>::Disconnect()
 	{
-		if(m_Event != nullptr)
+		if(!m_Event.expired())
 		{
-			m_Event->Disconnect(*this);
+			auto evt = m_Event.lock();
+			evt->Disconnect(*this);
+			m_Event.reset();
 		}
-		m_Event = nullptr;
+	}
+
+	template<class ...Args>
+	bool EventHandler<Args...>::IsConnected() const noexcept
+	{
+		return !m_Event.expired();
 	}
 
 	template<class... Args>
@@ -110,7 +140,7 @@ namespace greaper
 		:m_Name(eventName)
 		,m_LastID(0)
 	{
-
+		m_This.reset(this, DeleterEmpty<Event<Args...>>());
 	}
 
 	template<class... Args>
@@ -119,7 +149,7 @@ namespace greaper
 		EventHandlerID<Args...> hnd;
 		hnd.Function = std::move(function);
 		hnd.ID = m_LastID++;
-		handler.m_Event = this;
+		handler.m_Event = WPtr<Event<Args...>>(m_This);
 		handler.m_ID = hnd.ID;
 		auto lck = Lock(m_Mutex);
 		m_Handlers.push_back(std::move(hnd));
@@ -134,7 +164,7 @@ namespace greaper
 			EventHandlerID<Args...>& hnd = *it;
 			if (hnd.ID == handler.m_ID)
 			{
-				handler.m_Event = nullptr;
+				handler.m_Event.reset();
 				m_Handlers.erase(it);
 				break;
 			}
@@ -156,6 +186,7 @@ namespace greaper
 	{
 		Mutex m_Mutex;
 		Vector<EventHandlerID<void>> m_Handlers;
+		SPtr<Event<void>> m_This;
 		String m_Name;
 		uint32 m_LastID;
 
@@ -167,7 +198,7 @@ namespace greaper
 			:m_Name(eventName)
 			, m_LastID(0)
 		{
-
+			m_This.reset(this, DeleterEmpty<Event<void>>());
 		}
 		~Event() = default;
 		Event(const Event&) = delete;
@@ -180,7 +211,7 @@ namespace greaper
 			EventHandlerID<void> hnd;
 			hnd.Function = std::move(function);
 			hnd.ID = m_LastID++;
-			handler.m_Event = this;
+			handler.m_Event = m_This;
 			handler.m_ID = hnd.ID;
 			auto lck = Lock(m_Mutex);
 			m_Handlers.push_back(std::move(hnd));
@@ -194,7 +225,7 @@ namespace greaper
 				EventHandlerID<void>& hnd = *it;
 				if (hnd.ID == handler.m_ID)
 				{
-					handler.m_Event = nullptr;
+					handler.m_Event.reset();
 					m_Handlers.erase(it);
 					break;
 				}

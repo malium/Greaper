@@ -18,7 +18,7 @@ namespace greaper
 		template<class T2>
 		friend class WeakPointer;
 	public:
-		INLINE WeakPointer()noexcept
+		INLINE constexpr WeakPointer()noexcept
 			:m_Control(nullptr)
 		{
 
@@ -110,11 +110,11 @@ namespace greaper
 				m_Control->DecWeakReference();
 		}
 
-		INLINE SharedPointer<T> Lock()const noexcept
+		INLINE SharedPointer<T> lock()const noexcept
 		{
 			SharedPointer<T> shared;
 
-			if (Expired())
+			if (expired())
 				return shared;
 
 			m_Control->AddSharedReference();
@@ -123,18 +123,18 @@ namespace greaper
 
 			return shared;
 		}
-		INLINE bool Expired()const noexcept
+		INLINE bool expired()const noexcept
 		{
 			return m_Control == nullptr || m_Control->SharedRefCount() <= 0;
 		}
 		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE void Swap(WeakPointer<T2>& other)noexcept
+		INLINE void swap(WeakPointer<T2>& other)noexcept
 		{
 			auto* tempControl = m_Control;
 			m_Control = other.m_Control;
 			other.m_Control = tempControl;
 		}
-		INLINE void Reset()noexcept
+		INLINE void reset()noexcept
 		{
 			if (m_Control != nullptr)
 			{
@@ -169,7 +169,7 @@ namespace greaper
 	template<class T>
 	INLINE bool operator==(const WeakPointer<T>& left, std::nullptr_t) noexcept
 	{
-		return left.Expired();
+		return left.expired();
 	}
 	template<class T>
 	INLINE bool operator!=(const WeakPointer<T>&left, std::nullptr_t) noexcept

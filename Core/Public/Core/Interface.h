@@ -9,6 +9,7 @@
 #define CORE_INTERFACE_H 1
 
 #include "Uuid.h"
+#include "Event.h"
 
 namespace greaper
 {
@@ -29,11 +30,20 @@ namespace greaper
 	 */
 	class IInterface
 	{
+	protected:
+		virtual void OnInitialization()noexcept = 0;
+
+		virtual void OnDeinitialization()noexcept = 0;
+
+		virtual void OnActivation(SPtr<IInterface> oldDefault)noexcept = 0;
+
+		virtual void OnDeactivation(SPtr<IInterface> newDefault)noexcept = 0;
+
 	public:
 		using InitializationEvt_t = Event<bool>;
-		using ActivationEvt_t = Event<bool>;
-		using ChangingDefaultEvt_t = Event<IInterface*, WPtr<IInterface>>;
+		using ActivationEvt_t = Event<bool, IInterface*, SPtr<IInterface>>;
 
+		IInterface()noexcept;
 		virtual ~IInterface()noexcept = default;
 
 		static constexpr Uuid InterfaceUUID = Uuid{  };
@@ -43,45 +53,125 @@ namespace greaper
 		
 		virtual const StringView& GetInterfaceName()const noexcept = 0;
 		
-		virtual WPtr<IGreaperLibrary> GetLibrary()const noexcept = 0;
+		WPtr<IGreaperLibrary> GetLibrary()const noexcept;
 
-		virtual void Initialize(WPtr<IGreaperLibrary> library)noexcept = 0;
+		void Initialize(WPtr<IGreaperLibrary> library)noexcept;
 
-		virtual void Deinitialize()noexcept = 0;
+		void Deinitialize()noexcept;
 
-		virtual void OnActivate()noexcept = 0;
+		void Activate(SPtr<IInterface> oldDefault)noexcept;
 
-		virtual void OnDeactivate()noexcept = 0;
+		void Deactivate(SPtr<IInterface> newDefault)noexcept;
 
 		virtual void InitProperties()noexcept = 0;
 
 		virtual void DeinitProperties()noexcept = 0;
 
-		virtual bool IsActive()const noexcept = 0;
+		virtual void InitSerialization()noexcept = 0;
+
+		virtual void DeinitSerialization()noexcept = 0;
+
+		bool IsActive()const noexcept;
 		
-		virtual bool IsInitialized()const noexcept = 0;
+		bool IsInitialized()const noexcept;
 
-		/*virtual void PreUpdate() = 0;
+		InitializationEvt_t* GetInitializationEvent()const noexcept;
 
-		virtual void Update() = 0;
+		ActivationEvt_t* GetActivationEvent()const noexcept;
 
-		virtual void PostUpdate() = 0;
+		CRange<WPtr<IProperty>> GetProperties()const noexcept;
 
-		virtual void FixedUpdate() = 0;*/
+	protected:
+		WPtr<IGreaperLibrary> m_Library;
+		mutable InitializationEvt_t m_InitEvent;
+		mutable ActivationEvt_t m_ActivationEvent;
+		Vector<WPtr<IProperty>> m_Properties;
 
-		virtual InitializationEvt_t* GetInitializationEvent()const noexcept = 0;
-
-		virtual ActivationEvt_t* GetActivationEvent()const noexcept = 0;
-
-		virtual void OnChangingDefault(WPtr<IInterface> newDefault)noexcept = 0;
-
-		virtual ChangingDefaultEvt_t* GetChangingDefaultEvent()const noexcept = 0;
-
-		virtual CRange<WPtr<IProperty>> GetProperties()const noexcept = 0;
+	private:
+		bool m_IsActive;
+		bool m_IsInitialized;
 	};
+
+	INLINE IInterface::IInterface() noexcept
+		:m_InitEvent("Interface_Initialize"sv)
+		,m_ActivationEvent("Interface_Activation"sv)
+		,m_IsActive(false)
+		,m_IsInitialized(false)
+	{
+
+	}
+
+	INLINE const Uuid& IInterface::GetInterfaceUUID()const noexcept { return InterfaceUUID; }
+
+	INLINE const StringView& IInterface::GetInterfaceName()const noexcept { return InterfaceName; }
+
+	INLINE WPtr<IGreaperLibrary> IInterface::GetLibrary()const noexcept { return m_Library; }
+
+	INLINE void IInterface::Initialize(WPtr<IGreaperLibrary> library) noexcept
+	{
+		VerifyNot(m_IsInitialized, "Trying to initialize an already initialized Interface '%s'.", GetInterfaceName().data());
+
+		m_Library = library;
+
+		OnInitialization();
+
+		m_InitEvent.Trigger(true);
+		m_IsInitialized = true;
+	}
+
+	INLINE void IInterface::Deinitialize() noexcept
+	{
+		Verify(m_IsInitialized, "Trying to deinitialize an already deinitialized Interface '%s'.", GetInterfaceName().data());
+
+		OnDeinitialization();
+
+		m_Library.reset();
+
+		m_InitEvent.Trigger(false);
+		m_IsInitialized = false;
+	}
+
+	INLINE void IInterface::Activate(SPtr<IInterface> oldDefault) noexcept
+	{
+		VerifyNot(m_IsActive, "Trying to activate an already activated Interface '%s'.", GetInterfaceName().data());
+
+		OnActivation(oldDefault);
+
+		m_ActivationEvent.Trigger(true, this, (SPtr<IInterface>)oldDefault);
+		m_IsActive = true;
+	}
+
+	INLINE void IInterface::Deactivate(SPtr<IInterface> newDefault) noexcept
+	{
+		Verify(m_IsActive, "Trying to deactivate an already deactivated Interface '%s'.", GetInterfaceName().data());
+
+		OnDeactivation(newDefault);
+
+		m_ActivationEvent.Trigger(false, this, (SPtr<IInterface>)newDefault);
+		m_IsActive = false;
+	}
+
+	INLINE bool IInterface::IsActive() const noexcept { return m_IsActive; }
+
+	INLINE bool IInterface::IsInitialized() const noexcept { return m_IsInitialized; }
+
+	INLINE IInterface::InitializationEvt_t* IInterface::GetInitializationEvent() const noexcept { return &m_InitEvent; }
+
+	INLINE IInterface::ActivationEvt_t* IInterface::GetActivationEvent() const noexcept { return &m_ActivationEvent; }
+
+	INLINE CRange<WPtr<IProperty>> IInterface::GetProperties() const noexcept { return CreateRange(m_Properties); }
 
 	using PInterface = SPtr<IInterface>;
 	using WInterface = WPtr<IInterface>;
+
+	template<class T>
+	class TInterface : public IInterface
+	{
+	public:
+		const Uuid& GetInterfaceUUID()const noexcept override { return T::InterfaceUUID; }
+
+		const StringView& GetInterfaceName()const noexcept override { return T::InterfaceName; }
+	};
 
 	template<class T>
 	struct IsInterface

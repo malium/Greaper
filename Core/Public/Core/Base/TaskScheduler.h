@@ -100,14 +100,14 @@ namespace greaper
 		,m_Name(schedulerName)
 	{
 		if (taskHandlerCount > 0)
-			VerifyNotNull(m_ThreadManager, "Trying to create a multithreaded TaskScheduler, but not ThreadManager was provided.");
+			VerifyNot(m_ThreadManager.expired(), "Trying to create a multithreaded TaskScheduler, but not ThreadManager was provided.");
 
 
 		m_TaskHandlers.reserve(taskHandlerCount);
 
 		ThreadConfig cfg;
 		cfg.ThreadFN = std::bind(&TaskScheduler::RunFn, this);
-		auto thmgr = m_ThreadManager.Lock();
+		auto thmgr = m_ThreadManager.lock();
 
 		for (uint32 i = 0; i < taskHandlerCount; ++i)
 		{

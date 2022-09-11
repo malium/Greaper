@@ -16,12 +16,6 @@ namespace greaper::core
 {
 	class ThreadManager final : public IThreadManager
 	{
-		WGreaperLib m_Library;
-		bool m_IsActive;
-		bool m_IsInitialized;
-		mutable InitializationEvt_t m_OnInitialization;
-		mutable ActivationEvt_t m_OnActivation;
-		mutable ChangingDefaultEvt_t m_OnChangingDefault;
 		mutable ThreadCreationEvent_t m_ThreadCreationEvent;
 		mutable ThreadDestructionEvent_t m_ThreadDestructionEvent;
 
@@ -42,39 +36,25 @@ namespace greaper::core
 		}
 
 	public:
-		const Uuid& GetInterfaceUUID()const noexcept override { return InterfaceUUID; }
+		ThreadManager();
 
-		const StringView& GetInterfaceName()const noexcept override { return InterfaceName; }
+		~ThreadManager()noexcept;
 
-		WGreaperLib GetLibrary()const noexcept override { return m_Library; }
+		void OnInitialization()noexcept override;
 
-		void Initialize(WGreaperLib library)noexcept override;
+		void OnDeinitialization()noexcept override;
 
-		void Deinitialize()noexcept override;
+		void OnActivation(SPtr<IInterface> oldDefault)noexcept override;
 
-		void OnActivate()noexcept override;
-
-		void OnDeactivate()noexcept override;
+		void OnDeactivation(SPtr<IInterface> newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 
 		void DeinitProperties()noexcept override;
 
-		bool IsActive()const noexcept override { return m_IsActive; }
+		void InitSerialization()noexcept override;
 
-		bool IsInitialized()const noexcept override { return m_IsInitialized; }
-
-		InitializationEvt_t* GetInitializationEvent()const noexcept override { return &m_OnInitialization; }
-
-		ActivationEvt_t* GetActivationEvent()const noexcept override { return &m_OnActivation; }
-
-		void OnChangingDefault(WInterface newDefault)noexcept override;
-
-		ChangingDefaultEvt_t* GetChangingDefaultEvent()const noexcept { return &m_OnChangingDefault; }
-
-		ThreadManager();
-
-		~ThreadManager()noexcept;
+		void DeinitSerialization()noexcept override;
 
 		Result<WThread> GetThread(ThreadID_t id)const noexcept override;
 
@@ -88,17 +68,7 @@ namespace greaper::core
 		
 		ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
 
-		CRange<WPtr<IProperty>> GetProperties()const noexcept override { return CRange<WPtr<IProperty>>(); }
-
 		CRange<PThread> GetThreads()const noexcept override { return CRange<PThread>(); }
-
-		/*Result<IThreadPool*> GetThreadPool(const String& poolName)const override;
-
-		Result<IThreadPool*> CreateThreadPool(const ThreadPoolConfig& config)override;
-
-		void DestroyThreadPool(IThreadPool* pool)override;
-
-		ThreadPoolEvent_t* const GetThreadPoolEvent()override { return &m_ThreadPoolEvent; }*/
 	};
 }
 

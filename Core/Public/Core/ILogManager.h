@@ -33,7 +33,7 @@ namespace greaper
 		LogLevel_t Level;
 	};
 
-	class ILogManager : public IInterface
+	class ILogManager : public TInterface<ILogManager>
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xB05DBD1D, 0x83FE42E1, 0x90CFF1EE, 0x2434CD0D };

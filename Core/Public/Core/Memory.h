@@ -22,7 +22,7 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
-//#include <memory>
+#include <memory>
 #include <cstdarg>
 #include <functional>
 #if PLT_LINUX
@@ -107,6 +107,7 @@ namespace greaper
 	INLINE void* Alloc(sizet byteSize)
 	{
 		return MemoryAllocator<_Alloc_>::Allocate(byteSize);
+		//return malloc(byteSize);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
@@ -140,6 +141,7 @@ namespace greaper
 	INLINE void Dealloc(void* mem)
 	{
 		MemoryAllocator<_Alloc_>::Deallocate(mem);
+		//free(mem);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
@@ -455,7 +457,7 @@ namespace greaper
 {
 	// Fwd declarations that need container types
 	template<class T, class _Alloc_ = GenericAllocator>
-	Result<SPtr<TProperty<T>>> CreateProperty(const WPtr<IGreaperLibrary>& library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
+	Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
 		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
 }
 

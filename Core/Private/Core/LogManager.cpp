@@ -14,26 +14,26 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 	if (prop == nullptr)
 		return;
 
-	auto* async = (PropertyBool*)prop;
+	auto* async = (AsyncLogProp_t*)prop;
 	if (m_Threaded == async->GetValue())
 		return; // no change
 
 	m_Threaded = async->GetValue();
 
-	VerifyNot(m_Library.Expired(), "Trying to change async LogManager, but its library has expired.");
-	auto lib = m_Library.Lock();
+	VerifyNot(m_Library.expired(), "Trying to change async LogManager, but its library has expired.");
+	auto lib = m_Library.lock();
 	auto wApp = lib->GetApplication();
 
 	if (async->GetValue()) // init threaded mode
 	{
-		if (wApp.Expired())
+		if (wApp.expired())
 		{
 			lib->LogError("Trying to enable async LogManager, but this library does not have an application connected.");
 			m_Threaded = false;
 			async->SetValue(false, true);
 			return;
 		}
-		auto app = wApp.Lock();
+		auto app = wApp.lock();
 		auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
 		if (thmgrRes.HasFailed())
 		{
@@ -68,12 +68,12 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 		//if (m_AsyncThread == nullptr)
 		//	return;
 
-		if (wApp.Expired())
+		if (wApp.expired())
 		{
 			lib->LogError("Trying to disable async LogManager, but this library does not have an application connected.");
 			return;
 		}
-		auto app = wApp.Lock();
+		auto app = wApp.lock();
 		auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
 		if (thmgrRes.HasFailed())
 		{
@@ -95,50 +95,35 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 
 void greaper::core::LogManager::RunFn()
 {
+	
+}
+
+void LogManager::OnInitialization() noexcept
+{
 
 }
 
-void LogManager::Initialize(WGreaperLib library)noexcept
+void LogManager::OnDeinitialization() noexcept
 {
-	if (m_IsInitialized)
-		return;
 
-	m_Library = library;
-
-	m_OnInitialization.Trigger(true);
-	m_IsInitialized = true;
 }
 
-void LogManager::Deinitialize()noexcept
+void LogManager::OnActivation(SPtr<IInterface> oldDefault) noexcept
 {
-	if (!m_IsInitialized)
-		return;
-
-	m_IsInitialized = false;
+	UNUSED(oldDefault);
 }
 
-void LogManager::OnActivate()noexcept
+void LogManager::OnDeactivation(SPtr<IInterface> newDefault) noexcept
 {
-	if (m_IsActive)
-		return;
-
-	m_IsActive = true;
-}
-
-void LogManager::OnDeactivate()noexcept
-{
-	if (!m_IsActive)
-		return;
-
-	m_IsActive = false;
+	UNUSED(newDefault);
 }
 
 void LogManager::InitProperties()noexcept
 {
-	if (m_Library == nullptr)
+	if (m_Library.expired())
 		return; // no base library weird
 
-	auto lib = m_Library.Lock();
+	auto lib = m_Library.lock();
 
 	if (m_Properties.size() != (sizet)COUNT)
 		m_Properties.resize((sizet)COUNT, WIProperty());
@@ -164,18 +149,18 @@ void LogManager::DeinitProperties()noexcept
 
 }
 
-void LogManager::OnChangingDefault(WInterface newDefault)noexcept
+void LogManager::InitSerialization() noexcept
+{
+
+}
+
+void LogManager::DeinitSerialization() noexcept
 {
 
 }
 
 LogManager::LogManager()
-	:m_IsActive(false)
-	,m_IsInitialized(false)
-	,m_OnInitialization("OnInitialization"sv)
-	,m_OnActivation("OnActivation"sv)
-	,m_OnChangingDefault("OnChangingDefault"sv)
-	,m_OnLogMessage("OnLogMessage"sv)
+	:m_OnLogMessage("OnLogMessage"sv)
 	,m_Threaded(false)
 {
 

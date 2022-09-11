@@ -32,7 +32,7 @@ namespace greaper
 	*	- UpdateMaxRate -> Stores the maximum amount of updates per second, mutable external
 	*	- FixedUpdateMaxRate -> Stores the amount of fixed updates per second, mutable external
 	*/
-	class IApplication : public IInterface
+	class IApplication : public TInterface<IApplication>
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xF79C882D, 0x506B4307, 0xBE036194, 0x9F58B3BC };
@@ -44,8 +44,6 @@ namespace greaper
 		DEF_PROP(CompilationInfo, String);
 		DEF_PROP(ApplicationVersion, uint32);
 		DEF_PROP(LoadedLibraries, WStringVec);
-		/*DEF_PROP(UpdateMaxRate, uint32);
-		DEF_PROP(FixedUpdateRate, uint32);*/
 		
 		using OnCloseEvent_t = Event<void>;
 
@@ -83,12 +81,6 @@ namespace greaper
 
 		virtual Result<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const = 0;
 
-		/*virtual bool AppHasToStop()const = 0;
-
-		virtual void StopApplication() = 0;
-
-		virtual OnCloseEvent_t*const GetOnCloseEvent() = 0;*/
-
 		virtual OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept = 0;
 
 		virtual WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept = 0;
@@ -99,31 +91,9 @@ namespace greaper
 
 		virtual WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept = 0;
 
-		/*virtual Timepoint_t GetStartTime()const = 0;
-
-		virtual Timepoint_t GetLastUpdateTime()const = 0;
-
-		virtual Timepoint_t GetLastFixedUpdateTime()const = 0;
-
-		virtual uint64 GetFrameCount()const = 0;
-
-		virtual float GetUpdateDelta()const = 0;
-
-		virtual float GetFixedUpdateDelta()const = 0;
-
-		virtual float GetAvgUpdateDelta()const = 0;
-
-		virtual float GetMinUpdateDelta()const = 0;
-
-		virtual float GetMaxUpdateDelta()const = 0;*/
-
 		virtual WPtr<AppInstanceProp_t> GetAppInstance()const noexcept = 0;
 
 		virtual WPtr<CommandLineProp_t> GetCommandLine()const noexcept = 0;
-
-		/*virtual FixedUpdateRateProp_t* GetFixedUpdateRate() = 0;
-
-		virtual UpdateMaxRateProp_t* GetUpdateMaxRate() = 0;*/
 
 		template<class T>
 		Result<SPtr<T>> RegisterGreaperLibraryT(const WStringView& libPath)

@@ -7,6 +7,9 @@
 
 namespace greaper
 {
+	template<class T>
+	class SharedPointer;
+
 	namespace Impl
 	{
 		enum class SPtrType
@@ -161,15 +164,14 @@ namespace greaper
 				void* mem = PlatformAlloc(sizeof(SharedPointerControlMT<T>));// , 16);
 				new(mem)SharedPointerControlMT<T>(m_Value, deleter);
 				m_Control = (SharedPointerControlMT<T>*)mem;
-				m_Control->AddSharedReference();
 			}
 			else if (threading == SPtrType::SingleThread)
 			{
 				void* mem = PlatformAlloc(sizeof(SharedPointerControlST<T>));// , 16);
 				new(mem)SharedPointerControlST<T>(m_Value, deleter);
 				m_Control = (SharedPointerControlST<T>*)mem;
-				m_Control->AddSharedReference();
 			}
+			m_Control->AddSharedReference();
 		}
 
 		template<class T2>
@@ -292,7 +294,7 @@ namespace greaper
 			return *this;
 		}
 		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE void Reset(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread) noexcept
+		INLINE void reset(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread) noexcept
 		{
 			if (m_Control != nullptr)
 			{
@@ -303,7 +305,7 @@ namespace greaper
 			if (m_Value != nullptr)
 				CreateControl(deleter, threading);
 		}
-		INLINE void Reset(std::nullptr_t)
+		INLINE void reset()
 		{
 			if (m_Control != nullptr)
 			{
@@ -323,7 +325,7 @@ namespace greaper
 			return shared;
 		}
 		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE void Swap(SharedPointer<T2>& other) noexcept
+		INLINE void swap(SharedPointer<T2>& other) noexcept
 		{
 			auto tempControl = m_Control;
 			auto tempValue = m_Value;
@@ -344,7 +346,7 @@ namespace greaper
 				return m_Control->WeakRefCount();
 			return 0;
 		}
-		INLINE T* Get()const noexcept { return m_Value; }
+		INLINE T* get()const noexcept { return m_Value; }
 		INLINE T* operator->()const noexcept
 		{
 			VerifyNotNull(m_Value, "SPtr: Trying to access a nullptr.");
@@ -367,7 +369,7 @@ namespace greaper
 	template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 	INLINE bool operator==(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
 	{
-		return left.Get() == right.Get();
+		return left.get() == right.get();
 	}
 	template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 	INLINE bool operator!=(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
@@ -377,7 +379,7 @@ namespace greaper
 	template<class T>
 	INLINE bool operator==(const SharedPointer<T>& left, std::nullptr_t)
 	{
-		return left.Get() == nullptr;
+		return left.get() == nullptr;
 	}
 	template<class T>
 	INLINE bool operator!=(const SharedPointer<T>& left, std::nullptr_t)
@@ -385,12 +387,6 @@ namespace greaper
 		return !(left == nullptr);
 	}
 
-	//template<class T, class _Alloc_ = GenericAllocator, class... Args>
-	//INLINE SharedPointer<T> MakeShared(Args&&... args, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, _Alloc_>, Impl::SPtrType type = Impl::SPtrType::MultiThread)
-	//{
-	//	auto ptr = Construct<T, _Alloc_>(args...);
-	//	return SharedPointer<T>(ptr);
-	//}
 	template<class T>
 	using SPtr = SharedPointer<T>;
 }
