@@ -196,41 +196,41 @@ namespace greaper
 	INLINE void IGreaperLibrary::Log(const String& message) const noexcept
 	{
 		if (m_LogActivated && m_LogManager != nullptr)
-			m_LogManager->Log(LogLevel_t::INFORMATIVE, message);
+			m_LogManager->Log(LogLevel_t::INFORMATIVE, message, GetLibraryName());
 		else
-			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::INFORMATIVE });
+			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::INFORMATIVE, GetLibraryName() });
 	}
 
 	INLINE void IGreaperLibrary::LogVerbose(const String& message) const noexcept
 	{
 		if (m_LogActivated && m_LogManager != nullptr)
-			m_LogManager->Log(LogLevel_t::VERBOSE, message);
+			m_LogManager->Log(LogLevel_t::VERBOSE, message, GetLibraryName());
 		else
-			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::VERBOSE });
+			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::VERBOSE, GetLibraryName() });
 	}
 
 	INLINE void IGreaperLibrary::LogWarning(const String& message) const noexcept
 	{
 		if (m_LogActivated && m_LogManager != nullptr)
-			m_LogManager->Log(LogLevel_t::WARNING, message);
+			m_LogManager->Log(LogLevel_t::WARNING, message, GetLibraryName());
 		else
-			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::WARNING });
+			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::WARNING, GetLibraryName() });
 	}
 
 	INLINE void IGreaperLibrary::LogError(const String& message) const noexcept
 	{
 		if (m_LogActivated && m_LogManager != nullptr)
-			m_LogManager->Log(LogLevel_t::LL_ERROR, message);
+			m_LogManager->Log(LogLevel_t::ERROR, message, GetLibraryName());
 		else
-			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::LL_ERROR });
+			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::ERROR, GetLibraryName() });
 	}
 
 	INLINE void IGreaperLibrary::LogCritical(const String& message) const noexcept
 	{
 		if (m_LogActivated && m_LogManager != nullptr)
-			m_LogManager->Log(LogLevel_t::CRITICAL, message);
+			m_LogManager->Log(LogLevel_t::CRITICAL, message, GetLibraryName());
 		else
-			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::CRITICAL });
+			m_InitLogs.push_back(LogData{ message, Clock_t::now(), LogLevel_t::CRITICAL, GetLibraryName() });
 	}
 
 	INLINE void IGreaperLibrary::OnNewLog(WPtr<IInterface> newInterface) noexcept

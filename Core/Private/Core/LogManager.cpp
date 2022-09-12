@@ -9,6 +9,8 @@
 using namespace greaper;
 using namespace core;
 
+greaper::SPtr<greaper::core::LogManager> gLogManager = greaper::SPtr<greaper::core::LogManager>();
+
 void LogManager::OnAsyncChanged(IProperty* prop)
 {
 	if (prop == nullptr)
@@ -93,19 +95,55 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 	}
 }
 
-void greaper::core::LogManager::RunFn()
+void LogManager::RunFn()
 {
-	
+	while (m_Threaded)
+	{
+		auto lck = UniqueLock<Mutex>(m_QueueMutex);
+		while (m_QueuedMessages.empty() || !m_Threaded)
+			m_QueueSignal.wait(lck);
+
+		if (!m_Threaded)
+			break; // stop thread
+
+		for (const auto& logData : m_QueuedMessages)
+			LogToWriters(logData);
+
+		m_QueuedMessages.clear();
+	}
+}
+
+void LogManager::LogToWriters(const LogData& data)
+{
+	auto lck = Lock(m_WriterMutex);
+
+	for (auto& writer : m_Writers)
+	{
+		if (writer == nullptr)
+			continue;
+		writer->WriteLog(data);
+	}
 }
 
 void LogManager::OnInitialization() noexcept
 {
-
+	VerifyNot(m_Library.expired(), "Trying to initialize LogManager, but its library is expired.");
+	auto lib = m_Library.lock();
+	auto managers = lib->GetManagers();
+	for (auto it = managers.begin(); it != managers.end(); ++it)
+	{
+		auto mgr = *it;
+		if (mgr.get() == this)
+		{
+			gLogManager = mgr;
+			break;
+		}
+	}
 }
 
 void LogManager::OnDeinitialization() noexcept
 {
-
+	gLogManager.reset();
 }
 
 void LogManager::OnActivation(SPtr<IInterface> oldDefault) noexcept
@@ -160,8 +198,7 @@ void LogManager::DeinitSerialization() noexcept
 }
 
 LogManager::LogManager()
-	:m_OnLogMessage("OnLogMessage"sv)
-	,m_Threaded(false)
+	:m_Threaded(false)
 {
 
 }
@@ -171,12 +208,60 @@ LogManager::~LogManager() noexcept
 
 }
 
-void LogManager::Log(LogLevel_t level, const String& message)noexcept
+void LogManager::AddLogWriter(SPtr<ILogWriter> writer) noexcept
 {
+	auto lck = Lock(m_WriterMutex);
 
+	if (Contains(m_Writers, writer))
+		return;
+
+	writer->_Connect(gLogManager, m_Writers.size());
+	m_Writers.push_back(writer);
+
+	if (writer->WritePreviousMessages())
+	{
+		auto msgLck = Lock(m_MessagesMutex);
+		for (const auto& logData : m_Messages)
+			writer->WriteLog(logData);
+	}
+}
+
+void LogManager::RemoveLogWriter(sizet writerID) noexcept
+{
+	auto lck = Lock(m_WriterMutex);
+
+	if (writerID >= m_Writers.size())
+		return;
+
+	m_Writers[writerID].reset();
+}
+
+CRangeProtected<LogData, Mutex> LogManager::GetMessages() const noexcept
+{
+	return CreateRange(m_Messages, m_MessagesMutex);
+}
+
+void LogManager::Log(LogLevel_t level, const String& message, StringView libraryName)noexcept
+{
+	_Log(LogData{ message, Clock_t::now(), level, std::move(libraryName) });
 }
 
 void LogManager::_Log(const LogData& data)noexcept
 {
+	if (!m_Threaded)
+	{
+		LogToWriters(data);
+	}
+	else
+	{
+		m_QueueMutex.lock();
+		m_QueuedMessages.push_back(data);
+		m_QueueMutex.unlock();
+		m_QueueSignal.notify_one();
+	}
 
+	{
+		auto lck = Lock(m_MessagesMutex);
+		m_Messages.push_back(data);
+	}
 }

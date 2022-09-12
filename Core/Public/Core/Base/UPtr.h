@@ -20,7 +20,13 @@ namespace greaper
 			Destroy(ptr);
 		}
 
-		INLINE explicit UPtr(T* value = nullptr, DeleteFN deleteFn = &UPtr<T>::DefaultDeleteFn) noexcept
+		INLINE constexpr UPtr() noexcept
+			:m_Value(nullptr)
+			,m_Deleter(nullptr)
+		{
+
+		}
+		INLINE explicit UPtr(T* value, DeleteFN deleteFn = &UPtr<T>::DefaultDeleteFn) noexcept
 			:m_Value(value)
 			,m_Deleter(std::move(deleteFn))
 		{

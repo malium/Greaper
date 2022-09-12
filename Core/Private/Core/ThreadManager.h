@@ -68,7 +68,7 @@ namespace greaper::core
 		
 		ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
 
-		CRange<PThread> GetThreads()const noexcept override { return CRange<PThread>(); }
+		CRange<PThread> GetThreads()const noexcept override { return CRange<PThread>(nullptr, nullptr); }
 	};
 }
 

@@ -842,48 +842,8 @@ namespace greaper
 	}
 
 	using AsyncOp = TAsyncOp<std::any>;
-
-	namespace Impl
-	{
-		template<typename T, typename M, typename A = StdAlloc<T>>
-		std::size_t GetSizeProtected(const Vector<T, A>& vec, M& mtx)
-		{
-			Lock<M> lck(mtx);
-			return vec.size();
-		}
-		template<typename T, typename M, typename A = StdAlloc<T>>
-		T& GetElementProtected(Vector<T, A>& vec, M& mtx, std::size_t idx)
-		{
-			Lock<M> lck(mtx);
-			return vec[idx];
-		}
-		template<typename T, typename M, typename A = StdAlloc<T>>
-		const T& GetCElementProtected(const Vector<T, A>& vec, M& mtx, std::size_t idx)
-		{
-			Lock<M> lck(mtx);
-			return vec[idx];
-		}
-	}
-
-	template<typename T, typename M, typename A = StdAlloc<T>>
-	Range<T> CreateProtectedRange(Vector<T, A>& vec, M& mtx)
-	{
-		using namespace std::placeholders;
-		Range<T> r;
-		r.SizeFn = std::bind(Impl::GetSizeProtected<T, M, A>, vec, mtx);
-		r.GetItemFn = std::bind(Impl::GetElementProtected<T, M, A>, vec, mtx, _1);
-		return r;
-	}
-
-	template<typename T, typename M, typename A = StdAlloc<T>>
-	CRange<T> CreateProtectedRange(const Vector<T, A>& vec, M& mtx)
-	{
-		using namespace std::placeholders;
-		CRange<T> r;
-		r.SizeFn = std::bind(Impl::GetSizeProtected<T, M, A>, vec, mtx);
-		r.GetItemFn = std::bind(Impl::GetCElementProtected<T, M, A>, vec, mtx, _1);
-		return r;
-	}
 }
+
+#include "Base/RangeProtected.h"
 
 #endif /* CORE_CONCURRENCY_H */

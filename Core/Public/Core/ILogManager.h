@@ -20,7 +20,7 @@ namespace greaper
 			VERBOSE,
 			INFORMATIVE,
 			WARNING,
-			LL_ERROR,
+			ERROR,
 			CRITICAL
 		};
 	}
@@ -31,7 +31,10 @@ namespace greaper
 		String Message;
 		Timepoint_t Time;
 		LogLevel_t Level;
+		StringView LibraryName;
 	};
+
+	class ILogWriter;
 
 	class ILogManager : public TInterface<ILogManager>
 	{
@@ -41,17 +44,17 @@ namespace greaper
 
 		DEF_PROP(AsyncLog, bool);
 
-		using LogEvent_t = Event<const LogData&>;
-		using LogEventHandler_t = LogEvent_t::HandlerType;
-		using LogEventFunction_t = LogEvent_t::HandlerFunction;
-
 		virtual ~ILogManager()noexcept = default;
-
-		virtual LogEvent_t* GetLogEvent()const noexcept = 0;
 
 		virtual WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept = 0;
 
-		virtual void Log(LogLevel_t level, const String& message)noexcept = 0;
+		virtual void AddLogWriter(SPtr<ILogWriter> writer)noexcept = 0;
+
+		virtual void RemoveLogWriter(sizet writerID)noexcept = 0;
+
+		virtual CRangeProtected<LogData, Mutex> GetMessages()const noexcept = 0;
+
+		virtual void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept = 0;
 
 		virtual void _Log(const LogData& data)noexcept = 0;
 	};
@@ -59,5 +62,7 @@ namespace greaper
 	using WLogManager = WPtr<ILogManager>;
 	using PLogManager = SPtr<ILogManager>;
 }
+
+#include "Base/ILogWriter.h"
 
 #endif /* CORE_I_LOG_MANAGER_H */

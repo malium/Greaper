@@ -181,7 +181,7 @@ namespace greaper
 		using Type = T;
 		using Pointer = T*;
 
-		INLINE SharedPointer() noexcept
+		INLINE constexpr SharedPointer() noexcept
 			:m_Value(nullptr)
 			,m_Control(nullptr)
 		{

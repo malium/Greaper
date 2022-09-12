@@ -327,65 +327,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	template<typename K, typename V, typename H, typename C, typename A> struct ReflectedTypeToID<UnorderedMultiMap<K, V, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMultiMap; };
 	template<typename T, typename H, typename C, typename A> struct ReflectedTypeToID<UnorderedMultiSet<T, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMultiSet; };
 
-	template<typename T>
-	struct Range
-	{
-		std::function<std::size_t()> SizeFn;
-		std::function<T&(std::size_t idx)> GetItemFn;
-
-		INLINE operator bool()const noexcept
-		{
-			return SizeFn != nullptr && GetItemFn != nullptr;
-		}
-
-		INLINE T* begin()const noexcept
-		{
-			return &GetItemFn(0);
-		}
-		INLINE T* end()const noexcept
-		{
-			return &GetItemFn(SizeFn() - 1) + 1;
-		}
-	};
-	template<typename T>
-	struct CRange
-	{
-		std::function<std::size_t()> SizeFn = nullptr;
-		std::function<const T& (std::size_t idx)> GetItemFn = nullptr;
-
-		INLINE operator bool()const noexcept
-		{
-			return SizeFn != nullptr && GetItemFn != nullptr;
-		}
-
-		INLINE const T* begin()const noexcept
-		{
-			return &GetItemFn(0);
-		}
-		INLINE const T* end()const noexcept
-		{
-			return &GetItemFn(SizeFn() - 1) + 1;
-		}
-	};
-
-	template<typename T, typename A = StdAlloc<T>>
-	Range<T> CreateRange(Vector<T, A>& vec)
-	{
-		Range<T> r;
-		r.SizeFn = std::bind(&Vector<T, A>::size, &vec);
-		r.GetItemFn = std::bind([](Vector<T, A>& v, std::size_t i) -> T& { return v[i]; }, vec, std::placeholders::_1);
-		return r;
-	}
-
-	template<typename T, typename A = StdAlloc<T>>
-	CRange<T> CreateRange(const Vector<T, A>& vec)
-	{
-		CRange<T> r;
-		r.SizeFn = std::bind(&Vector<T, A>::size, &vec);
-		r.GetItemFn = std::bind([](const Vector<T, A>& v, std::size_t i) -> const T& { return v[i]; }, vec, std::placeholders::_1);
-		return r;
-	}
-
+	
 	struct Snprintf
 	{
 		static int Fn(achar* buffer, size_t bufferLen, const achar* fmt, va_list argList)
@@ -449,6 +391,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	}
 }
 
+#include "Base/Range.h"
 #include "Base/UPtr.h"
 #include "Base/SPtr.h"
 #include "Base/WPtr.h"

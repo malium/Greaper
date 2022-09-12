@@ -26,14 +26,21 @@ namespace greaper::core
 			COUNT
 		};
 
-		mutable LogEvent_t m_OnLogMessage;
 		AsyncLogProp_t::ModificationEventHandler_t m_OnAsyncProp;
 
 		Vector<LogData> m_QueuedMessages;
-		std::atomic_bool m_Threaded;
+		Mutex m_QueueMutex;
+		Signal m_QueueSignal;
+		bool m_Threaded;
+		Mutex m_WriterMutex;
+		Vector<SPtr<ILogWriter>> m_Writers;
+
+		Vector<LogData> m_Messages;
+		mutable Mutex m_MessagesMutex;
 
 		void OnAsyncChanged(IProperty* prop);
 		void RunFn();
+		void LogToWriters(const LogData& data);
 
 	public:
 		LogManager();
@@ -56,11 +63,15 @@ namespace greaper::core
 
 		void DeinitSerialization()noexcept override;
 
-		LogEvent_t* GetLogEvent()const noexcept override { return &m_OnLogMessage; }
-
 		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return m_Properties[(sizet)AsyncProp]; }
 
-		void Log(LogLevel_t level, const String& message)noexcept override;
+		void AddLogWriter(SPtr<ILogWriter> writer)noexcept override;
+
+		void RemoveLogWriter(sizet writerID)noexcept override;
+
+		CRangeProtected<LogData, Mutex> GetMessages()const noexcept override;
+
+		void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept override;
 
 		void _Log(const LogData& data)noexcept override;
 	};
