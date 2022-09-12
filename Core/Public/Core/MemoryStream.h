@@ -20,45 +20,45 @@ namespace greaper
 		uint8* m_End;
 		bool m_OwnsMemory;
 
-		void Realloc(sizet bytes);
+		void Realloc(sizet bytes)noexcept;
 
 	public:
-		MemoryStream();
+		MemoryStream()noexcept;
 
-		MemoryStream(sizet capacity);
+		MemoryStream(sizet capacity)noexcept;
 
-		MemoryStream(void* memory, sizet size);
+		MemoryStream(void* memory, sizet size)noexcept;
 
-		MemoryStream(const MemoryStream& other);
-		MemoryStream& operator=(const MemoryStream& other);
-		MemoryStream(MemoryStream&& other) noexcept;
+		MemoryStream(const MemoryStream& other)noexcept;
+		MemoryStream& operator=(const MemoryStream& other)noexcept;
+		MemoryStream(MemoryStream&& other) noexceptnoexcept;
 		MemoryStream& operator=(MemoryStream&& other) noexcept;
 
-		~MemoryStream();
+		~MemoryStream()noexcept;
 
 		INLINE bool IsFile()const noexcept override { return false; }
 
-		uint8* GetData()const { return m_Data; }
+		INLINE uint8* GetData()const noexcept { return m_Data; }
 
-		uint8* GetCursor()const { return m_Cursor; }
+		INLINE uint8* GetCursor()const noexcept { return m_Cursor; }
 
-		ssizet Read(void* buf, ssizet count)const override;
+		ssizet Read(void* buf, ssizet count)const noexcept override;
 
-		ssizet Write(const void* buf, ssizet count) override;
+		ssizet Write(const void* buf, ssizet count)noexcept override;
 
-		void Skip(ssizet count) override;
+		void Skip(ssizet count)noexcept override;
 
-		void Seek(ssizet pos) override;
+		void Seek(ssizet pos)noexcept override;
 
-		ssizet Tell()const override { return m_Cursor - m_Data; }
+		INLINE ssizet Tell()const noexcept override { return m_Cursor - m_Data; }
 
-		bool Eof()const override { return m_Cursor >= m_End; }
+		INLINE bool Eof()const noexcept override { return m_Cursor >= m_End; }
 
-		SPtr<IStream> Clone(bool copyData = true)const override;
+		SPtr<IStream> Clone(bool copyData = true)const noexcept override;
 
-		void Close() override;
+		void Close()noexcept override;
 
-		uint8* DisownMemory();
+		uint8* DisownMemory()noexcept;
 	};
 }
 

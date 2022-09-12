@@ -479,6 +479,7 @@
     <ClInclude Include="Public\Core\CorePrerequisites.h" />
     <ClInclude Include="Public\Core\Enumeration.h" />
     <ClInclude Include="Public\Core\Event.h" />
+    <ClInclude Include="Public\Core\FileStream.h" />
     <ClInclude Include="Public\Core\IApplication.h" />
     <ClInclude Include="Public\Core\ICommandManager.h" />
     <ClInclude Include="Public\Core\ICrashManager.h" />

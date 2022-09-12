@@ -28,10 +28,10 @@ namespace greaper
 		uint16 m_Access;
 
 	public:
-		IStream(uint16 accessMode = READ);
-		IStream(StringView name, uint16 accessMode = READ);
+		IStream(uint16 accessMode = READ)noexcept;
+		IStream(StringView name, uint16 accessMode = READ)noexcept;
 
-		virtual ~IStream() = default;
+		virtual ~IStream()noexcept = default;
 
 		const String& GetName()const noexcept { return m_Name; }
 
@@ -44,33 +44,33 @@ namespace greaper
 		virtual bool IsFile()const noexcept = 0;
 
 		template<typename T>
-		const IStream& operator>>(T& val)const;
+		const IStream& operator>>(T& val)const noexcept;
 
 		template<typename T>
-		IStream& operator>>(T& val);
+		IStream& operator>>(T& val)noexcept;
 
 		template<typename T>
-		IStream& operator<<(const T& val);
+		IStream& operator<<(const T& val)noexcept;
 
-		virtual ssizet Read(void* buff, ssizet count)const = 0;
+		virtual ssizet Read(void* buff, ssizet count)const noexcept = 0;
 		
-		virtual ssizet Write(const void* buff, ssizet count) = 0;
+		virtual ssizet Write(const void* buff, ssizet count)noexcept = 0;
 		
-		virtual void Skip(ssizet count) = 0;
+		virtual void Skip(ssizet count)noexcept = 0;
 
-		virtual void Seek(ssizet pos) = 0;
+		virtual void Seek(ssizet pos)noexcept = 0;
 
-		virtual ssizet Tell()const = 0;
+		virtual ssizet Tell()const noexcept = 0;
 
-		virtual void Align(uint32 count = 1);
+		virtual void Align(uint32 count = 1)noexcept;
 
-		virtual bool Eof()const = 0;
+		virtual bool Eof()const noexcept = 0;
 
 		ssizet Size()const noexcept { return m_Size; }
 
-		virtual SPtr<IStream> Clone(bool copyData = true)const = 0;
+		virtual SPtr<IStream> Clone(bool copyData = true)const noexcept = 0;
 
-		virtual void Close() = 0;
+		virtual void Close()noexcept = 0;
 	};
 }
 
