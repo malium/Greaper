@@ -48,7 +48,7 @@ namespace greaper
 		friend class HTask;
 
 	public:
-		INLINE TaskScheduler(WThreadManager thManager, uint32 taskHandlerCount = 1, StringView schedulerName = "TaskScheduler"sv);
+		INLINE explicit TaskScheduler(WThreadManager thManager, uint32 taskHandlerCount = 1, StringView schedulerName = "TaskScheduler"sv);
 
 		INLINE ~TaskScheduler()noexcept;
 
@@ -123,7 +123,7 @@ namespace greaper
 
 	INLINE TaskScheduler::~TaskScheduler() noexcept
 	{
-		if (m_TaskHandlers.size() == 0)
+		if (m_TaskHandlers.empty())
 			return;
 
 
@@ -131,14 +131,14 @@ namespace greaper
 
 	INLINE HTask TaskScheduler::SendTask(Task task) noexcept
 	{
-		if (m_TaskHandlers.size() == 0)
+		if (m_TaskHandlers.empty())
 		{
 			task();
-			return HTask(this, nullptr);
+			return {this, nullptr};
 		}
 
 
-		return HTask();
+		return {};
 	}
 
 	INLINE void TaskScheduler::WaitUntilAllTasksFinished() noexcept

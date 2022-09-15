@@ -31,11 +31,11 @@
 #if COMPILER_MSVC
 #define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__))
 #else
-#define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: " FUNCTION_FULL ", message: " msg __VA_OPT__(,) __VA_ARGS__));
+#define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: " FUNCTION_FULL ", message: " msg , __VA_ARGS__));
 #endif
 
 #if GREAPER_ENABLE_BREAK
-#if COMPILER_MSVC
+#if PLT_WINDOWS
 #define Verify(exp, msg, ...) { if(!(exp)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #exp " not verified, at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
 #define VerifyNot(exp, msg, ...) { if((exp)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: !" #exp " not verified, at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
 #define VerifyInequal(a, b, msg, ...) { if((a) == (b)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #a " != " #b " not verified, at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
@@ -165,7 +165,8 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	template<typename T>
 	using WeakSPtr = std::weak_ptr<T>;
 	template<typename T>
-	using UPtr = std::unique_ptr<T>;*/
+	using UPtr = std::unique_ptr<T>;
+	 */
 
 	template<class T, class _Alloc_ = GenericAllocator>
 	class Destructor
@@ -474,7 +475,6 @@ void* greaper::MemoryAllocator<T>::AllocateAligned(sizet byteSize, sizet alignme
 		return Allocate(byteSize);
 
 	void* mem = PlatformAlignedAlloc(byteSize, alignment);
-
 	VerifyNotNull(mem, "Nullptr detected after asking to OS for %lld bytes aligned %lld.", byteSize, alignment);
 
 	return mem;
@@ -516,7 +516,7 @@ namespace std
 	{
 		INLINE size_t operator()(const greaper::String& str)const noexcept
 		{
-#if PLT_WINDOWS
+#if COMPILER_MSVC
 			return std::_Hash_array_representation(str.data(), str.size());
 #else
 			return std::_Hash_bytes(str.data(), str.size(), 0);
@@ -529,7 +529,7 @@ namespace std
 	{
 		INLINE size_t operator()(const greaper::WString& str)const noexcept
 		{
-#if PLT_WINDOWS
+#if COMPILER_MSVC
 			return std::_Hash_array_representation(str.data(), str.size());
 #else
 			return std::_Hash_bytes(str.data(), str.size(), 0);

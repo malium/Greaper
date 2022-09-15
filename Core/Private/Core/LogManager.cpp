@@ -143,6 +143,16 @@ void LogManager::OnInitialization() noexcept
 
 void LogManager::OnDeinitialization() noexcept
 {
+	m_OnAsyncProp.Disconnect();
+
+	if (m_Threaded)
+	{
+		m_Threaded = false;
+		m_QueueSignal.notify_all();
+		m_AsyncThread->Join();
+	}
+	m_Writers.clear();
+
 	gLogManager.reset();
 }
 
@@ -176,7 +186,14 @@ void LogManager::InitProperties()noexcept
 	{
 		auto asyncLogResult = CreateProperty<bool>(m_Library, AsyncLogName, false, ""sv, false, true, nullptr);
 		Verify(asyncLogResult.IsOk(), "Couldn't create the property '%s' msg: %s", AsyncLogName.data(), asyncLogResult.GetFailMessage().c_str());
-		asyncLogProp = asyncLogResult.GetValue();
+		asyncLogProp = (WPtr<AsyncLogProp_t>)asyncLogResult.GetValue();
+	}
+
+	auto asyncLog = asyncLogProp.lock();
+	if (asyncLog != nullptr)
+	{
+		using namespace std::placeholders;
+		asyncLog->GetOnModificationEvent()->Connect(m_OnAsyncProp, std::bind(&LogManager::OnAsyncChanged, this, _1));
 	}
 
 	m_Properties[(sizet)AsyncProp] = asyncLogProp;
@@ -184,7 +201,9 @@ void LogManager::InitProperties()noexcept
 
 void LogManager::DeinitProperties()noexcept
 {
+	m_OnAsyncProp.Disconnect();
 
+	m_Properties.clear();
 }
 
 void LogManager::InitSerialization() noexcept
@@ -215,7 +234,7 @@ void LogManager::AddLogWriter(SPtr<ILogWriter> writer) noexcept
 	if (Contains(m_Writers, writer))
 		return;
 
-	writer->_Connect(gLogManager, m_Writers.size());
+	writer->_Connect((WLogManager)gLogManager, m_Writers.size());
 	m_Writers.push_back(writer);
 
 	if (writer->WritePreviousMessages())
@@ -243,7 +262,7 @@ CRangeProtected<LogData, Mutex> LogManager::GetMessages() const noexcept
 
 void LogManager::Log(LogLevel_t level, const String& message, StringView libraryName)noexcept
 {
-	_Log(LogData{ message, Clock_t::now(), level, std::move(libraryName) });
+	_Log(LogData{ message, std::chrono::system_clock::now(), level, std::move(libraryName) });
 }
 
 void LogManager::_Log(const LogData& data)noexcept

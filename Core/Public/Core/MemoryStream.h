@@ -25,16 +25,16 @@ namespace greaper
 	public:
 		MemoryStream()noexcept;
 
-		MemoryStream(sizet capacity)noexcept;
+		explicit MemoryStream(sizet capacity)noexcept;
 
 		MemoryStream(void* memory, sizet size)noexcept;
 
 		MemoryStream(const MemoryStream& other)noexcept;
 		MemoryStream& operator=(const MemoryStream& other)noexcept;
-		MemoryStream(MemoryStream&& other) noexceptnoexcept;
+		MemoryStream(MemoryStream&& other) noexcept;
 		MemoryStream& operator=(MemoryStream&& other) noexcept;
 
-		~MemoryStream()noexcept;
+		~MemoryStream()noexcept override;
 
 		INLINE bool IsFile()const noexcept override { return false; }
 

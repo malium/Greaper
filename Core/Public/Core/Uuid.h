@@ -29,7 +29,7 @@ namespace greaper
 
 	public:
 		INLINE constexpr Uuid() noexcept = default;
-		INLINE constexpr Uuid(const uint32 data0, const uint32 data1, const uint32 data2, const uint32 data3) noexcept;
+		INLINE constexpr Uuid(uint32 data0, uint32 data1, uint32 data2, uint32 data3) noexcept;
 		INLINE constexpr explicit Uuid(const StringView& view) noexcept;
 		INLINE constexpr Uuid(const Uuid& other) noexcept = default;
 		INLINE constexpr Uuid(Uuid&& other) noexcept = default;

@@ -24,7 +24,7 @@ namespace greaper::StringUtils
 
 			static constexpr uint32 offsets[6] = { 0x00000000, 0x00003080, 0x000E2080, 0x03C82080, 0xFA082080, 0x82082080 };
 
-			uint32 numBytes = 0;
+			uint32 numBytes;
 
 			const auto firstByte = (uint8)*begin;
 			if (firstByte < 192)
@@ -76,7 +76,7 @@ namespace greaper::StringUtils
 				return output;
 			}
 
-			uint32 numBytes = 0;;
+			uint32 numBytes;
 			if (input < 0x80)
 				numBytes = 1;
 			else if (input < 0x800)

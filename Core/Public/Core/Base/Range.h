@@ -21,9 +21,9 @@ namespace greaper
 		T* operator->()const noexcept;
 		T& operator*()const noexcept;
 		RangeIterator<T>& operator++()noexcept;
-		RangeIterator<T> operator++(int)noexcept;
+		const RangeIterator<T> operator++(int)noexcept;
 		RangeIterator<T>& operator--()noexcept;
-		RangeIterator<T> operator--(int)noexcept;
+		const RangeIterator<T> operator--(int)noexcept;
 		bool operator==(const RangeIterator& other)const noexcept;
 		bool operator!=(const RangeIterator& other)const noexcept;
 	};
@@ -38,9 +38,9 @@ namespace greaper
 		const T* operator->()const noexcept;
 		const T& operator*()const noexcept;
 		ConstRangeIterator<T>& operator++()noexcept;
-		ConstRangeIterator<T> operator++(int)noexcept;
+		const ConstRangeIterator<T> operator++(int)noexcept;
 		ConstRangeIterator<T>& operator--()noexcept;
-		ConstRangeIterator<T> operator--(int)noexcept;
+		const ConstRangeIterator<T> operator--(int)noexcept;
 		bool operator==(const ConstRangeIterator& other)const noexcept;
 		bool operator!=(const ConstRangeIterator& other)const noexcept;
 	};
@@ -57,7 +57,7 @@ namespace greaper
 
 		}
 
-		INLINE operator bool()const noexcept
+		INLINE explicit operator bool()const noexcept
 		{
 			return SizeFn != nullptr && GetItemFn != nullptr;
 		}
@@ -92,7 +92,7 @@ namespace greaper
 
 		}
 
-		INLINE operator bool()const noexcept
+		INLINE explicit operator bool()const noexcept
 		{
 			return SizeFn != nullptr && GetItemFn != nullptr;
 		}
@@ -162,7 +162,7 @@ namespace greaper
 	}
 
 	template<typename T>
-	INLINE RangeIterator<T> RangeIterator<T>::operator++(int) noexcept
+	INLINE const RangeIterator<T> RangeIterator<T>::operator++(int) noexcept
 	{
 		RangeIterator<T> old = *this;
 		++(*this);
@@ -177,7 +177,7 @@ namespace greaper
 	}
 
 	template<typename T>
-	INLINE RangeIterator<T> RangeIterator<T>::operator--(int) noexcept
+	INLINE const RangeIterator<T> RangeIterator<T>::operator--(int) noexcept
 	{
 		RangeIterator<T> old = *this;
 		--(*this);
@@ -228,7 +228,7 @@ namespace greaper
 	}
 
 	template<typename T>
-	INLINE ConstRangeIterator<T> ConstRangeIterator<T>::operator++(int) noexcept
+	INLINE const ConstRangeIterator<T> ConstRangeIterator<T>::operator++(int) noexcept
 	{
 		ConstRangeIterator<T> old = *this;
 		++(*this);
@@ -243,7 +243,7 @@ namespace greaper
 	}
 
 	template<typename T>
-	INLINE ConstRangeIterator<T> ConstRangeIterator<T>::operator--(int) noexcept
+	INLINE const ConstRangeIterator<T> ConstRangeIterator<T>::operator--(int) noexcept
 	{
 		ConstRangeIterator<T> old = *this;
 		--(*this);

@@ -34,6 +34,7 @@ namespace greaper::core
 		bool m_Threaded;
 		Mutex m_WriterMutex;
 		Vector<SPtr<ILogWriter>> m_Writers;
+		PThread m_AsyncThread;
 
 		Vector<LogData> m_Messages;
 		mutable Mutex m_MessagesMutex;
@@ -63,7 +64,7 @@ namespace greaper::core
 
 		void DeinitSerialization()noexcept override;
 
-		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return m_Properties[(sizet)AsyncProp]; }
+		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return (WPtr<AsyncLogProp_t>)m_Properties[(sizet)AsyncProp]; }
 
 		void AddLogWriter(SPtr<ILogWriter> writer)noexcept override;
 

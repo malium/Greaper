@@ -8,6 +8,8 @@
 #ifndef CORE_MONITOR_H
 #define CORE_MONITOR_H 1
 
+#include <utility>
+
 #include "../CorePrerequisites.h"
 #include "Rect.h"
 
@@ -33,7 +35,7 @@ namespace greaper
 		bool m_IsPrimary;
 
 	public:
-		Monitor(const std::pair<uint16, uint16>& size, const RectU& workRect, MonitorHandle handle,
+		Monitor(std::pair<uint16, uint16>  size, const RectU& workRect, MonitorHandle handle,
 			DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
 			String monitorKey, bool isPrimary) noexcept;
 
@@ -56,10 +58,10 @@ namespace greaper
 		INLINE bool IsPrimary()const noexcept { return m_IsPrimary; }
 	};
 
-	INLINE Monitor::Monitor(const std::pair<uint16, uint16>& size, const RectU& workRect, MonitorHandle handle,
+	INLINE Monitor::Monitor(std::pair<uint16, uint16>  size, const RectU& workRect, MonitorHandle handle,
 				DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
 				String monitorKey, bool isPrimary) noexcept
-		:m_Size(size)
+		:m_Size(std::move(size))
 		,m_WorkRect(workRect)
 		,m_Handle(handle)
 		,m_Adapter(adapter)

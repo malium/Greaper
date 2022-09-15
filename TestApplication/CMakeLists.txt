@@ -8,9 +8,11 @@ project(TestApplication
 include_directories(../Core/Public)
 
 file(GLOB source_files CONFIGURE_DEPENDS
-	"../TestApplication/*.cpp"
-	"../Core/Public/Core/*.h"
-	"../Core/Public/Core/*/*.h")
+		"../TestApplication/*.cpp"
+		"../Core/Public/Core/*.h"
+		"../Core/Public/Core/*.inl"
+		"../Core/Public/Core/*/*.h"
+		"../Core/Public/Core/*/*.inl")
 
 
 add_executable(TestApplication ${source_files})

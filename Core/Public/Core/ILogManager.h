@@ -29,7 +29,7 @@ namespace greaper
 	struct LogData
 	{
 		String Message;
-		Timepoint_t Time;
+		std::chrono::system_clock::time_point Time;
 		LogLevel_t Level;
 		StringView LibraryName;
 	};

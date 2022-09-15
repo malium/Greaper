@@ -8,11 +8,15 @@
 #ifndef CORE_INTERFACE_H
 #define CORE_INTERFACE_H 1
 
+#include <utility>
+
 #include "Uuid.h"
 #include "Event.h"
+#include "Enumeration.h"
 
 namespace greaper
 {
+	ENUMERATION(InitState, Stopped, Starting, Started, Stopping);
 	/**
 	 * @brief Base class of all manager and factories
 	 * 
@@ -59,9 +63,9 @@ namespace greaper
 
 		void Deinitialize()noexcept;
 
-		void Activate(SPtr<IInterface> oldDefault)noexcept;
+		void Activate(const SPtr<IInterface>& oldDefault)noexcept;
 
-		void Deactivate(SPtr<IInterface> newDefault)noexcept;
+		void Deactivate(const SPtr<IInterface>& newDefault)noexcept;
 
 		virtual void InitProperties()noexcept = 0;
 
@@ -74,6 +78,10 @@ namespace greaper
 		bool IsActive()const noexcept;
 		
 		bool IsInitialized()const noexcept;
+
+		InitState_t GetActivationState()const noexcept;
+
+		InitState_t GetInitializationState()const noexcept;
 
 		InitializationEvt_t* GetInitializationEvent()const noexcept;
 
@@ -88,72 +96,76 @@ namespace greaper
 		Vector<WPtr<IProperty>> m_Properties;
 
 	private:
-		bool m_IsActive;
-		bool m_IsInitialized;
+		InitState_t m_InitializationState;
+		InitState_t m_ActiveState;
 	};
 
 	INLINE IInterface::IInterface() noexcept
 		:m_InitEvent("Interface_Initialize"sv)
 		,m_ActivationEvent("Interface_Activation"sv)
-		,m_IsActive(false)
-		,m_IsInitialized(false)
+		,m_InitializationState(InitState_t::Stopped)
+		,m_ActiveState(InitState_t::Stopped)
 	{
 
 	}
-
-	INLINE const Uuid& IInterface::GetInterfaceUUID()const noexcept { return InterfaceUUID; }
-
-	INLINE const StringView& IInterface::GetInterfaceName()const noexcept { return InterfaceName; }
 
 	INLINE WPtr<IGreaperLibrary> IInterface::GetLibrary()const noexcept { return m_Library; }
 
 	INLINE void IInterface::Initialize(WPtr<IGreaperLibrary> library) noexcept
 	{
-		VerifyNot(m_IsInitialized, "Trying to initialize an already initialized Interface '%s'.", GetInterfaceName().data());
-
-		m_Library = library;
+		VerifyEqual(m_InitializationState, InitState_t::Stopped, "Trying to initialize an already initialized Interface '%s'.", GetInterfaceName().data());
+		
+		m_InitializationState = InitState_t::Starting;
+		m_Library = std::move(library);
 
 		OnInitialization();
 
+		m_InitializationState = InitState_t::Started;
 		m_InitEvent.Trigger(true);
-		m_IsInitialized = true;
 	}
 
 	INLINE void IInterface::Deinitialize() noexcept
 	{
-		Verify(m_IsInitialized, "Trying to deinitialize an already deinitialized Interface '%s'.", GetInterfaceName().data());
+		VerifyEqual(m_InitializationState, InitState_t::Started, "Trying to deinitialize an already deinitialized Interface '%s'.", GetInterfaceName().data());
 
+		m_InitializationState = InitState_t::Stopping;
 		OnDeinitialization();
 
 		m_Library.reset();
 
+		m_InitializationState = InitState_t::Stopped;
 		m_InitEvent.Trigger(false);
-		m_IsInitialized = false;
 	}
 
-	INLINE void IInterface::Activate(SPtr<IInterface> oldDefault) noexcept
+	INLINE void IInterface::Activate(const SPtr<IInterface>& oldDefault) noexcept
 	{
-		VerifyNot(m_IsActive, "Trying to activate an already activated Interface '%s'.", GetInterfaceName().data());
+		VerifyEqual(m_ActiveState, InitState_t::Stopped, "Trying to activate an already activated Interface '%s'.", GetInterfaceName().data());
 
+		m_ActiveState = InitState_t::Starting;
 		OnActivation(oldDefault);
 
+		m_ActiveState = InitState_t::Started;
 		m_ActivationEvent.Trigger(true, this, (SPtr<IInterface>)oldDefault);
-		m_IsActive = true;
 	}
 
-	INLINE void IInterface::Deactivate(SPtr<IInterface> newDefault) noexcept
+	INLINE void IInterface::Deactivate(const SPtr<IInterface>& newDefault) noexcept
 	{
-		Verify(m_IsActive, "Trying to deactivate an already deactivated Interface '%s'.", GetInterfaceName().data());
+		VerifyEqual(m_ActiveState, InitState_t::Started, "Trying to deactivate an already deactivated Interface '%s'.", GetInterfaceName().data());
 
+		m_ActiveState = InitState_t::Stopping;
 		OnDeactivation(newDefault);
 
+		m_ActiveState = InitState_t::Stopped;
 		m_ActivationEvent.Trigger(false, this, (SPtr<IInterface>)newDefault);
-		m_IsActive = false;
 	}
 
-	INLINE bool IInterface::IsActive() const noexcept { return m_IsActive; }
+	INLINE bool IInterface::IsActive() const noexcept { return m_ActiveState == InitState_t::Started; }
 
-	INLINE bool IInterface::IsInitialized() const noexcept { return m_IsInitialized; }
+	INLINE bool IInterface::IsInitialized() const noexcept { return m_InitializationState == InitState_t::Started; }
+
+	INLINE InitState_t IInterface::GetActivationState() const noexcept { return m_ActiveState; }
+
+	INLINE InitState_t IInterface::GetInitializationState() const noexcept { return m_InitializationState; }
 
 	INLINE IInterface::InitializationEvt_t* IInterface::GetInitializationEvent() const noexcept { return &m_InitEvent; }
 

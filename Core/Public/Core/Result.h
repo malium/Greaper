@@ -24,7 +24,7 @@ namespace greaper
 
 		template<class _T_> friend Result<_T_> CreateResult(_T_)noexcept;
 		template<class _T_> friend Result<_T_> CreateFailure(StringView)noexcept;
-		template<class _T_> friend Result<_T_> CreateFailure(String)noexcept;
+		template<class _T_> friend Result<_T_> CreateFailure(const String&)noexcept;
 		template<class _T_, class _U_> friend Result<_T_> CopyFailure(Result<_U_>)noexcept;
 
 		Result() = default;
@@ -68,10 +68,10 @@ namespace greaper
 	}
 
 	template<class T>
-	INLINE Result<T> CreateFailure(String errorMessage) noexcept
+	INLINE Result<T> CreateFailure(const String& errorMessage) noexcept
 	{
 		Result<T> res;
-		res.m_FailMessage = std::move(errorMessage);
+		res.m_FailMessage = errorMessage;
 		res.m_Failure = true;
 		return res;
 		//return std::move(res);
@@ -79,7 +79,7 @@ namespace greaper
 
 	INLINE Result<EmptyStruct> CreateEmptyFailure(StringView errorMessage) noexcept
 	{
-		return CreateFailure<EmptyStruct>(std::move(errorMessage));
+		return CreateFailure<EmptyStruct>(errorMessage);
 	}
 
 	template<class T, class U = T>

@@ -37,7 +37,7 @@ INLINE constexpr uint32 BitsLog2(uint32 v)
 template<typename T>
 INLINE constexpr bool IsPowerOfTwo(const T value)
 {
-	return !(value == 0) && !(value & (value - 1));
+	return value != 0 && !(value & (value - 1));
 }
 /** Rounds number up/down to the next multiple, multiple must be power of two */
 template<typename T>
@@ -45,7 +45,7 @@ INLINE constexpr T RoundUp(const T number, const T multiple)
 {
 	static_assert(!IsPowerOfTwo(multiple), "Multiple must be power of two.");
 	const T result = (number + multiple - 1) & ~(multiple - 1);
-	static_assert(number <= result && result < number + multiple, "");
+	static_assert(number <= result && result < number + multiple);
 	return result;
 }
 /** Computes the factor that tells by how much is bigger/smaller */
@@ -166,7 +166,7 @@ INLINE void SetBitValue(uint8* ptr, const uint32 index, const bool set)noexcept
 }
 
 /***********************************************************************************
-*                              HASH HELPER FUNCITONS                               *
+*                              HASH HELPER FUNCTIONS                               *
 ***********************************************************************************/
 namespace std { template<class T> struct hash; }
 /**
@@ -267,6 +267,5 @@ INLINE bool IsMemoryCleared(const T& data) noexcept
 #define _MACRO_GET_ARG_COUNT(...) MACRO_EVAL(MACRO_ARG_N(__VA_ARGS__))
 #define MACRO_GET_ARG_COUNT(...) _MACRO_GET_ARG_COUNT(__VA_ARGS__, MACRO_RSEQ_N())
 
-
-#define MACRO_CONCAT(A, B) _MACRO_CONCAT(A, B)
 #define _MACRO_CONCAT(A, B) A##_##B
+#define MACRO_CONCAT(A, B) _MACRO_CONCAT(A, B)

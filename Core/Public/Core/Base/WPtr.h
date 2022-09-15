@@ -12,7 +12,7 @@ namespace greaper
 	{
 		mutable Impl::ISharedPointerControl* m_Control;
 
-		template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type>
+		template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type>
 		friend bool operator==(const WeakPointer<T>& left, const WeakPointer<T2>& right)noexcept;
 
 		template<class T2>
@@ -23,8 +23,8 @@ namespace greaper
 		{
 
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE WeakPointer(const SharedPointer<T2>& shared) noexcept
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		INLINE explicit WeakPointer(const SharedPointer<T2>& shared) noexcept
 			:m_Control(shared.m_Control)
 		{
 			if (m_Control != nullptr)
@@ -36,8 +36,8 @@ namespace greaper
 			if (m_Control != nullptr)
 				m_Control->AddWeakReference();
 		}
-		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
-		INLINE WeakPointer(const WeakPointer<T2>& other) noexcept
+		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
+		INLINE explicit WeakPointer(const WeakPointer<T2>& other) noexcept
 			:m_Control(other.m_Control)
 		{
 			if (m_Control != nullptr)
@@ -48,8 +48,8 @@ namespace greaper
 		{
 			other.m_Control = nullptr;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE WeakPointer(WeakPointer<T2>&& other) noexcept
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		INLINE explicit WeakPointer(WeakPointer<T2>&& other) noexcept
 			:m_Control(other.m_Control)
 		{
 			other.m_Control = nullptr;
@@ -67,7 +67,7 @@ namespace greaper
 			}
 			return *this;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 		INLINE WeakPointer& operator=(const WeakPointer<T2>& other) noexcept
 		{
 			if (((void*)this) != ((void*)&other))
@@ -92,7 +92,7 @@ namespace greaper
 			}
 			return *this;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 		INLINE WeakPointer& operator=(WeakPointer<T2>&& other) noexcept
 		{
 			if (((void*)this) != ((void*)&other))
@@ -127,7 +127,7 @@ namespace greaper
 		{
 			return m_Control == nullptr || m_Control->SharedRefCount() <= 0;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 		INLINE void swap(WeakPointer<T2>& other)noexcept
 		{
 			auto* tempControl = m_Control;
@@ -156,12 +156,12 @@ namespace greaper
 		}
 	};
 
-	template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+	template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 	INLINE bool operator==(const WeakPointer<T>& left, const WeakPointer<T2>& right)noexcept
 	{
 		return left.m_Control == right.m_Control;
 	}
-	template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+	template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 	INLINE bool operator!=(const WeakPointer<T>& left, const WeakPointer<T2>& right)noexcept
 	{
 		return !(left == right);

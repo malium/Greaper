@@ -10,8 +10,9 @@ project(Core
 include_directories(Public/)
 
 file(GLOB source_files CONFIGURE_DEPENDS
-	"Private/Core/*.h"
-	"Private/Core/*.cpp")
+		"Private/Core/*.h"
+		"Private/Core/*.inl"
+		"Private/Core/*.cpp")
 
 add_library(Core SHARED ${source_files})
 

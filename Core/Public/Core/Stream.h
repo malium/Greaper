@@ -28,8 +28,8 @@ namespace greaper
 		uint16 m_Access;
 
 	public:
-		IStream(uint16 accessMode = READ)noexcept;
-		IStream(StringView name, uint16 accessMode = READ)noexcept;
+		explicit IStream(uint16 accessMode = READ)noexcept;
+		explicit IStream(StringView name, uint16 accessMode = READ)noexcept;
 
 		virtual ~IStream()noexcept = default;
 

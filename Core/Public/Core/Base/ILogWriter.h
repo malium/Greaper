@@ -9,6 +9,7 @@
 #define CORE_I_LOG_WRITER_H 1
 
 #include <limits>
+#include <utility>
 
 namespace greaper
 {
@@ -28,7 +29,7 @@ namespace greaper
 
 		INLINE void _Connect(WPtr<ILogManager> logManager, sizet writerID)noexcept
 		{
-			m_LogManager = logManager;
+			m_LogManager = std::move(logManager);
 			m_WriterID = writerID;
 		}
 	

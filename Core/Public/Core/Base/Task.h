@@ -10,6 +10,7 @@
 
 #include "../Memory.h"
 #include <functional>
+#include <utility>
 
 namespace greaper
 {
@@ -56,7 +57,7 @@ namespace greaper
 	INLINE Task::Task(std::function<void()> function, StringView name, std::function<void(const Task&, Duration_t)> durationLogFn)
 		:m_Name(std::move(name))
 		,m_Function(std::move(function))
-		,m_DurationReportFn(durationLogFn)
+		,m_DurationReportFn(std::move(durationLogFn))
 	{
 
 	}

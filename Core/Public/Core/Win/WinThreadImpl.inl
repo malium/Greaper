@@ -10,6 +10,8 @@
 
 //#include "../Base/IThread.h"
 //#include "../Event.h"
+#include <utility>
+
 #include "../IThreadManager.h"
 
 namespace greaper
@@ -102,8 +104,8 @@ namespace greaper
 		}
 
 	public:
-		WinThreadImpl(WThreadManager manager, WThread self, ThreadConfig config)
-			:m_Manager(manager)
+		WinThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
+			:m_Manager(std::move(manager))
 			,m_Handle(InvalidThreadHandle)
 			,m_ID(InvalidThreadID)
 			,m_State(ThreadState_t::SUSPENDED)
@@ -141,7 +143,7 @@ namespace greaper
 				m_State = ThreadState_t::RUNNING;
 		}
 
-		~WinThreadImpl()
+		~WinThreadImpl() override
 		{
 			if (m_JoinsAtDestruction && Joinable())
 				Join();

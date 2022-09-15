@@ -13,7 +13,8 @@
 namespace greaper::core
 {
 	class Application;
-
+    class LogManager;
+    class ThreadManager;
 }
 
 #endif /* CORE_IMPL_PREREQUISITES_H */

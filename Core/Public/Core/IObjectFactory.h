@@ -23,7 +23,7 @@ namespace greaper
 		Uuid m_ObjectUUID;
 
 	public:
-		constexpr ObjectHandle(IObjectFactory* factory = nullptr, Uuid objectID = IObject::InvalidUUID) noexcept;
+		constexpr explicit ObjectHandle(IObjectFactory* factory = nullptr, Uuid objectID = IObject::InvalidUUID) noexcept;
 
 		ObjectHandle(const ObjectHandle& other) noexcept;
 		ObjectHandle& operator=(const ObjectHandle& other) noexcept;
@@ -61,7 +61,7 @@ namespace greaper
 
 		virtual EmptyResult DestroyObject(const ObjectHandle& handle) = 0;
 
-		virtual IObject* GetObject(Uuid objectID)const = 0;
+		virtual IObject* GetObject(const ObjectHandle& objectID)const = 0;
 	};
 
 	template<class TObject>
@@ -111,7 +111,7 @@ namespace greaper
 		struct ObjectInfo
 		{
 			TObject* Obj;
-			int64 RefereceCount;
+			int64 ReferenceCount;
 		};
 		Vector<ObjectInfo> m_ObjectList;
 		UnorderedMap<Uuid, sizet> m_UUID2IDX;
@@ -120,7 +120,7 @@ namespace greaper
 
 	public:
 		TObjectFactory() = default;
-		TObjectFactory(sizet capacity) noexcept
+		explicit TObjectFactory(sizet capacity) noexcept
 		{
 			LOCK(m_Mutex);
 			m_ObjectList.reserve(capacity);
@@ -130,7 +130,7 @@ namespace greaper
 		TObjectFactory(const TObjectFactory&) = delete;
 		TObjectFactory& operator=(const TObjectFactory&) = delete;
 		
-		INLINE ~TObjectFactory() noexcept
+		INLINE ~TObjectFactory() noexcept override
 		{
 			ClearFactory();
 		}
@@ -145,14 +145,14 @@ namespace greaper
 				Destroy(info.Obj);
 			}
 			m_ObjectList.clear();
-			m_FreeList.clear();
+			m_FreeIndicesList.clear();
 			m_UUID2IDX.clear();
 		}
 
 		INLINE sizet GetObjectCount()const override
 		{
 			LOCK(m_Mutex);
-			return m_ObjectList.size() - m_FreeList.size();
+			return m_ObjectList.size() - m_FreeIndicesList.size();
 		}
 
 		INLINE Result<ObjectHandle> GetHandle(Uuid objectUUID)override
@@ -175,7 +175,7 @@ namespace greaper
 			if (info.Obj == nullptr)
 				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the given ObjectUUID points to a null Object."sv);
 			
-			++info.RefereceCount;
+			++info.ReferenceCount;
 
 			return CreateResult(ObjectHandle(this, objectUUID));
 		}
@@ -203,15 +203,15 @@ namespace greaper
 			if (info.Obj == nullptr)
 				return; // Object already destroyed
 
-			--info.RefereceCount;
+			--info.ReferenceCount;
 			
 			// No more references -> destroy object
-			if (info.RefereceCount <= 0)
+			if (info.ReferenceCount <= 0)
 			{
 				Destroy(info.Obj);
 				info.Obj = nullptr;
 				m_UUID2IDX.erase(findIT);
-				m_FreeList.push_back(idx); // Add the index to the free list
+                m_FreeIndicesList.push_back(idx); // Add the index to the free list
 			}
 		}
 
@@ -220,9 +220,9 @@ namespace greaper
 			auto createFn = [this](ObjectInfo& info, Uuid objectUUID)
 			{
 				info.Obj = Construct<TObject>();
-				info.RefereceCount = 0;
+				info.ReferenceCount = 0;
 				auto obj = reinterpret_cast<IObject*>(info.Obj);
-				obj.m_UUID = objectUUID;
+				obj->m_UUID = objectUUID;
 			};
 			LOCK(m_Mutex);
 			auto objectUUID = Uuid::GenerateRandom();
@@ -248,7 +248,7 @@ namespace greaper
 
 				const auto idx = m_ObjectList.size();
 				m_ObjectList.push_back(ObjectInfo{});
-				ObjectInfo& info = m_ObjectList[objectID];
+				ObjectInfo& info = m_ObjectList[idx];
 				
 				createFn(info, objectUUID);
 				m_UUID2IDX.insert_or_assign(objectUUID, idx);
@@ -310,7 +310,7 @@ namespace greaper
 				if (res.IsOk())
 				{
 					*this = std::move(res.GetValue());
-					return;
+					return *this;
 				}
 			}
 			m_Factory = nullptr;
@@ -355,7 +355,7 @@ namespace greaper
 		if (!IsValid())
 			return nullptr;
 
-		IObject* object = m_Factory->GetObject(m_ObjectUUID);
+		IObject* object = m_Factory->GetObject(*this);
 
 		return object;
 	}

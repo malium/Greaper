@@ -69,20 +69,18 @@ void Application::UpdateActiveInterfaceList()noexcept
 {
 	LOCK(m_ActiveMutex);
 
-	for (sizet i = 0; i < m_InterfacesToRemove.size(); ++i)
+	for (const auto& iface : m_InterfacesToRemove)
 	{
-		auto iface = m_InterfacesToRemove[i];
-		const auto ifaceIDX = IndexOf(m_ActiveInterfaces, iface);
+        const auto ifaceIDX = IndexOf(m_ActiveInterfaces, iface);
 		if (ifaceIDX < 0)
 			continue; // Not in vector
 
 		m_ActiveInterfaces[ifaceIDX].reset();
 		iface->Deactivate(PInterface());
 	}
-	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
+	for (const auto& iface : m_InterfacesToAdd)
 	{
-		auto iface = m_InterfacesToAdd[i];
-		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
+        auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
 		sizet ifaceIDX;
 		if (uuidIT == m_ActiveInterfaceUuidMap.end())
 		{
@@ -97,16 +95,17 @@ void Application::UpdateActiveInterfaceList()noexcept
 		}
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		iface->Activate(PInterface());
+		m_OnInterfaceActivation.Trigger((WInterface)iface);
 	}
 
-	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
+	for (const auto& iface : m_InterfaceToChange)
 	{
-		auto iface = m_InterfaceToChange[i];
-		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
+        auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
 		VerifyInequal(uuidIT, m_ActiveInterfaceUuidMap.end(), "Couldn't find the Active interafce with UUID '%s' on the ActiveInterfaces.", iface->GetInterfaceUUID().ToString().c_str());
 		const auto ifaceIDX = uuidIT->second;
 		auto oiFace = m_ActiveInterfaces[ifaceIDX];
 		iface->Activate(oiFace);
+		m_OnInterfaceActivation.Trigger((WInterface)iface);
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		oiFace->Deactivate(iface);
 	}
@@ -135,6 +134,49 @@ void Application::OnInitialization() noexcept
 
 void Application::OnDeinitialization() noexcept
 {
+	VerifyNot(m_Library.expired(), "Trying to deinitialize Application but its GreaperLibrary is expired.");
+	auto ownLib = m_Library.lock();
+
+	{
+		LOCK(m_ActiveMutex);
+		for (auto& mgr : m_ActiveInterfaces)
+		{
+			if (mgr == nullptr)
+				continue;
+			DeactivateInterface(mgr->GetInterfaceUUID());
+		}
+
+		m_ActiveInterfaces.clear();
+		m_ActiveInterfaceNameMap.clear();
+		m_ActiveInterfaceUuidMap.clear();
+
+		m_InterfacesToAdd.clear();
+		m_InterfacesToRemove.clear();
+		m_InterfaceToChange.clear();
+	}
+
+	for (auto& lib : m_Libraries)
+	{
+		auto gLib = lib.Lib;
+		if (gLib->GetLibraryUuid() == ownLib->GetLibraryUuid())
+		{
+			lib.IntefaceNameMap.clear();
+			lib.InterfaceUuidMap.clear();
+			lib.Interfaces.clear();
+			continue;
+		}
+
+		if (gLib->GetInitializationState() == InitState_t::Started)
+			gLib->DeinitLibrary();
+
+		lib.IntefaceNameMap.clear();
+		lib.InterfaceUuidMap.clear();
+		lib.Interfaces.clear();
+	}
+	m_Libraries.clear();
+	m_LibraryNameMap.clear();
+	m_LibraryUuidMap.clear();
+
 	gApplication.reset();
 }
 
@@ -179,7 +221,7 @@ void Application::InitProperties()noexcept
 	{
 		auto appNameResult = CreateProperty<greaper::String>(m_Library, ApplicationNameName, {}, ""sv, false, true, nullptr);
 		Verify(appNameResult.IsOk(), "Couldn't create the property '%s' msg: %s", ApplicationNameName.data(), appNameResult.GetFailMessage().c_str());
-		appNameProp = appNameResult.GetValue();
+		appNameProp = (WPtr<ApplicationNameProp_t>)appNameResult.GetValue();
 	}
 	m_Properties[(sizet)ApplicationName] = std::move(appNameProp);
 
@@ -192,7 +234,7 @@ void Application::InitProperties()noexcept
 	{
 		auto appVersionResult = CreateProperty<uint32>(m_Library, ApplicationVersionName, 0, ""sv, false, true, nullptr);
 		Verify(appVersionResult.IsOk(), "Couldn't create the property '%s' msg: %s", ApplicationVersionName.data(), appVersionResult.GetFailMessage().c_str());
-		appVersionProp = appVersionResult.GetValue();
+		appVersionProp = (WPtr<ApplicationVersionProp_t>)appVersionResult.GetValue();
 	}
 	m_Properties[(sizet)ApplicationVersion] = std::move(appVersionProp);
 
@@ -213,7 +255,7 @@ void Application::InitProperties()noexcept
 #endif
 		auto comilationInfoResult = CreateProperty<greaper::String>(m_Library, CompilationInfoName, greaper::String{ gCompilationInfo }, ""sv, true, true, nullptr);
 		Verify(comilationInfoResult.IsOk(), "Couldn't create the property '%s' msg: %s", CompilationInfoName.data(), comilationInfoResult.GetFailMessage().c_str());
-		compilationInfoProp = comilationInfoResult.GetValue();
+		compilationInfoProp = (WPtr<CompilationInfoProp_t>)comilationInfoResult.GetValue();
 	}
 	m_Properties[(sizet)CompilationInfo] = std::move(compilationInfoProp);
 
@@ -226,9 +268,9 @@ void Application::InitProperties()noexcept
 	{
 		auto loadedLibrariesResult = CreateProperty<greaper::WStringVec>(m_Library, LoadedLibrariesName, {}, ""sv, false, true, nullptr);
 		Verify(loadedLibrariesResult.IsOk(), "Couldn't create the property '%s' msg: %s", LoadedLibrariesName.data(), loadedLibrariesResult.GetFailMessage().c_str());
-		loadedLibrariesProp = loadedLibrariesResult.GetValue();
+		loadedLibrariesProp = (WPtr<LoadedLibrariesProp_t>)loadedLibrariesResult.GetValue();
 	}
-	m_Properties[(sizet)LoadedLibraries] = std::move(loadedLibrariesProp);
+	m_Properties[(sizet)LoadedLibraries] = (WPtr<LoadedLibrariesProp_t>)std::move(loadedLibrariesProp);
 
 	/*UpdateMaxRateProp_t* updateMaxRateProp = nullptr;
 	result = m_Library->GetProperty(UpdateMaxRateName);
@@ -471,15 +513,15 @@ EmptyResult Application::UnregisterInterface(PInterface interface)
 	sizet nIndex = std::numeric_limits<sizet>::max();
 	sizet uIndex = std::numeric_limits<sizet>::max();
 	sizet index = std::numeric_limits<sizet>::max();
-	if (nameIT != m_LibraryNameMap.end())
+	if (nameIT != libInfo.IntefaceNameMap.end())
 	{
 		nIndex = nameIT->second;
-		m_LibraryNameMap.erase(nameIT);
+		libInfo.IntefaceNameMap.erase(nameIT);
 	}
-	if (uuidIT != m_LibraryUuidMap.end())
+	if (uuidIT != libInfo.InterfaceUuidMap.end())
 	{
 		uIndex = uuidIT->second;
-		m_LibraryUuidMap.erase(uuidIT);
+		libInfo.InterfaceUuidMap.erase(uuidIT);
 	}
 
 	auto lib = m_Library.lock();
@@ -541,6 +583,8 @@ EmptyResult Application::ActivateInterface(PInterface interface)
 	else
 		m_InterfacesToAdd.push_back(interface);
 
+	UpdateActiveInterfaceList();
+
 	return CreateEmptyResult();
 }
 
@@ -586,6 +630,8 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 	}
 	m_InterfacesToRemove.push_back(interface);
 
+	UpdateActiveInterfaceList();
+
 	return CreateEmptyResult();
 }
 
@@ -630,6 +676,8 @@ EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 	}
 
 	m_InterfacesToRemove.push_back(interface);
+
+	UpdateActiveInterfaceList();
 
 	return CreateEmptyResult();
 }

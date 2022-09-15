@@ -103,7 +103,7 @@ namespace greaper
 			auto res = RegisterGreaperLibrary(libPath);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> lib = (SPtr<T>)res.GetValue();
+			auto lib = (SPtr<T>)res.GetValue();
 			return CreateResult(lib);
 		}
 
@@ -115,7 +115,7 @@ namespace greaper
 			auto res = GetGreaperLibrary(libraryName);
 			if(res.HasFailed())
 				return CopyFailure<WPtr<T>>(res);
-			WPtr<T> lib = (WPtr<T>)res.GetValue();
+			auto lib = (WPtr<T>)res.GetValue();
 			return CreateResult(lib);
 		}
 
@@ -127,7 +127,7 @@ namespace greaper
 			auto res = GetGreaperLibrary(libraryUUID);
 			if(res.HasFailed())
 				return CopyFailure<WPtr<T>>(res);
-			WPtr<T> lib = (WPtr<T>)res.GetValue();
+			auto lib = (WPtr<T>)res.GetValue();
 			return CreateResult(lib);
 		}
 
@@ -138,7 +138,7 @@ namespace greaper
 			auto res = GetActiveInterface(interfaceUUID);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> interface = (SPtr<T>)res.GetValue();
+			auto interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
@@ -149,7 +149,7 @@ namespace greaper
 			auto res = GetActiveInterface(interfaceName);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> interface = (SPtr<T>)res.GetValue();
+			auto interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
@@ -160,7 +160,7 @@ namespace greaper
 			auto res = GetInterface(interfaceUUID, libraryUUID);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> interface = (SPtr<T>)res.GetValue();
+			auto interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
@@ -171,7 +171,7 @@ namespace greaper
 			auto res = GetInterface(interfaceName, libraryName);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> interface = (SPtr<T>)res.GetValue();
+			auto interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
@@ -182,7 +182,7 @@ namespace greaper
 			auto res = GetInterface(interfaceUUID, libraryName);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> interface = (SPtr<T>)res.GetValue();
+			auto interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 
@@ -193,7 +193,7 @@ namespace greaper
 			auto res = GetInterface(interfaceName, libraryUUID);
 			if(res.HasFailed())
 				return CopyFailure<SPtr<T>>(res);
-			SPtr<T> interface = (SPtr<T>)res.GetValue();
+			auto interface = (SPtr<T>)res.GetValue();
 			return CreateResult(interface);
 		}
 	};

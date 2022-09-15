@@ -8,6 +8,8 @@
 #ifndef CORE_PROPERTY_H
 #define CORE_PROPERTY_H 1
 
+#include <utility>
+
 #include "Memory.h"
 #include "Base/PropertyValidator.h"
 //#include "Base/PropertyConverter.h"
@@ -79,7 +81,7 @@ namespace greaper
 			, m_PropertyInfo(propertyInfo)
 			, m_OnModificationEvent("PropertyModified"sv)
 			, m_PropertyValidator(validator)
-			, m_Library(library)
+			, m_Library(std::move(library))
 			, m_Static(isStatic)
 			, m_Constant(isConstant)
 		{

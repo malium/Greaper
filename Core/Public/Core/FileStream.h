@@ -11,14 +11,15 @@
 #include "Stream.h"
 #include <filesystem>
 #include <fstream>
+#include <utility>
 
 namespace greaper
 {
 	class FileStream : public IStream
 	{
 	public:
-		FileStream(const std::filesystem::path& filePath, AccessMode accessMode = READ, bool freeOnClose = true)noexcept;
-		~FileStream()noexcept;
+		explicit FileStream(std::filesystem::path  filePath, uint16 accessMode = READ, bool freeOnClose = true)noexcept;
+		~FileStream()noexcept override;
 
 		INLINE bool IsFile()const noexcept override { return true; }
 
@@ -46,9 +47,9 @@ namespace greaper
 		bool m_FreeOnClose;
 	};
 
-	INLINE greaper::FileStream::FileStream(const std::filesystem::path& filePath, AccessMode accessMode, bool freeOnClose) noexcept
-		:IStream((uint16)accessMode)
-		,m_Path(filePath)
+	INLINE greaper::FileStream::FileStream(std::filesystem::path  filePath, uint16 accessMode, bool freeOnClose) noexcept
+		:IStream(accessMode)
+		,m_Path(std::move(filePath))
 		,m_FreeOnClose(freeOnClose)
 	{
 		std::ios::openmode openMode = std::ios::binary;
@@ -61,6 +62,7 @@ namespace greaper
 		if ((m_Access & WRITE) != 0)
 		{
 			openMode |= std::ios::out;
+			openMode |= std::ios::app;
 		}
 
 		m_Stream->open(m_Path, openMode);
@@ -128,7 +130,8 @@ namespace greaper
 
 	INLINE SPtr<IStream> FileStream::Clone(bool copyData) const noexcept
 	{
-		return SPtr<FileStream>(Construct<FileStream>(m_Path, (AccessMode)GetAccessMode(), m_FreeOnClose));
+		UNUSED(copyData);
+		return SPtr<IStream>(Construct<FileStream>(m_Path, GetAccessMode(), m_FreeOnClose));
 	}
 
 	INLINE void FileStream::Close()noexcept

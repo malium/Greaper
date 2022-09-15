@@ -89,7 +89,7 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 	if (!SUCCEEDED(retVal))
 		return nullptr;
 
-	LPWSTR lpWideCharStr = (LPWSTR)PlatformAlloc(retVal * sizeof(wchar_t));
+	auto lpWideCharStr = (LPWSTR)PlatformAlloc(retVal * sizeof(wchar_t));
 	if (lpWideCharStr == nullptr)
 		return nullptr;
 	retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, lpWideCharStr, retVal);
@@ -118,7 +118,7 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 		}
 		storage += retVal;
 	}
-	LPSTR* result = (LPSTR*)LocalAlloc(LMEM_FIXED, storage);
+	auto* result = (LPSTR*)LocalAlloc(LMEM_FIXED, storage);
 	if (!result)
 	{
 		LocalFree(args);

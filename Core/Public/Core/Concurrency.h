@@ -605,7 +605,7 @@ namespace greaper
 		const sizet m_MaxCount;
 
 	public:
-		Semaphore(sizet maxCount = 0) noexcept
+		explicit Semaphore(sizet maxCount = 0) noexcept
 			:m_Count(maxCount)
 			,m_MaxCount(maxCount)
 		{
@@ -662,7 +662,7 @@ namespace greaper
 		sizet m_Generation;
 
 	public:
-		Barrier(sizet maxCount = 0)
+		explicit Barrier(sizet maxCount = 0)
 			:m_MaxCount(maxCount)
 			,m_Count(maxCount)
 			,m_Generation(0)
@@ -730,12 +730,12 @@ namespace greaper
 
 		}
 
-		IAsyncOp(AsyncOpEmpty empty)
+		explicit IAsyncOp(AsyncOpEmpty empty)
 		{
 			UNUSED(empty);
 		}
 
-		IAsyncOp(const SPtr<AsyncOpSyncData>& syncData)
+		explicit IAsyncOp(const SPtr<AsyncOpSyncData>& syncData)
 			:m_Data(Construct<OpData>())
 			,m_SyncData(syncData)
 		{
@@ -788,14 +788,14 @@ namespace greaper
 		using ReturnType = RetType;
 
 		TAsyncOp() = default;
-
-		TAsyncOp(AsyncOpEmpty empty)
+        
+        explicit TAsyncOp(AsyncOpEmpty empty)
 			:IAsyncOp(empty)
 		{
 
 		}
 
-		TAsyncOp(const SPtr<AsyncOpSyncData>& syncData)
+		explicit TAsyncOp(const SPtr<AsyncOpSyncData>& syncData)
 			:IAsyncOp(syncData)
 		{
 

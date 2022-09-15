@@ -83,7 +83,7 @@ Result<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
 	{
 		return CreateFailure<WThread>(Format("Trying to get a thread with ID: %d, that is already finished.", id));
 	}
-	return CreateResult<WThread>(thread);
+	return CreateResult((WThread)thread);
 }
 
 Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcept
@@ -101,7 +101,7 @@ Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcep
 	{
 		return CreateFailure<WThread>(Format("Trying to get a thread with name:'%s', that is already finished.", threadName.c_str()));
 	}
-	return CreateResult<WThread>(thread);
+	return CreateResult((WThread)thread);
 }
 
 Result<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept

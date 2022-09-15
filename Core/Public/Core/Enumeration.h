@@ -69,7 +69,7 @@ template<class T> struct IsGreaperEnum { static constexpr bool value = false; };
 /*** Returns the TEnum class for the given type T, if type T is not a GreaperEnum will return void */
 template<class T> struct GetGreaperEnumReflection { using ReflectionType = void; };
 /*** Returns whether the give type T has an implementation of TEnum */
-template<class T> struct HasEnumReflection { static constexpr bool value = !std::is_same_v<GetGreaperEnumReflection<T>::ReflectionType, void>; };
+template<class T> struct HasEnumReflection { static constexpr bool value = !std::is_same_v<typename GetGreaperEnumReflection<T>::ReflectionType, void>; };
 
 #define _ENUMDEF_BEGIN(name)\
 namespace E##name {

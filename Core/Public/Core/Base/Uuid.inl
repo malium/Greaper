@@ -46,7 +46,7 @@ namespace greaper
 			for (int32 i = 7; i >= 0; --i)
 			{
 				const auto charVal = view[idx++];
-				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<size_t>(charVal)];
+				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<sizet>(charVal)];
 				data[0] |= hexVal << (i * 4);
 			}
 
@@ -55,7 +55,7 @@ namespace greaper
 			for (int32 i = 7; i >= 4; --i)
 			{
 				const auto charVal = view[idx++];
-				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<size_t>(charVal)];
+				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<sizet>(charVal)];
 				data[1] |= hexVal << (i * 4);
 			}
 
@@ -64,7 +64,7 @@ namespace greaper
 			for (int32 i = 3; i >= 0; --i)
 			{
 				const auto charVal = view[idx++];
-				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<size_t>(charVal)];
+				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<sizet>(charVal)];
 				data[1] |= hexVal << (i * 4);
 			}
 
@@ -73,7 +73,7 @@ namespace greaper
 			for (int32 i = 7; i >= 4; --i)
 			{
 				const auto charVal = view[idx++];
-				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<size_t>(charVal)];
+				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<sizet>(charVal)];
 				data[2] |= hexVal << (i * 4);
 			}
 
@@ -82,7 +82,7 @@ namespace greaper
 			for (int32 i = 3; i >= 0; --i)
 			{
 				const auto charVal = view[idx++];
-				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<size_t>(charVal)];
+				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<sizet>(charVal)];
 				data[2] |= hexVal << (i * 4);
 			}
 
@@ -90,7 +90,7 @@ namespace greaper
 			for (int32 i = 7; i >= 0; --i)
 			{
 				const auto charVal = view[idx++];
-				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<size_t>(charVal)];
+				const auto hexVal = (uint32)LITERAL_TO_HEX[static_cast<sizet>(charVal)];
 				data[3] |= hexVal << (i * 4);
 			}
 		}

@@ -8,6 +8,7 @@
 #include <Core/IApplication.h>
 #include <Core/Reflection/ReflectedPlainContainer.h>
 #include <Core/Property.h>
+#include <Core/Base/LogWriterFile.h>
 #include <iostream>
 
 #if PLT_WINDOWS
@@ -87,13 +88,13 @@ int MainCode(void* hInstance, int argc, char** argv)
 		TRYEXP(corePtr, CORE_LIBRARY_NAME " does not return a IGreaperLibrary.");
 		gCore = *corePtr;
 
-		auto propAppInstanceRes = CreateProperty<ptruint>(gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
+		auto propAppInstanceRes = CreateProperty<ptruint>((WGreaperLib)gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
 
 		StringVec commandLine;
 		commandLine.resize(argc);
 		for (int32 i = 0; i < argc; ++i)
 			commandLine[i] = String{ argv[i] };
-		auto propCmdLineRes = CreateProperty<StringVec>(gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
+		auto propCmdLineRes = CreateProperty<StringVec>((WGreaperLib)gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
 
 		gCore->InitLibrary(gCoreLib, PApplication());
 
@@ -103,6 +104,14 @@ int MainCode(void* hInstance, int argc, char** argv)
 		gApplication->GetApplicationName().lock()->SetValue(String{ "TestApplication"sv });
 		gApplication->GetApplicationVersion().lock()->SetValue(APPLICATION_VERSION);
 		gApplication->GetLoadedLibrariesNames().lock()->SetValue({});
+
+		const auto logMgrRes = gApplication->GetInterface(ILogManager::InterfaceUUID, gCore->GetLibraryUuid());
+		if (logMgrRes.IsOk())
+		{
+			auto logMgr = (PLogManager)logMgrRes.GetValue();
+			logMgr->AddLogWriter(SPtr<ILogWriter>(Construct<LogWriterFile>()));
+			gApplication->ActivateInterface((PInterface)logMgr);
+		}
 
 		std::cout << "Successfully started!\n " << gApplication->GetApplicationName().lock()->GetStringValue() << " Version " << gApplication->GetApplicationVersion().lock()->GetStringValue() << std::endl;
 

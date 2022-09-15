@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <atomic>
+
 namespace greaper
 {
 	template<class T>
@@ -84,10 +86,10 @@ namespace greaper
 					PlatformDealloc(this);
 				}
 			}
-			INLINE uint32 SharedRefCount()const noexcept { return m_SharedReferences; }
-			INLINE uint32 WeakRefCount()const noexcept { return m_WeakReferences; }
-			INLINE void* GetValue()const noexcept { return m_Value; }
-			INLINE SPtrType GetType()const noexcept { return SPtrType::SingleThread; }
+			INLINE uint32 SharedRefCount()const noexcept override { return m_SharedReferences; }
+			INLINE uint32 WeakRefCount()const noexcept override { return m_WeakReferences; }
+			INLINE void* GetValue()const noexcept override { return m_Value; }
+			INLINE SPtrType GetType()const noexcept override { return SPtrType::SingleThread; }
 
 		private:
 			mutable T* m_Value;
@@ -138,10 +140,10 @@ namespace greaper
 					PlatformDealloc(this);
 				}
 			}
-			INLINE uint32 SharedRefCount()const noexcept { return m_SharedReferences; }
-			INLINE uint32 WeakRefCount()const noexcept { return m_WeakReferences; }
-			INLINE void* GetValue()const noexcept { return m_Value; }
-			INLINE SPtrType GetType()const noexcept { return SPtrType::MultiThread; }
+			INLINE uint32 SharedRefCount()const noexcept override { return m_SharedReferences; }
+			INLINE uint32 WeakRefCount()const noexcept override { return m_WeakReferences; }
+			INLINE void* GetValue()const noexcept override { return m_Value; }
+			INLINE SPtrType GetType()const noexcept override { return SPtrType::MultiThread; }
 
 		private:
 			mutable T* m_Value;
@@ -194,7 +196,7 @@ namespace greaper
 			if (m_Value != nullptr)
 				CreateControl(deleter, threading);
 		}
-		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
 		explicit INLINE SharedPointer(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
 			:m_Value((T*)value)
 			,m_Control(nullptr)
@@ -209,8 +211,8 @@ namespace greaper
 			if (m_Value != nullptr && m_Control != nullptr)
 				m_Control->AddSharedReference();
 		}
-		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
-		INLINE SharedPointer(const SharedPointer<T2>& other)noexcept
+		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
+		INLINE explicit SharedPointer(const SharedPointer<T2>& other)noexcept
 			:m_Value((T*)other.m_Value)
 			,m_Control(other.m_Control)
 		{
@@ -224,8 +226,8 @@ namespace greaper
 			other.m_Value = nullptr;
 			other.m_Control = nullptr;
 		}
-		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
-		INLINE SharedPointer(SharedPointer<T2>&& other)noexcept
+		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
+		INLINE explicit SharedPointer(SharedPointer<T2>&& other)noexcept
 			:m_Value((T*)other.m_Value)
 			,m_Control(other.m_Control)
 		{
@@ -251,7 +253,7 @@ namespace greaper
 			}
 			return *this;
 		}
-		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
 		INLINE SharedPointer& operator=(const SharedPointer<T2>& other)noexcept
 		{
 			if (((void*)this) != ((void*)&other))
@@ -279,7 +281,7 @@ namespace greaper
 			}
 			return *this;
 		}
-		template<class T2, std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
 		INLINE SharedPointer& operator=(SharedPointer<T2>&& other)noexcept
 		{
 			if (((void*)this) != ((void*)&other))
@@ -293,7 +295,7 @@ namespace greaper
 			}
 			return *this;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 		INLINE void reset(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread) noexcept
 		{
 			if (m_Control != nullptr)
@@ -314,8 +316,8 @@ namespace greaper
 			m_Control = nullptr;
 			m_Value = nullptr;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE operator SharedPointer<T2>()const
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		INLINE explicit operator SharedPointer<T2>()const
 		{
 			SharedPointer<T2> shared;
 			shared.m_Control = m_Control;
@@ -324,7 +326,7 @@ namespace greaper
 				m_Control->AddSharedReference();
 			return shared;
 		}
-		template<class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 		INLINE void swap(SharedPointer<T2>& other) noexcept
 		{
 			auto tempControl = m_Control;
@@ -366,12 +368,12 @@ namespace greaper
 		friend class WeakPointer;
 	};
 
-	template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+	template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 	INLINE bool operator==(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
 	{
 		return left.get() == right.get();
 	}
-	template<class T, class T2, std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
+	template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
 	INLINE bool operator!=(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
 	{
 		return !(left == right);

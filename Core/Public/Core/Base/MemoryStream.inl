@@ -7,7 +7,7 @@
 
 namespace greaper
 {
-	void MemoryStream::Realloc(const sizet bytes)noexcept
+    INLINE void MemoryStream::Realloc(const sizet bytes)noexcept
 	{
 		if (bytes == m_Size)
 			return;
@@ -32,8 +32,8 @@ namespace greaper
 		m_Data = buffer;
 		m_Size = bytes;
 	}
-
-	MemoryStream::MemoryStream()noexcept
+    
+    INLINE MemoryStream::MemoryStream()noexcept
 		:IStream(READ | WRITE)
 		,m_Data(nullptr)
 		,m_Cursor(nullptr)
@@ -42,8 +42,8 @@ namespace greaper
 	{
 
 	}
-
-	MemoryStream::MemoryStream(const sizet capacity)noexcept
+    
+    INLINE MemoryStream::MemoryStream(const sizet capacity)noexcept
 		:IStream(READ | WRITE)
 		, m_Data(nullptr)
 		, m_Cursor(nullptr)
@@ -53,8 +53,8 @@ namespace greaper
 		Realloc(capacity);
 		m_End = m_Cursor + capacity;
 	}
-
-	MemoryStream::MemoryStream(void* memory, const sizet size)noexcept
+    
+    INLINE MemoryStream::MemoryStream(void* memory, const sizet size)noexcept
 		:IStream(READ | WRITE)
 		, m_Data((uint8*)memory)
 		, m_Cursor((uint8*)memory)
@@ -63,8 +63,8 @@ namespace greaper
 	{
 		m_Size = size;
 	}
-
-	MemoryStream::MemoryStream(const MemoryStream& other)noexcept
+    
+    INLINE MemoryStream::MemoryStream(const MemoryStream& other)noexcept
 		:IStream(READ | WRITE)
 		, m_Data(nullptr)
 		, m_Cursor(nullptr)
@@ -77,8 +77,8 @@ namespace greaper
 		m_Access = other.m_Access;
 		VerifyGreater(m_End, m_Cursor, "Cursor outside of bounds.");
 	}
-
-	MemoryStream& MemoryStream::operator=(const MemoryStream& other)noexcept
+    
+    INLINE MemoryStream& MemoryStream::operator=(const MemoryStream& other)noexcept
 	{
 		if (this != &other)
 		{
@@ -110,8 +110,8 @@ namespace greaper
 		}
 		return *this;
 	}
-
-	MemoryStream::MemoryStream(MemoryStream&& other) noexcept
+    
+    INLINE MemoryStream::MemoryStream(MemoryStream&& other) noexcept
 		:IStream(READ | WRITE)
 		,m_Data(std::exchange(other.m_Data, nullptr))
 		,m_Cursor(std::exchange(other.m_Cursor, nullptr))
@@ -122,8 +122,8 @@ namespace greaper
 		m_Name = std::move(other.m_Name);
 		m_Access = std::exchange(other.m_Access, 0);
 	}
-
-	MemoryStream& MemoryStream::operator=(MemoryStream&& other)noexcept
+    
+    INLINE MemoryStream& MemoryStream::operator=(MemoryStream&& other)noexcept
 	{
 		if (this != &other)
 		{
@@ -140,13 +140,13 @@ namespace greaper
 		}
 		return *this;
 	}
-
-	MemoryStream::~MemoryStream()noexcept
+    
+    INLINE MemoryStream::~MemoryStream()noexcept
 	{
 		Close();
 	}
-
-	ssizet MemoryStream::Read(void* buf, ssizet count) const noexcept
+    
+    INLINE ssizet MemoryStream::Read(void* buf, ssizet count) const noexcept
 	{
 		if(!IsReadable() || count <= 0)
 			return 0;
@@ -162,8 +162,8 @@ namespace greaper
 
 		return count;
 	}
-
-	ssizet MemoryStream::Write(const void* buf, ssizet count)noexcept
+    
+    INLINE ssizet MemoryStream::Write(const void* buf, ssizet count)noexcept
 	{
 		if (!IsWritable() || count <= 0)
 			return 0;
@@ -186,27 +186,27 @@ namespace greaper
 		m_End = Max(m_Cursor, m_End);
 		return count;
 	}
-
-	void MemoryStream::Skip(const ssizet count)noexcept
+    
+    INLINE void MemoryStream::Skip(const ssizet count)noexcept
 	{
 		VerifyLessEqual(m_Cursor + count, m_End, "Trying to skip a MemoryStream outside of its bounds.");
 		m_Cursor = Min(m_Cursor + count, m_End);
 	}
-
-	void MemoryStream::Seek(const ssizet pos)noexcept
+    
+    INLINE void MemoryStream::Seek(const ssizet pos)noexcept
 	{
 		VerifyLessEqual(m_Data + pos, m_End, "Trying to seek a MemoryStream outside of its bounds.");
 		m_Cursor = Min(m_Data + pos, m_End);
 	}
-
-	SPtr<IStream> MemoryStream::Clone(const bool copyData)const noexcept
+    
+    INLINE SPtr<IStream> MemoryStream::Clone(const bool copyData)const noexcept
 	{
 		if (!copyData)
-			return SPtr<MemoryStream>(Construct<MemoryStream>(m_Data, m_Size));
-		return SPtr<MemoryStream>(Construct<MemoryStream>(*this));
+			return SPtr<IStream>(Construct<MemoryStream>(m_Data, m_Size));
+		return SPtr<IStream>(Construct<MemoryStream>(*this));
 	}
-
-	void MemoryStream::Close()noexcept
+    
+    INLINE void MemoryStream::Close()noexcept
 	{
 		if (m_Data != nullptr)
 		{
@@ -216,7 +216,7 @@ namespace greaper
 		}
 	}
 
-	uint8* MemoryStream::DisownMemory()noexcept
+	INLINE uint8* MemoryStream::DisownMemory()noexcept
 	{
 		m_OwnsMemory = false;
 		return m_Data;

@@ -8,6 +8,8 @@
 #ifndef CORE_VIDEO_MODE_H
 #define CORE_VIDEO_MODE_H 1
 
+#include <utility>
+
 #include "../CorePrerequisites.h"
 
 namespace greaper
@@ -21,7 +23,7 @@ namespace greaper
 		uint8 m_PixelDepth;
 
 	public:
-		constexpr VideoMode(const std::pair<uint16, uint16>& resolution, DisplayAdapter* adpater, uint16 frequency, uint8 pixelDepth)noexcept;
+		constexpr VideoMode(std::pair<uint16, uint16>  resolution, DisplayAdapter* adapter, uint16 frequency, uint8 pixelDepth)noexcept;
 
 		INLINE constexpr const std::pair<uint16, uint16>& GetResolution()const noexcept { return m_Resolution; }
 
@@ -32,10 +34,10 @@ namespace greaper
 		INLINE constexpr uint8 GetPixelDepth()const noexcept { return m_PixelDepth; }
 	};
 
-	INLINE constexpr VideoMode::VideoMode(const std::pair<uint16, uint16>& resolution, DisplayAdapter* adpater,
+	INLINE constexpr VideoMode::VideoMode(std::pair<uint16, uint16>  resolution, DisplayAdapter* adapter,
 		uint16 frequency, uint8 pixelDepth) noexcept
-		:m_Resolution(resolution)
-		,m_Adapter(adpater)
+		:m_Resolution(std::move(resolution))
+		,m_Adapter(adapter)
 		,m_Frequency(frequency)
 		,m_PixelDepth(pixelDepth)
 	{

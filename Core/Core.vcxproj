@@ -464,6 +464,7 @@
     <ClInclude Include="Public\Core\Base\IThread.h" />
     <ClInclude Include="Public\Core\Base\IThreadPool.h" />
     <ClInclude Include="Public\Core\Base\IWindow.h" />
+    <ClInclude Include="Public\Core\Base\LogWriterFile.h" />
     <ClInclude Include="Public\Core\Base\Monitor.h" />
     <ClInclude Include="Public\Core\Base\PropertyValidator.h" />
     <ClInclude Include="Public\Core\Base\Range.h" />

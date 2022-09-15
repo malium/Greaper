@@ -44,7 +44,7 @@ namespace greaper::core
 		UnorderedMap<Uuid, size_t> m_LibraryUuidMap;
 		Vector<LibInfo> m_Libraries;
 
-		mutable Mutex m_ActiveMutex;
+		mutable RecursiveMutex m_ActiveMutex;
 		UnorderedMap<StringView, size_t> m_ActiveInterfaceNameMap;
 		UnorderedMap<Uuid, size_t> m_ActiveInterfaceUuidMap;
 		Vector<PInterface> m_ActiveInterfaces;
@@ -109,19 +109,19 @@ namespace greaper::core
 
 		Result<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
 
-		OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept { return &m_OnInterfaceActivation; }
+		OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept override { return &m_OnInterfaceActivation; }
 
-		WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept override { return m_Properties[(sizet)ApplicationName]; }
+		WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept override { return (WPtr<ApplicationNameProp_t>)m_Properties[(sizet)ApplicationName]; }
 
-		WPtr<CompilationInfoProp_t> GetCompilationInfo()const noexcept override { return m_Properties[(sizet)CompilationInfo]; }
+		WPtr<CompilationInfoProp_t> GetCompilationInfo()const noexcept override { return (WPtr<CompilationInfoProp_t>)m_Properties[(sizet)CompilationInfo]; }
 
-		WPtr<ApplicationVersionProp_t> GetApplicationVersion()const noexcept override { return m_Properties[(sizet)ApplicationVersion]; }
+		WPtr<ApplicationVersionProp_t> GetApplicationVersion()const noexcept override { return (WPtr<ApplicationVersionProp_t>)m_Properties[(sizet)ApplicationVersion]; }
 
-		WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept override { return m_Properties[(sizet)LoadedLibraries]; }
+		WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept override { return (WPtr<LoadedLibrariesProp_t>)m_Properties[(sizet)LoadedLibraries]; }
 
-		WPtr<CommandLineProp_t> GetCommandLine()const noexcept override { return m_Properties[(sizet)CommandLine]; }
+		WPtr<CommandLineProp_t> GetCommandLine()const noexcept override { return (WPtr<CommandLineProp_t>)m_Properties[(sizet)CommandLine]; }
 
-		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return m_Properties[(sizet)AppInstance]; }
+		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return (WPtr<AppInstanceProp_t>)m_Properties[(sizet)AppInstance]; }
 	};
 }
 

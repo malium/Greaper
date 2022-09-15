@@ -10,6 +10,8 @@
 
 #include "../Memory.h"
 #include "../StringUtils.h"
+#include <utility>
+
 #include "../Result.h"
 
 namespace greaper
@@ -30,11 +32,11 @@ namespace greaper
         bool m_CanBeUndone;
 
     public:
-        ICommand(String commandName, String helpMessage = "", bool canBeUndone = false);
+        explicit ICommand(String commandName, String helpMessage = "", bool canBeUndone = false)noexcept;
 
-        virtual ~ICommand() = default;
+        virtual ~ICommand()noexcept = default;
 
-        virtual bool DoCommand(const StringVec& args) = 0;
+        virtual bool DoCommand(const StringVec& args)noexcept = 0;
 
         virtual bool UndoCommand(const StringVec& args) { return true; }
 
@@ -62,9 +64,9 @@ namespace greaper
         return CreateResult(info);
     }
 
-    ICommand::ICommand(String commandName, String helpMessage, bool canBeUndone) 
-        :m_CommandName(commandName)
-        ,m_HelpMessage(helpMessage)
+    INLINE ICommand::ICommand(String commandName, String helpMessage, bool canBeUndone) noexcept
+        :m_CommandName(std::move(commandName))
+        ,m_HelpMessage(std::move(helpMessage))
         ,m_Active(true)
         ,m_CanBeUndone(canBeUndone)
     {

@@ -63,17 +63,17 @@ void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
 	}
 
 	m_Application.reset(Construct<Application>());
-	m_Application->Initialize(gCoreLibrary);
+	m_Application->Initialize((WGreaperLib)gCoreLibrary);
 
 	// add more managers
-	m_Managers.push_back(SPtr<LogManager>(Construct<LogManager>()));
-	m_Managers.push_back(SPtr<ThreadManager>(Construct<ThreadManager>()));
+	m_Managers.push_back(SPtr<IInterface>(Construct<LogManager>()));
+	m_Managers.push_back(SPtr<IInterface>(Construct<ThreadManager>()));
 
 
 
 	for (auto mgr : m_Managers)
 	{
-		mgr->Initialize(gCoreLibrary);
+		mgr->Initialize((WGreaperLib)gCoreLibrary);
 		m_Application->RegisterInterface(mgr);
 	}
 }
@@ -97,7 +97,7 @@ void greaper::core::GreaperCoreLibrary::DeinitReflection()noexcept
 
 void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
 {
-	for (auto it = m_Managers.rend(); it < m_Managers.rbegin(); ++it)
+	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
 		(*it)->DeinitProperties();
 
 	m_Application->DeinitProperties();
@@ -108,8 +108,15 @@ void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
 
 void greaper::core::GreaperCoreLibrary::DeinitManagers()noexcept
 {
-	for (auto it = m_Managers.rend(); it < m_Managers.rbegin(); ++it)
-		(*it)->Deinitialize();
+	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
+	{
+		auto& mgr = (*it);
+		if (mgr->IsActive())
+			m_Application->DeactivateInterface(mgr->GetInterfaceUUID());
+		m_Application->UnregisterInterface(mgr);
+
+		mgr.reset();
+	}
 
 	m_Application->Deinitialize();
 

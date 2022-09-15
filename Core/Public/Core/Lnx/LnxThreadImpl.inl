@@ -10,6 +10,8 @@
 
 //#include "../Base/IThread.h"
 //#include <atomic>
+#include <utility>
+
 #include "../IThreadManager.h"
 
 namespace greaper
@@ -17,24 +19,23 @@ namespace greaper
 	class LnxThreadImpl : IThread
 	{
 		WThreadManager m_Manager;
-		ThreadConfig m_Config;
 		ThreadHandle m_Handle;
 		ThreadID_t m_ID;
 		std::atomic_int8_t m_State;
-		std::function<void()> m_ThreadFn;
-		bool m_JoinsAtDestruction;
-		String m_Name;
+        std::function<void()> m_ThreadFn;
+        bool m_JoinsAtDestruction;
+        String m_Name;
 
 		static inline void* RunFn(void* data)
 		{
 			//auto* th = (LnxThreadImpl*)data;
 			auto* wThis = (WThread*)data;
-			auto th = (SPtr<LnxThreadImpl>)wThis->Lock();
+			auto th = (SPtr<LnxThreadImpl>)wThis->lock();
 			if (th == nullptr)
-				return;
+				return nullptr;
 
 			{
-				auto mgr = th->m_Manager.Lock();
+				auto mgr = th->m_Manager.lock();
 				mgr->GetThreadCreationEvent()->Trigger((PThread)th);
 			}
 
@@ -47,7 +48,7 @@ namespace greaper
 			th->m_State = ThreadState_t::STOPPED;
 
 			{
-				auto mgr = th->m_Manager.Lock();
+				auto mgr = th->m_Manager.lock();
 				mgr->GetThreadDestructionEvent()->Trigger((PThread)th);
 			}
 
@@ -56,13 +57,12 @@ namespace greaper
 		}
 
 	public:
-		LnxThreadImpl(WThreadManager manager, WThread self, ThreadConfig config)
-			:m_Manager(manager)
-			,m_Config(std::move(config))
+		LnxThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
+			:m_Manager(std::move(manager))
 			,m_State(ThreadState_t::SUSPENDED)
-			,m_ThreadFn(config.ThreadFN)
-			,m_JoinsAtDestruction(config.JoinAtDestruction)
-			,m_Name(config.Name)
+            ,m_ThreadFn(config.ThreadFN)
+            ,m_JoinsAtDestruction(config.JoinAtDestruction)
+            ,m_Name(config.Name)
 		{
 			if (m_Manager == nullptr || m_ThreadFn == nullptr)
 			{
@@ -107,7 +107,7 @@ namespace greaper
 
 		void Join()override
 		{
-			Verify(Joinable(), "Trying to join a not-joinable thread");
+			Verify(Joinable(), "Trying to join a non-joinable thread");
 			void* thRet = nullptr;
 			auto ret = pthread_join(m_Handle, &thRet);
 			VerifyEqual(ret, 0, "Trying to join a thread, but something went wrong, error:'%d'.", ret);

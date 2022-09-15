@@ -59,7 +59,7 @@ namespace greaper
 		constexpr DeleterEmpty()noexcept = default;
 
 		template<class T2, std::enable_if_t<std::is_convertible<T2*, T*>::value, int> = 0>
-		constexpr DeleterEmpty(const DeleterEmpty<T2>& other)noexcept
+		constexpr explicit DeleterEmpty(const DeleterEmpty<T2>& other)noexcept
 		{
 			UNUSED(other);
 		}
@@ -87,7 +87,7 @@ namespace greaper
 	template<class... Args>
 	class Event
 	{
-		Mutex m_Mutex;
+		RecursiveMutex m_Mutex;
 		Vector<EventHandlerID<Args...>> m_Handlers;
 		SPtr<Event<Args...>> m_This;
 
@@ -98,7 +98,7 @@ namespace greaper
 		using HandlerType = EventHandler<Args...>;
 		using HandlerFunction = typename EventHandlerID<Args...>::HandlerFunction;
 		
-		Event(const StringView& eventName = "unnamed"sv) noexcept;
+		explicit Event(const StringView& eventName = "unnamed"sv) noexcept;
 		~Event() = default;
 		Event(const Event&) = delete;
 		Event& operator=(const Event&) = delete;
@@ -194,7 +194,7 @@ namespace greaper
 		using HandlerType = EventHandler<void>;
 		using HandlerFunction = typename EventHandlerID<void>::HandlerFunction;
 
-		Event(const StringView& eventName = "unnamed"sv) noexcept
+		INLINE explicit Event(const StringView& eventName = "unnamed"sv) noexcept
 			:m_Name(eventName)
 			, m_LastID(0)
 		{
@@ -206,18 +206,18 @@ namespace greaper
 
 		const String& GetName()const noexcept { return m_Name; }
 
-		void Connect(HandlerType& handler, HandlerFunction function) noexcept
+		INLINE void Connect(HandlerType& handler, HandlerFunction function) noexcept
 		{
 			EventHandlerID<void> hnd;
 			hnd.Function = std::move(function);
 			hnd.ID = m_LastID++;
-			handler.m_Event = m_This;
+			handler.m_Event = (WPtr<Event<void>>)m_This;
 			handler.m_ID = hnd.ID;
 			auto lck = Lock(m_Mutex);
 			m_Handlers.push_back(std::move(hnd));
 		}
 
-		void Disconnect(HandlerType& handler) noexcept
+		INLINE void Disconnect(HandlerType& handler) noexcept
 		{
 			auto lck = Lock(m_Mutex);
 			for (auto it = m_Handlers.begin(); it != m_Handlers.end(); ++it)
@@ -232,7 +232,7 @@ namespace greaper
 			}
 		}
 
-		void Trigger(void) noexcept
+		INLINE void Trigger() noexcept
 		{
 			auto lck = Lock(m_Mutex);
 			for (EventHandlerID<void>& hnd : m_Handlers)

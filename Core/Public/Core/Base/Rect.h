@@ -24,12 +24,12 @@ namespace greaper
 		T Bottom = T(0);
 
 		constexpr RectT() = default;
-		constexpr RectT(T left, T top, T right, T bottom) noexcept;
+		constexpr RectT(T left, T top, T width, T height) noexcept;
 		
 		constexpr T GetWidth()const noexcept;
 		constexpr T GetHeight()const noexcept;
 
-		void SetSize(T widht, T height) noexcept;
+		void SetSize(T width, T height) noexcept;
 		void SetOrigin(T left, T top, bool keepSize = false) noexcept;
 
 		constexpr bool IsInside(T x, T y)const noexcept;
@@ -37,7 +37,7 @@ namespace greaper
 
 		constexpr T GetArea()const noexcept;
 
-		String ToString()const noexcept;
+		[[nodiscard]] String ToString()const noexcept;
 		bool FromString(const String& str) noexcept;
 
 #if PLT_WINDOWS

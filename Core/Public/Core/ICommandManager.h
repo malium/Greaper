@@ -43,7 +43,7 @@ namespace greaper
     EmptyResult AddCommand(ICommandManager* mgr, Args&&... args)
     {
         static_assert(std::is_base_of_v<ICommand, T>, "Trying to create a Command which doesn't derive from ICommand");
-        auto cmd = (ICommand*)Construct<T, _Alloc_>(args);
+        auto cmd = (ICommand*)Construct<T, _Alloc_>(args...);
         auto rtn = mgr->AddCommand(cmd);
         if(rtn.HasFailed())
             Destroy<T, _Alloc_>((T*)cmd);

@@ -96,7 +96,7 @@ namespace greaper
 
 	public:
 		inline static constexpr int32 ValidatorType = EPropertyValidatorType::Selected;
-		PropertyValidatorSelected(Vector<T> validValues) noexcept
+		explicit PropertyValidatorSelected(Vector<T> validValues) noexcept
 			:m_ValidValues(std::move(validValues))
 		{
 
