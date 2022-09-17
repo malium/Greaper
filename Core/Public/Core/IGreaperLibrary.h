@@ -47,7 +47,7 @@ namespace greaper
 
 		virtual ~IGreaperLibrary() = default;
 
-		void InitLibrary(PLibrary newInterface, SPtr<IApplication> oldLog)noexcept;
+		void InitLibrary(PLibrary newInterface, SPtr<IApplication> app)noexcept;
 
 		void DeinitLibrary()noexcept;
 
@@ -94,7 +94,7 @@ namespace greaper
 		IInterface::ActivationEvt_t::HandlerType m_OnLogActivation;
 		InitState_t m_InitializationState = InitState_t::Stopped;
 
-		void OnNewLog(const WPtr<IInterface>& active)noexcept;
+		void OnNewLog(const SPtr<IInterface>& active)noexcept;
 
 		void OnLogActivation(bool active, IInterface* oldLog, const SPtr<IInterface>& newLog)noexcept;
 
@@ -162,8 +162,8 @@ namespace greaper
 		if (m_LogManager != nullptr)
 		{
 			m_LogManager->GetActivationEvent()->Connect(m_OnLogActivation,
-                                                        [this](bool active, IInterface* oldLog, const PInterface& newLog)
-                                                        { OnLogActivation(active, oldLog, newLog); });
+														[this](bool active, IInterface* oldLog, const PInterface& newLog)
+														{ OnLogActivation(active, oldLog, newLog); });
 			m_LogActivated = m_LogManager->IsActive();
 			if (m_LogActivated)
 				DumpStoredLogs();
@@ -171,8 +171,8 @@ namespace greaper
 		else
 		{
 			m_Application->GetOnInterfaceActivationEvent()->Connect(m_OnNewLog,
-                                                                    [this](const WInterface& newInterface)
-                                                                    { OnNewLog(newInterface); });
+																	[this](const PInterface& newInterface)
+																	{ OnNewLog(newInterface); });
 		}
 
 		m_InitializationState = InitState_t::Started;
@@ -256,22 +256,21 @@ namespace greaper
 			m_InitLogs.push_back(LogData{ message, std::chrono::system_clock::now(), LogLevel_t::CRITICAL, GetLibraryName() });
 	}
 
-	INLINE void IGreaperLibrary::OnNewLog(const WPtr<IInterface>& newInterface) noexcept
+	INLINE void IGreaperLibrary::OnNewLog(const SPtr<IInterface>& newInterface) noexcept
 	{
 		using namespace std::placeholders;
 
-		if (newInterface.expired())
+		if (newInterface == nullptr)
 			return;
-		auto iface = newInterface.lock();
 
-		if (iface->GetInterfaceUUID() == ILogManager::InterfaceUUID)
+		if (newInterface->GetInterfaceUUID() == ILogManager::InterfaceUUID)
 		{
-			m_LogManager = iface;
+			m_LogManager = newInterface;
 			m_LogActivated = m_LogManager->IsActive();
 			m_OnLogActivation.Disconnect();
 			m_LogManager->GetActivationEvent()->Connect(m_OnLogActivation,
-                    [this](bool active, IInterface* oldLog, const PInterface& newLog)
-                    { OnLogActivation(active, oldLog, newLog); });
+					[this](bool active, IInterface* oldLog, const PInterface& newLog)
+					{ OnLogActivation(active, oldLog, newLog); });
 			m_OnNewLog.Disconnect();
 			if (m_LogActivated)
 				DumpStoredLogs();
@@ -290,9 +289,9 @@ namespace greaper
 				m_LogManager = newLog;
 				m_LogActivated = m_LogManager->IsActive();
 				m_OnLogActivation.Disconnect();
-                m_LogManager->GetActivationEvent()->Connect(m_OnLogActivation,
-                        [this](bool active, IInterface* oldLog, const PInterface& newLog)
-                        { OnLogActivation(active, oldLog, newLog); });
+				m_LogManager->GetActivationEvent()->Connect(m_OnLogActivation,
+						[this](bool active, IInterface* oldLog, const PInterface& newLog)
+						{ OnLogActivation(active, oldLog, newLog); });
 				if (m_LogActivated)
 					DumpStoredLogs();
 			}
@@ -301,9 +300,9 @@ namespace greaper
 				m_OnLogActivation.Disconnect();
 				m_LogManager.reset();
 				m_LogActivated = false;
-                m_Application->GetOnInterfaceActivationEvent()->Connect(m_OnNewLog,
-                        [this](const WInterface& newInterface)
-                        { OnNewLog(newInterface); });
+				m_Application->GetOnInterfaceActivationEvent()->Connect(m_OnNewLog,
+						[this](const PInterface& newInterface)
+						{ OnNewLog(newInterface); });
 			}
 		}
 		else // the current log manager was activated, we shouldn't arrive here
@@ -311,9 +310,9 @@ namespace greaper
 			m_LogManager = newLog;
 			m_LogActivated = m_LogManager->IsActive();
 			m_OnLogActivation.Disconnect();
-            m_LogManager->GetActivationEvent()->Connect(m_OnLogActivation,
-                    [this](bool active, IInterface* oldLog, const PInterface& newLog)
-                    { OnLogActivation(active, oldLog, newLog); });
+			m_LogManager->GetActivationEvent()->Connect(m_OnLogActivation,
+					[this](bool active, IInterface* oldLog, const PInterface& newLog)
+					{ OnLogActivation(active, oldLog, newLog); });
 			if (m_LogActivated)
 				DumpStoredLogs();
 		}
@@ -347,7 +346,7 @@ namespace greaper
 
 	//// Property methods to avoid circle dependency
 	template<class T, class _Alloc_>
-	INLINE Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo,
+	Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo,
 		bool isConstant, bool isStatic, TPropertyValidator<T>* validator)
 	{
 		auto lib = library.lock();
@@ -365,12 +364,12 @@ namespace greaper
 		}
 		return CreateResult(prop);
 	}
-    
-    INLINE bool IGreaperLibrary::IsInitialized() const noexcept { return m_InitializationState == InitState_t::Started; }
-    
-    INLINE InitState_t IGreaperLibrary::GetInitializationState() const noexcept { return m_InitializationState; }
-    
-    template<class T>
+	
+	INLINE bool IGreaperLibrary::IsInitialized() const noexcept { return m_InitializationState == InitState_t::Started; }
+	
+	INLINE InitState_t IGreaperLibrary::GetInitializationState() const noexcept { return m_InitializationState; }
+	
+	template<class T>
 	INLINE Result<WProperty<T>> GetProperty(const WPtr<IGreaperLibrary>& library, const String& name)
 	{
 		auto lib = library.lock();

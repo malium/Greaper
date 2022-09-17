@@ -31,7 +31,7 @@ namespace greaper
 		StringView Name = "Unnamed"sv;
 	};
 
-	ENUMERATION(ThreadState, STOPPED, SUSPENDED, RUNNING);
+	ENUMERATION(ThreadState, STOPPED, SUSPENDED, RUNNING, UNMANAGED);
 
 	class IThread
 	{

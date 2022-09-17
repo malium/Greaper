@@ -53,9 +53,7 @@ namespace greaper::core
 		Vector<PInterface> m_InterfacesToRemove;
 		Vector<PInterface> m_InterfacesToAdd;
 
-		void AddGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept;
 		EmptyResult RegisterGreaperLibrary(SPtr<IGreaperLibrary> gLib);
-		void LoadConfigLibraries()noexcept;
 
 		void UpdateActiveInterfaceList()noexcept;
 
@@ -67,9 +65,9 @@ namespace greaper::core
 
 		void OnDeinitialization()noexcept override;
 
-		void OnActivation(SPtr<IInterface> oldDefault)noexcept override;
+		void OnActivation(const SPtr<IInterface>& oldDefault)noexcept override;
 
-		void OnDeactivation(SPtr<IInterface> newDefault)noexcept override;
+		void OnDeactivation(const SPtr<IInterface>& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 

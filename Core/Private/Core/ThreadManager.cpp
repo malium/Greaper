@@ -16,24 +16,80 @@
 using namespace greaper;
 using namespace greaper::core;
 
+extern SPtr<ThreadManager> gThreadManager = SPtr<ThreadManager>();
+
+#if PLT_WINDOWS
+using ThreadImpl = WinThreadImpl;
+#elif PLT_LINUX
+using ThreadImpl = LnxThreadImp;
+#endif
+
 void ThreadManager::OnInitialization() noexcept
 {
-
+	VerifyNot(m_Library.expired(), "Trying to initialize ThreadManager, but its library is expired.");
+	auto lib = m_Library.lock();
+	auto managers = lib->GetManagers();
+	for (auto it = managers.begin(); it != managers.end(); ++it)
+	{
+		auto mgr = *it;
+		if (mgr.get() == this)
+		{
+			gThreadManager = mgr;
+			break;
+		}
+	}
 }
 
 void ThreadManager::OnDeinitialization() noexcept
 {
-
+	gThreadManager.reset();
 }
 
-void ThreadManager::OnActivation(SPtr<IInterface> oldDefault) noexcept
+void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 {
+	if (oldDefault != nullptr)
+	{
+		const auto& other = (const PThreadManager&)oldDefault;
+		// Copy threads
+		auto lckTh = Lock(m_ThreadMutex);
+		auto range = other->GetThreads();
+		auto lckRng = Lock(range.Protection);
+		const auto thCount = range.SizeFn();
+		if (m_Threads.capacity() < thCount)
+			m_Threads.reserve(thCount);
 
+		for (auto it = range.begin(); it != range.end(); ++it)
+		{
+			const auto& thread = *it;
+			if (thread == nullptr)
+				continue;
+			m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
+			m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
+			m_Threads.push_back(thread);
+		}
+	}
+	else
+	{
+		// Add Main Thread
+		LOCK(m_ThreadMutex);
+		auto curTh = SPtr<ThreadImpl>(AllocT<ThreadImpl>());
+		new((void*)curTh.get())ThreadImpl((WThreadManager)gThreadManager, CUR_THHND(), CUR_THID(), "Main");
+
+		m_ThreadNameMap.insert_or_assign(curTh->GetName(), m_Threads.size());
+		m_ThreadIDMap.insert_or_assign(curTh->GetID(), m_Threads.size());
+		m_Threads.push_back((PThread)curTh);
+	}
 }
 
-void ThreadManager::OnDeactivation(SPtr<IInterface> newDefault) noexcept
+void ThreadManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
 {
+	UNUSED(newDefault);
 
+	// Clear threads
+	LOCK(m_ThreadMutex);
+	m_Threads.clear();
+	m_ThreadIDMap.clear();
+	m_ThreadNameMap.clear();
 }
 
 void ThreadManager::InitProperties()noexcept
@@ -70,7 +126,7 @@ ThreadManager::~ThreadManager() noexcept
 
 Result<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
 {
-	SharedLock lock(m_ThreadMutex);
+	LOCK(m_ThreadMutex);
 
 	const auto findIDIT = m_ThreadIDMap.find(id);
 	if (findIDIT == m_ThreadIDMap.end())
@@ -88,7 +144,7 @@ Result<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
 
 Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcept
 {
-	SharedLock lock(m_ThreadMutex);
+	LOCK(m_ThreadMutex);
 
 	const auto findNameIT = m_ThreadNameMap.find(threadName);
 	if (findNameIT == m_ThreadNameMap.end())
@@ -106,10 +162,12 @@ Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcep
 
 Result<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 {
-	return CreateFailure<PThread>("Not Implemented"sv);
-}
+	LOCK(m_ThreadMutex);
+	auto thread = SPtr<ThreadImpl>(AllocT<ThreadImpl>());
+	new((void*)thread.get())ThreadImpl((WThreadManager)gThreadManager, (WThread)thread, config);
 
-void ThreadManager::DestroyThread(PThread thread) noexcept
-{
-
+	m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
+	m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
+	m_Threads.push_back((PThread)thread);
+	return CreateResult((PThread)thread);
 }

@@ -26,7 +26,7 @@ namespace greaper
         bool m_JoinsAtDestruction;
         String m_Name;
 
-		static inline void* RunFn(void* data)
+		static INLINE void* RunFn(void* data)
 		{
 			//auto* th = (LnxThreadImpl*)data;
 			auto* wThis = (WThread*)data;
@@ -57,7 +57,7 @@ namespace greaper
 		}
 
 	public:
-		LnxThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
+		INLINE LnxThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_State(ThreadState_t::SUSPENDED)
             ,m_ThreadFn(config.ThreadFN)
@@ -92,20 +92,32 @@ namespace greaper
 				m_State = ThreadState_t::RUNNING;
 		}
 
-		~LnxThreadImpl()
+		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
+			:m_Manager(manager)
+			, m_Handle(handle)
+			, m_ID(id)
+			, m_State(ThreadState_t::UNMANAGED)
+			, m_ThreadFn(nullptr)
+			, m_JoinsAtDestruction(false)
+			, m_Name(name)
+		{
+
+		}
+
+		INLINE ~LnxThreadImpl()
 		{
 			if (m_JoinsAtDestruction && Joinable())
 				Join();
 		}
 
-		void Detach()override
+		INLINE void Detach()override
 		{
 			auto ret = pthread_detach(m_Handle);
 			VerifyEqual(ret, 0, "Trying to detach a thread, but something went wrong, error:'%d'.", ret);
-			m_State = ThreadState_t::STOPPED;
+			m_State = ThreadState_t::UNMANAGED;
 		}
 
-		void Join()override
+		INLINE void Join()override
 		{
 			Verify(Joinable(), "Trying to join a non-joinable thread");
 			void* thRet = nullptr;
@@ -113,12 +125,12 @@ namespace greaper
 			VerifyEqual(ret, 0, "Trying to join a thread, but something went wrong, error:'%d'.", ret);
 		}
 
-		bool Joinable()const noexcept override
+		INLINE bool Joinable()const noexcept override
 		{
 			return m_State == ThreadState_t::RUNNING;
 		}
 
-		bool TryJoin()override
+		INLINE bool TryJoin()override
 		{
 			if (!Joinable())
 				return false;
@@ -128,9 +140,9 @@ namespace greaper
 			return ret == 0;
 		}
 
-		ThreadHandle GetOSHandle()const noexcept override { return m_Handle; }
+		INLINE ThreadHandle GetOSHandle()const noexcept override { return m_Handle; }
 
-		void Terminate()override
+		INLINE void Terminate()override
 		{
 			Verify(Joinable(), "Trying to terminate a not Joinable thread.");
 			auto ret = pthread_cancel(m_Handle);
@@ -138,7 +150,7 @@ namespace greaper
 			m_State = ThreadState_t::STOPPED;
 		}
 
-		void Resume()override
+		INLINE void Resume()override
 		{
 			if (GetState() != ThreadState_t::SUSPENDED)
 				return;
@@ -148,13 +160,13 @@ namespace greaper
 			m_State = ThreadState_t::RUNNING;
 		}
 
-		ThreadID_t GetID()const noexcept override { return m_ID; }
+		INLINE ThreadID_t GetID()const noexcept override { return m_ID; }
 
-		bool JoinsAtDestruction()const noexcept override { return m_JoinsAtDestruction; }
+		INLINE bool JoinsAtDestruction()const noexcept override { return m_JoinsAtDestruction; }
 
-		const String& GetName()const noexcept override { return m_Name; }
+		INLINE const String& GetName()const noexcept override { return m_Name; }
 
-		ThreadState_t GetState()const noexcept override { return (ThreadState_t)m_State.load(); }
+		INLINE ThreadState_t GetState()const noexcept override { return (ThreadState_t)m_State.load(); }
 	};
 	using Thread = LnxThreadImpl;
 }

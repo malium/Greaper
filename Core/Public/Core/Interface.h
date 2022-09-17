@@ -39,9 +39,9 @@ namespace greaper
 
 		virtual void OnDeinitialization()noexcept = 0;
 
-		virtual void OnActivation(SPtr<IInterface> oldDefault)noexcept = 0;
+		virtual void OnActivation(const SPtr<IInterface>& oldDefault)noexcept = 0;
 
-		virtual void OnDeactivation(SPtr<IInterface> newDefault)noexcept = 0;
+		virtual void OnDeactivation(const SPtr<IInterface>& newDefault)noexcept = 0;
 
 	public:
 		using InitializationEvt_t = Event<bool>;

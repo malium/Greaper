@@ -13,17 +13,7 @@ using namespace greaper::core;
 
 extern SPtr<Application> gApplication = SPtr<Application>();
 
-void Application::AddGreaperLibrary(PGreaperLib library) noexcept
-{
-	const auto id = m_Libraries.size();
-	m_LibraryNameMap.insert_or_assign(library->GetLibraryName(), id);
-	m_LibraryUuidMap.insert_or_assign(library->GetLibraryUuid(), id);
-	LibInfo info;
-	info.Lib = library;
-	m_Libraries.push_back(std::move(info));
-}
-
-EmptyResult Application::RegisterGreaperLibrary(PGreaperLib gLib)
+EmptyResult Application::RegisterGreaperLibrary(SPtr<IGreaperLibrary> gLib)
 {
 	auto uLib = GetGreaperLibrary(gLib->GetLibraryUuid());
 	if (uLib.IsOk() && uLib.GetValue() != nullptr)
@@ -50,28 +40,13 @@ EmptyResult Application::RegisterGreaperLibrary(PGreaperLib gLib)
 	return CreateEmptyResult();
 }
 
-void Application::LoadConfigLibraries() noexcept
-{
-	/*if (m_Config.GreaperLibraries == nullptr)
-		return;
-	for (uint32 i = 0; i < m_Config.GreaperLibraryCount; ++i)
-	{
-		auto res = RegisterGreaperLibrary(m_Config.GreaperLibraries[i]);
-		if (res.HasFailed())
-		{
-			m_Library->LogWarning(res.GetFailMessage());
-			continue;
-		}
-	}*/
-}
-
 void Application::UpdateActiveInterfaceList()noexcept 
 {
 	LOCK(m_ActiveMutex);
 
 	for (const auto& iface : m_InterfacesToRemove)
 	{
-        const auto ifaceIDX = IndexOf(m_ActiveInterfaces, iface);
+		const auto ifaceIDX = IndexOf(m_ActiveInterfaces, iface);
 		if (ifaceIDX < 0)
 			continue; // Not in vector
 
@@ -80,7 +55,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 	}
 	for (const auto& iface : m_InterfacesToAdd)
 	{
-        auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
+		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
 		sizet ifaceIDX;
 		if (uuidIT == m_ActiveInterfaceUuidMap.end())
 		{
@@ -95,17 +70,17 @@ void Application::UpdateActiveInterfaceList()noexcept
 		}
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		iface->Activate(PInterface());
-		m_OnInterfaceActivation.Trigger((WInterface)iface);
+		m_OnInterfaceActivation.Trigger((PInterface)iface);
 	}
 
 	for (const auto& iface : m_InterfaceToChange)
 	{
-        auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
+		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
 		VerifyInequal(uuidIT, m_ActiveInterfaceUuidMap.end(), "Couldn't find the Active interafce with UUID '%s' on the ActiveInterfaces.", iface->GetInterfaceUUID().ToString().c_str());
 		const auto ifaceIDX = uuidIT->second;
 		auto oiFace = m_ActiveInterfaces[ifaceIDX];
 		iface->Activate(oiFace);
-		m_OnInterfaceActivation.Trigger((WInterface)iface);
+		m_OnInterfaceActivation.Trigger((PInterface)iface);
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		oiFace->Deactivate(iface);
 	}
@@ -180,13 +155,15 @@ void Application::OnDeinitialization() noexcept
 	gApplication.reset();
 }
 
-void Application::OnActivation(SPtr<IInterface> oldDefault) noexcept
+void Application::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 {
+	UNUSED(oldDefault);
 	/* No-op */
 }
 
-void Application::OnDeactivation(SPtr<IInterface> newDefault) noexcept
+void Application::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
 {
+	UNUSED(newDefault);
 	/* No-op */
 }
 
@@ -271,34 +248,6 @@ void Application::InitProperties()noexcept
 		loadedLibrariesProp = (WPtr<LoadedLibrariesProp_t>)loadedLibrariesResult.GetValue();
 	}
 	m_Properties[(sizet)LoadedLibraries] = (WPtr<LoadedLibrariesProp_t>)std::move(loadedLibrariesProp);
-
-	/*UpdateMaxRateProp_t* updateMaxRateProp = nullptr;
-	result = m_Library->GetProperty(UpdateMaxRateName);
-	if (result.IsOk())
-		updateMaxRateProp = reinterpret_cast<UpdateMaxRateProp_t*>(result.GetValue());
-
-	if (updateMaxRateProp == nullptr)
-	{
-		auto updateMaxRateResult = CreateProperty<uint32>(m_Library, UpdateMaxRateName, 200, "Maximum amount of updates per second."sv, false, false, nullptr);
-		Verify(updateMaxRateResult.IsOk(), "Couldn't create the property '%s' msg: %s", UpdateMaxRateName.data(), updateMaxRateResult.GetFailMessage().c_str());
-		updateMaxRateProp = updateMaxRateResult.GetValue();
-	}
-	updateMaxRateProp->GetOnModificationEvent()->Connect(m_OnUpdateMaxRateEvtHnd, std::bind(&Application::OnUpdateMaxRateChange, this, std::placeholders::_1));
-	m_Properties[(sizet)UpdateMaxRate] = updateMaxRateProp;
-
-	FixedUpdateRateProp_t* fixedUpdateRateProp = nullptr;
-	result = m_Library->GetProperty(FixedUpdateRateName);
-	if (result.IsOk())
-		fixedUpdateRateProp = reinterpret_cast<FixedUpdateRateProp_t*>(result.GetValue());
-
-	if (fixedUpdateRateProp == nullptr)
-	{
-		auto fixedDeltaRateResult = CreateProperty<uint32>(m_Library, FixedUpdateRateName, 50, "Amount of fixed updates per second."sv, false, false, nullptr);
-		Verify(fixedDeltaRateResult.IsOk(), "Couldn't create the property '%s' msg: %s", FixedUpdateRateName.data(), fixedDeltaRateResult.GetFailMessage().c_str());
-		fixedUpdateRateProp = fixedDeltaRateResult.GetValue();
-	}
-	fixedUpdateRateProp->GetOnModificationEvent()->Connect(m_OnFixedUpdateMaxRateEvtHnd, std::bind(&Application::OnFixedUpdateRateChange, this, std::placeholders::_1));
-	m_Properties[(sizet)FixedUpdateRate] = fixedUpdateRateProp;*/
 }
 
 void Application::DeinitProperties()noexcept
@@ -594,32 +543,31 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 	PInterface interface;
 	// Remove it from toAdd and toChange
 	bool removed = false;
-	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
+	for (sizet i = 0; const auto & iface : m_InterfacesToAdd)
 	{
-		auto iface = m_InterfacesToAdd[i];
 		if (iface->GetInterfaceUUID() == interfaceUUID)
 		{
 			m_InterfacesToAdd.erase(m_InterfacesToAdd.begin() + i);
 			removed = true;
 			break;
 		}
+		++i;
 	}
-	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
+
+	for (sizet i = 0; const auto & iface : m_InterfaceToChange)
 	{
-		auto iface = m_InterfaceToChange[i];
 		if (iface->GetInterfaceUUID() == interfaceUUID)
 		{
 			m_InterfaceToChange.erase(m_InterfaceToChange.begin() + i);
 			removed = true;
 			break;
 		}
+		++i;
 	}
 
-	const auto activeIT = m_ActiveInterfaceUuidMap.find(interfaceUUID);
-	if (activeIT != m_ActiveInterfaceUuidMap.end())
-	{
+	if (const auto activeIT = m_ActiveInterfaceUuidMap.find(interfaceUUID);
+		activeIT != m_ActiveInterfaceUuidMap.end())
 		interface = m_ActiveInterfaces[activeIT->second];
-	}
 
 	if (interface == nullptr)
 	{
@@ -641,31 +589,31 @@ EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 	PInterface interface;
 	// Remove it from toAdd and toChange
 	bool removed = false;
-	for (sizet i = 0; i < m_InterfacesToAdd.size(); ++i)
+	for (sizet i = 0; const auto & iface : m_InterfacesToAdd)
 	{
-		auto iface = m_InterfacesToAdd[i];
 		if (iface->GetInterfaceName() == interfaceName)
 		{
 			m_InterfacesToAdd.erase(m_InterfacesToAdd.begin() + i);
 			removed = true;
 			break;
 		}
+		++i;
 	}
-	for (sizet i = 0; i < m_InterfaceToChange.size(); ++i)
+
+	for (sizet i = 0; const auto & iface : m_InterfaceToChange)
 	{
-		auto iface = m_InterfaceToChange[i];
 		if (iface->GetInterfaceName() == interfaceName)
 		{
 			m_InterfaceToChange.erase(m_InterfaceToChange.begin() + i);
 			removed = true;
 			break;
 		}
+		++i;
 	}
-	const auto activeIT = m_ActiveInterfaceNameMap.find(interfaceName);
-	if (activeIT != m_ActiveInterfaceNameMap.end())
-	{
+
+	if (const auto activeIT = m_ActiveInterfaceNameMap.find(interfaceName);
+		activeIT != m_ActiveInterfaceNameMap.end())
 		interface = m_ActiveInterfaces[activeIT->second];
-	}
 
 	if (interface == nullptr)
 	{

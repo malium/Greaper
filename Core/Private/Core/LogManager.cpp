@@ -143,27 +143,61 @@ void LogManager::OnInitialization() noexcept
 
 void LogManager::OnDeinitialization() noexcept
 {
-	m_OnAsyncProp.Disconnect();
-
 	if (m_Threaded)
 	{
 		m_Threaded = false;
 		m_QueueSignal.notify_all();
 		m_AsyncThread->Join();
 	}
-	m_Writers.clear();
-
+	{
+		LOCK(m_WriterMutex);
+		m_Writers.clear();
+	}
 	gLogManager.reset();
 }
 
-void LogManager::OnActivation(SPtr<IInterface> oldDefault) noexcept
+void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 {
-	UNUSED(oldDefault);
+	if (oldDefault != nullptr)
+	{
+		const auto& other = (const PLogManager&)oldDefault;
+		auto lckMsg = Lock(m_MessagesMutex);
+		auto range = other->GetMessages();
+		auto lckRng = Lock(range.Protection);
+		const auto msgCount = range.SizeFn();
+		if (m_Messages.capacity() < msgCount)
+			m_Messages.reserve(msgCount);
+
+		for (auto it = range.begin(); it != range.end(); ++it)
+		{
+			m_Messages.push_back(*it);
+		}
+	}
+	
+	auto asyncProp = GetAsyncLog().lock();
+	if (asyncProp->GetValue())
+	{
+		m_Threaded = true;
+		// Create thread and init async logging
+	}
+	asyncProp->GetOnModificationEvent()->Connect(m_OnAsyncProp, [this](IProperty* prop) { OnAsyncChanged(prop); });
 }
 
-void LogManager::OnDeactivation(SPtr<IInterface> newDefault) noexcept
+void LogManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
 {
 	UNUSED(newDefault);
+	// deinit async logging
+	if (m_Threaded)
+	{
+		m_Threaded = false;
+		m_QueueSignal.notify_all();
+		m_AsyncThread->Join();
+	}
+	// clear messages
+	{
+		LOCK(m_MessagesMutex);
+		m_Messages.clear();
+	}
 }
 
 void LogManager::InitProperties()noexcept
@@ -189,13 +223,6 @@ void LogManager::InitProperties()noexcept
 		asyncLogProp = (WPtr<AsyncLogProp_t>)asyncLogResult.GetValue();
 	}
 
-	auto asyncLog = asyncLogProp.lock();
-	if (asyncLog != nullptr)
-	{
-		using namespace std::placeholders;
-		asyncLog->GetOnModificationEvent()->Connect(m_OnAsyncProp, std::bind(&LogManager::OnAsyncChanged, this, _1));
-	}
-
 	m_Properties[(sizet)AsyncProp] = asyncLogProp;
 }
 
@@ -203,7 +230,8 @@ void LogManager::DeinitProperties()noexcept
 {
 	m_OnAsyncProp.Disconnect();
 
-	m_Properties.clear();
+	for (auto& prop : m_Properties)
+		prop.reset();
 }
 
 void LogManager::InitSerialization() noexcept
@@ -229,7 +257,7 @@ LogManager::~LogManager() noexcept
 
 void LogManager::AddLogWriter(SPtr<ILogWriter> writer) noexcept
 {
-	auto lck = Lock(m_WriterMutex);
+	LOCK(m_WriterMutex);
 
 	if (Contains(m_Writers, writer))
 		return;
@@ -247,7 +275,7 @@ void LogManager::AddLogWriter(SPtr<ILogWriter> writer) noexcept
 
 void LogManager::RemoveLogWriter(sizet writerID) noexcept
 {
-	auto lck = Lock(m_WriterMutex);
+	LOCK(m_WriterMutex);
 
 	if (writerID >= m_Writers.size())
 		return;

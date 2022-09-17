@@ -12,8 +12,6 @@
 //#include "../Event.h"
 #include <utility>
 
-#include "../IThreadManager.h"
-
 namespace greaper
 {
 	class WinThreadImpl : IThread
@@ -25,20 +23,20 @@ namespace greaper
 		std::function<void()> m_ThreadFn;
 		bool m_JoinsAtDestruction;
 		String m_Name;
+		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
+		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
 
-		static inline unsigned STDCALL RunFn(void* data)
+		static INLINE unsigned STDCALL RunFn(void* data)
 		{
-			//auto* th = (WinThreadImpl*)data;
 			auto* wThis = (WThread*)data;
-			auto pThread = wThis->lock();
-			auto winThread = (SPtr<WinThreadImpl>)pThread;
-			//auto th = (SPtr<WinThreadImpl>)wThis->lock();
+			auto winThread = (SPtr<WinThreadImpl>)wThis->lock();
+			
 			if (winThread == nullptr)
 				return EXIT_FAILURE;
 
 			{
 				auto mgr = winThread->m_Manager.lock();
-				mgr->GetThreadCreationEvent()->Trigger((PThread)pThread);
+				mgr->GetThreadCreationEvent()->Trigger((PThread)winThread);
 			}
 
 			while (winThread->GetState() != ThreadState_t::RUNNING)
@@ -51,7 +49,7 @@ namespace greaper
 
 			{
 				auto mgr = winThread->m_Manager.lock();
-				mgr->GetThreadDestructionEvent()->Trigger((PThread)pThread);
+				mgr->GetThreadDestructionEvent()->Trigger((PThread)winThread);
 			}
 
 			return EXIT_SUCCESS;
@@ -103,8 +101,47 @@ namespace greaper
 #endif
 		}
 
+		void OnManagerActivation(bool active, IInterface* oldManager, const PInterface& newManager)noexcept
+		{
+			if (active)
+				return;
+
+			if (newManager != nullptr)
+			{
+				const auto& newThreadMgr = (const PThreadManager&)newManager;
+				m_OnManagerActivation.Disconnect();
+				newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+				m_Manager = (WThreadManager)newThreadMgr;
+			}
+			else
+			{
+				m_OnManagerActivation.Disconnect();
+				auto libW = oldManager->GetLibrary();
+				VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.");
+				auto lib = libW.lock();
+				auto appW = lib->GetApplication();
+				VerifyNot(appW.expired(), "Trying to connect to InterfaceActivationEvent but Application was expired.");
+				auto app = appW.lock();
+				m_OnNewManager.Disconnect();
+				app->GetOnInterfaceActivationEvent()->Connect(m_OnNewManager, [this](const PInterface& newManager) { OnNewManager(newManager); });
+			}
+		}
+
+		void OnNewManager(const PInterface& newManager)noexcept
+		{
+			if (newManager == nullptr)
+				return;
+			if (newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
+				return;
+
+			m_Manager = (WThreadManager)newManager;
+			m_OnManagerActivation.Disconnect();
+			newManager->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+			m_OnNewManager.Disconnect();
+		}
+
 	public:
-		WinThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
+		INLINE WinThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_Handle(InvalidThreadHandle)
 			,m_ID(InvalidThreadID)
@@ -141,22 +178,38 @@ namespace greaper
 			m_Handle = reinterpret_cast<HANDLE>(hnd);
 			if (!config.StartSuspended)
 				m_State = ThreadState_t::RUNNING;
+
+			auto mgr = m_Manager.lock();
+			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}
 
-		~WinThreadImpl() override
+		INLINE WinThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
+			:m_Manager(manager)
+			,m_Handle(handle)
+			,m_ID(id)
+			,m_State(ThreadState_t::UNMANAGED)
+			,m_ThreadFn(nullptr)
+			,m_JoinsAtDestruction(false)
+			,m_Name(name)
+		{
+			auto mgr = m_Manager.lock();
+			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+		}
+
+		INLINE ~WinThreadImpl() override
 		{
 			if (m_JoinsAtDestruction && Joinable())
 				Join();
 		}
 
-		void Detach()override
+		INLINE void Detach()override
 		{
 			m_Handle = InvalidThreadHandle;
 			m_ID = InvalidThreadID;
-			m_State = ThreadState_t::STOPPED;
+			m_State = ThreadState_t::UNMANAGED;
 		}
 
-		void Join()override
+		INLINE void Join()override
 		{
 			Verify(Joinable(), "Trying to join a not-joinable thread");
 			WaitForSingleObject(m_Handle, INFINITE);
@@ -165,12 +218,12 @@ namespace greaper
 			//m_State = ThreadState_t::STOPPED;
 		}
 
-		bool Joinable()const noexcept override
+		INLINE bool Joinable()const noexcept override
 		{
 			return m_State == ThreadState_t::RUNNING && m_Handle != InvalidThreadHandle && m_ID != InvalidThreadID;
 		}
 
-		bool TryJoin()override
+		INLINE bool TryJoin()override
 		{
 			if (!Joinable())
 				return false;
@@ -189,9 +242,9 @@ namespace greaper
 			return false;
 		}
 
-		ThreadHandle GetOSHandle()const noexcept override { return m_Handle; }
+		INLINE ThreadHandle GetOSHandle()const noexcept override { return m_Handle; }
 
-		void Terminate()override
+		INLINE void Terminate()override
 		{
 			Verify(Joinable(), "Trying to terminate a not Joinable thread.");
 			if (!TerminateThread(m_Handle, EXIT_FAILURE))
@@ -203,7 +256,7 @@ namespace greaper
 			m_State = ThreadState_t::STOPPED;
 		}
 
-		void Resume()override
+		INLINE void Resume()override
 		{
 			if (GetState() != ThreadState_t::SUSPENDED)
 				return;
@@ -214,13 +267,13 @@ namespace greaper
 			m_State = ThreadState_t::RUNNING;
 		}
 
-		ThreadID_t GetID()const noexcept override { return m_ID; }
+		INLINE ThreadID_t GetID()const noexcept override { return m_ID; }
 
-		bool JoinsAtDestruction()const noexcept override { return m_JoinsAtDestruction; }
+		INLINE bool JoinsAtDestruction()const noexcept override { return m_JoinsAtDestruction; }
 
-		const String& GetName()const noexcept override { return m_Name; }
+		INLINE const String& GetName()const noexcept override { return m_Name; }
 
-		ThreadState_t GetState()const noexcept override { return (ThreadState_t)m_State.load(); }
+		INLINE ThreadState_t GetState()const noexcept override { return (ThreadState_t)m_State.load(); }
 	};
 	using Thread = WinThreadImpl;
 }

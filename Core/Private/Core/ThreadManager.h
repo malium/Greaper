@@ -19,21 +19,10 @@ namespace greaper::core
 		mutable ThreadCreationEvent_t m_ThreadCreationEvent;
 		mutable ThreadDestructionEvent_t m_ThreadDestructionEvent;
 
-		mutable RWMutex m_ThreadMutex;
+		mutable RecursiveMutex m_ThreadMutex;
 		Vector<PThread> m_Threads;
 		UnorderedMap<String, sizet> m_ThreadNameMap;
 		UnorderedMap<ThreadID_t, sizet> m_ThreadIDMap;
-
-		std::size_t GetThreadCount()const noexcept
-		{
-			SharedLock lock(m_ThreadMutex);
-			return m_Threads.size();
-		}
-		const PThread& GetThreadIdx(std::size_t idx)const noexcept
-		{
-			SharedLock lock(m_ThreadMutex);
-			return m_Threads[idx];
-		}
 
 	public:
 		ThreadManager();
@@ -44,9 +33,9 @@ namespace greaper::core
 
 		void OnDeinitialization()noexcept override;
 
-		void OnActivation(SPtr<IInterface> oldDefault)noexcept override;
+		void OnActivation(const SPtr<IInterface>& oldDefault)noexcept override;
 
-		void OnDeactivation(SPtr<IInterface> newDefault)noexcept override;
+		void OnDeactivation(const SPtr<IInterface>& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 
@@ -62,13 +51,11 @@ namespace greaper::core
 
 		Result<PThread> CreateThread(const ThreadConfig& config)noexcept override;
 
-		void DestroyThread(PThread thread)noexcept override;
-
 		ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept override { return &m_ThreadCreationEvent; }
 		
 		ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
 
-		CRange<PThread> GetThreads()const noexcept override { return CRange<PThread>(nullptr, nullptr); }
+		CRangeProtected<PThread, RecursiveMutex> GetThreads()const noexcept override { return CreateRange(m_Threads, m_ThreadMutex); }
 	};
 }
 

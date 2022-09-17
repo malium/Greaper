@@ -181,14 +181,6 @@ typedef struct tagPOINT
 	LONG  y;
 } POINT, *PPOINT, NEAR *NPPOINT, FAR *LPPOINT;
 
-typedef struct _VCRT_ALIGN(16) _SETJMP_FLOAT128
-{
-	unsigned __int64 Part[2];
-} SETJMP_FLOAT128;
-
-#define _JBLEN  16
-typedef SETJMP_FLOAT128 _JBTYPE;
-
 #define MB_OK                       0x00000000L
 #define MB_OKCANCEL                 0x00000001L
 #define MB_ABORTRETRYIGNORE         0x00000002L
@@ -727,21 +719,11 @@ int           __cdecl _abnormal_termination(void);
 #define EXCEPTION_EXECUTE_HANDLER      1
 #define EXCEPTION_CONTINUE_SEARCH      0
 #define EXCEPTION_CONTINUE_EXECUTION (-1)
-
-#ifndef _JMP_BUF_DEFINED
-#define _JMP_BUF_DEFINED
-typedef _JBTYPE jmp_buf[_JBLEN];
-#endif
-int __cdecl setjmp(
-	jmp_buf _Buf
-);
 }
 
-__declspec(noreturn) void __cdecl longjmp(
-	jmp_buf _Buf,
-	int     _Value
-) noexcept(false);
 #else
 #include <Windows.h>
 #include <rpc.h>
 #endif
+
+#include <csetjmp>

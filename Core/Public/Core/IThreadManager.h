@@ -35,13 +35,11 @@ namespace greaper
 
 		virtual Result<PThread> CreateThread(const ThreadConfig& config)noexcept = 0;
 
-		virtual void DestroyThread(PThread thread)noexcept = 0;
-
 		virtual ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept = 0;
 
 		virtual ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept = 0;
 
-		virtual CRange<PThread> GetThreads()const noexcept = 0;
+		virtual CRangeProtected<PThread, RecursiveMutex> GetThreads()const noexcept = 0;
 	};
 
 	using WThreadManager = WPtr<IThreadManager>;
