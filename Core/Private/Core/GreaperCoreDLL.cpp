@@ -81,7 +81,7 @@ void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
 void greaper::core::GreaperCoreLibrary::InitProperties()noexcept
 {
 	m_Application->InitProperties();
-	for (auto mgr : m_Managers)
+	for (const auto& mgr : m_Managers)
 		mgr->InitProperties();
 }
 

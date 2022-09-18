@@ -13,7 +13,7 @@ using namespace greaper::core;
 
 extern SPtr<Application> gApplication = SPtr<Application>();
 
-EmptyResult Application::RegisterGreaperLibrary(SPtr<IGreaperLibrary> gLib)
+EmptyResult Application::RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLib)
 {
 	auto uLib = GetGreaperLibrary(gLib->GetLibraryUuid());
 	if (uLib.IsOk() && uLib.GetValue() != nullptr)
@@ -53,6 +53,8 @@ void Application::UpdateActiveInterfaceList()noexcept
 		m_ActiveInterfaces[ifaceIDX].reset();
 		iface->Deactivate(PInterface());
 	}
+	m_InterfacesToRemove.clear();
+
 	for (const auto& iface : m_InterfacesToAdd)
 	{
 		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
@@ -72,6 +74,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 		iface->Activate(PInterface());
 		m_OnInterfaceActivation.Trigger((PInterface)iface);
 	}
+	m_InterfacesToAdd.clear();
 
 	for (const auto& iface : m_InterfaceToChange)
 	{
@@ -84,6 +87,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		oiFace->Deactivate(iface);
 	}
+	m_InterfaceToChange.clear();
 }
 
 Application::Application()
@@ -93,7 +97,7 @@ Application::Application()
 
 }
 
-Application::~Application()
+Application::~Application()noexcept
 {
 	// No-op
 }
@@ -394,7 +398,7 @@ EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 	return CreateEmptyResult();
 }
 
-EmptyResult Application::RegisterInterface(PInterface interface)
+EmptyResult Application::RegisterInterface(const PInterface& interface)
 {
 	if (interface == nullptr)
 		return CreateEmptyFailure("Trying to register a nullptr interface.");
@@ -435,7 +439,7 @@ EmptyResult Application::RegisterInterface(PInterface interface)
 	return CreateEmptyResult();
 }
 
-EmptyResult Application::UnregisterInterface(PInterface interface)
+EmptyResult Application::UnregisterInterface(const PInterface& interface)
 {
 	if (interface == nullptr)
 		return CreateEmptyFailure("Trying to unregister a nullptr interface.");
@@ -502,7 +506,7 @@ EmptyResult Application::UnregisterInterface(PInterface interface)
 	return CreateEmptyResult();
 }
 
-EmptyResult Application::ActivateInterface(PInterface interface)
+EmptyResult Application::ActivateInterface(const PInterface& interface)
 {
 	if (interface == nullptr)
 		return CreateEmptyFailure("Trying to make default a nullptr interface, if you want to remove an Active interface call StopInterfaceDefault.");

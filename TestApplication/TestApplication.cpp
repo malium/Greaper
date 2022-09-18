@@ -9,6 +9,7 @@
 #include <Core/Reflection/ReflectedPlainContainer.h>
 #include <Core/Property.h>
 #include <Core/Base/LogWriterFile.h>
+#include <Core/IThreadManager.h>
 #include <iostream>
 
 #if PLT_WINDOWS
@@ -33,6 +34,8 @@ constexpr greaper::StringView LibFnName = "_Greaper";
 greaper::PLibrary gCoreLib;
 greaper::PGreaperLib gCore;
 greaper::PApplication gApplication;
+greaper::PLogManager gLogManager;
+greaper::PThreadManager gThreadManger;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
@@ -72,58 +75,90 @@ int main(int argc, char* argv[])
 }
 #endif
 
+void SetProperties(void* hInstance, int32 argc, achar** argv)
+{
+	using namespace greaper;
+
+	auto propAppInstanceRes = CreateProperty<ptruint>((WGreaperLib)gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
+	if (propAppInstanceRes.HasFailed())
+		gCore->LogError(propAppInstanceRes.GetFailMessage());
+
+	StringVec commandLine;
+	commandLine.resize(argc);
+	for (int32 i = 0; i < argc; ++i)
+		commandLine[i].assign(argv[i]);
+	auto propCmdLineRes = CreateProperty<StringVec>((WGreaperLib)gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
+	if (propCmdLineRes.HasFailed())
+		gCore->LogError(propCmdLineRes.GetFailMessage());
+
+	auto propAppNameRes = CreateProperty<String>((WGreaperLib)gCore, IApplication::ApplicationNameName, String{"TestApplication"sv}, ""sv, true, true, nullptr);
+	if (propAppNameRes.HasFailed())
+		gCore->LogError(propAppNameRes.GetFailMessage());
+
+	auto propAppVersionRes = CreateProperty<uint32>((WGreaperLib)gCore, IApplication::ApplicationVersionName, APPLICATION_VERSION, ""sv, true, true, nullptr);
+	if (propAppVersionRes.HasFailed())
+		gCore->LogError(propAppVersionRes.GetFailMessage());
+}
+
+void ActivateManagers()
+{
+	using namespace greaper;
+	auto app = gCore->GetApplication();
+	TRYEXP(!app.expired(), CORE_LIBRARY_NAME " does not have an Application.");
+	gApplication = app.lock();
+
+	auto mgrRes = gApplication->GetInterface(ILogManager::InterfaceUUID, gCore->GetLibraryUuid());
+	if (mgrRes.IsOk())
+	{
+		gLogManager = (PLogManager)mgrRes.GetValue();
+		gLogManager->AddLogWriter(SPtr<ILogWriter>(Construct<LogWriterFile>()));
+	}
+
+	mgrRes = gApplication->GetInterface(IThreadManager::InterfaceUUID, gCore->GetLibraryUuid());
+	if (mgrRes.IsOk())
+	{
+		gThreadManger = (PThreadManager)mgrRes.GetValue();
+	}
+
+	gApplication->ActivateInterface((const PInterface&)gThreadManger);
+	gApplication->ActivateInterface((const PInterface&)gLogManager);
+}
+
+void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
+{
+	using namespace greaper;
+	auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
+	TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function.");
+
+	// init Greaper
+	auto* corePtr = static_cast<PGreaperLib*>(libFN());
+	TRYEXP(corePtr, CORE_LIBRARY_NAME " does not return a IGreaperLibrary.");
+	gCore = *corePtr;
+
+	SetProperties(hInstance, argc, argv);
+
+	gCore->InitLibrary(gCoreLib, PApplication());
+
+	ActivateManagers();
+
+	gCore->Log(Format("Successfully started %s! Version:%d", gApplication->GetApplicationName().lock()->GetValue().c_str(), gApplication->GetApplicationVersion().lock()->GetValue()));
+
+	gCore->Log(Format("Closing %s...", gApplication->GetApplicationName().lock()->GetValue().c_str()));
+
+	gThreadManger.reset();
+	gLogManager.reset();
+	gApplication.reset();
+	gCore->DeinitLibrary();
+	gCore.reset();
+}
+
 int MainCode(void* hInstance, int argc, char** argv)
 {
-	//Init(hInstance, argc, argv);
 	using namespace greaper;
 	gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));
 	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
-	{
-		auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
-		TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function.");
-
-		// init Greaper
-		auto* corePtr = static_cast<PGreaperLib*>(libFN());
-		TRYEXP(corePtr, CORE_LIBRARY_NAME " does not return a IGreaperLibrary.");
-		gCore = *corePtr;
-
-		auto propAppInstanceRes = CreateProperty<ptruint>((WGreaperLib)gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
-
-		StringVec commandLine;
-		commandLine.resize(argc);
-		for (int32 i = 0; i < argc; ++i)
-			commandLine[i] = String{ argv[i] };
-		auto propCmdLineRes = CreateProperty<StringVec>((WGreaperLib)gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
-
-		gCore->InitLibrary(gCoreLib, PApplication());
-
-		auto app = gCore->GetApplication();
-		TRYEXP(!app.expired(), CORE_LIBRARY_NAME " does not have an Application.");
-		gApplication = app.lock();
-		gApplication->GetApplicationName().lock()->SetValue(String{ "TestApplication"sv });
-		gApplication->GetApplicationVersion().lock()->SetValue(APPLICATION_VERSION);
-		gApplication->GetLoadedLibrariesNames().lock()->SetValue({});
-
-		const auto logMgrRes = gApplication->GetInterface(ILogManager::InterfaceUUID, gCore->GetLibraryUuid());
-		if (logMgrRes.IsOk())
-		{
-			auto logMgr = (PLogManager)logMgrRes.GetValue();
-			logMgr->AddLogWriter(SPtr<ILogWriter>(Construct<LogWriterFile>()));
-			gApplication->ActivateInterface((PInterface)logMgr);
-		}
-
-		std::cout << "Successfully started!\n " << gApplication->GetApplicationName().lock()->GetStringValue() << " Version " << gApplication->GetApplicationVersion().lock()->GetStringValue() << std::endl;
-
-		std::cout << "Enter anything to shutdown" << std::endl;
-		achar a;
-		std::cin >> a;
-
-		//Deinit();
-		gApplication.reset();
-		gCore->DeinitLibrary();
-		gCore.reset();
-	}
+	GreaperCoreLibInit(hInstance, argc, argv);
 
 	gCoreLib->Close();
 	gCoreLib.reset();

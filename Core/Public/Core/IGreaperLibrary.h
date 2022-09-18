@@ -47,7 +47,7 @@ namespace greaper
 
 		virtual ~IGreaperLibrary() = default;
 
-		void InitLibrary(PLibrary newInterface, SPtr<IApplication> app)noexcept;
+		void InitLibrary(PLibrary lib, SPtr<IApplication> app)noexcept;
 
 		void DeinitLibrary()noexcept;
 
@@ -94,7 +94,7 @@ namespace greaper
 		IInterface::ActivationEvt_t::HandlerType m_OnLogActivation;
 		InitState_t m_InitializationState = InitState_t::Stopped;
 
-		void OnNewLog(const SPtr<IInterface>& active)noexcept;
+		void OnNewLog(const SPtr<IInterface>& newInterface)noexcept;
 
 		void OnLogActivation(bool active, IInterface* oldLog, const SPtr<IInterface>& newLog)noexcept;
 

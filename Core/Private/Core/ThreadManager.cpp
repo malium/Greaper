@@ -31,7 +31,7 @@ void ThreadManager::OnInitialization() noexcept
 	auto managers = lib->GetManagers();
 	for (auto it = managers.begin(); it != managers.end(); ++it)
 	{
-		auto mgr = *it;
+		const auto& mgr = *it;
 		if (mgr.get() == this)
 		{
 			gThreadManager = mgr;
@@ -58,11 +58,11 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 		if (m_Threads.capacity() < thCount)
 			m_Threads.reserve(thCount);
 
-		for (auto it = range.begin(); it != range.end(); ++it)
+		for (const auto& thread : range)
 		{
-			const auto& thread = *it;
-			if (thread == nullptr)
+            if (thread == nullptr)
 				continue;
+    
 			m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
 			m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
 			m_Threads.push_back(thread);

@@ -53,7 +53,7 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 			return;
 		}
 		ThreadConfig thcfg;
-		thcfg.ThreadFN = std::bind(&LogManager::RunFn, this);
+		thcfg.ThreadFN = [this](){ RunFn(); }; //std::bind(&LogManager::RunFn, this);
 		thcfg.Name = "AsyncLogger";
 		auto thRes = thmgr->CreateThread(thcfg);
 		if (thRes.HasFailed())
@@ -132,7 +132,7 @@ void LogManager::OnInitialization() noexcept
 	auto managers = lib->GetManagers();
 	for (auto it = managers.begin(); it != managers.end(); ++it)
 	{
-		auto mgr = *it;
+		const auto& mgr = *it;
 		if (mgr.get() == this)
 		{
 			gLogManager = mgr;
@@ -290,7 +290,7 @@ CRangeProtected<LogData, Mutex> LogManager::GetMessages() const noexcept
 
 void LogManager::Log(LogLevel_t level, const String& message, StringView libraryName)noexcept
 {
-	_Log(LogData{ message, std::chrono::system_clock::now(), level, std::move(libraryName) });
+	_Log(LogData{ message, std::chrono::system_clock::now(), level, libraryName });
 }
 
 void LogManager::_Log(const LogData& data)noexcept

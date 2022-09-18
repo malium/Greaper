@@ -59,11 +59,11 @@ namespace greaper
 
 		virtual EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library) = 0;
 
-		virtual EmptyResult RegisterInterface(PInterface interface) = 0;
+		virtual EmptyResult RegisterInterface(const PInterface& interface) = 0;
 
-		virtual EmptyResult UnregisterInterface(PInterface interface) = 0;
+		virtual EmptyResult UnregisterInterface(const PInterface& interface) = 0;
 
-		virtual EmptyResult ActivateInterface(PInterface interface) = 0;
+		virtual EmptyResult ActivateInterface(const PInterface& interface) = 0;
 		
 		virtual EmptyResult DeactivateInterface(const Uuid& interfaceUUID) = 0;
 

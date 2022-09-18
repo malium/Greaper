@@ -53,13 +53,13 @@ namespace greaper::core
 		Vector<PInterface> m_InterfacesToRemove;
 		Vector<PInterface> m_InterfacesToAdd;
 
-		EmptyResult RegisterGreaperLibrary(SPtr<IGreaperLibrary> gLib);
+		EmptyResult RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLib);
 
 		void UpdateActiveInterfaceList()noexcept;
 
 	public:
 		Application();
-		~Application();
+		~Application()noexcept;
 
 		void OnInitialization()noexcept override;
 
@@ -85,11 +85,11 @@ namespace greaper::core
 
 		EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)override;
 
-		EmptyResult RegisterInterface(PInterface interface)override;
+		EmptyResult RegisterInterface(const PInterface& interface)override;
 
-		EmptyResult UnregisterInterface(PInterface interface)override;
+		EmptyResult UnregisterInterface(const PInterface& interface)override;
 
-		EmptyResult ActivateInterface(PInterface interface)override;
+		EmptyResult ActivateInterface(const PInterface& interface)override;
 
 		EmptyResult DeactivateInterface(const Uuid& interfaceUUID)override;
 
