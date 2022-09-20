@@ -45,7 +45,7 @@ namespace greaper
 			{
 				std::sort(entries.begin(), entries.end(), [](const std::filesystem::directory_entry& left, const std::filesystem::directory_entry& right) -> bool
 					{
-						return left.last_write_time() < right.last_write_time();
+						return left.last_write_time() > right.last_write_time();
 					});
 
 				while (entries.size() >= maxLogs)
@@ -64,17 +64,13 @@ namespace greaper
 				name.resize(ret);
 			name.append(".log");
 
-			const auto fullPath = directory / name;
-
-
-
-			m_Stream = SPtr<FileStream>(Construct<FileStream>(fullPath, (uint16)(FileStream::AccessMode::WRITE | FileStream::AccessMode::READ)));
+			m_Stream = SPtr<FileStream>(Construct<FileStream>(directory / name, (uint16)(FileStream::AccessMode::WRITE | FileStream::AccessMode::READ)));
 		}
 		INLINE bool WritePreviousMessages()const noexcept override { return true; }
 
 		INLINE void WriteLog(const LogData& logData)noexcept override
 		{
-			static achar gTimeBuff[128];
+			static achar gTimeBuff[64];
 
 			auto time = std::chrono::system_clock::to_time_t(logData.Time);
 			std::strftime(gTimeBuff, ArraySize(gTimeBuff), "%H:%M:%S", std::localtime(&time));

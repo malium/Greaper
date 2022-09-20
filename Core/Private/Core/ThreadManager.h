@@ -19,10 +19,14 @@ namespace greaper::core
 		mutable ThreadCreationEvent_t m_ThreadCreationEvent;
 		mutable ThreadDestructionEvent_t m_ThreadDestructionEvent;
 
+		ThreadDestructionEvent_t::HandlerType m_DestructionEventHnd;
+
 		mutable RecursiveMutex m_ThreadMutex;
 		Vector<PThread> m_Threads;
 		UnorderedMap<String, sizet> m_ThreadNameMap;
 		UnorderedMap<ThreadID_t, sizet> m_ThreadIDMap;
+
+		void OnThreadDestruction(const PThread& thread)noexcept;
 
 	public:
 		ThreadManager();

@@ -13,85 +13,74 @@ greaper::SPtr<greaper::core::LogManager> gLogManager = greaper::SPtr<greaper::co
 
 void LogManager::OnAsyncChanged(IProperty* prop)
 {
-	if (prop == nullptr)
+	if (prop == nullptr || !IsActive())
 		return;
 
 	auto* async = (AsyncLogProp_t*)prop;
 	if (m_Threaded == async->GetValue())
 		return; // no change
 
-	m_Threaded = async->GetValue();
+	if (async->GetValue())
+		StartThreadMode();
+	else
+		StopThreadMode();
+}
 
-	VerifyNot(m_Library.expired(), "Trying to change async LogManager, but its library has expired.");
+void LogManager::StartThreadMode()
+{
+	VerifyNot(m_Library.expired(), "Trying to set as async LogManager, but its library has expired.");
 	auto lib = m_Library.lock();
 	auto wApp = lib->GetApplication();
-
-	if (async->GetValue()) // init threaded mode
+	if (wApp.expired())
 	{
-		if (wApp.expired())
-		{
-			lib->LogError("Trying to enable async LogManager, but this library does not have an application connected.");
-			m_Threaded = false;
-			async->SetValue(false, true);
-			return;
-		}
-		auto app = wApp.lock();
-		auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
-		if (thmgrRes.HasFailed())
-		{
-			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
-			m_Threaded = false;
-			async->SetValue(false, true);
-			return;
-		}
-		auto thmgr = (PThreadManager)thmgrRes.GetValue();
-		if (thmgr == nullptr)
-		{
-			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager.");
-			m_Threaded = false;
-			async->SetValue(false, true);
-			return;
-		}
-		ThreadConfig thcfg;
-		thcfg.ThreadFN = [this](){ RunFn(); }; //std::bind(&LogManager::RunFn, this);
-		thcfg.Name = "AsyncLogger";
-		auto thRes = thmgr->CreateThread(thcfg);
-		if (thRes.HasFailed())
-		{
-			lib->LogError("Trying to enable async LogManager, but couldn't create a Thread, reason: " + thRes.GetFailMessage());
-			m_Threaded = false;
-			async->SetValue(false, true);
-			return;
-		}
-		//m_AsyncThread = thRes.GetValue();
+		lib->LogError("Trying to set as async LogManager, but this library does not have an application connected.");
+		m_Threaded = false;
+		GetAsyncLog().lock()->SetValue(false, true);
+		return;
 	}
-	else // stop threaded mode
+	auto app = wApp.lock();
+	auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
+	if (thmgrRes.HasFailed())
 	{
-		//if (m_AsyncThread == nullptr)
-		//	return;
+		lib->LogError("Trying to set as async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
+		m_Threaded = false;
+		GetAsyncLog().lock()->SetValue(false, true);
+		return;
+	}
+	auto thmgr = (PThreadManager)thmgrRes.GetValue();
+	if (thmgr == nullptr)
+	{
+		lib->LogError("Trying to set as async LogManager, but couldn't obtain a ThreadManager.");
+		m_Threaded = false;
+		GetAsyncLog().lock()->SetValue(false, true);
+		return;
+	}
+	ThreadConfig thcfg
+	{ 
+		.ThreadFN = [this]() { RunFn(); },
+		.Name = "AsyncLogger"sv
+	};
+	
+	m_Threaded = true;
+	auto thRes = thmgr->CreateThread(thcfg);
+	if (thRes.HasFailed())
+	{
+		lib->LogError("Trying to enable async LogManager, but couldn't create a Thread, reason: " + thRes.GetFailMessage());
+		m_Threaded = false;
+		GetAsyncLog().lock()->SetValue(false, true);
+		return;
+	}
+	m_AsyncThread = thRes.GetValue();
+}
 
-		if (wApp.expired())
-		{
-			lib->LogError("Trying to disable async LogManager, but this library does not have an application connected.");
-			return;
-		}
-		auto app = wApp.lock();
-		auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
-		if (thmgrRes.HasFailed())
-		{
-			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
-			m_Threaded = false;
-			async->SetValue(false, true);
-			return;
-		}
-		auto thmgr = (PThreadManager)thmgrRes.GetValue();
-		if (thmgr == nullptr)
-		{
-			lib->LogError("Trying to enable async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
-			m_Threaded = false;
-			async->SetValue(false, true);
-			return;
-		}
+void LogManager::StopThreadMode()
+{
+	m_Threaded = false;
+	m_QueueSignal.notify_all();
+	if (m_AsyncThread != nullptr)
+	{
+		m_AsyncThread->Join();
+		m_AsyncThread.reset();
 	}
 }
 
@@ -100,16 +89,16 @@ void LogManager::RunFn()
 	while (m_Threaded)
 	{
 		auto lck = UniqueLock<Mutex>(m_QueueMutex);
-		while (m_QueuedMessages.empty() || !m_Threaded)
+		while (m_QueuedMessages.empty() && m_Threaded)
 			m_QueueSignal.wait(lck);
-
-		if (!m_Threaded)
-			break; // stop thread
 
 		for (const auto& logData : m_QueuedMessages)
 			LogToWriters(logData);
 
 		m_QueuedMessages.clear();
+
+		if (!m_Threaded)
+			break; // stop thread
 	}
 }
 
@@ -177,10 +166,8 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	auto asyncProp = GetAsyncLog().lock();
 	if (asyncProp->GetValue())
 	{
-		m_Threaded = true;
-		// Create thread and init async logging
+		StartThreadMode();
 	}
-	asyncProp->GetOnModificationEvent()->Connect(m_OnAsyncProp, [this](IProperty* prop) { OnAsyncChanged(prop); });
 }
 
 void LogManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
@@ -189,9 +176,7 @@ void LogManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
 	// deinit async logging
 	if (m_Threaded)
 	{
-		m_Threaded = false;
-		m_QueueSignal.notify_all();
-		m_AsyncThread->Join();
+		StopThreadMode();
 	}
 	// clear messages
 	{
@@ -210,20 +195,24 @@ void LogManager::InitProperties()noexcept
 	if (m_Properties.size() != (sizet)COUNT)
 		m_Properties.resize((sizet)COUNT, WIProperty());
 
-	WPtr<AsyncLogProp_t> asyncLogProp;
+	WPtr<AsyncLogProp_t> asyncLogPropW;
 	auto result = lib->GetProperty(AsyncLogName);
 	if (result.IsOk())
 	{
-		asyncLogProp = result.GetValue();
+		asyncLogPropW = result.GetValue();
 	}
 	else
 	{
 		auto asyncLogResult = CreateProperty<bool>(m_Library, AsyncLogName, false, ""sv, false, true, nullptr);
 		Verify(asyncLogResult.IsOk(), "Couldn't create the property '%s' msg: %s", AsyncLogName.data(), asyncLogResult.GetFailMessage().c_str());
-		asyncLogProp = (WPtr<AsyncLogProp_t>)asyncLogResult.GetValue();
+		asyncLogPropW = (WPtr<AsyncLogProp_t>)asyncLogResult.GetValue();
 	}
 
-	m_Properties[(sizet)AsyncProp] = asyncLogProp;
+	auto asyncLogProp = asyncLogPropW.lock();
+	m_Threaded = false;
+	asyncLogProp->GetOnModificationEvent()->Connect(m_OnAsyncProp, [this](IProperty* prop) { OnAsyncChanged(prop); });
+
+	m_Properties[(sizet)AsyncProp] = asyncLogPropW;
 }
 
 void LogManager::DeinitProperties()noexcept

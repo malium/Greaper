@@ -66,8 +66,8 @@ void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
 	m_Application->Initialize((WGreaperLib)gCoreLibrary);
 
 	// add more managers
-	m_Managers.push_back(SPtr<IInterface>(Construct<LogManager>()));
 	m_Managers.push_back(SPtr<IInterface>(Construct<ThreadManager>()));
+	m_Managers.push_back(SPtr<IInterface>(Construct<LogManager>()));
 
 
 

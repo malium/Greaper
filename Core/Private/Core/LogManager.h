@@ -40,6 +40,8 @@ namespace greaper::core
 		mutable Mutex m_MessagesMutex;
 
 		void OnAsyncChanged(IProperty* prop);
+		void StartThreadMode();
+		void StopThreadMode();
 		void RunFn();
 		void LogToWriters(const LogData& data);
 

@@ -25,44 +25,95 @@ namespace greaper
         std::function<void()> m_ThreadFn;
         bool m_JoinsAtDestruction;
         String m_Name;
+		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
+		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
+		SPtr<LnxThreadImpl> m_This;
+		Barrier m_Barrier;
 
 		static INLINE void* RunFn(void* data)
 		{
 			//auto* th = (LnxThreadImpl*)data;
-			auto* wThis = (WThread*)data;
-			auto th = (SPtr<LnxThreadImpl>)wThis->lock();
-			if (th == nullptr)
+			auto* thread = (SPtr<LnxThreadImpl>*)data;
+			SPtr<LnxThreadImpl>& lnxThread = *thread;
+			if (lnxThread == nullptr)
 				return nullptr;
 
+			if(!lnxThread->m_Manager.expired())
 			{
-				auto mgr = th->m_Manager.lock();
-				mgr->GetThreadCreationEvent()->Trigger((PThread)th);
+				auto mgr = lnxThread->m_Manager.lock();
+				mgr->GetThreadCreationEvent()->Trigger((PThread)lnxThread);
 			}
 
-			while (th->GetState() != ThreadState_t::RUNNING)
+			while (lnxThread->GetState() != ThreadState_t::RUNNING)
 				THREAD_YIELD();
 
-			if(th->m_ThreadFn != nullptr)
-				th->m_ThreadFn();
+			lnxThread->m_Barrier.sync();
 
-			th->m_State = ThreadState_t::STOPPED;
+			if(lnxThread->m_ThreadFn != nullptr)
+				lnxThread->m_ThreadFn();
 
+			lnxThread->m_State = ThreadState_t::STOPPED;
+
+			if (!lnxThread->m_Manager.expired())
 			{
-				auto mgr = th->m_Manager.lock();
-				mgr->GetThreadDestructionEvent()->Trigger((PThread)th);
+				auto mgr = lnxThread->m_Manager.lock();
+				mgr->GetThreadDestructionEvent()->Trigger((PThread)lnxThread);
 			}
+
+			lnxThread.reset();
 
 			//pthread_exit(nullptr);
 			return nullptr;
 		}
 
+		void OnManagerActivation(bool active, IInterface* oldManager, const PInterface& newManager)noexcept
+		{
+			if (active)
+				return;
+
+			if (newManager != nullptr)
+			{
+				const auto& newThreadMgr = (const PThreadManager&)newManager;
+				m_OnManagerActivation.Disconnect();
+				newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+				m_Manager = (WThreadManager)newThreadMgr;
+			}
+			else
+			{
+				m_OnManagerActivation.Disconnect();
+				auto libW = oldManager->GetLibrary();
+				VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.");
+				auto lib = libW.lock();
+				auto appW = lib->GetApplication();
+				VerifyNot(appW.expired(), "Trying to connect to InterfaceActivationEvent but Application was expired.");
+				auto app = appW.lock();
+				m_OnNewManager.Disconnect();
+				app->GetOnInterfaceActivationEvent()->Connect(m_OnNewManager, [this](const PInterface& newManager) { OnNewManager(newManager); });
+			}
+		}
+
+		void OnNewManager(const PInterface& newManager)noexcept
+		{
+			if (newManager == nullptr)
+				return;
+			if (newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
+				return;
+
+			m_Manager = (WThreadManager)newManager;
+			m_OnManagerActivation.Disconnect();
+			newManager->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+			m_OnNewManager.Disconnect();
+		}
+
 	public:
-		INLINE LnxThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
+		INLINE LnxThreadImpl(WThreadManager manager, PThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_State(ThreadState_t::SUSPENDED)
             ,m_ThreadFn(config.ThreadFN)
             ,m_JoinsAtDestruction(config.JoinAtDestruction)
             ,m_Name(config.Name)
+			,m_This(std::move((SPtr<LnxThreadImpl>)self))
+			,m_Barrier(2)
 		{
 			if (m_Manager == nullptr || m_ThreadFn == nullptr)
 			{
@@ -80,7 +131,7 @@ namespace greaper
 				VerifyEqual(ret, 0, "Trying to create a thread, but something went wrong setting it stack size, error:'%d'.", ret);
 			}
 			
-			ret = pthread_create(&m_Handle, &threadAttrib, &LnxThreadImpl::RunFn, &self);
+			ret = pthread_create(&m_Handle, &threadAttrib, &LnxThreadImpl::RunFn, &m_This);
 			VerifyEqual(ret, 0, "Trying to create a thread, but something went wrong, error:'%d'.", ret);
 
 			ret = pthread_setname_np(m_Handle, m_Name.c_str());
@@ -88,8 +139,11 @@ namespace greaper
 			ret = pthread_attr_destroy(&threadAttrib);
 
 			m_ID = m_Handle;
-			if(!config.StartSuspended)
+			if (!config.StartSuspended)
+			{
 				m_State = ThreadState_t::RUNNING;
+				m_Barrier.sync();
+			}
 		}
 
 		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
@@ -102,6 +156,19 @@ namespace greaper
 			, m_Name(name)
 		{
 
+		}
+
+		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
+			:m_Manager(manager)
+			,m_Handle(handle)
+			,m_ID(id)
+			,m_State(ThreadState_t::UNMANAGED)
+			,m_ThreadFn(nullptr)
+			,m_JoinsAtDestruction(false)
+			,m_Name(name)
+		{
+			auto mgr = m_Manager.lock();
+			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}
 
 		INLINE ~LnxThreadImpl()
@@ -119,6 +186,9 @@ namespace greaper
 
 		INLINE void Join()override
 		{
+			if (m_State == ThreadState_t::STOPPED)
+				return;
+
 			Verify(Joinable(), "Trying to join a non-joinable thread");
 			void* thRet = nullptr;
 			auto ret = pthread_join(m_Handle, &thRet);
@@ -132,6 +202,9 @@ namespace greaper
 
 		INLINE bool TryJoin()override
 		{
+			if (m_State == ThreadState_t::STOPPED)
+				return true;
+
 			if (!Joinable())
 				return false;
 
@@ -155,9 +228,8 @@ namespace greaper
 			if (GetState() != ThreadState_t::SUSPENDED)
 				return;
 
-			Verify(Joinable(), "Trying to resume an invalid thread.");
-
 			m_State = ThreadState_t::RUNNING;
+			m_Barrier.sync();
 		}
 
 		INLINE ThreadID_t GetID()const noexcept override { return m_ID; }

@@ -374,7 +374,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		va_list argList;
 		va_start(argList, fmt);
 
-		const auto size = Snprintf::Fn((T*)nullptr, 0, fmt, argList);
+		const auto size = (ssizet)Snprintf::Fn((T*)nullptr, 0, fmt, argList);
 
 		VerifyGreaterEqual(size, 0, "Error while formatting");
 
@@ -382,7 +382,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		va_start(argList, fmt);
 
 		BasicString<T, StdAlloc<T, _Alloc_>> str {};
-		str.resize(size, (T)0);
+		str.resize(size + 1, (T)0);
 
 		Snprintf::Fn(str.data(), str.size(), fmt, argList);
 

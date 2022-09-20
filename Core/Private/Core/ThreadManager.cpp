@@ -24,6 +24,31 @@ using ThreadImpl = WinThreadImpl;
 using ThreadImpl = LnxThreadImp;
 #endif
 
+void ThreadManager::OnThreadDestruction(const PThread& thread) noexcept
+{
+	if (thread == nullptr || !IsActive())
+		return; // thread was nullptr or manager not active
+
+	LOCK(m_ThreadMutex);
+	sizet threadIDX;
+	if (const auto findIDIT = m_ThreadIDMap.find(thread->GetID());
+		findIDIT != m_ThreadIDMap.end())
+	{
+		threadIDX = findIDIT->second;
+	}
+	else if (const auto findNameIT = m_ThreadNameMap.find(thread->GetName());
+		findNameIT != m_ThreadNameMap.end())
+	{
+		threadIDX = findNameIT->second;
+	}
+	else
+	{
+		return; // Not found
+	}
+
+	m_Threads[threadIDX].reset();
+}
+
 void ThreadManager::OnInitialization() noexcept
 {
 	VerifyNot(m_Library.expired(), "Trying to initialize ThreadManager, but its library is expired.");
@@ -79,11 +104,14 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 		m_ThreadIDMap.insert_or_assign(curTh->GetID(), m_Threads.size());
 		m_Threads.push_back((PThread)curTh);
 	}
+	m_ThreadDestructionEvent.Connect(m_DestructionEventHnd, [this](PThread thread) {OnThreadDestruction(thread); });
 }
 
 void ThreadManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
 {
 	UNUSED(newDefault);
+
+	m_DestructionEventHnd.Disconnect();
 
 	// Clear threads
 	LOCK(m_ThreadMutex);
@@ -164,7 +192,7 @@ Result<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 {
 	LOCK(m_ThreadMutex);
 	auto thread = SPtr<ThreadImpl>(AllocT<ThreadImpl>());
-	new((void*)thread.get())ThreadImpl((WThreadManager)gThreadManager, (WThread)thread, config);
+	new((void*)thread.get())ThreadImpl((WThreadManager)gThreadManager, (PThread)thread, config);
 
 	m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
 	m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());

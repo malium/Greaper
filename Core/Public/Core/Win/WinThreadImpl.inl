@@ -8,8 +8,9 @@
 #ifndef CORE_WIN_THREAD_IMPL_I
 #define CORE_WIN_THREAD_IMPL_I 1
 
-//#include "../Base/IThread.h"
-//#include "../Event.h"
+#include "../Base/IThread.h"
+#include "../Event.h"
+#include "../IThreadManager.h"
 #include <utility>
 
 namespace greaper
@@ -25,15 +26,18 @@ namespace greaper
 		String m_Name;
 		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
+		SPtr<WinThreadImpl> m_This;
+		Barrier m_Barier;
 
 		static INLINE unsigned STDCALL RunFn(void* data)
 		{
-			auto* wThis = (WThread*)data;
-			auto winThread = (SPtr<WinThreadImpl>)wThis->lock();
+			auto* thread = (SPtr<WinThreadImpl>*)data;
+			SPtr<WinThreadImpl>& winThread = *thread;
 			
 			if (winThread == nullptr)
 				return EXIT_FAILURE;
 
+			if(!winThread->m_Manager.expired())
 			{
 				auto mgr = winThread->m_Manager.lock();
 				mgr->GetThreadCreationEvent()->Trigger((PThread)winThread);
@@ -42,15 +46,19 @@ namespace greaper
 			while (winThread->GetState() != ThreadState_t::RUNNING)
 				THREAD_YIELD();
 
+			winThread->m_Barier.sync();
+
 			if(winThread->m_ThreadFn != nullptr)
 				winThread->m_ThreadFn();
 
 			winThread->m_State = ThreadState_t::STOPPED;
 
+			if (!winThread->m_Manager.expired())
 			{
 				auto mgr = winThread->m_Manager.lock();
 				mgr->GetThreadDestructionEvent()->Trigger((PThread)winThread);
 			}
+			winThread.reset();
 
 			return EXIT_SUCCESS;
 		}
@@ -141,7 +149,7 @@ namespace greaper
 		}
 
 	public:
-		INLINE WinThreadImpl(WThreadManager manager, WThread self, const ThreadConfig& config)noexcept
+		INLINE WinThreadImpl(WThreadManager manager, PThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_Handle(InvalidThreadHandle)
 			,m_ID(InvalidThreadID)
@@ -149,6 +157,8 @@ namespace greaper
 			,m_ThreadFn(config.ThreadFN)
 			,m_JoinsAtDestruction(config.JoinAtDestruction)
 			,m_Name(config.Name)
+			,m_This(std::move((SPtr<WinThreadImpl>)self))
+			,m_Barier(2)
 		{
 			if (m_Manager.expired() || m_ThreadFn == nullptr)
 			{
@@ -156,7 +166,7 @@ namespace greaper
 				return;
 			}
 
-			auto hnd = _beginthreadex(nullptr, config.StackSize, &WinThreadImpl::RunFn, &self,
+			auto hnd = _beginthreadex(nullptr, config.StackSize, &WinThreadImpl::RunFn, &m_This,
 				config.StartSuspended ? CREATE_SUSPENDED : 0, &m_ID);
 
 			if (hnd == 0)
@@ -181,6 +191,7 @@ namespace greaper
 
 			auto mgr = m_Manager.lock();
 			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+			m_Barier.sync();
 		}
 
 		INLINE WinThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
@@ -211,6 +222,9 @@ namespace greaper
 
 		INLINE void Join()override
 		{
+			if (m_State == ThreadState_t::STOPPED)
+				return;
+
 			Verify(Joinable(), "Trying to join a not-joinable thread");
 			WaitForSingleObject(m_Handle, INFINITE);
 			m_Handle = InvalidThreadHandle;
@@ -220,11 +234,15 @@ namespace greaper
 
 		INLINE bool Joinable()const noexcept override
 		{
-			return m_State == ThreadState_t::RUNNING && m_Handle != InvalidThreadHandle && m_ID != InvalidThreadID;
+			return m_State == ThreadState_t::RUNNING
+				&& m_Handle != InvalidThreadHandle && m_ID != InvalidThreadID;
 		}
 
 		INLINE bool TryJoin()override
 		{
+			if (m_State == ThreadState_t::STOPPED)
+				return true;
+			
 			if (!Joinable())
 				return false;
 
@@ -261,10 +279,9 @@ namespace greaper
 			if (GetState() != ThreadState_t::SUSPENDED)
 				return;
 
-			Verify(Joinable(), "Trying to resume an invalid thread.");
-
 			ResumeThread(m_Handle);
 			m_State = ThreadState_t::RUNNING;
+			m_Barier.sync();
 		}
 
 		INLINE ThreadID_t GetID()const noexcept override { return m_ID; }

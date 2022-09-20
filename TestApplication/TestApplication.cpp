@@ -31,6 +31,7 @@
 #define CORE_LIBRARY_NAME "Core" PLT_NAME ARCH_NAME "_" CONF_NAME GREAPER_DLLEXT
 constexpr greaper::StringView CORE_LIB_NAME = CORE_LIBRARY_NAME;
 constexpr greaper::StringView LibFnName = "_Greaper";
+constexpr static bool AsyncLog = true;
 greaper::PLibrary gCoreLib;
 greaper::PGreaperLib gCore;
 greaper::PApplication gApplication;
@@ -98,6 +99,10 @@ void SetProperties(void* hInstance, int32 argc, achar** argv)
 	auto propAppVersionRes = CreateProperty<uint32>((WGreaperLib)gCore, IApplication::ApplicationVersionName, APPLICATION_VERSION, ""sv, true, true, nullptr);
 	if (propAppVersionRes.HasFailed())
 		gCore->LogError(propAppVersionRes.GetFailMessage());
+
+	auto propLogAsyncRes = CreateProperty<bool>((WGreaperLib)gCore, ILogManager::AsyncLogName, AsyncLog, ""sv, false, true, nullptr);
+	if (propLogAsyncRes.HasFailed())
+		gCore->LogError(propLogAsyncRes.GetFailMessage());
 }
 
 void ActivateManagers()
@@ -127,6 +132,7 @@ void ActivateManagers()
 void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
+
 	auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
 	TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function.");
 
@@ -141,7 +147,17 @@ void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 
 	ActivateManagers();
 
-	gCore->Log(Format("Successfully started %s! Version:%d", gApplication->GetApplicationName().lock()->GetValue().c_str(), gApplication->GetApplicationVersion().lock()->GetValue()));
+	auto appNamePropW = gApplication->GetApplicationName();
+	auto appVersionPropW = gApplication->GetApplicationVersion();
+	auto appVersion = appVersionPropW.lock()->GetValue();
+	const auto& appName = appNamePropW.lock()->GetValue();
+	gCore->Log(Format("Successfully started %s! Version:%d.%d.%d.%d", appName.c_str(), VERSION_GET_MAJOR(appVersion),
+		VERSION_GET_MINOR(appVersion), VERSION_GET_PATCH(appVersion), VERSION_GET_REV(appVersion)));
+}
+
+void GreaperCoreLibClose()
+{
+	using namespace greaper;
 
 	gCore->Log(Format("Closing %s...", gApplication->GetApplicationName().lock()->GetValue().c_str()));
 
@@ -159,6 +175,8 @@ int MainCode(void* hInstance, int argc, char** argv)
 	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
 	GreaperCoreLibInit(hInstance, argc, argv);
+
+	GreaperCoreLibClose();
 
 	gCoreLib->Close();
 	gCoreLib.reset();
