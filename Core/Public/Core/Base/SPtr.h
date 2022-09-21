@@ -23,17 +23,6 @@ namespace greaper
 		template<class T>
 		using SPtrDeleterFn_t = std::function<void(T*)>;
 
-		template<class T, class _Alloc_>
-		INLINE void SPtrDefaultDeleter(T* ptr)
-		{
-			Destroy<T, _Alloc_>(ptr);
-		}
-		template<class T>
-		INLINE void SPtrEmptyDeleter(T* ptr)
-		{
-
-		}
-
 		class ISharedPointerControl
 		{
 		public:
@@ -194,7 +183,7 @@ namespace greaper
 		{
 
 		}
-		explicit INLINE SharedPointer(T* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
+		explicit INLINE SharedPointer(T* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::DefaultDeleter<T>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
 			: m_Value(value)
 			, m_Control(nullptr)
 		{
@@ -202,7 +191,7 @@ namespace greaper
 				CreateControl(std::move(deleter), threading);
 		}
 		template<class T2, typename std::enable_if<(std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>) && !std::is_same_v<T2, T>, bool>::type = true>
-		explicit INLINE SharedPointer(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
+		explicit INLINE SharedPointer(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::DefaultDeleter<T>, Impl::SPtrType threading = Impl::SPtrType::MultiThread)noexcept
 			:m_Value((T*)value)
 			,m_Control(nullptr)
 		{
@@ -301,7 +290,7 @@ namespace greaper
 			return *this;
 		}
 		template<class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-		INLINE void reset(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::SPtrDefaultDeleter<T, GenericAllocator>, Impl::SPtrType threading = Impl::SPtrType::MultiThread) noexcept
+		INLINE void reset(T2* value, Impl::SPtrDeleterFn_t<T> deleter = &Impl::DefaultDeleter<T>, Impl::SPtrType threading = Impl::SPtrType::MultiThread) noexcept
 		{
 			if (m_Control != nullptr)
 			{

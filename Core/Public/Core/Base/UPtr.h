@@ -15,18 +15,13 @@ namespace greaper
 		using Pointer = T*;
 		using DeleteFN = std::function<void(T*)>;
 
-		INLINE static void DefaultDeleteFn(T* ptr) noexcept
-		{
-			Destroy(ptr);
-		}
-
 		INLINE constexpr UPtr() noexcept
 			:m_Value(nullptr)
 			,m_Deleter(nullptr)
 		{
 
 		}
-		INLINE explicit UPtr(T* value, DeleteFN deleteFn = &UPtr<T>::DefaultDeleteFn) noexcept
+		INLINE explicit UPtr(T* value, DeleteFN deleteFn = &Impl::DefaultDeleter<T>) noexcept
 			:m_Value(value)
 			,m_Deleter(std::move(deleteFn))
 		{
@@ -65,7 +60,7 @@ namespace greaper
 			m_Value = nullptr;
 			return temp;
 		}
-		INLINE void Reset(T* value) noexcept
+		INLINE void Reset(T* value, DeleteFN deleteFn = &Impl::DefaultDeleter<T>) noexcept
 		{
 			if (m_Value != nullptr)
 			{
@@ -73,6 +68,7 @@ namespace greaper
 				m_Value = nullptr;
 			}
 			m_Value = value;
+			m_Deleter = std::move(deleteFn);
 		}
 		INLINE T* Get()const noexcept { return m_Value; }
 		INLINE T* operator->() const noexcept

@@ -122,7 +122,7 @@ namespace greaper
 		:m_Name(eventName)
 		,m_LastID(0)
 	{
-		m_This.reset(this, &Impl::SPtrEmptyDeleter<Event<Args...>>);
+		m_This.reset(this, &Impl::EmptyDeleter<Event<Args...>>);
 	}
 
 	template<class... Args>
@@ -180,7 +180,7 @@ namespace greaper
 			:m_Name(eventName)
 			, m_LastID(0)
 		{
-			m_This.reset(this, &Impl::SPtrEmptyDeleter<Event<void>>);
+			m_This.reset(this, &Impl::EmptyDeleter<Event<void>>);
 		}
 		~Event() = default;
 		Event(const Event&) = delete;

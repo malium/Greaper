@@ -390,6 +390,20 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 		return str;
 	}
+
+	namespace Impl
+	{
+		template<class T, class _Alloc_ = GenericAllocator>
+		INLINE void DefaultDeleter(T* ptr)
+		{
+			Destroy<T, _Alloc_>(ptr);
+		}
+		template<class T>
+		INLINE void EmptyDeleter(T* ptr)
+		{
+			UNUSED(ptr);
+		}
+	}
 }
 
 #include "Base/Range.h"
