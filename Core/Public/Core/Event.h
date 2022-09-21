@@ -53,24 +53,6 @@ namespace greaper
 		uint32 ID = 0;
 	};
 
-	template<class T>
-	struct DeleterEmpty
-	{
-		constexpr DeleterEmpty()noexcept = default;
-
-		template<class T2, std::enable_if_t<std::is_convertible<T2*, T*>::value, int> = 0>
-		constexpr explicit DeleterEmpty(const DeleterEmpty<T2>& other)noexcept
-		{
-			UNUSED(other);
-		}
-
-		void operator()(T* ptr)const
-		{
-			UNUSED(ptr);
-			/* No-op */
-		}
-	};
-
 	/*** Handles event creation, trigger and dispatching
 	*	Event provides an easy and multithreaded way of handling event triggering, dispatching and listening
 	*	Also this way of handling events, provide an easy way of sending arguments via template parameters,
@@ -98,7 +80,7 @@ namespace greaper
 		using HandlerType = EventHandler<Args...>;
 		using HandlerFunction = typename EventHandlerID<Args...>::HandlerFunction;
 		
-		explicit Event(const StringView& eventName = "unnamed"sv) noexcept;
+		explicit Event(StringView eventName = "unnamed"sv) noexcept;
 		~Event() = default;
 		Event(const Event&) = delete;
 		Event& operator=(const Event&) = delete;
@@ -136,11 +118,11 @@ namespace greaper
 	}
 
 	template<class... Args>
-	Event<Args...>::Event(const StringView& eventName) noexcept
+	Event<Args...>::Event(StringView eventName) noexcept
 		:m_Name(eventName)
 		,m_LastID(0)
 	{
-		m_This.reset(this, DeleterEmpty<Event<Args...>>());
+		m_This.reset(this, &Impl::SPtrEmptyDeleter<Event<Args...>>);
 	}
 
 	template<class... Args>
@@ -198,7 +180,7 @@ namespace greaper
 			:m_Name(eventName)
 			, m_LastID(0)
 		{
-			m_This.reset(this, DeleterEmpty<Event<void>>());
+			m_This.reset(this, &Impl::SPtrEmptyDeleter<Event<void>>);
 		}
 		~Event() = default;
 		Event(const Event&) = delete;
