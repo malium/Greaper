@@ -146,20 +146,8 @@ namespace greaper
 			}
 		}
 
-		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
-			:m_Manager(manager)
-			, m_Handle(handle)
-			, m_ID(id)
-			, m_State(ThreadState_t::UNMANAGED)
-			, m_ThreadFn(nullptr)
-			, m_JoinsAtDestruction(false)
-			, m_Name(name)
-		{
-
-		}
-
-		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
-			:m_Manager(manager)
+		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
+			:m_Manager(std::move(manager))
 			,m_Handle(handle)
 			,m_ID(id)
 			,m_State(ThreadState_t::UNMANAGED)
@@ -167,6 +155,8 @@ namespace greaper
 			,m_JoinsAtDestruction(false)
 			,m_Name(name)
 		{
+			if (setName)
+				auto ret = pthread_setname_np(m_Handle, m_Name.c_str());
 			auto mgr = m_Manager.lock();
 			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}
@@ -182,6 +172,7 @@ namespace greaper
 			auto ret = pthread_detach(m_Handle);
 			VerifyEqual(ret, 0, "Trying to detach a thread, but something went wrong, error:'%d'.", ret);
 			m_State = ThreadState_t::UNMANAGED;
+			m_JoinsAtDestruction = false;
 		}
 
 		INLINE void Join()override

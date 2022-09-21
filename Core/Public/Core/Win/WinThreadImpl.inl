@@ -194,8 +194,8 @@ namespace greaper
 			m_Barier.sync();
 		}
 
-		INLINE WinThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name)
-			:m_Manager(manager)
+		INLINE WinThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
+			:m_Manager(std::move(manager))
 			,m_Handle(handle)
 			,m_ID(id)
 			,m_State(ThreadState_t::UNMANAGED)
@@ -203,6 +203,8 @@ namespace greaper
 			,m_JoinsAtDestruction(false)
 			,m_Name(name)
 		{
+			if (setName)
+				SetName();
 			auto mgr = m_Manager.lock();
 			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}
@@ -217,6 +219,7 @@ namespace greaper
 		{
 			m_Handle = InvalidThreadHandle;
 			m_ID = InvalidThreadID;
+			m_JoinsAtDestruction = false;
 			m_State = ThreadState_t::UNMANAGED;
 		}
 
