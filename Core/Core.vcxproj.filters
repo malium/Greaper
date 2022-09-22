@@ -225,12 +225,6 @@
     <ClInclude Include="Public\Core\Base\ILogWriter.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Core\Base\Range.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Core\Base\RangeProtected.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Core\Base\LogWriterFile.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>

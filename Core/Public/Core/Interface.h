@@ -9,6 +9,7 @@
 #define CORE_INTERFACE_H 1
 
 #include <utility>
+#include <span>
 
 #include "Uuid.h"
 #include "Event.h"
@@ -87,7 +88,7 @@ namespace greaper
 
 		ActivationEvt_t* GetActivationEvent()const noexcept;
 
-		CRange<WPtr<IProperty>> GetProperties()const noexcept;
+		std::span<const WPtr<IProperty>> GetProperties()const noexcept;
 
 	protected:
 		WPtr<IGreaperLibrary> m_Library;
@@ -171,7 +172,7 @@ namespace greaper
 
 	INLINE IInterface::ActivationEvt_t* IInterface::GetActivationEvent() const noexcept { return &m_ActivationEvent; }
 
-	INLINE CRange<WPtr<IProperty>> IInterface::GetProperties() const noexcept { return CreateRange(m_Properties); }
+	INLINE std::span<const WPtr<IProperty>> IInterface::GetProperties() const noexcept { return std::span(m_Properties); }
 
 	using PInterface = SPtr<IInterface>;
 	using WInterface = WPtr<IInterface>;

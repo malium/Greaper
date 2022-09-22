@@ -844,6 +844,4 @@ namespace greaper
 	using AsyncOp = TAsyncOp<std::any>;
 }
 
-#include "Base/RangeProtected.h"
-
 #endif /* CORE_CONCURRENCY_H */

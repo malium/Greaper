@@ -72,7 +72,7 @@ namespace greaper::core
 
 		void RemoveLogWriter(sizet writerID)noexcept override;
 
-		CRangeProtected<LogData, Mutex> GetMessages()const noexcept override;
+		std::tuple<std::span<const LogData>, Mutex&> GetMessages()const noexcept override;
 
 		void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept override;
 

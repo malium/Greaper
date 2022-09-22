@@ -10,6 +10,7 @@
 
 #include "Interface.h"
 #include "Event.h"
+#include <tuple>
 
 namespace greaper
 {
@@ -52,7 +53,7 @@ namespace greaper
 
 		virtual void RemoveLogWriter(sizet writerID)noexcept = 0;
 
-		virtual CRangeProtected<LogData, Mutex> GetMessages()const noexcept = 0;
+		virtual std::tuple<std::span<const LogData>, Mutex&> GetMessages()const noexcept = 0;
 
 		virtual void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept = 0;
 

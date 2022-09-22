@@ -467,8 +467,6 @@
     <ClInclude Include="Public\Core\Base\LogWriterFile.h" />
     <ClInclude Include="Public\Core\Base\Monitor.h" />
     <ClInclude Include="Public\Core\Base\PropertyValidator.h" />
-    <ClInclude Include="Public\Core\Base\Range.h" />
-    <ClInclude Include="Public\Core\Base\RangeProtected.h" />
     <ClInclude Include="Public\Core\Base\Rect.h" />
     <ClInclude Include="Public\Core\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Core\Base\SPtr.h" />

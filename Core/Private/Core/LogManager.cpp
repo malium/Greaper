@@ -119,9 +119,8 @@ void LogManager::OnInitialization() noexcept
 	VerifyNot(m_Library.expired(), "Trying to initialize LogManager, but its library is expired.");
 	auto lib = m_Library.lock();
 	auto managers = lib->GetManagers();
-	for (auto it = managers.begin(); it != managers.end(); ++it)
+	for (const auto& mgr : managers)
 	{
-		const auto& mgr = *it;
 		if (mgr.get() == this)
 		{
 			gLogManager = mgr;
@@ -151,15 +150,16 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	{
 		const auto& other = (const PLogManager&)oldDefault;
 		auto lckMsg = Lock(m_MessagesMutex);
-		auto range = other->GetMessages();
-		auto lckRng = Lock(range.Protection);
-		const auto msgCount = range.SizeFn();
+		auto rangeTuple = other->GetMessages();
+		auto lckRng = Lock(std::get<1>(rangeTuple));
+		auto messages = std::get<0>(rangeTuple);
+		const auto msgCount = messages.size();
 		if (m_Messages.capacity() < msgCount)
 			m_Messages.reserve(msgCount);
 
-		for (auto it = range.begin(); it != range.end(); ++it)
+		for (const auto& msg : messages)
 		{
-			m_Messages.push_back(*it);
+			m_Messages.push_back(msg);
 		}
 	}
 	
@@ -272,9 +272,9 @@ void LogManager::RemoveLogWriter(sizet writerID) noexcept
 	m_Writers[writerID].reset();
 }
 
-CRangeProtected<LogData, Mutex> LogManager::GetMessages() const noexcept
+std::tuple<std::span<const LogData>, Mutex&> LogManager::GetMessages() const noexcept
 {
-	return CreateRange(m_Messages, m_MessagesMutex);
+	return { std::span(m_Messages), (Mutex&)m_MessagesMutex };
 }
 
 void LogManager::Log(LogLevel_t level, const String& message, StringView libraryName)noexcept

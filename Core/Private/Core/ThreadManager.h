@@ -11,6 +11,8 @@
 #include "ImplPrerequisites.h"
 #include <Core/Concurrency.h>
 #include <Core/IThreadManager.h>
+#include <span>
+#include <tuple>
 
 namespace greaper::core
 {
@@ -55,11 +57,14 @@ namespace greaper::core
 
 		Result<PThread> CreateThread(const ThreadConfig& config)noexcept override;
 
-		ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept override { return &m_ThreadCreationEvent; }
+		INLINE ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept override { return &m_ThreadCreationEvent; }
 		
-		ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
+		INLINE ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
 
-		CRangeProtected<PThread, RecursiveMutex> GetThreads()const noexcept override { return CreateRange(m_Threads, m_ThreadMutex); }
+		INLINE std::tuple<std::span<const PThread, std::dynamic_extent>, RecursiveMutex&> GetThreads()const noexcept override
+		{
+			return { std::span(m_Threads), (RecursiveMutex&)m_ThreadMutex };
+		}
 	};
 }
 

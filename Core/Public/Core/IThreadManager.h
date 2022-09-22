@@ -39,7 +39,7 @@ namespace greaper
 
 		virtual ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept = 0;
 
-		virtual CRangeProtected<PThread, RecursiveMutex> GetThreads()const noexcept = 0;
+		virtual std::tuple<std::span<const PThread, std::dynamic_extent>, RecursiveMutex&> GetThreads()const noexcept = 0;
 	};
 
 	using WThreadManager = WPtr<IThreadManager>;

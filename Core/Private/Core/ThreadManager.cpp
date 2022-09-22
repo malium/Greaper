@@ -54,9 +54,8 @@ void ThreadManager::OnInitialization() noexcept
 	VerifyNot(m_Library.expired(), "Trying to initialize ThreadManager, but its library is expired.");
 	auto lib = m_Library.lock();
 	auto managers = lib->GetManagers();
-	for (auto it = managers.begin(); it != managers.end(); ++it)
+	for(const auto& mgr : managers)
 	{
-		const auto& mgr = *it;
 		if (mgr.get() == this)
 		{
 			gThreadManager = mgr;
@@ -77,13 +76,14 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 		const auto& other = (const PThreadManager&)oldDefault;
 		// Copy threads
 		auto lckTh = Lock(m_ThreadMutex);
-		auto range = other->GetThreads();
-		auto lckRng = Lock(range.Protection);
-		const auto thCount = range.SizeFn();
+		auto rangeTuple = other->GetThreads();
+		auto lckRng = Lock(std::get<1>(rangeTuple));
+		auto span = std::get<0>(rangeTuple);
+		const auto thCount = span.size();
 		if (m_Threads.capacity() < thCount)
 			m_Threads.reserve(thCount);
 
-		for (const auto& thread : range)
+		for (const auto& thread : span)
 		{
             if (thread == nullptr)
 				continue;

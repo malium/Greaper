@@ -59,9 +59,9 @@ namespace greaper
 
 		WPtr<Library> GetOSLibrary()const noexcept;
 
-		CRange<SPtr<IInterface>> GetManagers()const noexcept;
+		std::span<const SPtr<IInterface>> GetManagers()const noexcept;
 
-		CRange<SPtr<IProperty>> GetProperties()const noexcept;
+		std::span<const SPtr<IProperty>> GetProperties()const noexcept;
 
 		Result<WPtr<IProperty>> GetProperty(const StringView& name)const noexcept;
 
@@ -201,9 +201,9 @@ namespace greaper
 
 	INLINE WPtr<Library> IGreaperLibrary::GetOSLibrary() const noexcept { return (WLibrary)m_Library; }
 
-	INLINE CRange<SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return CreateRange(m_Managers); }
+	INLINE std::span<const SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return std::span(m_Managers); }
 
-	INLINE CRange<SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return CreateRange(m_Properties); }
+	INLINE std::span<const SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return std::span(m_Properties); }
 
 	INLINE Result<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
 	{
