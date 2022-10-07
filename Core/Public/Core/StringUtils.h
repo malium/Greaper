@@ -263,6 +263,33 @@ namespace greaper::StringUtils
 	}
 
 	/**
+	 * @brief Converts a WIDE string into an ANSI string
+	 *
+	 * @tparam _Alloca_ ANSI string allocator, auto deducted by param str
+	 * @tparam _Allocw_ WIDE string allocator
+	 * @param str The WIDE string
+	 * @return BasicString<achar, _Alloca_> The converted ANSI string
+	 */
+	template<class _Alloca_ = StdAlloc<achar>>
+	BasicString<achar, _Alloca_> FromWIDE(const BasicStringView<wchar>& str)
+	{
+		static_assert(std::is_same_v<achar, typename _Alloca_::value_type>, "Bad ANSI allocator type");
+
+		BasicString<achar, _Alloca_> output;
+		output.reserve(str.size());
+
+		auto backInserter = std::back_inserter(output);
+
+		for (auto it = str.begin(); it != str.end();)
+		{
+			u32char c32 = 0;
+			it = Impl::WIDEToUTF32(it, str.end(), c32);
+			Impl::UTF32To8(c32, backInserter, 4);
+		}
+		return output;
+	}
+
+	/**
 	 * @brief Converts an ANSI string into a WIDE string
 	 * 
 	 * @tparam _Allocw_ WIDE string allocator
@@ -275,6 +302,35 @@ namespace greaper::StringUtils
 	{
 		static_assert(std::is_same_v<wchar, typename _Allocw_::value_type>, "Bad WIDE allocator type");
 		static_assert(std::is_same_v<achar, typename _Alloca_::value_type>, "Bad ANSI allocator type");
+
+		BasicString<wchar, _Allocw_> output;
+		output.reserve(str.size());
+
+		auto backInserter = std::back_inserter(output);
+
+		for (auto it = str.begin(); it != str.end(); )
+		{
+			u32char c32 = 0;
+			it = Impl::UTF8To32(it, str.end(), c32);
+			Impl::UTF32ToWIDE(c32, backInserter, 2);
+
+		}
+
+		return output;
+	}
+
+	/**
+	 * @brief Converts an ANSI string into a WIDE string
+	 *
+	 * @tparam _Allocw_ WIDE string allocator
+	 * @tparam _Alloca_ ANSI string allocator, auto deducted by param str
+	 * @param str The ANSI string
+	 * @return BasicString<wchar, _Allocw_> The Converted WIDE string
+	 */
+	template<class _Allocw_ = StdAlloc<wchar>>
+	BasicString<wchar, _Allocw_> ToWIDE(const BasicStringView<achar>& str)
+	{
+		static_assert(std::is_same_v<wchar, typename _Allocw_::value_type>, "Bad WIDE allocator type");
 
 		BasicString<wchar, _Allocw_> output;
 		output.reserve(str.size());

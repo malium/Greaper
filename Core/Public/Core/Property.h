@@ -43,6 +43,10 @@ namespace greaper
 		virtual WPtr<IGreaperLibrary> GetLibrary()const noexcept = 0;
 	};
 
+	template<class T, class _Alloc_ = GenericAllocator>
+	Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo = {},
+		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
+
 	/**
 	 * @brief Stores configuration information, that information must be able to be 
 	 * serialized into a string. Works like a ConsoleVariable (ID Software like).
@@ -152,13 +156,6 @@ namespace greaper
 	using PropertyFloat = TProperty<float>;
 	using PropertyString = TProperty<String>;
 	using PropertyStringVec = TProperty<StringVec>;
-
-	using PIProperty = SPtr<IProperty>;
-	using WIProperty = WPtr<IProperty>;
-	template<class T>
-	using PProperty = SPtr<TProperty<T>>;
-	template<class T>
-	using WProperty = WPtr<TProperty<T>>;
 
 	// A way to retrieve the RTI_ID from the type Property
 	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };

@@ -9,15 +9,16 @@
 #define CORE_INTERFACE_H 1
 
 #include <utility>
-#include <span>
+//#include <span>
 
 #include "Uuid.h"
 #include "Event.h"
 #include "Enumeration.h"
 
+ENUMERATION(InitState, Stopped, Starting, Started, Stopping);
+
 namespace greaper
 {
-	ENUMERATION(InitState, Stopped, Starting, Started, Stopping);
 	/**
 	 * @brief Base class of all manager and factories
 	 * 
@@ -88,7 +89,7 @@ namespace greaper
 
 		ActivationEvt_t* GetActivationEvent()const noexcept;
 
-		std::span<const WPtr<IProperty>> GetProperties()const noexcept;
+		CSpan<WPtr<IProperty>> GetProperties()const noexcept;
 
 	protected:
 		WPtr<IGreaperLibrary> m_Library;
@@ -172,7 +173,7 @@ namespace greaper
 
 	INLINE IInterface::ActivationEvt_t* IInterface::GetActivationEvent() const noexcept { return &m_ActivationEvent; }
 
-	INLINE std::span<const WPtr<IProperty>> IInterface::GetProperties() const noexcept { return std::span(m_Properties); }
+	INLINE CSpan<WPtr<IProperty>> IInterface::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
 	using PInterface = SPtr<IInterface>;
 	using WInterface = WPtr<IInterface>;
@@ -181,6 +182,8 @@ namespace greaper
 	class TInterface : public IInterface
 	{
 	public:
+		virtual ~TInterface()noexcept = default;
+
 		const Uuid& GetInterfaceUUID()const noexcept override { return T::InterfaceUUID; }
 
 		const StringView& GetInterfaceName()const noexcept override { return T::InterfaceName; }

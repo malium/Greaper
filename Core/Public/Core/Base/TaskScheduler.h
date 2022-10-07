@@ -10,6 +10,7 @@
 
 #include "ThreadPool.h"
 #include "../Concurrency.h"
+#include "IThread.h"
 #include "Task.h"
 
 namespace greaper

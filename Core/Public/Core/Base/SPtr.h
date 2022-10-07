@@ -20,9 +20,6 @@ namespace greaper
 			MultiThread
 		};
 
-		template<class T>
-		using SPtrDeleterFn_t = std::function<void(T*)>;
-
 		class ISharedPointerControl
 		{
 		public:

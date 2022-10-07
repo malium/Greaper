@@ -788,8 +788,8 @@ namespace greaper
 		using ReturnType = RetType;
 
 		TAsyncOp() = default;
-        
-        explicit TAsyncOp(AsyncOpEmpty empty)
+		
+		explicit TAsyncOp(AsyncOpEmpty empty)
 			:IAsyncOp(empty)
 		{
 
@@ -811,7 +811,7 @@ namespace greaper
 		{
 			this->CompleteCheck();
 
-			return any_cast<RetType>(m_Data->RetValue);
+			return std::any_cast<RetType>(m_Data->RetValue);
 		}
 
 		void _CompleteOperation()

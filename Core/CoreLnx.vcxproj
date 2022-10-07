@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{a19d8bac-ee48-47e4-85f7-5dce17d1f690}</ProjectGuid>
+    <Keyword>Linux</Keyword>
+    <RootNamespace>CoreLnx</RootNamespace>
+    <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
+    <ApplicationType>Linux</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+    <TargetLinuxPlatform>Generic</TargetLinuxPlatform>
+    <LinuxProjectType>{2238F9CD-F817-4ECC-BD14-2524D2669B35}</LinuxProjectType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WSL2_1_0</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WSL2_1_0</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>WSL2_1_0</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>WSL2_1_0</PlatformToolset>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)Core/Public/;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)Core/Public/;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)Core/Public/;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)Core/Public/;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="Private\Core\Application.cpp" />
+    <ClCompile Include="Private\Core\GreaperCoreDLL.cpp" />
+    <ClCompile Include="Private\Core\LogManager.cpp" />
+    <ClCompile Include="Private\Core\ThreadManager.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Private\Core\Application.h" />
+    <ClInclude Include="Private\Core\GreaperCoreDLL.h" />
+    <ClInclude Include="Private\Core\ImplPrerequisites.h" />
+    <ClInclude Include="Private\Core\LogManager.h" />
+    <ClInclude Include="Private\Core\ThreadManager.h" />
+    <ClInclude Include="Public\Core\Base\BasicTypeInfo.h" />
+    <ClInclude Include="Public\Core\Base\BasicTypes.h" />
+    <ClInclude Include="Public\Core\Base\Config.h" />
+    <ClInclude Include="Public\Core\Base\DisplayAdapter.h" />
+    <ClInclude Include="Public\Core\Base\ICommand.h" />
+    <ClInclude Include="Public\Core\Base\IConsole.h" />
+    <ClInclude Include="Public\Core\Base\ILogWriter.h" />
+    <ClInclude Include="Public\Core\Base\IThread.h" />
+    <ClInclude Include="Public\Core\Base\IThreadPool.h" />
+    <ClInclude Include="Public\Core\Base\IWindow.h" />
+    <ClInclude Include="Public\Core\Base\LogWriterFile.h" />
+    <ClInclude Include="Public\Core\Base\Monitor.h" />
+    <ClInclude Include="Public\Core\Base\PropertyValidator.h" />
+    <ClInclude Include="Public\Core\Base\Rect.h" />
+    <ClInclude Include="Public\Core\Base\ReflectedConversions.h" />
+    <ClInclude Include="Public\Core\Base\Span.h" />
+    <ClInclude Include="Public\Core\Base\SPtr.h" />
+    <ClInclude Include="Public\Core\Base\Task.h" />
+    <ClInclude Include="Public\Core\Base\TaskScheduler.h" />
+    <ClInclude Include="Public\Core\Base\ThreadPool.h" />
+    <ClInclude Include="Public\Core\Base\UPtr.h" />
+    <ClInclude Include="Public\Core\Base\Utils.h" />
+    <ClInclude Include="Public\Core\Base\VideoMode.h" />
+    <ClInclude Include="Public\Core\Base\WPtr.h" />
+    <ClInclude Include="Public\Core\Concurrency.h" />
+    <ClInclude Include="Public\Core\CorePrerequisites.h" />
+    <ClInclude Include="Public\Core\Enumeration.h" />
+    <ClInclude Include="Public\Core\Event.h" />
+    <ClInclude Include="Public\Core\FileStream.h" />
+    <ClInclude Include="Public\Core\IApplication.h" />
+    <ClInclude Include="Public\Core\ICommandManager.h" />
+    <ClInclude Include="Public\Core\IGreaperLibrary.h" />
+    <ClInclude Include="Public\Core\ILogManager.h" />
+    <ClInclude Include="Public\Core\Interface.h" />
+    <ClInclude Include="Public\Core\IObject.h" />
+    <ClInclude Include="Public\Core\IObjectFactory.h" />
+    <ClInclude Include="Public\Core\IThreadManager.h" />
+    <ClInclude Include="Public\Core\IWindowManager.h" />
+    <ClInclude Include="Public\Core\Library.h" />
+    <ClInclude Include="Public\Core\Lnx\LnxLibrary.h" />
+    <ClInclude Include="Public\Core\Lnx\LnxPlatform.h" />
+    <ClInclude Include="Public\Core\Lnx\LnxThreading.h" />
+    <ClInclude Include="Public\Core\Lnx\Prerequisites.h" />
+    <ClInclude Include="Public\Core\Memory.h" />
+    <ClInclude Include="Public\Core\MemoryStream.h" />
+    <ClInclude Include="Public\Core\PHAL.h" />
+    <ClInclude Include="Public\Core\Platform.h" />
+    <ClInclude Include="Public\Core\Property.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedField.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainContainer.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainEnum.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainField.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainType.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedProperty.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedReflField.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedTypeInfo.h" />
+    <ClInclude Include="Public\Core\Result.h" />
+    <ClInclude Include="Public\Core\Stream.h" />
+    <ClInclude Include="Public\Core\StringUtils.h" />
+    <ClInclude Include="Public\Core\Uuid.h" />
+    <ClInclude Include="Public\Core\Win\MinWinHeader.h" />
+    <ClInclude Include="Public\Core\Win\Prerequisites.h" />
+    <ClInclude Include="Public\Core\Win\WinLibrary.h" />
+    <ClInclude Include="Public\Core\Win\WinPlatform.h" />
+    <ClInclude Include="Public\Core\Win\WinThreading.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Public\Core\Base\MemoryStream.inl" />
+    <None Include="Public\Core\Base\Stream.inl" />
+    <None Include="Public\Core\Base\Uuid.inl" />
+    <None Include="Public\Core\Lnx\LnxPlatform.inl" />
+    <None Include="Public\Core\Lnx\LnxThreadImpl.inl" />
+    <None Include="Public\Core\Win\WinPlatform.inl" />
+    <None Include="Public\Core\Win\WinThreadImpl.inl" />
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <BuildLog>
+      <Path>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+    </BuildLog>
+    <ClCompile>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <PreprocessorDefinitions>GREAPER_CORE_DLL;DEBUG;</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <RemotePostBuildEvent>
+      <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
+    </RemotePostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <BuildLog>
+      <Path>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+    </BuildLog>
+    <ClCompile>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <PreprocessorDefinitions>GREAPER_CORE_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <RemotePostBuildEvent>
+      <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
+    </RemotePostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <BuildLog>
+      <Path>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+    </BuildLog>
+    <ClCompile>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <PreprocessorDefinitions>GREAPER_CORE_DLL;DEBUG;</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <RemotePostBuildEvent>
+      <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
+    </RemotePostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <BuildLog>
+      <Path>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+    </BuildLog>
+    <ClCompile>
+      <CppLanguageStandard>c++17</CppLanguageStandard>
+      <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
+      <PreprocessorDefinitions>GREAPER_CORE_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <RemotePostBuildEvent>
+      <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
+    </RemotePostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

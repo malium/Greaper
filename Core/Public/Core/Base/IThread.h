@@ -15,10 +15,9 @@
 #elif PLT_LINUX
 #include "../Lnx/LnxThreading.h"
 #endif
-#include <functional>
-#include "../Interface.h"
-#include "../IGreaperLibrary.h"
-#include "../Enumeration.h"
+#include "../IThreadManager.h"
+
+ENUMERATION(ThreadState, STOPPED, SUSPENDED, RUNNING, UNMANAGED);
 
 namespace greaper
 {
@@ -30,8 +29,6 @@ namespace greaper
 		bool JoinAtDestruction = true;
 		StringView Name = "Unnamed"sv;
 	};
-
-	ENUMERATION(ThreadState, STOPPED, SUSPENDED, RUNNING, UNMANAGED);
 
 	class IThread
 	{
@@ -57,17 +54,14 @@ namespace greaper
 		virtual bool JoinsAtDestruction()const noexcept = 0;
 
 		virtual const String& GetName()const noexcept = 0;
-
+		
 		virtual ThreadState_t GetState()const noexcept = 0;
 	};
-
-	using PThread = SPtr<IThread>;
-	using WThread = WPtr<IThread>;
 }
-//#if PLT_WINDOWS
-//#include "../Win/WinThreadImpl.inl"
-//#elif PLT_LINUX
-//#incldue "../Lnx/LnxThreadImpl.inl"
-//#endif
+#if PLT_WINDOWS
+#include "../Win/WinThreadImpl.inl"
+#elif PLT_LINUX
+#include "../Lnx/LnxThreadImpl.inl"
+#endif
 
 #endif /* CORE_I_THREAD_H */

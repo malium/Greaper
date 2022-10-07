@@ -10,9 +10,6 @@
 
 #include "CorePrerequisites.h"
 #include "Interface.h"
-#include "Base/IThread.h"
-//#include "Base/ThreadPool.h"
-//#include "Base/IThreadPool.h"
 #include "Result.h"
 #include "Event.h"
 
@@ -39,11 +36,8 @@ namespace greaper
 
 		virtual ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept = 0;
 
-		virtual std::tuple<std::span<const PThread, std::dynamic_extent>, RecursiveMutex&> GetThreads()const noexcept = 0;
+		virtual std::tuple<CSpan<PThread>, RecursiveMutex&> GetThreads()const noexcept = 0;
 	};
-
-	using WThreadManager = WPtr<IThreadManager>;
-	using PThreadManager = SPtr<IThreadManager>;
 }
 
 #endif /* CORE_I_THREAD_MANAGER_H */

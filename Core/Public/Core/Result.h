@@ -82,7 +82,7 @@ namespace greaper
 		return CreateFailure<EmptyStruct>(errorMessage);
 	}
 
-	template<class T, class U = T>
+	template<class T, class U>
 	INLINE Result<T> CopyFailure(Result<U> res) noexcept
 	{
 		Result<T> r;

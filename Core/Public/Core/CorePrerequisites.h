@@ -9,15 +9,17 @@
 #define CORE_PREREQUISITES_H 1
 
 #include "PHAL.h"
+#include "Memory.h"
 #include <chrono>
 
 #ifdef GREAPER_CORE_VERSION
 #undef GREAPER_CORE_VERSION
 #endif
-#define GREAPER_CORE_VERSION VERSION_SETTER(0, 2, 7, 0)
+#define GREAPER_CORE_VERSION VERSION_SETTER(0, 3, 0, 0)
 
-#define DEF_PROP(name, type) static constexpr StringView name##Name = #name; using name##Prop_t = TProperty<type>
+#define DEF_PROP(name, type) static constexpr StringView name##Name = #name##sv; using name##Prop_t = TProperty<type>
 
+template<class T> class TEnum;
 namespace greaper
 {
 	using Clock_t = std::chrono::high_resolution_clock;
@@ -26,16 +28,16 @@ namespace greaper
 
 	// fwd
 	class GenericAllocator;
-	class IApplication;
-	class ILogManager;
-	class IThreadManager;
-	class ITimeManager;
-	class IGreaperLibrary;
-	class IProperty;
-	template<class T> class TProperty;
+	class IApplication; using PApplication = SPtr<IApplication>; using WApplication = WPtr<IApplication>;
+	class ILogManager; using PLogManager = SPtr<ILogManager>; using WLogManager = WPtr<ILogManager>;
+	class IThreadManager; using PThreadManager = SPtr<IThreadManager>; using WThreadManager = WPtr<IThreadManager>;
+	class IThread; using PThread = SPtr<IThread>; using WThread = WPtr<IThread>;
+	struct ThreadConfig;
+	class IGreaperLibrary; using PGreaperLib = SPtr<IGreaperLibrary>; using WGreaperLib = WPtr<IGreaperLibrary>;
+	class IProperty; using PIProperty = SPtr<IProperty>; using WIProperty = WPtr<IProperty>;
+	template<class T> class TProperty; template<class T> using PProperty = SPtr<TProperty<T>>; template<class T> using WProperty = WPtr<TProperty<T>>;
 	template<class T> class TPropertyValidator;
 	template<class... Args> class Event;
-	template<class T> class TEnum;
 	class IStream;
 	class Uuid;
 	template<class T> class Result;
@@ -92,8 +94,6 @@ namespace greaper
 
 	};
 }
-
 #include "Base/ReflectedConversions.h"
-#include "Base/GreaperEntryPoint.h"
 
 #endif /* CORE_PREREQUISITES_H */

@@ -47,7 +47,7 @@ void LogManager::StartThreadMode()
 		GetAsyncLog().lock()->SetValue(false, true);
 		return;
 	}
-	auto thmgr = (PThreadManager)thmgrRes.GetValue();
+	auto thmgr = (SPtr<IThreadManager>)thmgrRes.GetValue();
 	if (thmgr == nullptr)
 	{
 		lib->LogError("Trying to set as async LogManager, but couldn't obtain a ThreadManager.");
@@ -55,11 +55,9 @@ void LogManager::StartThreadMode()
 		GetAsyncLog().lock()->SetValue(false, true);
 		return;
 	}
-	ThreadConfig thcfg
-	{ 
-		.ThreadFN = [this]() { RunFn(); },
-		.Name = "AsyncLogger"sv
-	};
+	ThreadConfig thcfg;
+	thcfg.ThreadFN = [this]() { RunFn(); };
+	thcfg.Name = "AsyncLogger"sv;
 	
 	m_Threaded = true;
 	auto thRes = thmgr->CreateThread(thcfg);
@@ -153,7 +151,7 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 		auto rangeTuple = other->GetMessages();
 		auto lckRng = Lock(std::get<1>(rangeTuple));
 		auto messages = std::get<0>(rangeTuple);
-		const auto msgCount = messages.size();
+		const auto msgCount = messages.GetSizeFn();
 		if (m_Messages.capacity() < msgCount)
 			m_Messages.reserve(msgCount);
 
@@ -272,9 +270,9 @@ void LogManager::RemoveLogWriter(sizet writerID) noexcept
 	m_Writers[writerID].reset();
 }
 
-std::tuple<std::span<const LogData>, Mutex&> LogManager::GetMessages() const noexcept
+std::tuple<CSpan<LogData>, Mutex&> LogManager::GetMessages() const noexcept
 {
-	return { std::span(m_Messages), (Mutex&)m_MessagesMutex };
+	return { CreateSpan(m_Messages), (Mutex&)m_MessagesMutex };
 }
 
 void LogManager::Log(LogLevel_t level, const String& message, StringView libraryName)noexcept

@@ -9,8 +9,6 @@
 #define CORE_GREAPER_LIBRARY_H 1
 
 #include "Library.h"
-
-#include <utility>
 #include "Uuid.h"
 #include "Result.h"
 #include "ILogManager.h"
@@ -59,9 +57,9 @@ namespace greaper
 
 		WPtr<Library> GetOSLibrary()const noexcept;
 
-		std::span<const SPtr<IInterface>> GetManagers()const noexcept;
+		CSpan<SPtr<IInterface>> GetManagers()const noexcept;
 
-		std::span<const SPtr<IProperty>> GetProperties()const noexcept;
+		CSpan<SPtr<IProperty>> GetProperties()const noexcept;
 
 		Result<WPtr<IProperty>> GetProperty(const StringView& name)const noexcept;
 
@@ -106,9 +104,6 @@ namespace greaper
 		UnorderedMap<StringView, sizet> m_PropertyMap;
 		Vector<SPtr<IProperty>> m_Properties;
 	};
-
-	using PGreaperLib = SPtr<IGreaperLibrary>;
-	using WGreaperLib = WPtr<IGreaperLibrary>;
 
 	INLINE EmptyResult IGreaperLibrary::RegisterProperty(const SPtr<IProperty>& property) noexcept
 	{
@@ -201,9 +196,9 @@ namespace greaper
 
 	INLINE WPtr<Library> IGreaperLibrary::GetOSLibrary() const noexcept { return (WLibrary)m_Library; }
 
-	INLINE std::span<const SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return std::span(m_Managers); }
+	INLINE CSpan<SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return CreateSpan(m_Managers); }
 
-	INLINE std::span<const SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return std::span(m_Properties); }
+	INLINE CSpan<SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
 	INLINE Result<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
 	{
@@ -353,13 +348,11 @@ namespace greaper
 		if (lib == nullptr)
 			return CreateFailure<PProperty<T>>("Couldn't create the property, expired library given"sv);
 
-		auto* propPtr = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
-		auto prop = PProperty<T>(propPtr);
-
+		TProperty<T>* propPtr = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
+		SPtr<TProperty<T>> prop(propPtr, Impl::SPtrDeleterFn_t<TProperty<T>>(&Impl::DefaultDeleter<TProperty<T>, _Alloc_>));
 		const auto res = lib->RegisterProperty((PIProperty)prop);
 		if (res.HasFailed())
 		{
-			//Destroy<TProperty<T>, _Alloc_>(property);
 			return CreateFailure<PProperty<T>>("Couldn't register the property\n" + res.GetFailMessage());
 		}
 		return CreateResult(prop);
@@ -383,7 +376,7 @@ namespace greaper
 	}
 
 	template<class T>
-	INLINE bool TProperty<T>::SetValue(const T& value, bool triggerEvent) noexcept
+	bool TProperty<T>::SetValue(const T& value, bool triggerEvent) noexcept
 	{
 		VerifyNot(m_Library.expired(), "Trying to set a value to a disconnected Property.");
 		auto lib = m_Library.lock();

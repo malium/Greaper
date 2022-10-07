@@ -529,7 +529,7 @@ EmptyResult Application::ActivateInterface(const PInterface& interface)
 		return CreateEmptyResult();
 	}
 
-	const auto existsAnother = m_ActiveInterfaceUuidMap.contains(interface->GetInterfaceUUID());
+	const auto existsAnother = m_ActiveInterfaceUuidMap.find(interface->GetInterfaceUUID()) != m_ActiveInterfaceUuidMap.end(); // m_ActiveInterfaceUuidMap.contains(interface->GetInterfaceUUID());
 
 	if (existsAnother)
 		m_InterfaceToChange.push_back(interface);
@@ -547,7 +547,8 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 	PInterface interface;
 	// Remove it from toAdd and toChange
 	bool removed = false;
-	for (sizet i = 0; const auto & iface : m_InterfacesToAdd)
+	sizet i = 0;
+	for (const auto & iface : m_InterfacesToAdd)
 	{
 		if (iface->GetInterfaceUUID() == interfaceUUID)
 		{
@@ -558,7 +559,8 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 		++i;
 	}
 
-	for (sizet i = 0; const auto & iface : m_InterfaceToChange)
+	i = 0;
+	for (const auto & iface : m_InterfaceToChange)
 	{
 		if (iface->GetInterfaceUUID() == interfaceUUID)
 		{
@@ -593,7 +595,8 @@ EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 	PInterface interface;
 	// Remove it from toAdd and toChange
 	bool removed = false;
-	for (sizet i = 0; const auto & iface : m_InterfacesToAdd)
+	sizet i = 0;
+	for (const auto & iface : m_InterfacesToAdd)
 	{
 		if (iface->GetInterfaceName() == interfaceName)
 		{
@@ -604,7 +607,8 @@ EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 		++i;
 	}
 
-	for (sizet i = 0; const auto & iface : m_InterfaceToChange)
+	i = 0;
+	for (const auto & iface : m_InterfaceToChange)
 	{
 		if (iface->GetInterfaceName() == interfaceName)
 		{

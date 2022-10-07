@@ -13,10 +13,10 @@
 #include "../Enumeration.h"
 #include "../Event.h"
 
+ENUMERATION(ConsoleType, VIRTUAL, EXTERNAL);
+
 namespace greaper
 {
-    ENUMERATION(ConsoleType, VIRTUAL, EXTERNAL);
-
     class IConsole
     {
     public:

@@ -11,13 +11,15 @@
 #include <dlfcn.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <utility>
 #include <uuid/uuid.h>
+#include <csignal>
 
 struct LnxTypes : BasicTypes
 {
-    typedef __SIZE_TYPE__ sizetype;
-    typedef __SSIZE_T_TYPE ssizetype;
-    typedef wchar_t widechar;
+	typedef __SIZE_TYPE__ sizetype;
+	typedef __SSIZE_T_TYPE ssizetype;
+	typedef wchar_t widechar;
 };
 
 typedef LnxTypes PlatformTypes;
@@ -27,7 +29,7 @@ typedef LnxTypes PlatformTypes;
 #define NOINLINE __attribute__((noinline))
 #define FUNCTION_NO_RETURN_START 
 #define FUNCTION_NO_RETURN_END __attribute__((noreturn))
-#define TRIGGER_BREAKPOINT() __asm__ volatile("int $0x03")
+#define TRIGGER_BREAKPOINT() raise(SIGABRT)
 
 #define DLLIMPORT __attribute__((visibility("default")))
 #define DLLEXPORT __attribute__((visibility("default")))
@@ -40,7 +42,7 @@ typedef LnxTypes PlatformTypes;
 #define PATH_SEPARATOR_WIDE L'/'
 #endif
 
-#define FUNCTION_FULL "" 
+#define FUNCTION_FULL __PRETTY_FUNCTION__
 
 #ifndef PTHREAD_STACK_MIN
 #define PTHREAD_STACK_MIN	16384

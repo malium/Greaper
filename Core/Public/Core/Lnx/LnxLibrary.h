@@ -25,8 +25,8 @@ namespace greaper
 
 		static LibraryHandle Load(WStringView libraryName)
 		{
-            const auto libName = StringUtils::FromWIDE(WString{libraryName});
-            return dlopen(libName.c_str(), RTLD_LAZY | RTLD_LOCAL);
+            const auto libName = StringUtils::FromWIDE(libraryName);
+			return Load(StringView(libName));
 		}
 
 		static void Unload(LibraryHandle handle)

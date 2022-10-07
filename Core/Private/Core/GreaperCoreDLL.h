@@ -20,7 +20,7 @@ namespace greaper::core
 	{
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{ 0xDAC703FC, 0x16BD4F59, 0xB62D28ED, 0x3C9DE087 };
-		static constexpr StringView LibraryName = StringView{ "GreaperCore" };
+		static constexpr StringView LibraryName = "GreaperCore"sv;
 		
 		GreaperCoreLibrary() = default;
 

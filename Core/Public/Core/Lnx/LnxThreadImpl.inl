@@ -5,20 +5,16 @@
 
 #pragma once
 
-#ifndef CORE_LNX_THREAD_IMPL_I
-#define CORE_LNX_THREAD_IMPL_I 1
-
 //#include "../Base/IThread.h"
 //#include <atomic>
-#include <utility>
-
-#include "../IThreadManager.h"
+//#include "../IThreadManager.h"
+#include "../IGreaperLibrary.h"
 
 namespace greaper
 {
 	class LnxThreadImpl : IThread
 	{
-		WThreadManager m_Manager;
+		WPtr<IThreadManager> m_Manager;
 		ThreadHandle m_Handle;
 		ThreadID_t m_ID;
 		std::atomic_int8_t m_State;
@@ -66,47 +62,47 @@ namespace greaper
 			return nullptr;
 		}
 
-		void OnManagerActivation(bool active, IInterface* oldManager, const PInterface& newManager)noexcept
+		void OnManagerActivation(bool active, IInterface* oldManager, const SPtr<IInterface>& newManager)noexcept
 		{
 			if (active)
 				return;
 
 			if (newManager != nullptr)
 			{
-				const auto& newThreadMgr = (const PThreadManager&)newManager;
+				const auto& newThreadMgr = (const SPtr<IThreadManager>&)newManager;
 				m_OnManagerActivation.Disconnect();
-				newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
-				m_Manager = (WThreadManager)newThreadMgr;
+				newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const SPtr<IInterface>& newManager) { OnManagerActivation(active, oldManager, newManager); });
+				m_Manager = (WPtr<IThreadManager>)newThreadMgr;
 			}
 			else
 			{
 				m_OnManagerActivation.Disconnect();
 				auto libW = oldManager->GetLibrary();
-				VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.");
+				VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.", 0);
 				auto lib = libW.lock();
 				auto appW = lib->GetApplication();
 				VerifyNot(appW.expired(), "Trying to connect to InterfaceActivationEvent but Application was expired.");
 				auto app = appW.lock();
 				m_OnNewManager.Disconnect();
-				app->GetOnInterfaceActivationEvent()->Connect(m_OnNewManager, [this](const PInterface& newManager) { OnNewManager(newManager); });
+				app->GetOnInterfaceActivationEvent()->Connect(m_OnNewManager, [this](const SPtr<IInterface>& newManager) { OnNewManager(newManager); });
 			}
 		}
 
-		void OnNewManager(const PInterface& newManager)noexcept
+		void OnNewManager(const SPtr<IInterface>& newManager)noexcept
 		{
 			if (newManager == nullptr)
 				return;
 			if (newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
 				return;
 
-			m_Manager = (WThreadManager)newManager;
+			m_Manager = (WPtr<IThreadManager>)newManager;
 			m_OnManagerActivation.Disconnect();
 			newManager->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 			m_OnNewManager.Disconnect();
 		}
 
 	public:
-		INLINE LnxThreadImpl(WThreadManager manager, PThread self, const ThreadConfig& config)noexcept
+		INLINE LnxThreadImpl(WPtr<IThreadManager> manager, PThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_State(ThreadState_t::SUSPENDED)
             ,m_ThreadFn(config.ThreadFN)
@@ -146,7 +142,7 @@ namespace greaper
 			}
 		}
 
-		INLINE LnxThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
+		INLINE LnxThreadImpl(WPtr<IThreadManager> manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
 			:m_Manager(std::move(manager))
 			,m_Handle(handle)
 			,m_ID(id)
@@ -158,7 +154,7 @@ namespace greaper
 			if (setName)
 				auto ret = pthread_setname_np(m_Handle, m_Name.c_str());
 			auto mgr = m_Manager.lock();
-			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const SPtr<IInterface>& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}
 
 		INLINE ~LnxThreadImpl()
@@ -233,5 +229,3 @@ namespace greaper
 	};
 	using Thread = LnxThreadImpl;
 }
-
-#endif /* CORE_LNX_THREAD_IMPL_I */

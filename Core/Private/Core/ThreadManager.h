@@ -11,8 +11,6 @@
 #include "ImplPrerequisites.h"
 #include <Core/Concurrency.h>
 #include <Core/IThreadManager.h>
-#include <span>
-#include <tuple>
 
 namespace greaper::core
 {
@@ -61,9 +59,9 @@ namespace greaper::core
 		
 		INLINE ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
 
-		INLINE std::tuple<std::span<const PThread, std::dynamic_extent>, RecursiveMutex&> GetThreads()const noexcept override
+		INLINE std::tuple<CSpan<PThread>, RecursiveMutex&> GetThreads()const noexcept override
 		{
-			return { std::span(m_Threads), (RecursiveMutex&)m_ThreadMutex };
+			return { CreateSpan(m_Threads), (RecursiveMutex&)m_ThreadMutex };
 		}
 	};
 }

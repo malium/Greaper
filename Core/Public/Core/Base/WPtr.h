@@ -12,8 +12,8 @@ namespace greaper
 	{
 		mutable Impl::ISharedPointerControl* m_Control;
 
-		template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type>
-		friend bool operator==(const WeakPointer<T>& left, const WeakPointer<T2>& right)noexcept;
+		template<class _T_, class T2, typename std::enable_if<std::is_base_of_v<_T_, T2> || std::is_base_of_v<T2, _T_>, bool>::type>
+		friend bool operator==(const WeakPointer<_T_>& left, const WeakPointer<T2>& right)noexcept;
 
 		template<class T2>
 		friend class WeakPointer;

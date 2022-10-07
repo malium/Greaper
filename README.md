@@ -5,7 +5,7 @@
 Greaper is a super modular application framework, with cross-platform between Windows and Linux.
 This framework enables the creation of these types of applications, real-time applications or event-based applications. Provides utilities from the basic OS abstractions to a full modular approach to application creation.
 The main focus of Greaper is the hability to create an application from different modules and enable the interchange of modules at runtime.
-Greaper currently supports Windows using 64bits, 32bits (needs testing), and Linux(needs testing) based OS. Mac and another Apple platforms won't be supported.
+Greaper currently supports Windows using 64bits, 32bits (needs testing), and Linux based OS. Mac and another Apple platforms won't be supported.
 
 ## Why so much modularity?
 

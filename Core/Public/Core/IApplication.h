@@ -197,8 +197,6 @@ namespace greaper
 			return CreateResult(interface);
 		}
 	};
-	using WApplication = WPtr<IApplication>;
-	using PApplication = SPtr<IApplication>;
 }
 
 #endif /* CORE_I_APPLICATION_H */

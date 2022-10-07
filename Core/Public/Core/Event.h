@@ -42,7 +42,7 @@ namespace greaper
 	{
 		using HandlerFunction = std::function<void(Args...)>;
 		HandlerFunction Function;
-		uint32 ID;
+		uint32 ID = 0;
 	};
 
 	template<>

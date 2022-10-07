@@ -19,4 +19,6 @@ namespace greaper
 	using OSPlatform = LnxOSPlatform;
 }
 
+#include "LnxPlatform.inl"
+
 #endif /* CORE_LNX_PLATFORM_H */

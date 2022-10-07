@@ -10,12 +10,13 @@
 #include <Core/Property.h>
 #include <Core/Base/LogWriterFile.h>
 #include <Core/IThreadManager.h>
+#include <Core/Platform.h>
 #include <iostream>
 
 #if PLT_WINDOWS
-#define PLT_NAME "Win"
+#define PLT_NAME "Windows"
 #else
-#define PLT_NAME "Lnx"
+#define PLT_NAME "Linux"
 #endif
 #if ARCHITECTURE_X64
 #define ARCH_NAME "64"
@@ -23,14 +24,18 @@
 #define ARCH_NAME "32"
 #endif
 #if GREAPER_DEBUG
-#define CONF_NAME "DebugDLL"
+#define CONF_NAME "Debug"
 #else
-#define CONF_NAME "ReleaseDLL"
+#define CONF_NAME "Release"
 #endif
 
+#if PLT_WINDOWS
 #define CORE_LIBRARY_NAME "Core" PLT_NAME ARCH_NAME "_" CONF_NAME GREAPER_DLLEXT
-constexpr greaper::StringView CORE_LIB_NAME = CORE_LIBRARY_NAME;
-constexpr greaper::StringView LibFnName = "_Greaper";
+#elif PLT_LINUX
+#define CORE_LIBRARY_NAME "./Core" PLT_NAME ARCH_NAME "_" CONF_NAME GREAPER_DLLEXT
+#endif
+constexpr greaper::StringView CORE_LIB_NAME = { CORE_LIBRARY_NAME };
+constexpr greaper::StringView LibFnName = "_Greaper"sv;
 constexpr static bool AsyncLog = true;
 greaper::PLibrary gCoreLib;
 greaper::PGreaperLib gCore;
@@ -72,7 +77,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 int main(int argc, char* argv[])
 {
 	void* hInstance = nullptr;
-	return MainCode(nullptr, argc, argv);
+	return MainCode(hInstance, argc, argv);
 }
 #endif
 
@@ -171,15 +176,27 @@ void GreaperCoreLibClose()
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
-	gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));
-	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
-	GreaperCoreLibInit(hInstance, argc, argv);
+#if PLT_WINDOWS && COMPILER_MSVC
+	OSPlatform::PerThreadSEHInit();
+#endif
 
-	GreaperCoreLibClose();
+	try
+	{
+		gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));
+		TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
-	gCoreLib->Close();
-	gCoreLib.reset();
+		GreaperCoreLibInit(hInstance, argc, argv);
+
+		GreaperCoreLibClose();
+
+		gCoreLib->Close();
+		gCoreLib.reset();
+	}
+	catch (std::exception e)
+	{
+		DEBUG_OUTPUT(e.what());
+	}
 
 	return EXIT_SUCCESS;
 }

@@ -11,11 +11,11 @@
 #include "../CorePrerequisites.h"
 #include "../Enumeration.h"
 
+ENUMERATION(ReflectedFieldType, Plain, DataChunk, Reference, ReferencePtr);
+
 namespace greaper
 {
 	struct IReflectedType;
-
-	ENUMERATION(ReflectedFieldType, Plain, DataChunk, Reference, ReferencePtr);
 
 	struct ReflectedFieldInfo
 	{

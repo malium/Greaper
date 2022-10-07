@@ -6,12 +6,7 @@
 #pragma once
 
 #include "ThreadManager.h"
-
-#if PLT_WINDOWS
-#include <Core/Win/WinThreadImpl.inl>
-#elif PLT_LINUX
-#include <Core/Lnx/LnxThreadImpl.inl>
-#endif
+#include <Core/Base/IThread.h>
 
 using namespace greaper;
 using namespace greaper::core;
@@ -21,7 +16,7 @@ extern SPtr<ThreadManager> gThreadManager = SPtr<ThreadManager>();
 #if PLT_WINDOWS
 using ThreadImpl = WinThreadImpl;
 #elif PLT_LINUX
-using ThreadImpl = LnxThreadImp;
+using ThreadImpl = LnxThreadImpl;
 #endif
 
 void ThreadManager::OnThreadDestruction(const PThread& thread) noexcept
@@ -78,16 +73,16 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 		auto lckTh = Lock(m_ThreadMutex);
 		auto rangeTuple = other->GetThreads();
 		auto lckRng = Lock(std::get<1>(rangeTuple));
-		auto span = std::get<0>(rangeTuple);
-		const auto thCount = span.size();
+		const auto& span = std::get<0>(rangeTuple);
+		const auto thCount = span.GetSizeFn();
 		if (m_Threads.capacity() < thCount)
 			m_Threads.reserve(thCount);
 
 		for (const auto& thread : span)
 		{
-            if (thread == nullptr)
+			if (thread == nullptr)
 				continue;
-    
+	
 			m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
 			m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
 			m_Threads.push_back(thread);
@@ -162,7 +157,7 @@ Result<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
 		return CreateFailure<WThread>(Format("Cannot find the thread with ID: %d.", id));
 	}
 	const auto thIdx = findIDIT->second;
-	auto thread = m_Threads[thIdx];
+	const auto& thread = m_Threads[thIdx];
 	if (thread == nullptr)
 	{
 		return CreateFailure<WThread>(Format("Trying to get a thread with ID: %d, that is already finished.", id));
@@ -180,7 +175,7 @@ Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcep
 		return CreateFailure<WThread>(Format("Cannot find the thread with name:'%s'.", threadName.c_str()));
 	}
 	const auto thIdx = findNameIT->second;
-	auto thread = m_Threads[thIdx];
+	const auto& thread = m_Threads[thIdx];
 	if (thread == nullptr)
 	{
 		return CreateFailure<WThread>(Format("Trying to get a thread with name:'%s', that is already finished.", threadName.c_str()));

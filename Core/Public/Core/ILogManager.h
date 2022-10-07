@@ -8,9 +8,9 @@
 #ifndef CORE_I_LOG_MANAGER_H
 #define CORE_I_LOG_MANAGER_H 1
 
+#include "CorePrerequisites.h"
 #include "Interface.h"
 #include "Event.h"
-#include <tuple>
 
 namespace greaper
 {
@@ -41,7 +41,7 @@ namespace greaper
 	{
 	public:
 		static constexpr Uuid InterfaceUUID = Uuid{ 0xB05DBD1D, 0x83FE42E1, 0x90CFF1EE, 0x2434CD0D };
-		static constexpr StringView InterfaceName = StringView{ "LogManager" };
+		static constexpr StringView InterfaceName = "LogManager"sv;
 
 		DEF_PROP(AsyncLog, bool);
 
@@ -53,15 +53,12 @@ namespace greaper
 
 		virtual void RemoveLogWriter(sizet writerID)noexcept = 0;
 
-		virtual std::tuple<std::span<const LogData>, Mutex&> GetMessages()const noexcept = 0;
+		virtual std::tuple<CSpan<LogData>, Mutex&> GetMessages()const noexcept = 0;
 
 		virtual void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept = 0;
 
 		virtual void _Log(const LogData& data)noexcept = 0;
 	};
-
-	using WLogManager = WPtr<ILogManager>;
-	using PLogManager = SPtr<ILogManager>;
 }
 
 #include "Base/ILogWriter.h"

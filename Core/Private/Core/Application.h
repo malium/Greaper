@@ -35,18 +35,18 @@ namespace greaper::core
 		struct LibInfo
 		{
 			SPtr<IGreaperLibrary> Lib;
-			UnorderedMap<StringView, size_t> IntefaceNameMap;
-			UnorderedMap<Uuid, size_t> InterfaceUuidMap;
+			UnorderedMap<StringView, sizet> IntefaceNameMap;
+			UnorderedMap<Uuid, sizet> InterfaceUuidMap;
 			Vector<PInterface> Interfaces;
 		};
 
-		UnorderedMap<StringView, size_t> m_LibraryNameMap;
-		UnorderedMap<Uuid, size_t> m_LibraryUuidMap;
+		UnorderedMap<StringView, sizet> m_LibraryNameMap;
+		UnorderedMap<Uuid, sizet> m_LibraryUuidMap;
 		Vector<LibInfo> m_Libraries;
 
 		mutable RecursiveMutex m_ActiveMutex;
-		UnorderedMap<StringView, size_t> m_ActiveInterfaceNameMap;
-		UnorderedMap<Uuid, size_t> m_ActiveInterfaceUuidMap;
+		UnorderedMap<StringView, sizet> m_ActiveInterfaceNameMap;
+		UnorderedMap<Uuid, sizet> m_ActiveInterfaceUuidMap;
 		Vector<PInterface> m_ActiveInterfaces;
 
 		Vector<PInterface> m_InterfaceToChange;

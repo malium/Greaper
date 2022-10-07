@@ -5,19 +5,14 @@
 
 #pragma once
 
-#ifndef CORE_WIN_THREAD_IMPL_I
-#define CORE_WIN_THREAD_IMPL_I 1
-
-#include "../Base/IThread.h"
-#include "../Event.h"
-#include "../IThreadManager.h"
-#include <utility>
+#include "../IGreaperLibrary.h"
+#include "WinPlatform.h"
 
 namespace greaper
 {
 	class WinThreadImpl : IThread
 	{
-		WThreadManager m_Manager;
+		WPtr<IThreadManager> m_Manager;
 		ThreadHandle m_Handle;
 		ThreadID_t m_ID;
 		std::atomic_int8_t m_State;
@@ -31,6 +26,8 @@ namespace greaper
 
 		static INLINE unsigned STDCALL RunFn(void* data)
 		{
+			OSPlatform::PerThreadSEHInit();
+
 			auto* thread = (SPtr<WinThreadImpl>*)data;
 			SPtr<WinThreadImpl>& winThread = *thread;
 			
@@ -119,7 +116,7 @@ namespace greaper
 				const auto& newThreadMgr = (const PThreadManager&)newManager;
 				m_OnManagerActivation.Disconnect();
 				newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
-				m_Manager = (WThreadManager)newThreadMgr;
+				m_Manager = (WPtr<IThreadManager>)newThreadMgr;
 			}
 			else
 			{
@@ -142,14 +139,14 @@ namespace greaper
 			if (newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
 				return;
 
-			m_Manager = (WThreadManager)newManager;
+			m_Manager = (WPtr<IThreadManager>)newManager;
 			m_OnManagerActivation.Disconnect();
 			newManager->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 			m_OnNewManager.Disconnect();
 		}
 
 	public:
-		INLINE WinThreadImpl(WThreadManager manager, PThread self, const ThreadConfig& config)noexcept
+		INLINE WinThreadImpl(WPtr<IThreadManager> manager, PThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_Handle(InvalidThreadHandle)
 			,m_ID(InvalidThreadID)
@@ -194,7 +191,7 @@ namespace greaper
 			m_Barier.sync();
 		}
 
-		INLINE WinThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
+		INLINE WinThreadImpl(WPtr<IThreadManager> manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
 			:m_Manager(std::move(manager))
 			,m_Handle(handle)
 			,m_ID(id)
@@ -297,5 +294,3 @@ namespace greaper
 	};
 	using Thread = WinThreadImpl;
 }
-
-#endif /* CORE_WIN_THREAD_IMPL_I */
