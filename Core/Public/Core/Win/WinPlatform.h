@@ -30,9 +30,9 @@ namespace greaper
 		static constexpr sizet MAX_STACKTRACE_DEPTH = 200;
 		static constexpr sizet MAX_STACKTRACE_NAME_LENGTH = 1024;
 
-		static Mutex m_Mutex;
+		static inline Mutex m_Mutex;
 
-		static Library PSAPI;
+		static inline Library PSAPI;
 
 		typedef BOOL(WINAPI* EnumProcessModules_t)(HANDLE hProcess, HMODULE* lphModule, DWORD cb, LPDWORD lpcbNeeded);
 		typedef DWORD(WINAPI* GetModuleBaseName_t)(HANDLE hProcess, HMODULE hModule, LPSTR lpBaseName, DWORD nSize);
@@ -44,7 +44,7 @@ namespace greaper
 		static inline GetModuleFileNameEx_t GetModuleFileNameEx = nullptr;
 		static inline GetModuleInformation_t GetModuleInformation = nullptr;
 
-		static Library DbgHelp;
+		static inline Library DbgHelp;
 
 		typedef BOOL(WINAPI* MiniDumpWriteDump_t)(HANDLE hProcess, DWORD ProcessId, HANDLE hFile, MINIDUMP_TYPE DumpType,
 			PMINIDUMP_EXCEPTION_INFORMATION ExceptionParam, PMINIDUMP_USER_STREAM_INFORMATION UserStreamParam,

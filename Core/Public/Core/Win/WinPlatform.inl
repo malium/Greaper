@@ -97,16 +97,21 @@ INLINE void greaper::WinOSPlatform::WriteMiniDump(std::filesystem::path path, PE
 	auto hFile = CreateFileW(path.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 
 	if (hFile == INVALID_HANDLE_VALUE)
-		return; // something went wrong
+	{
+		// something went wrong
+		const auto errorCode = GetLastError();
+		DEBUG_OUTPUT(Format("Something went wrong while creating the MiniDump file. Error code: " I32_HEX_FMT, errorCode).c_str());
+		return;
+	}
 
 	MINIDUMP_EXCEPTION_INFORMATION dumpExceptionInfo;
+	ClearMemory(dumpExceptionInfo);
 
 	dumpExceptionInfo.ThreadId = GetCurrentThreadId();
 	dumpExceptionInfo.ExceptionPointers = exceptionData;
 	dumpExceptionInfo.ClientPointers = false;
 
-	if (!DbgHelp.IsOpen())
-		InitDbgHelp();
+	InitDbgHelp();
 
 	MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, MiniDumpNormal,
 		&dumpExceptionInfo, nullptr, nullptr);
@@ -120,12 +125,13 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace()
 	CONTEXT context;
 	RtlCaptureContext(&context);
 
-	if (!PSAPI.IsOpen())
-		InitPSAPI();
+	InitPSAPI();
+	InitDbgHelp();
 
 	LoadSymbols();
-	auto stackTrace = GetStackTrace(context, 2);
+	auto stackTrace = GetStackTrace(context, 1);
 	UnloadSymbols();
+
 	return stackTrace;
 }
 
@@ -171,6 +177,7 @@ INLINE void greaper::WinOSPlatform::InitDbgHelp()
 
 INLINE void greaper::WinOSPlatform::LoadSymbols()
 {
+	InitDbgHelp();
 	auto hProcess = GetCurrentProcess();
 	auto options = SymGetOptions();
 	options |= (SYMOPT_LOAD_LINES | SYMOPT_EXACT_SYMBOLS | SYMOPT_UNDNAME | SYMOPT_FAIL_CRITICAL_ERRORS | SYMOPT_NO_PROMPTS);
@@ -179,6 +186,8 @@ INLINE void greaper::WinOSPlatform::LoadSymbols()
 	if (!SymInitialize(hProcess, nullptr, false))
 	{
 		// Something went wrong
+		const auto errorCode = GetLastError();
+		DEBUG_OUTPUT(Format("SymInitialize() failed. Error code: " I32_HEX_FMT, errorCode).c_str());
 		return;
 	}
 
@@ -190,21 +199,20 @@ INLINE void greaper::WinOSPlatform::LoadSymbols()
 	auto* modules = AllocN<HMODULE>(moduleCount);
 	EnumProcessModules(hProcess, modules, bufferSize, &bufferSize);
 
-	std::array<achar, MAX_STACKTRACE_NAME_LENGTH> moduleName;
-	std::array<achar, MAX_STACKTRACE_NAME_LENGTH> imageName;
-	std::array<achar, MAX_STACKTRACE_NAME_LENGTH> pdbSearchPath;
+	std::array<achar, MAX_STACKTRACE_NAME_LENGTH> moduleName{};
+	std::array<achar, MAX_STACKTRACE_NAME_LENGTH> imageName{};
+	std::array<achar, MAX_STACKTRACE_NAME_LENGTH> pdbSearchPath{};
+
+	MODULEINFO moduleInfo;
+	achar* fileName;
 
 	for (uint32 i = 0; i < moduleCount; ++i)
 	{
-		MODULEINFO moduleInfo;
-
 		GetModuleInformation(hProcess, modules[i], &moduleInfo, sizeof(moduleInfo));
 		GetModuleFileNameEx(hProcess, modules[i], imageName.data(), MAX_STACKTRACE_NAME_LENGTH);
 		GetModuleBaseName(hProcess, modules[i], moduleName.data(), MAX_STACKTRACE_NAME_LENGTH);
 
-		achar* fileName;
 		GetFullPathNameA(moduleName.data(), MAX_STACKTRACE_NAME_LENGTH, pdbSearchPath.data(), &fileName);
-		*fileName = '\0';
 
 		SymSetSearchPath(hProcess, pdbSearchPath.data());
 
@@ -219,12 +227,20 @@ INLINE void greaper::WinOSPlatform::LoadSymbols()
 
 			if (!SymGetModuleInfo64(hProcess, moduleAddress, &imageInfo))
 			{
-				continue; // error
+				// error
+				const auto errorCode = GetLastError();
+				DEBUG_OUTPUT(Format("Failed retrieving module information for module '%s'. Error code: " I32_HEX_FMT, moduleName.data(),
+					errorCode).c_str());
+				continue;
 			}
 		}
 		else
 		{
-			continue; // error
+			// error
+			const auto errorCode = GetLastError();
+			DEBUG_OUTPUT(Format("Failed loading module '%s', Search path '%s', Image name '%s'. Error code: " I32_HEX_FMT, moduleName.data(),
+				pdbSearchPath.data(), imageName.data(), errorCode).c_str());
+			continue;
 		}
 	}
 
@@ -291,6 +307,7 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 	constexpr auto symbolSize = sizeof(IMAGEHLP_SYMBOL64) + MAX_STACKTRACE_NAME_LENGTH;
 
 	auto symbol = UPtr<IMAGEHLP_SYMBOL64>((PIMAGEHLP_SYMBOL64)Alloc(symbolSize), &Impl::CStrucDeleter<IMAGEHLP_SYMBOL64>);
+	memset(symbol.Get(), 0, symbolSize);
 	symbol->SizeOfStruct = sizeof(IMAGEHLP_SYMBOL64);
 	symbol->Size = symbolSize;
 	symbol->MaxNameLength = MAX_STACKTRACE_NAME_LENGTH;
@@ -299,9 +316,11 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 
 	String output;
 
-	std::array<achar, MAX_SYM_NAME + 1 + 8> fnName;
-	std::array<achar, MAX_PATH + 20 + 10 + 10 + 20> fileData;
-	std::array<achar, 256 + 12> moduleString;
+	std::array<achar, MAX_SYM_NAME + 1 + 8> fnName{};
+	std::array<achar, MAX_PATH + 20 + 10 + 10 + 20> fileData{};
+	std::array<achar, 256 + 12> moduleString{};
+	DWORD64 dummy;
+	DWORD column;
 
 	for (decltype(entryCount) i = skip; i < entryCount; ++i)
 	{
@@ -309,8 +328,6 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 			output += '\n';
 
 		auto fnAddr = rawStackTrace[i];
-
-		DWORD64 dummy;
 		
 		if (SymGetSymFromAddr64(hProcess, fnAddr, &dummy, symbol.Get()))
 		{
@@ -319,8 +336,8 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 		}
 
 		IMAGEHLP_LINE64 lineData;
+		ClearMemory(lineData);
 		lineData.SizeOfStruct = sizeof(lineData);
-		DWORD column;
 
 		if (SymGetLineFromAddr64(hProcess, fnAddr, &column, &lineData))
 		{
@@ -330,6 +347,7 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 		}
 
 		IMAGEHLP_MODULE64 moduleData;
+		ClearMemory(moduleData);
 		moduleData.SizeOfStruct = sizeof(moduleData);
 
 		if (SymGetModuleInfo64(hProcess, fnAddr, &moduleData))

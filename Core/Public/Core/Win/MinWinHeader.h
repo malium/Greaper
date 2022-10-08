@@ -5,10 +5,6 @@
 
 #pragma once
 
-//#pragma comment(lib, "Rpcrt4.lib")
-//#pragma comment(lib, "uuid.lib")
-//#pragma comment(lib, "Kernel32.lib")
-
 #if 1
 extern "C" {
 #define DECLSPEC_IMPORT __declspec(dllimport)
@@ -17,7 +13,9 @@ extern "C" {
 #define WINBASEAPI DECLSPEC_IMPORT
 #define NTSYSAPI     DECLSPEC_IMPORT
 #define NTSYSCALLAPI DECLSPEC_IMPORT
-//#define _ACRTIMP DECLSPEC_IMPORT
+#ifndef _ACRTIMP
+#define _ACRTIMP __declspec(dllimport)
+#endif
 #define WINAPI      __stdcall
 #define NTAPI __stdcall
 #define RESTRICTED_POINTER
@@ -111,6 +109,14 @@ typedef unsigned __int64 UINT_PTR, *PUINT_PTR;
 typedef __int64 LONG_PTR, *PLONG_PTR;
 typedef unsigned __int64 ULONG_PTR, *PULONG_PTR;
 
+#ifndef _UINTPTR_T_DEFINED
+#define _UINTPTR_T_DEFINED
+#if ARCHITECTURE_X64
+typedef unsigned __int64  uintptr_t;
+#else
+typedef unsigned int uintptr_t;
+#endif
+#endif
 
 typedef DWORD near* PDWORD;
 typedef DWORD far* LPDWORD;
@@ -675,7 +681,7 @@ Sleep(
 	DWORD dwMilliseconds
 );
 typedef unsigned(__stdcall* _beginthreadex_proc_type)(void*);
-_ACRTIMP uintptr_t __cdecl _beginthreadex(
+_ACRTIMP uintptr_t CDECL _beginthreadex(
 	void* _Security,
 	unsigned                 _StackSize,
 	_beginthreadex_proc_type _StartAddress,
@@ -1540,6 +1546,7 @@ typedef struct _IMAGEHLP_LINE64 {
 }
 
 #else
+#include <malloc.h>
 #include <Windows.h>
 #include <rpc.h>
 #include <Psapi.h>

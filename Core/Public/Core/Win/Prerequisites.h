@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <malloc.h>
+#include <cstdio>
 
 struct WinTypes : BasicTypes
 {
@@ -83,18 +83,46 @@ typedef WinTypes PlatformTypes;
 #define PlatformAlignedDealloc(mem) _aligned_free(mem)
 #define DEBUG_OUTPUT(x) OutputDebugStringA(x)
 
-INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
+INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs) noexcept
 {
+	constexpr size_t BufferSize = 128;
+	static char errorMsgBuffer[BufferSize];
 	int retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, nullptr, 0);
 	if (!SUCCEEDED(retVal))
+	{
+		// Error
+		if (IsDebuggerPresent() == TRUE)
+		{
+			const auto errorCode = GetLastError();
+			snprintf(errorMsgBuffer, BufferSize, "MultiByteToWideChar failed, error code: %d.", errorCode);
+			DEBUG_OUTPUT(errorMsgBuffer);
+			TRIGGER_BREAKPOINT();
+		}
 		return nullptr;
+	}
 
 	auto lpWideCharStr = (LPWSTR)PlatformAlloc(retVal * sizeof(wchar_t));
 	if (lpWideCharStr == nullptr)
+	{
+		if (IsDebuggerPresent() == TRUE)
+		{
+			snprintf(errorMsgBuffer, BufferSize, "PlatformAlloc couldn't allocate %zd bytes.", retVal * sizeof(wchar_t));
+			DEBUG_OUTPUT(errorMsgBuffer);
+			TRIGGER_BREAKPOINT();
+		}
 		return nullptr;
+	}
+
 	retVal = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, lpCmdLine, -1, lpWideCharStr, retVal);
 	if (!SUCCEEDED(retVal))
 	{
+		if (IsDebuggerPresent() == TRUE)
+		{
+			const auto errorCode = GetLastError();
+			snprintf(errorMsgBuffer, BufferSize, "MultiByteToWideChar failed, error code: %d.", errorCode);
+			DEBUG_OUTPUT(errorMsgBuffer);
+			TRIGGER_BREAKPOINT();
+		}
 		PlatformDealloc(lpWideCharStr);
 		return nullptr;
 	}
@@ -103,7 +131,16 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 	LPWSTR* args = CommandLineToArgvW(lpWideCharStr, &numArgs);
 	PlatformDealloc(lpWideCharStr);
 	if (!args)
+	{
+		if (IsDebuggerPresent() == TRUE)
+		{
+			const auto errorCode = GetLastError();
+			snprintf(errorMsgBuffer, BufferSize, "CommandLineToArgvW returned nullptr, error code: %d.", errorCode);
+			DEBUG_OUTPUT(errorMsgBuffer);
+			TRIGGER_BREAKPOINT();
+		}
 		return nullptr;
+	}
 
 	int storage = numArgs * sizeof(LPSTR);
 	for (int i = 0; i < numArgs; ++i)
@@ -113,6 +150,13 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 			nullptr, &lpUsedDefaultChar);
 		if (!SUCCEEDED(retVal))
 		{
+			if (IsDebuggerPresent() == TRUE)
+			{
+				const auto errorCode = GetLastError();
+				snprintf(errorMsgBuffer, BufferSize, "WideCharToMultiByte failed, error code: %d.", errorCode);
+				DEBUG_OUTPUT(errorMsgBuffer);
+				TRIGGER_BREAKPOINT();
+			}
 			LocalFree(args);
 			return nullptr;
 		}
@@ -122,6 +166,13 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 	if (!result)
 	{
 		LocalFree(args);
+		if (IsDebuggerPresent() == TRUE)
+		{
+			const auto errorCode = GetLastError();
+			snprintf(errorMsgBuffer, BufferSize, "LocalAlloc returned nullptr, error code: %d.", errorCode);
+			DEBUG_OUTPUT(errorMsgBuffer);
+			TRIGGER_BREAKPOINT();
+		}
 		return nullptr;
 	}
 
@@ -132,7 +183,14 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 		if (bufLen <= 0)
 		{
 			if (IsDebuggerPresent() == TRUE)
+			{
+				const auto errorCode = GetLastError();
+				snprintf(errorMsgBuffer, BufferSize, "LocalAlloc returned nullptr, error code: %d.", errorCode);
+				DEBUG_OUTPUT(errorMsgBuffer);
 				TRIGGER_BREAKPOINT();
+			}
+			LocalFree(result);
+			LocalFree(args);
 			return nullptr;
 		}
 		BOOL lpUsedDefaultChar = FALSE;
@@ -140,6 +198,13 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 			nullptr, &lpUsedDefaultChar);
 		if (!SUCCEEDED(retVal))
 		{
+			if (IsDebuggerPresent() == TRUE)
+			{
+				const auto errorCode = GetLastError();
+				snprintf(errorMsgBuffer, BufferSize, "WideCharToMultiByte failed, error code: %d.", errorCode);
+				DEBUG_OUTPUT(errorMsgBuffer);
+				TRIGGER_BREAKPOINT();
+			}
 			LocalFree(result);
 			LocalFree(args);
 			return nullptr;
@@ -155,7 +220,7 @@ INLINE LPSTR* CommandLineToArgvA(LPSTR lpCmdLine, INT* pNumArgs)
 	return result;
 }
 
-INLINE void FreeArgvA(LPSTR* argv)
+INLINE void FreeArgvA(LPSTR* argv) noexcept
 {
 	if (argv == nullptr)
 		return;

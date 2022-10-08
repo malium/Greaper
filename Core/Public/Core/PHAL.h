@@ -301,7 +301,7 @@
 #endif
 /* Debug Console Output */
 #ifndef DEBUG_OUTPUT
-#define DEBUG_OUTPUT(x) std::cout << x << std::endl
+#define DEBUG_OUTPUT(x) std::cerr << x << std::endl
 #endif
 /* High Performance Graphics enable utility */
 #ifndef USE_HPG
