@@ -53,11 +53,11 @@ namespace greaper
 
 		virtual sizet GetObjectCount()const = 0;
 
-		virtual Result<ObjectHandle> GetHandle(Uuid objectUUID) = 0;
+		virtual TResult<ObjectHandle> GetHandle(Uuid objectUUID) = 0;
 
 		virtual void OnHandleDestroyed(const ObjectHandle& handle) = 0;
 
-		virtual Result<Uuid> CreateObject() = 0;
+		virtual TResult<Uuid> CreateObject() = 0;
 
 		virtual EmptyResult DestroyObject(const ObjectHandle& handle) = 0;
 
@@ -155,29 +155,29 @@ namespace greaper
 			return m_ObjectList.size() - m_FreeIndicesList.size();
 		}
 
-		INLINE Result<ObjectHandle> GetHandle(Uuid objectUUID)override
+		INLINE TResult<ObjectHandle> GetHandle(Uuid objectUUID)override
 		{
 			if (objectUUID == IObject::InvalidUUID)
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle from an Invalid ObjectUUID."sv);
+				return Result::CreateFailure<ObjectHandle>("Trying to obtain a handle from an Invalid ObjectUUID."sv);
 
 			LOCK(m_Mutex);
 
 			const auto findIT = m_UUID2IDX.find(objectUUID);
 			if(findIT == m_UUID2IDX.end())
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the object is not in this Factory."sv);
+				return Result::CreateFailure<ObjectHandle>("Trying to obtain a handle but the object is not in this Factory."sv);
 
 			const auto idx = findIT->second;
 			if (m_ObjectList.size() <= idx)
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the object is no longer in the Factory."sv);
+				return Result::CreateFailure<ObjectHandle>("Trying to obtain a handle but the object is no longer in the Factory."sv);
 
 			ObjectInfo& info = m_ObjectList[idx];
 
 			if (info.Obj == nullptr)
-				return CreateFailure<ObjectHandle>("Trying to obtain a handle but the given ObjectUUID points to a null Object."sv);
+				return Result::CreateFailure<ObjectHandle>("Trying to obtain a handle but the given ObjectUUID points to a null Object."sv);
 			
 			++info.ReferenceCount;
 
-			return CreateResult(ObjectHandle(this, objectUUID));
+			return Result::CreateSuccess(ObjectHandle(this, objectUUID));
 		}
 
 		INLINE void OnHandleDestroyed(const ObjectHandle& handle)override
@@ -215,7 +215,7 @@ namespace greaper
 			}
 		}
 
-		INLINE Result<Uuid> CreateObject()override
+		INLINE TResult<Uuid> CreateObject()override
 		{
 			auto createFn = [this](ObjectInfo& info, Uuid objectUUID)
 			{
@@ -229,7 +229,7 @@ namespace greaper
 			if (m_ObjectList.size() == m_ObjectList.max_size())
 			{
 				if (m_FreeIndicesList.empty())
-					return CreateFailure<Uuid>("Trying to create a new Object but the Factory is at its limits!"sv);
+					return Result::CreateFailure<Uuid>("Trying to create a new Object but the Factory is at its limits!"sv);
 
 				auto freeIndex = m_FreeIndicesList.front();
 				m_FreeIndicesList.erase(m_FreeIndicesList.begin());
@@ -253,7 +253,7 @@ namespace greaper
 				createFn(info, objectUUID);
 				m_UUID2IDX.insert_or_assign(objectUUID, idx);
 			}
-			return CreateResult(objectUUID);
+			return Result::CreateSuccess(objectUUID);
 		}
 
 		INLINE IObject* GetObject(const ObjectHandle& handle)const override

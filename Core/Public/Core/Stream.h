@@ -8,7 +8,7 @@
 #ifndef CORE_STREAM_H
 #define CORE_STREAM_H 1
 
-#include "Memory.h"
+#include "CorePrerequisites.h"
 
 namespace greaper
 {

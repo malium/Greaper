@@ -147,43 +147,43 @@ ThreadManager::~ThreadManager() noexcept
 
 }
 
-Result<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
+TResult<WThread> ThreadManager::GetThread(ThreadID_t id) const noexcept
 {
 	LOCK(m_ThreadMutex);
 
 	const auto findIDIT = m_ThreadIDMap.find(id);
 	if (findIDIT == m_ThreadIDMap.end())
 	{
-		return CreateFailure<WThread>(Format("Cannot find the thread with ID: %d.", id));
+		return Result::CreateFailure<WThread>(Format("Cannot find the thread with ID: %d.", id));
 	}
 	const auto thIdx = findIDIT->second;
 	const auto& thread = m_Threads[thIdx];
 	if (thread == nullptr)
 	{
-		return CreateFailure<WThread>(Format("Trying to get a thread with ID: %d, that is already finished.", id));
+		return Result::CreateFailure<WThread>(Format("Trying to get a thread with ID: %d, that is already finished.", id));
 	}
-	return CreateResult((WThread)thread);
+	return Result::CreateSuccess((WThread)thread);
 }
 
-Result<WThread> ThreadManager::GetThread(const String& threadName) const noexcept
+TResult<WThread> ThreadManager::GetThread(const String& threadName) const noexcept
 {
 	LOCK(m_ThreadMutex);
 
 	const auto findNameIT = m_ThreadNameMap.find(threadName);
 	if (findNameIT == m_ThreadNameMap.end())
 	{
-		return CreateFailure<WThread>(Format("Cannot find the thread with name:'%s'.", threadName.c_str()));
+		return Result::CreateFailure<WThread>(Format("Cannot find the thread with name:'%s'.", threadName.c_str()));
 	}
 	const auto thIdx = findNameIT->second;
 	const auto& thread = m_Threads[thIdx];
 	if (thread == nullptr)
 	{
-		return CreateFailure<WThread>(Format("Trying to get a thread with name:'%s', that is already finished.", threadName.c_str()));
+		return Result::CreateFailure<WThread>(Format("Trying to get a thread with name:'%s', that is already finished.", threadName.c_str()));
 	}
-	return CreateResult((WThread)thread);
+	return Result::CreateSuccess((WThread)thread);
 }
 
-Result<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
+TResult<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 {
 	LOCK(m_ThreadMutex);
 	auto thread = SPtr<ThreadImpl>(AllocT<ThreadImpl>());
@@ -192,5 +192,5 @@ Result<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 	m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
 	m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
 	m_Threads.push_back((PThread)thread);
-	return CreateResult((PThread)thread);
+	return Result::CreateSuccess((PThread)thread);
 }

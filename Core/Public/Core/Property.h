@@ -44,7 +44,7 @@ namespace greaper
 	};
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo = {},
+	TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo = {},
 		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
 
 	/**
@@ -99,7 +99,7 @@ namespace greaper
 		}
 
 		template<class _T_, class _Alloc_>
-		friend Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
+		friend TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
 			bool isConstant, bool isStatic, TPropertyValidator<_T_>* validator);
 		MemoryFriend();
 	public:

@@ -77,11 +77,11 @@ namespace greaper::core
 
 		void DeinitSerialization()noexcept override;
 
-		Result<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)override;
+		TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)override;
 
-		Result<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)override;
+		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)override;
 
-		Result<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)override;
+		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)override;
 
 		EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)override;
 
@@ -95,17 +95,17 @@ namespace greaper::core
 
 		EmptyResult DeactivateInterface(const StringView& interfaceName)override;
 
-		Result<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const  override;
+		TResult<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const  override;
 
-		Result<PInterface> GetActiveInterface(const StringView& interfaceName)const override;
+		TResult<PInterface> GetActiveInterface(const StringView& interfaceName)const override;
 
-		Result<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const override;
+		TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const override;
 
-		Result<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const override;
+		TResult<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const override;
 
-		Result<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const override;
+		TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const override;
 
-		Result<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
+		TResult<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
 
 		OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept override { return &m_OnInterfaceActivation; }
 

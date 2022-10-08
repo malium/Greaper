@@ -10,6 +10,7 @@
 
 #include "../PHAL.h"
 #include "../StringUtils.h"
+#include "../Result.h"
 
 namespace greaper
 {
@@ -18,28 +19,45 @@ namespace greaper
 	public:
 		using LibraryHandle = void*;
 
-		static LibraryHandle Load(StringView libraryName)
+		static TResult<LibraryHandle> Load(StringView libraryName)
 		{
-			return dlopen(libraryName.data(), RTLD_LAZY | RTLD_LOCAL);
+			auto lib = dlopen(libraryName.data(), RTLD_LAZY | RTLD_LOCAL);
+			if (lib != nullptr)
+				return Result::CreateSuccess(lib);
+
+			return Result::CreateFailure<LibraryHandle>(Format("Couldn't load the library '%s', error: '%s'.", libraryName.data(), dlerror()));
 		}
 
-		static LibraryHandle Load(WStringView libraryName)
+		static TResult<LibraryHandle> Load(WStringView libraryName)
 		{
-            const auto libName = StringUtils::FromWIDE(libraryName);
-			return Load(StringView(libName));
+			const auto libName = StringUtils::FromWIDE(libraryName);
+			return Load(libName);
 		}
 
-		static void Unload(LibraryHandle handle)
+		static EmptyResult Unload(LibraryHandle handle)
 		{
-            dlclose(handle);
+			if (dlclose(handle) == 0)
+				return Result::CreateSuccess();
+			
+			return Result::CreateFailure(Format("Couldn't unload a library, error: '%s'.", dlerror()));
 		}
 
-		static FuncPtr FuncLoad(LibraryHandle handle, StringView procName)
+		static TResult<FuncPtr> FuncLoad(LibraryHandle handle, StringView procName)
 		{
-			const auto proc = dlsym(handle, procName.data());
-			/*if (proc == nullptr)
-				return nullptr;*/
-			return reinterpret_cast<FuncPtr>(proc);
+			// Clear old error conditions
+			dlerror();
+
+			// obtain the procedure
+			auto proc = dlsym(handle, procName.data());
+
+			// obtain the new error message
+			auto error = dlerror();
+			
+			if (error == nullptr) // no error
+				return Result::CreateSuccess(reinterpret_cast<FuncPtr>(proc));
+
+			// error condition triggered
+			return Result::CreateFailure<FuncPtr>(Format("Couldn't obtain the function '%s' from a library, error: '%s'.", procName.data(), error));
 		}
 	};
 	using OSLibrary = LnxLibrary;

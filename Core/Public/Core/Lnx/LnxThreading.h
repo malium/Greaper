@@ -74,7 +74,8 @@ namespace greaper
 
 			static void Invalidate(MutexHandle& handle) noexcept
 			{
-				ClearMemory(handle);
+				UNUSED(handle);
+				/* No-op */
 			}
 		};
 		using MutexImpl = LnxMutexImpl;
@@ -117,7 +118,8 @@ namespace greaper
 
 			static void Invalidate(RecursiveMutexHandle& handle) noexcept
 			{
-				ClearMemory(handle);
+				UNUSED(handle);
+				/* No-op */
 			}
 		};
 		using RecursiveMutexImpl = LnxRecursiveMutexImpl;
@@ -171,7 +173,8 @@ namespace greaper
 
 			static void Invalidate(RWMutexHandle& handle) noexcept
 			{
-				ClearMemory(handle);
+				UNUSED(handle);
+				/* No-op */
 			}
 		};
 		using RWMutexImpl = LnxRWMutexImpl;
@@ -246,7 +249,8 @@ namespace greaper
 			}
 			static void Invalidate(SignalHandle& handle) noexcept
 			{
-				ClearMemory(handle);
+				UNUSED(handle);
+				/* No-op */
 			}
 		};
 		using SignalImpl = LnxSignalImpl;

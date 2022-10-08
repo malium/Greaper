@@ -138,11 +138,11 @@ void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
 
-	auto libFN = gCoreLib->GetFunctionT<void*>(LibFnName);
-	TRYEXP(libFN, CORE_LIBRARY_NAME " does not have the _Greaper function.");
+	auto libFNRes = gCoreLib->GetFunctionT<void*>(LibFnName);
+	TRYEXP(libFNRes.IsOk(), CORE_LIBRARY_NAME " does not have the _Greaper function.");
 
 	// init Greaper
-	auto* corePtr = static_cast<PGreaperLib*>(libFN());
+	auto* corePtr = static_cast<PGreaperLib*>(libFNRes.GetValue()());
 	TRYEXP(corePtr, CORE_LIBRARY_NAME " does not return a IGreaperLibrary.");
 	gCore = *corePtr;
 

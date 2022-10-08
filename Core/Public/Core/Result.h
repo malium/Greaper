@@ -13,97 +13,141 @@
 
 namespace greaper
 {
-	template<class T> class Result;
-	struct EmptyStruct {  };
-	template<class T>
+	namespace Impl
+	{
+		template<class T>
+		class TResult
+		{
+			String m_FailMessage;
+			T m_Value;
+			bool m_Failure;
+
+		public:
+			INLINE TResult()noexcept = default;
+
+			INLINE bool IsOk()const noexcept { return !m_Failure; }
+
+			INLINE bool HasFailed()const noexcept { return m_Failure; }
+
+			INLINE const String& GetFailMessage()const noexcept { return m_FailMessage; }
+
+			INLINE T& GetValue() noexcept
+			{
+				Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
+				return m_Value;
+			}
+
+			INLINE const T& GetValue()const noexcept
+			{
+				Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
+				return m_Value;
+			}
+			friend class greaper::Result;
+		};
+
+		template<>
+		class TResult<EmptyStruc>
+		{
+			String m_FailMessage;
+			bool m_Failure;
+
+			static EmptyStruc gRtn;
+
+		public:
+			INLINE TResult()noexcept = default;
+
+			INLINE bool IsOk()const noexcept { return !m_Failure; }
+
+			INLINE bool HasFailed()const noexcept { return m_Failure; }
+
+			INLINE const String& GetFailMessage()const noexcept { return m_FailMessage; }
+
+			INLINE EmptyStruc& GetValue() noexcept
+			{
+				static_assert("should not reach here");
+				return gRtn;
+			}
+
+			INLINE const EmptyStruc& GetValue()const noexcept
+			{
+				static_assert("should not reach here");
+				return gRtn;
+			}
+			friend class greaper::Result;
+		};
+	}
+
 	class Result
 	{
-		String m_FailMessage;
-		T m_Value;
-		bool m_Failure = false;
-
-		template<class _T_> friend Result<_T_> CreateResult(_T_)noexcept;
-		template<class _T_> friend Result<_T_> CreateFailure(StringView)noexcept;
-		template<class _T_> friend Result<_T_> CreateFailure(const String&)noexcept;
-		template<class _T_, class _U_> friend Result<_T_> CopyFailure(Result<_U_>)noexcept;
-
-		Result() = default;
-
 	public:
-		bool IsOk()const noexcept { return !m_Failure; }
+		template<class T>
+		INLINE static TResult<T> CreateSuccess(T value) noexcept
+		{
+			TResult<T> res;
+			res.m_Failure = false;
+			res.m_Value = std::move(value);
+			return res;
+		}
 
-		bool HasFailed()const noexcept { return m_Failure; }
+		INLINE static TResult<Impl::EmptyStruc> CreateSuccess() noexcept
+		{
+			TResult<Impl::EmptyStruc> res;
+			res.m_Failure = false;
+			return res;
+		}
 
-		const String& GetFailMessage()const noexcept { return m_FailMessage; }
+		INLINE static TResult<Impl::EmptyStruc> CreateFailure(String errorMessage) noexcept
+		{
+			TResult<Impl::EmptyStruc> res;
+			res.m_Failure = true;
+			res.m_FailMessage = std::move(errorMessage);
+			return res;
+		}
 
-		T& GetValue() noexcept;
+		INLINE static TResult<Impl::EmptyStruc> CreateFailure(StringView errorMessage) noexcept
+		{
+			TResult<Impl::EmptyStruc> res;
+			res.m_Failure = true;
+			res.m_FailMessage.assign(errorMessage);
+			return res;
+		}
 
-		const T& GetValue()const noexcept;
+		template<class T>
+		INLINE static TResult<T> CreateFailure(String errorMessage) noexcept
+		{
+			TResult<T> res;
+			res.m_Failure = true;
+			res.m_FailMessage = std::move(errorMessage);
+			return res;
+		}
+
+		template<class T>
+		INLINE static TResult<T> CreateFailure(StringView errorMessage) noexcept
+		{
+			TResult<T> res;
+			res.m_Failure = true;
+			res.m_FailMessage.assign(errorMessage);
+			return res;
+		}
+
+		template<class T, class T2>
+		INLINE static TResult<T> CopyFailure(const TResult<T2>& other)noexcept
+		{
+			TResult<T> res;
+			res.m_FailMessage.assign(other.GetFailMessage());
+			res.m_Failure = true;
+			return res;
+		}
+
+		template<class T>
+		INLINE static TResult<Impl::EmptyStruc> CopyFailure(const TResult<T>& other)noexcept
+		{
+			TResult<Impl::EmptyStruc> res;
+			res.m_FailMessage.assign(other.GetFailMessage());
+			res.m_Failure = true;
+			return res;
+		}
 	};
-
-	using EmptyResult = Result<EmptyStruct>;
-
-	template<class T>
-	INLINE Result<T> CreateResult(T value) noexcept
-	{
-		Result<T> res;
-		res.m_Value = std::move(value);
-		res.m_Failure = false;
-		return res;
-	}
-
-	INLINE Result<EmptyStruct> CreateEmptyResult() noexcept
-	{
-		return CreateResult<EmptyStruct>(EmptyStruct{});
-	}
-
-	template<class T>
-	INLINE Result<T> CreateFailure(StringView errorMessage) noexcept
-	{
-		Result<T> res;
-		res.m_FailMessage.assign(errorMessage);
-		res.m_Failure = true;
-		return res;
-		//return std::move(res);
-	}
-
-	template<class T>
-	INLINE Result<T> CreateFailure(const String& errorMessage) noexcept
-	{
-		Result<T> res;
-		res.m_FailMessage = errorMessage;
-		res.m_Failure = true;
-		return res;
-		//return std::move(res);
-	}
-
-	INLINE Result<EmptyStruct> CreateEmptyFailure(StringView errorMessage) noexcept
-	{
-		return CreateFailure<EmptyStruct>(errorMessage);
-	}
-
-	template<class T, class U>
-	INLINE Result<T> CopyFailure(Result<U> res) noexcept
-	{
-		Result<T> r;
-		r.m_Failure = true;
-		r.m_FailMessage = std::move(res.m_FailMessage);
-		return std::move(r);
-	}
-
-	template<class T>
-	INLINE T& greaper::Result<T>::GetValue() noexcept
-	{
-		Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
-		return m_Value;
-	}
-	
-	template<class T>
-	INLINE const T& greaper::Result<T>::GetValue() const noexcept
-	{
-		Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
-		return m_Value;
-	}
 }
 
 #endif /* CORE_RESULT_H */

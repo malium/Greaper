@@ -18,14 +18,14 @@ EmptyResult Application::RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLi
 	auto uLib = GetGreaperLibrary(gLib->GetLibraryUuid());
 	if (uLib.IsOk() && uLib.GetValue() != nullptr)
 	{
-		return CreateEmptyFailure(Format(
+		return Result::CreateFailure(Format(
 			"Trying to register a GreaperLibrary, but its UUID '%s' its already registered.",
 			gLib->GetLibraryUuid().ToString().c_str()));
 	}
 	auto nLib = GetGreaperLibrary(gLib->GetLibraryName());
 	if (nLib.IsOk() && nLib.GetValue() != nullptr)
 	{
-		return CreateEmptyFailure(Format(
+		return Result::CreateFailure(Format(
 			"Trying to register a GreaperLibrary, but its name '%s' its already registered.",
 			gLib->GetLibraryName().data()));
 	}
@@ -37,7 +37,7 @@ EmptyResult Application::RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLi
 	info.Lib = gLib;
 	m_Libraries.push_back(std::move(info));
 
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
 void Application::UpdateActiveInterfaceList()noexcept 
@@ -81,7 +81,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 		auto uuidIT = m_ActiveInterfaceUuidMap.find(iface->GetInterfaceUUID());
 		VerifyInequal(uuidIT, m_ActiveInterfaceUuidMap.end(), "Couldn't find the Active interafce with UUID '%s' on the ActiveInterfaces.", iface->GetInterfaceUUID().ToString().c_str());
 		const auto ifaceIDX = uuidIT->second;
-		auto oiFace = m_ActiveInterfaces[ifaceIDX];
+		auto& oiFace = m_ActiveInterfaces[ifaceIDX];
 		iface->Activate(oiFace);
 		m_OnInterfaceActivation.Trigger((PInterface)iface);
 		m_ActiveInterfaces[ifaceIDX] = iface;
@@ -269,26 +269,26 @@ void Application::DeinitSerialization() noexcept
 {
 }
 
-Result<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringView& libPath)
+TResult<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringView& libPath)
 {
 	PLibrary lib{ Construct<Library>(libPath) };
 
 	if (!lib->IsOpen())
 	{
-		return CreateFailure<SPtr<IGreaperLibrary>>(Format(
+		return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format(
 			"Trying to register a GreaperLibrary with path '%S', but couldn't be openned.", libPath.data()));
 	}
-	auto fn = lib->GetFunctionT<void*>("_Greaper"sv);
-	if (fn == nullptr)
+	auto fnRes = lib->GetFunctionT<void*>("_Greaper"sv);
+	if (fnRes.HasFailed())
 	{
-		return CreateFailure<SPtr<IGreaperLibrary>>(Format(
+		return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format(
 			"Trying to register a GreaperLibrary with path '%S', but does not comply with Greaper modular protocol.",
 			libPath.data()));
 	}
-	auto gLibPtr = reinterpret_cast<PGreaperLib*>(fn());
+	auto gLibPtr = reinterpret_cast<PGreaperLib*>(fnRes.GetValue()());
 	if (gLibPtr == nullptr || (*gLibPtr) == nullptr)
 	{
-		return CreateFailure<SPtr<IGreaperLibrary>>(Format(
+		return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format(
 			"Trying to register a GreaperLibrary with path '%S', but the library returned a nullptr GreaperLibrary.",
 			libPath.data()));
 	}
@@ -296,47 +296,47 @@ Result<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringV
 	auto res = RegisterGreaperLibrary(gLib);
 	
 	if (res.HasFailed())
-		return CopyFailure<SPtr<IGreaperLibrary>>(res);
+		return Result::CopyFailure<SPtr<IGreaperLibrary>>(res);
 
 	gLib->InitLibrary(lib, (SPtr<IApplication>)gApplication);
 	
-	return CreateResult(gLib);
+	return Result::CreateSuccess(gLib);
 }
 
-Result<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const StringView& libraryName)
+TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const StringView& libraryName)
 {
 	if (auto findIT = m_LibraryNameMap.find(libraryName); findIT != m_LibraryNameMap.end())
 	{
 		if (m_Libraries.size() <= findIT->second)
 		{
-			return CreateFailure<SPtr<IGreaperLibrary>>(Format("A GreaperLibrary with name '%s' was found, but the library list didn't have that library.", libraryName.data()));
+			return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("A GreaperLibrary with name '%s' was found, but the library list didn't have that library.", libraryName.data()));
 		}
 		auto& libInfo = m_Libraries[findIT->second];
-		return CreateResult(libInfo.Lib);
+		return Result::CreateSuccess(libInfo.Lib);
 	}
 
-	return CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryName.data()));
+	return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryName.data()));
 }
 
-Result<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const Uuid& libraryUUID)
+TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const Uuid& libraryUUID)
 {
 	if (const auto findIT = m_LibraryUuidMap.find(libraryUUID); findIT != m_LibraryUuidMap.end())
 	{
 		if (m_Libraries.size() <= findIT->second)
 		{
-			return CreateFailure<SPtr<IGreaperLibrary>>(Format("A GreaperLibrary with UUID '%s' was found, but the library list didn't have that library.", libraryUUID.ToString().c_str()));
+			return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("A GreaperLibrary with UUID '%s' was found, but the library list didn't have that library.", libraryUUID.ToString().c_str()));
 		}
 		auto& libInfo = m_Libraries[findIT->second];
-		return CreateResult(libInfo.Lib);
+		return Result::CreateSuccess(libInfo.Lib);
 	}
 
-	return CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryUUID.ToString().c_str()));
+	return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryUUID.ToString().c_str()));
 }
 
 EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 {
 	if (library == nullptr)
-		return CreateEmptyFailure("Trying to unregister a nullptr GreaperLibrary"sv);
+		return Result::CreateFailure("Trying to unregister a nullptr GreaperLibrary"sv);
 	
 	const auto nameIT = m_LibraryNameMap.find(library->GetLibraryName());
 	const auto uuidIT = m_LibraryUuidMap.find(library->GetLibraryUuid());
@@ -372,7 +372,7 @@ EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 	}
 
 	if (m_Libraries.size() <= index)
-		return CreateEmptyFailure(Format("Trying to unregister a GreaperLibrary '%s', but it was not registered.", library->GetLibraryName().data()));
+		return Result::CreateFailure(Format("Trying to unregister a GreaperLibrary '%s', but it was not registered.", library->GetLibraryName().data()));
 
 	auto& libInfo = m_Libraries[index];
 	lib->Log(Format("Unregistering GraeperLibrary '%s'.", library->GetLibraryName().data()));
@@ -395,38 +395,38 @@ EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 	libInfo.IntefaceNameMap.clear();
 	libInfo.InterfaceUuidMap.clear();
 	libInfo.Interfaces.clear();
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
 EmptyResult Application::RegisterInterface(const PInterface& interface)
 {
 	if (interface == nullptr)
-		return CreateEmptyFailure("Trying to register a nullptr interface.");
+		return Result::CreateFailure("Trying to register a nullptr interface."sv);
 
 	auto wLib = interface->GetLibrary();
 	if (wLib.expired())
 	{
-		return CreateEmptyFailure("Trying to register an Interface without GreaperLibrary.");
+		return Result::CreateFailure("Trying to register an Interface without GreaperLibrary."sv);
 	}
 	auto pLib = wLib.lock();
 	
 	const auto findIT = m_LibraryUuidMap.find(pLib->GetLibraryUuid());
 	if (findIT == m_LibraryUuidMap.end())
-		return CreateEmptyFailure("Trying to register an Interface with a non-registered GreaperLibrary.");
+		return Result::CreateFailure("Trying to register an Interface with a non-registered GreaperLibrary."sv);
 	
 	auto& libInfo = m_Libraries[findIT->second];
 	
 	if (libInfo.Lib != pLib)
-		return CreateEmptyFailure("Trying to register an Interface with a GreaperLibrary which UUID points to another GreaperLibrary.");
+		return Result::CreateFailure("Trying to register an Interface with a GreaperLibrary which UUID points to another GreaperLibrary."sv);
 	
 	if (const auto nameIT = libInfo.IntefaceNameMap.find(interface->GetInterfaceName()); nameIT != libInfo.IntefaceNameMap.end())
 	{
-		return CreateEmptyFailure("Trying to register an Interface, but that GreaperLibrary already has an Interface registered with the same name.");
+		return Result::CreateFailure("Trying to register an Interface, but that GreaperLibrary already has an Interface registered with the same name."sv);
 	}
 
 	if (const auto uuidIT = libInfo.InterfaceUuidMap.find(interface->GetInterfaceUUID()); uuidIT != libInfo.InterfaceUuidMap.end())
 	{
-		return CreateEmptyFailure("Trying to register an Interface, but that GreaperLibrary already has an Interface registered with the same UUID.");
+		return Result::CreateFailure("Trying to register an Interface, but that GreaperLibrary already has an Interface registered with the same UUID."sv);
 	}
 
 	const auto index = libInfo.Interfaces.size();
@@ -436,29 +436,29 @@ EmptyResult Application::RegisterInterface(const PInterface& interface)
 
 	/*if (!interface->IsInitialized())
 		interface->Initialize(std::move(pLib));*/
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
 EmptyResult Application::UnregisterInterface(const PInterface& interface)
 {
 	if (interface == nullptr)
-		return CreateEmptyFailure("Trying to unregister a nullptr interface.");
+		return Result::CreateFailure("Trying to unregister a nullptr interface."sv);
 
 	auto wLib = interface->GetLibrary();
 	if (wLib.expired())
 	{
-		return CreateEmptyFailure("Trying to unregister an Interface without GreaperLibrary.");
+		return Result::CreateFailure("Trying to unregister an Interface without GreaperLibrary."sv);
 	}
 	auto pLib = wLib.lock();
 
 	const auto findIT = m_LibraryUuidMap.find(pLib->GetLibraryUuid());
 	if (findIT == m_LibraryUuidMap.end())
-		return CreateEmptyFailure("Trying to unregister an Interface with a non-registered GreaperLibrary.");
+		return Result::CreateFailure("Trying to unregister an Interface with a non-registered GreaperLibrary."sv);
 
 	auto& libInfo = m_Libraries[findIT->second];
 
 	if (libInfo.Lib != pLib)
-		return CreateEmptyFailure("Trying to unregister an Interface with a GreaperLibrary which UUID points to another GreaperLibrary.");
+		return Result::CreateFailure("Trying to unregister an Interface with a GreaperLibrary which UUID points to another GreaperLibrary."sv);
 
 	const auto nameIT = libInfo.IntefaceNameMap.find(interface->GetInterfaceName());
 	const auto uuidIT = libInfo.InterfaceUuidMap.find(interface->GetInterfaceUUID());
@@ -494,7 +494,7 @@ EmptyResult Application::UnregisterInterface(const PInterface& interface)
 	}
 
 	if (libInfo.Interfaces.size() <= index)
-		return CreateEmptyFailure(Format("Trying to unregister an Interface '%s', but it was not registered.", interface->GetInterfaceName().data()));
+		return Result::CreateFailure(Format("Trying to unregister an Interface '%s', but it was not registered.", interface->GetInterfaceName().data()));
 
 	lib->Log(Format("Unregistering an Interface '%s' from '%s' GreaperLibrary.", interface->GetInterfaceName().data(), pLib->GetLibraryName().data()));
 
@@ -503,13 +503,13 @@ EmptyResult Application::UnregisterInterface(const PInterface& interface)
 	if (interface->IsInitialized())
 		interface->Deinitialize();
 	libInfo.Interfaces[index].reset();
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
 EmptyResult Application::ActivateInterface(const PInterface& interface)
 {
 	if (interface == nullptr)
-		return CreateEmptyFailure("Trying to make default a nullptr interface, if you want to remove an Active interface call StopInterfaceDefault.");
+		return Result::CreateFailure("Trying to make default a nullptr interface, if you want to remove an Active interface call StopInterfaceDefault."sv);
 
 	LOCK(m_ActiveMutex);
 	
@@ -521,12 +521,12 @@ EmptyResult Application::ActivateInterface(const PInterface& interface)
 
 	if (Contains(m_InterfaceToChange, interface))
 	{
-		return CreateEmptyResult();
+		return Result::CreateSuccess();
 	}
 
 	if(Contains(m_InterfacesToAdd, interface))
 	{
-		return CreateEmptyResult();
+		return Result::CreateSuccess();
 	}
 
 	const auto existsAnother = m_ActiveInterfaceUuidMap.find(interface->GetInterfaceUUID()) != m_ActiveInterfaceUuidMap.end(); // m_ActiveInterfaceUuidMap.contains(interface->GetInterfaceUUID());
@@ -538,7 +538,7 @@ EmptyResult Application::ActivateInterface(const PInterface& interface)
 
 	UpdateActiveInterfaceList();
 
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
 EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
@@ -578,15 +578,15 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 	if (interface == nullptr)
 	{
 		if (removed)
-			return CreateEmptyResult(); // removed from activation
+			return Result::CreateSuccess(); // removed from activation
 
-		return CreateEmptyFailure(Format("Trying to deactivate an Interface with UUID '%s', but was not active.", interfaceUUID.ToString().c_str()));
+		return Result::CreateFailure(Format("Trying to deactivate an Interface with UUID '%s', but was not active.", interfaceUUID.ToString().c_str()));
 	}
 	m_InterfacesToRemove.push_back(interface);
 
 	UpdateActiveInterfaceList();
 
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
 EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
@@ -626,150 +626,150 @@ EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 	if (interface == nullptr)
 	{
 		if (removed)
-			return CreateEmptyResult(); // Removed from activation
+			return Result::CreateSuccess(); // Removed from activation
 
-		return CreateEmptyFailure(Format("Trying to deactivate an Interface with name '%s', but was not active.", interfaceName.data()));
+		return Result::CreateFailure(Format("Trying to deactivate an Interface with name '%s', but was not active.", interfaceName.data()));
 	}
 
 	m_InterfacesToRemove.push_back(interface);
 
 	UpdateActiveInterfaceList();
 
-	return CreateEmptyResult();
+	return Result::CreateSuccess();
 }
 
-Result<PInterface> Application::GetActiveInterface(const Uuid& interfaceUUID) const
+TResult<PInterface> Application::GetActiveInterface(const Uuid& interfaceUUID) const
 {
 	LOCK(m_ActiveMutex);
 
 	const auto uuidIT = m_ActiveInterfaceUuidMap.find(interfaceUUID);
 	if (uuidIT == m_ActiveInterfaceUuidMap.end())
-		return CreateFailure<PInterface>(Format("Couldn't find an active Interface with UUID '%s'.", interfaceUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Couldn't find an active Interface with UUID '%s'.", interfaceUUID.ToString().c_str()));
 
 	const auto index = uuidIT->second;
 
 	if (index >= m_ActiveInterfaces.size())
-		return CreateFailure<PInterface>(Format("Interface with UUID '%s', its index was out of bounds.", interfaceUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Interface with UUID '%s', its index was out of bounds.", interfaceUUID.ToString().c_str()));
 
-	auto iface = m_ActiveInterfaces[index];
+	auto& iface = m_ActiveInterfaces[index];
 
-	return CreateResult<PInterface>(std::move(iface));
+	return Result::CreateSuccess<PInterface>(std::move(iface));
 }
 
-Result<PInterface> Application::GetActiveInterface(const StringView& interfaceName) const
+TResult<PInterface> Application::GetActiveInterface(const StringView& interfaceName) const
 {
 	LOCK(m_ActiveMutex);
 
 	const auto nameIT = m_ActiveInterfaceNameMap.find(interfaceName);
 	if (nameIT == m_ActiveInterfaceNameMap.end())
-		return CreateFailure<PInterface>(Format("Couldn't find an active Interface with name '%s'.", interfaceName.data()));
+		return Result::CreateFailure<PInterface>(Format("Couldn't find an active Interface with name '%s'.", interfaceName.data()));
 
 	const auto index = nameIT->second;
 
 	if (index >= m_ActiveInterfaces.size())
-		return CreateFailure<PInterface>(Format("Interface with name '%s', its index was out of bounds.", interfaceName.data()));
+		return Result::CreateFailure<PInterface>(Format("Interface with name '%s', its index was out of bounds.", interfaceName.data()));
 
-	auto iface = m_ActiveInterfaces[index];
+	auto& iface = m_ActiveInterfaces[index];
 
-	return CreateResult(iface);
+	return Result::CreateSuccess(iface);
 }
 
-Result<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID) const
+TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID) const
 {
 	const auto libUuidIT = m_LibraryUuidMap.find(libraryUUID);
 	if (libUuidIT == m_LibraryUuidMap.end())
 	{
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the library is not registered.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the library is not registered.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
 	}
 
 	if(libUuidIT->second >= m_Libraries.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the library index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the library index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
 
 	auto& libInfo = m_Libraries[libUuidIT->second];
 
 	const auto ifaceUuidIT = libInfo.InterfaceUuidMap.find(interfaceUUID);
 
 	if(ifaceUuidIT == libInfo.InterfaceUuidMap.end())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the interface is not registered.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the interface is not registered.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
 
 	if(ifaceUuidIT->second >= libInfo.Interfaces.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the interface index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with UUID '%s', but the interface index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryUUID.ToString().c_str()));
 
-	auto iface = libInfo.Interfaces[ifaceUuidIT->second];
-	return CreateResult(iface);
+	auto& iface = libInfo.Interfaces[ifaceUuidIT->second];
+	return Result::CreateSuccess(iface);
 }
 
-Result<PInterface> Application::GetInterface(const StringView& interfaceName, const StringView& libraryName) const
+TResult<PInterface> Application::GetInterface(const StringView& interfaceName, const StringView& libraryName) const
 {
 	const auto libNameIT = m_LibraryNameMap.find(libraryName);
 	if (libNameIT == m_LibraryNameMap.end())
 	{
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the library is not registered.", interfaceName.data(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the library is not registered.", interfaceName.data(), libraryName.data()));
 	}
 
 	if (libNameIT->second >= m_Libraries.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the library index is outside of bounds.", interfaceName.data(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the library index is outside of bounds.", interfaceName.data(), libraryName.data()));
 
 	auto& libInfo = m_Libraries[libNameIT->second];
 
 	const auto ifaceNameIT = libInfo.IntefaceNameMap.find(interfaceName);
 
 	if (ifaceNameIT == libInfo.IntefaceNameMap.end())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the interface is not registered.", interfaceName.data(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the interface is not registered.", interfaceName.data(), libraryName.data()));
 
 	if (ifaceNameIT->second >= libInfo.Interfaces.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the interface index is outside of bounds.", interfaceName.data(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with name '%s', but the interface index is outside of bounds.", interfaceName.data(), libraryName.data()));
 
-	auto iface = libInfo.Interfaces[ifaceNameIT->second];
-	return CreateResult(iface);
+	auto& iface = libInfo.Interfaces[ifaceNameIT->second];
+	return Result::CreateSuccess(iface);
 }
 
-Result<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const StringView& libraryName) const
+TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const StringView& libraryName) const
 {
 	const auto libNameIT = m_LibraryNameMap.find(libraryName);
 	if (libNameIT == m_LibraryNameMap.end())
 	{
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the library is not registered.", interfaceUUID.ToString().c_str(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the library is not registered.", interfaceUUID.ToString().c_str(), libraryName.data()));
 	}
 
 	if (libNameIT->second >= m_Libraries.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the library index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the library index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryName.data()));
 
 	auto& libInfo = m_Libraries[libNameIT->second];
 
 	const auto ifaceUuidIT = libInfo.InterfaceUuidMap.find(interfaceUUID);
 
 	if (ifaceUuidIT == libInfo.InterfaceUuidMap.end())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the interface is not registered.", interfaceUUID.ToString().c_str(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the interface is not registered.", interfaceUUID.ToString().c_str(), libraryName.data()));
 
 	if (ifaceUuidIT->second >= libInfo.Interfaces.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the interface index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryName.data()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with UUID '%s' from a library with name '%s', but the interface index is outside of bounds.", interfaceUUID.ToString().c_str(), libraryName.data()));
 
-	auto iface = libInfo.Interfaces[ifaceUuidIT->second];
-	return CreateResult(iface);
+	auto& iface = libInfo.Interfaces[ifaceUuidIT->second];
+	return Result::CreateSuccess(iface);
 }
 
-Result<PInterface> Application::GetInterface(const StringView& interfaceName, const Uuid& libraryUUID) const
+TResult<PInterface> Application::GetInterface(const StringView& interfaceName, const Uuid& libraryUUID) const
 {
 	const auto libUuidIT = m_LibraryUuidMap.find(libraryUUID);
 	if (libUuidIT == m_LibraryUuidMap.end())
 	{
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the library is not registered.", interfaceName.data(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the library is not registered.", interfaceName.data(), libraryUUID.ToString().c_str()));
 	}
 
 	if (libUuidIT->second >= m_Libraries.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the library index is outside of bounds.", interfaceName.data(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the library index is outside of bounds.", interfaceName.data(), libraryUUID.ToString().c_str()));
 
 	auto& libInfo = m_Libraries[libUuidIT->second];
 
 	const auto ifaceNameIT = libInfo.IntefaceNameMap.find(interfaceName);
 
 	if (ifaceNameIT == libInfo.IntefaceNameMap.end())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the interface is not registered.", interfaceName.data(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the interface is not registered.", interfaceName.data(), libraryUUID.ToString().c_str()));
 
 	if (ifaceNameIT->second >= libInfo.Interfaces.size())
-		return CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the interface index is outside of bounds.", interfaceName.data(), libraryUUID.ToString().c_str()));
+		return Result::CreateFailure<PInterface>(Format("Trying to get an interface with name '%s' from a library with UUID '%s', but the interface index is outside of bounds.", interfaceName.data(), libraryUUID.ToString().c_str()));
 
-	auto iface = libInfo.Interfaces[ifaceNameIT->second];
-	return CreateResult(iface);
+	auto& iface = libInfo.Interfaces[ifaceNameIT->second];
+	return Result::CreateSuccess(iface);
 }

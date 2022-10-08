@@ -49,11 +49,11 @@ namespace greaper::core
 
 		void DeinitSerialization()noexcept override;
 
-		Result<WThread> GetThread(ThreadID_t id)const noexcept override;
+		TResult<WThread> GetThread(ThreadID_t id)const noexcept override;
 
-		Result<WThread> GetThread(const String& threadName)const noexcept override;
+		TResult<WThread> GetThread(const String& threadName)const noexcept override;
 
-		Result<PThread> CreateThread(const ThreadConfig& config)noexcept override;
+		TResult<PThread> CreateThread(const ThreadConfig& config)noexcept override;
 
 		INLINE ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept override { return &m_ThreadCreationEvent; }
 		

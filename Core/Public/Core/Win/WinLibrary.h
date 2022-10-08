@@ -9,6 +9,7 @@
 #define CORE_WIN_LIBRARY_H 1
 
 #include "../PHAL.h"
+#include "../Result.h"
 
 namespace greaper
 {
@@ -17,27 +18,43 @@ namespace greaper
 	public:
 		using LibraryHandle = HMODULE;
 
-		static LibraryHandle Load(StringView libraryName)
+		static TResult<LibraryHandle> Load(StringView libraryName)
 		{
-			return LoadLibraryA(libraryName.data());
+			auto lib = LoadLibraryA(libraryName.data());
+			if (lib != nullptr)
+				return Result::CreateSuccess(lib);
+
+			const auto errorCode = GetLastError();
+			return Result::CreateFailure<LibraryHandle>(Format("Couldn't load the library '%s', error code " I32_HEX_FMT ".", libraryName.data(), errorCode));
 		}
 
-		static LibraryHandle Load(WStringView libraryName)
+		static TResult<LibraryHandle> Load(WStringView libraryName)
 		{
-			return LoadLibraryW(libraryName.data());
+			auto lib = LoadLibraryW(libraryName.data());
+			if (lib != nullptr)
+				return Result::CreateSuccess(lib);
+
+			const auto errorCode = GetLastError();
+			return Result::CreateFailure<LibraryHandle>(Format("Couldn't load the library '%S', error code " I32_HEX_FMT ".", libraryName.data(), errorCode));
 		}
 
-		static void Unload(LibraryHandle handle)
+		static EmptyResult Unload(LibraryHandle handle)
 		{
-			FreeLibrary(handle);
+			if (FreeLibrary(handle) == TRUE)
+				return Result::CreateSuccess();
+
+			const auto errorCode = GetLastError();
+			return Result::CreateFailure(Format("Couldn't unload a library handle, error code " I32_HEX_FMT ".", errorCode));
 		}
 
-		static FuncPtr FuncLoad(LibraryHandle handle, StringView procName)
+		static TResult<FuncPtr> FuncLoad(LibraryHandle handle, StringView procName)
 		{
-			const auto proc = GetProcAddress(handle, procName.data());
-			/*if (proc == nullptr)
-				return nullptr;*/
-			return reinterpret_cast<FuncPtr>(proc);
+			auto proc = GetProcAddress(handle, procName.data());
+			if (proc != nullptr)
+				return Result::CreateSuccess(reinterpret_cast<FuncPtr>(proc));
+
+			const auto errorCode = GetLastError();
+			return Result::CreateFailure<FuncPtr>(Format("Couldn't obtain the function '%s' from a library, error code " I32_HEX_FMT ".", procName.data(), errorCode));
 		}
 	};
 	using OSLibrary = WinLibrary;

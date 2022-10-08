@@ -140,6 +140,11 @@ INLINE void greaper::WinOSPlatform::PerThreadSEHInit()
 	_set_se_translator(&WinOSPlatform::SETranslatorFn);
 }
 
+#define LoadProc(lib, name, var)\
+fnRes = lib.GetFunction(name); \
+if(fnRes.IsOk()) { var = (decltype(var))fnRes.GetValue(); } \
+else { var = nullptr; DEBUG_OUTPUT(fnRes.GetFailMessage().c_str()); }
+
 INLINE void greaper::WinOSPlatform::InitPSAPI()
 {
 	if (PSAPI.IsOpen())
@@ -148,10 +153,11 @@ INLINE void greaper::WinOSPlatform::InitPSAPI()
 	PSAPI.Open(L"PSAPI.dll"sv);
 	Verify(PSAPI.IsOpen(), "Couldn't load library PSAPI.dll!");
 
-	EnumProcessModules = (EnumProcessModules_t)PSAPI.GetFunction("EnumProcessModules"sv);
-	GetModuleBaseName = (GetModuleBaseName_t)PSAPI.GetFunction("GetModuleBaseNameA"sv);
-	GetModuleFileNameEx = (GetModuleFileNameEx_t)PSAPI.GetFunction("GetModuleFileNameExA"sv);
-	GetModuleInformation = (GetModuleInformation_t)PSAPI.GetFunction("GetModuleInformation"sv);
+	TResult<FuncPtr> fnRes;
+	LoadProc(PSAPI, "EnumProcessModules"sv, EnumProcessModules);
+	LoadProc(PSAPI, "GetModuleBaseNameA"sv, GetModuleBaseName);
+	LoadProc(PSAPI, "GetModuleFileNameExA"sv, GetModuleFileNameEx);
+	LoadProc(PSAPI, "GetModuleInformation"sv, GetModuleInformation);
 }
 
 INLINE void greaper::WinOSPlatform::InitDbgHelp()
@@ -162,18 +168,21 @@ INLINE void greaper::WinOSPlatform::InitDbgHelp()
 	DbgHelp.Open(L"Dbghelp.dll"sv);
 	Verify(PSAPI.IsOpen(), "Couldn't load library Dbghelp.dll!");
 
-	MiniDumpWriteDump = (MiniDumpWriteDump_t)DbgHelp.GetFunction("MiniDumpWriteDump"sv);
-	SymGetOptions = (SymGetOptions_t)DbgHelp.GetFunction("SymGetOptions"sv);
-	SymSetOptions = (SymSetOptions_t)DbgHelp.GetFunction("SymSetOptions"sv);
-	SymInitialize = (SymInitialize_t)DbgHelp.GetFunction("SymInitialize"sv);
-	SymSetSearchPath = (SymSetSearchPath_t)DbgHelp.GetFunction("SymSetSearchPath"sv);
-	SymLoadModule64 = (SymLoadModule64_t)DbgHelp.GetFunction("SymLoadModule64"sv);
-	SymGetModuleInfo64 = (SymGetModuleInfo64_t)DbgHelp.GetFunction("SymGetModuleInfo64"sv);
-	SymCleanup = (SymCleanup_t)DbgHelp.GetFunction("SymCleanup"sv);
-	StackWalk64 = (StackWalk64_t)DbgHelp.GetFunction("StackWalk64"sv);
-	SymGetSymFromAddr64 = (SymGetSymFromAddr64_t)DbgHelp.GetFunction("SymGetSymFromAddr64"sv);
-	SymGetLineFromAddr64 = (SymGetLineFromAddr64_t)DbgHelp.GetFunction("SymGetLineFromAddr64"sv);
+	TResult<FuncPtr> fnRes;
+	LoadProc(DbgHelp, "MiniDumpWriteDump"sv, MiniDumpWriteDump);
+	LoadProc(DbgHelp, "SymGetOptions"sv, SymGetOptions);
+	LoadProc(DbgHelp, "SymSetOptions"sv, SymSetOptions);
+	LoadProc(DbgHelp, "SymInitialize"sv, SymInitialize);
+	LoadProc(DbgHelp, "SymSetSearchPath"sv, SymSetSearchPath);
+	LoadProc(DbgHelp, "SymLoadModule64"sv, SymLoadModule64);
+	LoadProc(DbgHelp, "SymGetModuleInfo64"sv, SymGetModuleInfo64);
+	LoadProc(DbgHelp, "SymCleanup"sv, SymCleanup);
+	LoadProc(DbgHelp, "StackWalk64"sv, StackWalk64);
+	LoadProc(DbgHelp, "SymGetSymFromAddr64"sv, SymGetSymFromAddr64);
+	LoadProc(DbgHelp, "SymGetLineFromAddr64"sv, SymGetLineFromAddr64);
 }
+
+#undef LoadProc
 
 INLINE void greaper::WinOSPlatform::LoadSymbols()
 {

@@ -61,7 +61,7 @@ namespace greaper
 
 		CSpan<SPtr<IProperty>> GetProperties()const noexcept;
 
-		Result<WPtr<IProperty>> GetProperty(const StringView& name)const noexcept;
+		TResult<WPtr<IProperty>> GetProperty(const StringView& name)const noexcept;
 
 		virtual uint32 GetLibraryVersion()const noexcept = 0;
 
@@ -80,7 +80,7 @@ namespace greaper
 		void LogCritical(const String& message)const noexcept;
 
 		template<class T, class _Alloc_>
-		friend Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary>, StringView, T, StringView,
+		friend TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary>, StringView, T, StringView,
 			bool, bool, TPropertyValidator<T>*);
 
 	private:
@@ -113,20 +113,20 @@ namespace greaper
 			const auto index = nameIT->second;
 			if (index < m_Properties.size())
 			{
-				auto oProp = m_Properties[index];
+				const auto& oProp = m_Properties[index];
 				if (oProp == nullptr)
 				{
 					m_Properties[index] = property;
-					return CreateEmptyResult();
+					return Result::CreateSuccess();
 				}
-				return CreateEmptyFailure(Format("Trying to register a Property '%s', but its already registered.", property->GetPropertyName().c_str()));
+				return Result::CreateFailure(Format("Trying to register a Property '%s', but its already registered.", property->GetPropertyName().c_str()));
 			}
 			m_PropertyMap.erase(nameIT);
 		}
 		const auto index = m_Properties.size();
 		m_Properties.push_back(property);
 		m_PropertyMap.insert_or_assign(property->GetPropertyName(), index);
-		return CreateEmptyResult();
+		return Result::CreateSuccess();
 	}
 
 	INLINE void IGreaperLibrary::InitLibrary(PLibrary lib, SPtr<IApplication> app) noexcept
@@ -200,15 +200,15 @@ namespace greaper
 
 	INLINE CSpan<SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
-	INLINE Result<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
+	INLINE TResult<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
 	{
 		const auto nameIT = m_PropertyMap.find(name);
 		if (nameIT == m_PropertyMap.end())
-			return CreateFailure<WIProperty>(Format("Couldn't find the property '%s' registered in the GreaperLibrary '%s'.", name.data(), GetLibraryName().data()));
+			return Result::CreateFailure<WIProperty>(Format("Couldn't find the property '%s' registered in the GreaperLibrary '%s'.", name.data(), GetLibraryName().data()));
 		if (nameIT->second >= m_Properties.size())
-			return CreateFailure<WIProperty>(Format("The property '%s' registered in the GreaperLibrary '%s', is registered to an out of bounds index.", name.data(), GetLibraryName().data()));
-		auto prop = m_Properties[nameIT->second];
-		return CreateResult((WIProperty)prop);
+			return Result::CreateFailure<WIProperty>(Format("The property '%s' registered in the GreaperLibrary '%s', is registered to an out of bounds index.", name.data(), GetLibraryName().data()));
+		auto& prop = m_Properties[nameIT->second];
+		return Result::CreateSuccess((WIProperty)prop);
 	}
 
 	INLINE void IGreaperLibrary::Log(const String& message) const noexcept
@@ -341,21 +341,21 @@ namespace greaper
 
 	//// Property methods to avoid circle dependency
 	template<class T, class _Alloc_>
-	Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo,
+	TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo,
 		bool isConstant, bool isStatic, TPropertyValidator<T>* validator)
 	{
 		auto lib = library.lock();
 		if (lib == nullptr)
-			return CreateFailure<PProperty<T>>("Couldn't create the property, expired library given"sv);
+			return Result::CreateFailure<PProperty<T>>("Couldn't create the property, expired library given"sv);
 
 		TProperty<T>* propPtr = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
 		SPtr<TProperty<T>> prop(propPtr, Impl::SPtrDeleterFn_t<TProperty<T>>(&Impl::DefaultDeleter<TProperty<T>, _Alloc_>));
 		const auto res = lib->RegisterProperty((PIProperty)prop);
 		if (res.HasFailed())
 		{
-			return CreateFailure<PProperty<T>>("Couldn't register the property\n" + res.GetFailMessage());
+			return Result::CreateFailure<PProperty<T>>("Couldn't register the property\n" + res.GetFailMessage());
 		}
-		return CreateResult(prop);
+		return Result::CreateSuccess(prop);
 	}
 	
 	INLINE bool IGreaperLibrary::IsInitialized() const noexcept { return m_InitializationState == InitState_t::Started; }
@@ -363,16 +363,16 @@ namespace greaper
 	INLINE InitState_t IGreaperLibrary::GetInitializationState() const noexcept { return m_InitializationState; }
 	
 	template<class T>
-	INLINE Result<WProperty<T>> GetProperty(const WPtr<IGreaperLibrary>& library, const String& name)
+	INLINE TResult<WProperty<T>> GetProperty(const WPtr<IGreaperLibrary>& library, const String& name)
 	{
 		auto lib = library.lock();
 		if (lib == nullptr)
-			return CreateFailure<WProperty<T>>("Couldn't retrieve the property, expired library given.");
+			return Result::CreateFailure<WProperty<T>>("Couldn't retrieve the property, expired library given.");
 
 		auto res = lib->GetProperty(name);
 		if (res.HasFailed())
-			return CopyFailure<TProperty<T>*>(res);
-		return CreateResult(reinterpret_cast<TProperty<T>*>(res.GetValue()));
+			return Result::CopyFailure<TProperty<T>*>(res);
+		return Result::CreateSuccess(reinterpret_cast<TProperty<T>*>(res.GetValue()));
 	}
 
 	template<class T>

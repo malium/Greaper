@@ -24,11 +24,11 @@ namespace greaper
 
 		virtual ~IWindowManager()noexcept = default;
 
-		virtual Result<IWindow*> CreateWindow(const WindowDesc& desc = {}) = 0;
+		virtual TResult<IWindow*> CreateWindow(const WindowDesc& desc = {}) = 0;
 
 		virtual EmptyResult DestroyWindow(IWindow* window) = 0;
 
-		virtual Result<IWindow*> FindWindow(const WString& title)const = 0;
+		virtual TResult<IWindow*> FindWindow(const WString& title)const = 0;
 
 		virtual const Vector<IWindow*>& GetWindows()const = 0;
 

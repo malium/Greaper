@@ -28,6 +28,7 @@
 #if PLT_LINUX
 #include <iostream>
 #endif
+
 #if COMPILER_MSVC
 #define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__))
 #else
@@ -210,6 +211,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 		INLINE T* allocate(const size_t num)
 		{
+#if GREAPER_DEBUG_ALLOCATION
 			if (num == 0)
 				return nullptr;
 			if (num > max_size())
@@ -219,6 +221,9 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 			if (p == nullptr)
 				return nullptr;
 			return static_cast<T*>(p);
+#else
+			return reinterpret_cast<T*>(AllocN<T, _Alloc_>(num));
+#endif
 		}
 
 		INLINE void deallocate(pointer p, size_type)
@@ -325,33 +330,6 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 			return vswprintf(buffer, bufferLen, fmt, argList);
 		}
 	};
-	//template<typename T>
-	//struct Snprintf
-	//{
-	//	static int Fn(T* buffer, size_t bufferCount, const T* fmt, va_list argList)
-	//	{
-	//		static_assert(false, "Unsupported character type.");
-	//		return -1;
-	//	}
-	//};
-	//
-	//template<>
-	//struct Snprintf<achar>
-	//{
-	//	static int Fn(achar* buffer, size_t bufferCount, const achar* fmt, va_list argList)
-	//	{
-	//		return vsnprintf(buffer, bufferCount, fmt, argList);
-	//	}
-	//};
-	//
-	//template<>
-	//struct Snprintf<wchar>
-	//{
-	//	static int Fn(wchar* buffer, size_t bufferCount, const wchar* fmt, va_list argList)
-	//	{
-	//		return vswprintf(buffer, bufferCount, fmt, argList);
-	//	}
-	//};
 
 	template<typename T, class _Alloc_ = GenericAllocator>
 	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const T* fmt, ...)//FUNCTION_VARARGS_END(1, 2)
@@ -415,14 +393,6 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 #include "Base/Span.h"
 
-//namespace greaper
-//{
-//	// Fwd declarations that need container types
-//	template<class T, class _Alloc_ = GenericAllocator>
-//	Result<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo = StringView{},
-//		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
-//}
-
 namespace greaper::Impl
 {
 	INLINE void _LogBreak(const String& str)
@@ -480,19 +450,23 @@ namespace greaper::Impl
 template<class T>
 void* greaper::MemoryAllocator<T>::Allocate(sizet byteSize)
 {
+#if GREAPER_DEBUG_ALLOCATION
 	if (byteSize == 0)
 		return nullptr;
 
 	void* mem = PlatformAlloc(byteSize);
 
 	VerifyNotNull(mem, "Nullptr detected after asking to OS for %lld bytes.", byteSize);
-
 	return mem;
+#else
+	return PlatformAlloc(byteSize);
+#endif
 }
 
 template<class T>
 void* greaper::MemoryAllocator<T>::AllocateAligned(sizet byteSize, sizet alignment)
 {
+#if GREAPER_DEBUG_ALLOCATION
 	if (byteSize == 0)
 		return nullptr;
 	if (alignment == 0)
@@ -502,11 +476,15 @@ void* greaper::MemoryAllocator<T>::AllocateAligned(sizet byteSize, sizet alignme
 	VerifyNotNull(mem, "Nullptr detected after asking to OS for %lld bytes aligned %lld.", byteSize, alignment);
 
 	return mem;
+#else
+	return PlatformAlignedAlloc(byteSize, alignment);
+#endif
 }
 
 template<class T>
 void greaper::MemoryAllocator<T>::Deallocate(void* mem)
 {
+#if GREAPER_DEBUG_ALLOCATION
 #if GREAPER_ENABLE_BREAK
 	VerifyNotNull(mem, "Detected nullptr, maybe use after free.");
 #else
@@ -514,6 +492,7 @@ void greaper::MemoryAllocator<T>::Deallocate(void* mem)
 	{
 		return;
 	}
+#endif
 #endif
 	PlatformDealloc(mem);
 }
@@ -521,6 +500,7 @@ void greaper::MemoryAllocator<T>::Deallocate(void* mem)
 template<class T>
 void greaper::MemoryAllocator<T>::DeallocateAligned(void* mem)
 {
+#if GREAPER_DEBUG_ALLOCATION
 #if GREAPER_ENABLE_BREAK
 	VerifyNotNull(mem, "Detected nullptr, maybe use after free.");
 #else
@@ -529,7 +509,7 @@ void greaper::MemoryAllocator<T>::DeallocateAligned(void* mem)
 		return;
 	}
 #endif
-
+#endif
 	PlatformAlignedDealloc(mem);
 }
 

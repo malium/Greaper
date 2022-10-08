@@ -40,7 +40,14 @@ namespace greaper
 	template<class... Args> class Event;
 	class IStream;
 	class Uuid;
-	template<class T> class Result;
+	class Result;
+	namespace Impl
+	{
+		template<class T> class TResult;
+		struct EmptyStruc {  };
+	}
+	template<class T> using TResult = Impl::TResult<T>;
+	using EmptyResult = Impl::TResult<Impl::EmptyStruc>;
 
 	// types
 	using half = int16;

@@ -641,7 +641,6 @@ namespace greaper::StringUtils
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 
-		//static constexpr T delims[] = { T(' '), T('\t'), T('\r'), T('\000') };
 		static constexpr Vector<T, _Alloc_> delims {T(' '), T('\t', T('\r'), T('\n'))};
 		return TrimSelf(str, delims, left, right);
 	}
@@ -743,6 +742,23 @@ namespace greaper::StringUtils
 	}
 
 	/**
+	 * @brief Lowers the given string
+	 *
+	 * @tparam T The type of the characters
+	 * @tparam _Alloca_ The allocator of the string
+	 * @param str The string to lower
+	 * @return BasicString<T, _Alloca_> The string lowered
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> ToLower(const BasicStringView<T>& str)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+
+		BasicString<T, _Alloc_> temp{ str };
+		return ToLowerSelf(temp);
+	}
+
+	/**
 	 * @brief Uppers the given string
 	 * 
 	 * @tparam T The type of the characters
@@ -779,6 +795,23 @@ namespace greaper::StringUtils
 	}
 
 	/**
+	 * @brief Uppers the given string
+	 *
+	 * @tparam T The type of the characters
+	 * @tparam _Alloca_ The allocator of the string
+	 * @param str The string to upper
+	 * @return BasicString<T, _Alloca_> The string uppered
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> ToUpper(const BasicStringView<T>& str)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+
+		BasicString<T, _Alloc_> temp{ str };
+		return ToUpperSelf(temp);
+	}
+
+	/**
 	 * @brief Returns whether if the given string is only numbers or contains other information
 	 * 
 	 * @tparam T The type of the characters
@@ -792,7 +825,7 @@ namespace greaper::StringUtils
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 		
-		for (auto& chr : str)
+		for (const auto& chr : str)
 		{
 			if (!IsWithinInclusive(chr, T('0'), T('9')) && chr != T(',') && chr != T('.') && chr != T('+') && chr != T('-') && chr != T('e') && chr != T('E'))
 				return false;

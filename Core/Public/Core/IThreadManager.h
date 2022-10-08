@@ -26,11 +26,11 @@ namespace greaper
 
 		virtual ~IThreadManager()noexcept = default;
 
-		virtual Result<WThread> GetThread(ThreadID_t id)const noexcept = 0;
+		virtual TResult<WThread> GetThread(ThreadID_t id)const noexcept = 0;
 
-		virtual Result<WThread> GetThread(const String& threadName)const noexcept = 0;
+		virtual TResult<WThread> GetThread(const String& threadName)const noexcept = 0;
 
-		virtual Result<PThread> CreateThread(const ThreadConfig& config)noexcept = 0;
+		virtual TResult<PThread> CreateThread(const ThreadConfig& config)noexcept = 0;
 
 		virtual ThreadCreationEvent_t* GetThreadCreationEvent()const noexcept = 0;
 

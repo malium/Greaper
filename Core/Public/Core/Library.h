@@ -70,26 +70,47 @@ namespace greaper
 			return *this;
 		}
 
-		INLINE void Open(StringView libraryName)
-		{
-			if (IsOpen())
-				return;
-			m_Handle = OSLibrary::Load(libraryName);
-		}
-
-		INLINE void Open(WStringView libraryName)
-		{
-			if (IsOpen())
-				return;
-			m_Handle = OSLibrary::Load(libraryName);
-		}
-
-		INLINE void Close()
+		INLINE EmptyResult Open(StringView libraryName)
 		{
 			if (!IsOpen())
-				return;
-			OSLibrary::Unload(m_Handle);
-			m_Handle = nullptr;
+			{
+				auto res = OSLibrary::Load(libraryName);
+				if (res.IsOk())
+				{
+					m_Handle = res.GetValue();
+					return Result::CreateSuccess();
+				}
+				m_Handle = nullptr;
+				return Result::CopyFailure(res);
+			}
+			return Result::CreateSuccess();
+		}
+
+		INLINE EmptyResult Open(WStringView libraryName)
+		{
+			if (!IsOpen())
+			{
+				auto res = OSLibrary::Load(libraryName);
+				if (res.IsOk())
+				{
+					m_Handle = res.GetValue();
+					return Result::CreateSuccess();
+				}
+				m_Handle = nullptr;
+				return Result::CopyFailure(res);
+			}
+			return Result::CreateSuccess();
+		}
+
+		INLINE EmptyResult Close()
+		{
+			if (IsOpen())
+			{
+				auto res = OSLibrary::Unload(m_Handle);
+				m_Handle = nullptr;
+				return res;
+			}
+			return Result::CreateSuccess();
 		}
 
 		INLINE constexpr bool IsOpen()const noexcept
@@ -102,20 +123,22 @@ namespace greaper
 			return m_Handle;
 		}
 
-		INLINE FuncPtr GetFunction(StringView funcName)const noexcept
+		INLINE TResult<FuncPtr> GetFunction(StringView funcName)const noexcept
 		{
-			if (!IsOpen())
-				return nullptr;
-			return OSLibrary::FuncLoad(m_Handle, funcName);
+			if (IsOpen())
+				return OSLibrary::FuncLoad(m_Handle, std::move(funcName));
+
+			return Result::CreateFailure<FuncPtr>(Format("Couldn't obtain the function '%s', the library was closed.", funcName.data()));
 		}
 		
 		template<typename retType = void, class... types>
-		INLINE typename FuncType<retType, types...>::Type GetFunctionT(StringView funcName)const noexcept
+		INLINE TResult<typename FuncType<retType, types...>::Type> GetFunctionT(StringView funcName)const noexcept
 		{
-			//if (!IsOpen())
-			//	return nullptr;
-
-			return reinterpret_cast<typename FuncType<retType, types...>::Type>(GetFunction(funcName));
+			using FuncType = typename FuncType<retType, types...>::Type;
+			auto res = GetFunction(std::move(funcName));
+			if (res.IsOk())
+				return Result::CreateSuccess(reinterpret_cast<FuncType>(res.GetValue()));
+			return Result::CopyFailure<FuncType>(res);
 		}
 
 		Library(const Library&) = delete;
