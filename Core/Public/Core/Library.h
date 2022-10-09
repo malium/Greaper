@@ -70,7 +70,7 @@ namespace greaper
 			return *this;
 		}
 
-		INLINE EmptyResult Open(StringView libraryName)
+		inline EmptyResult Open(StringView libraryName)
 		{
 			if (!IsOpen())
 			{
@@ -86,7 +86,7 @@ namespace greaper
 			return Result::CreateSuccess();
 		}
 
-		INLINE EmptyResult Open(WStringView libraryName)
+		inline EmptyResult Open(WStringView libraryName)
 		{
 			if (!IsOpen())
 			{
@@ -102,7 +102,7 @@ namespace greaper
 			return Result::CreateSuccess();
 		}
 
-		INLINE EmptyResult Close()
+		inline EmptyResult Close()
 		{
 			if (IsOpen())
 			{
@@ -123,7 +123,7 @@ namespace greaper
 			return m_Handle;
 		}
 
-		INLINE TResult<FuncPtr> GetFunction(StringView funcName)const noexcept
+		inline TResult<FuncPtr> GetFunction(StringView funcName)const noexcept
 		{
 			if (IsOpen())
 				return OSLibrary::FuncLoad(m_Handle, std::move(funcName));
@@ -132,7 +132,7 @@ namespace greaper
 		}
 		
 		template<typename retType = void, class... types>
-		INLINE TResult<typename FuncType<retType, types...>::Type> GetFunctionT(StringView funcName)const noexcept
+		inline TResult<typename FuncType<retType, types...>::Type> GetFunctionT(StringView funcName)const noexcept
 		{
 			using FuncType = typename FuncType<retType, types...>::Type;
 			auto res = GetFunction(std::move(funcName));

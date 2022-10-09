@@ -58,9 +58,9 @@ namespace greaper
 				InitializeSRWLock(&handle);
 			}
 
-			static void Deinitialize(MutexHandle& handle) noexcept
+			static void Deinitialize(UNUSED MutexHandle& handle) noexcept
 			{
-				UNUSED(handle);
+
 			}
 
 			static void Lock(MutexHandle& handle) noexcept
@@ -136,9 +136,9 @@ namespace greaper
 				InitializeSRWLock(&handle);
 			}
 
-			static void Deinitialize(RWMutexHandle& handle) noexcept
+			static void Deinitialize(UNUSED RWMutexHandle& handle) noexcept
 			{
-				UNUSED(handle);
+
 			}
 
 			static void Lock(RWMutexHandle& handle) noexcept
@@ -188,9 +188,9 @@ namespace greaper
 			{
 				InitializeConditionVariable(&handle);
 			}
-			static void Deinitialize(SignalHandle& handle) noexcept
+			static void Deinitialize(UNUSED SignalHandle& handle) noexcept
 			{
-				UNUSED(handle);
+
 			}
 			static void NotifyOne(SignalHandle& handle) noexcept
 			{

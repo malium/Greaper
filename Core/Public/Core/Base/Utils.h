@@ -151,18 +151,18 @@ INLINE bool IsInfinite(const float f)
 INLINE bool GetBitValue(const uint8* ptr, const uint32 index)noexcept
 {
 	const auto* const bytePtr = ptr + index / 8;
-	const uint8 mask = 1 << (index & 0x7);
+	const auto mask = static_cast<uint8>(1u << (index & 0x7u));
 	return (*bytePtr & mask) != 0;
 }
 /** Set the boolean value to a flag */
 INLINE void SetBitValue(uint8* ptr, const uint32 index, const bool set)noexcept
 {
 	const auto bytePtr = ptr + index / 8;
-	const uint8 mask = 1 << (index & 0x7);
+	const auto mask = static_cast<uint8>(1u << (index & 0x7u));
 	if (set)
 		*bytePtr |= mask;
 	else
-		*bytePtr &= ~mask;
+		*bytePtr &= (uint8)~mask;
 }
 
 /***********************************************************************************

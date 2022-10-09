@@ -11,7 +11,7 @@
 using namespace greaper;
 using namespace greaper::core;
 
-extern SPtr<Application> gApplication = SPtr<Application>();
+SPtr<Application> gApplication = {};
 
 EmptyResult Application::RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLib)
 {
@@ -159,15 +159,13 @@ void Application::OnDeinitialization() noexcept
 	gApplication.reset();
 }
 
-void Application::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
+void Application::OnActivation(UNUSED const SPtr<IInterface>& oldDefault) noexcept
 {
-	UNUSED(oldDefault);
 	/* No-op */
 }
 
-void Application::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
+void Application::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
 {
-	UNUSED(newDefault);
 	/* No-op */
 }
 
@@ -403,7 +401,7 @@ EmptyResult Application::RegisterInterface(const PInterface& interface)
 	if (interface == nullptr)
 		return Result::CreateFailure("Trying to register a nullptr interface."sv);
 
-	auto wLib = interface->GetLibrary();
+	const auto& wLib = interface->GetLibrary();
 	if (wLib.expired())
 	{
 		return Result::CreateFailure("Trying to register an Interface without GreaperLibrary."sv);
@@ -444,7 +442,7 @@ EmptyResult Application::UnregisterInterface(const PInterface& interface)
 	if (interface == nullptr)
 		return Result::CreateFailure("Trying to unregister a nullptr interface."sv);
 
-	auto wLib = interface->GetLibrary();
+	const auto& wLib = interface->GetLibrary();
 	if (wLib.expired())
 	{
 		return Result::CreateFailure("Trying to unregister an Interface without GreaperLibrary."sv);

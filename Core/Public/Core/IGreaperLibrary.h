@@ -105,7 +105,7 @@ namespace greaper
 		Vector<SPtr<IProperty>> m_Properties;
 	};
 
-	INLINE EmptyResult IGreaperLibrary::RegisterProperty(const SPtr<IProperty>& property) noexcept
+	inline EmptyResult IGreaperLibrary::RegisterProperty(const SPtr<IProperty>& property) noexcept
 	{
 		const auto nameIT = m_PropertyMap.find(property->GetPropertyName());
 		if (nameIT != m_PropertyMap.end())
@@ -192,15 +192,15 @@ namespace greaper
 		m_InitializationState = InitState_t::Stopped;
 	}
 
-	INLINE WPtr<IApplication> IGreaperLibrary::GetApplication() const noexcept { return (WApplication)m_Application; }
+	inline WPtr<IApplication> IGreaperLibrary::GetApplication() const noexcept { return (WApplication)m_Application; }
 
 	INLINE WPtr<Library> IGreaperLibrary::GetOSLibrary() const noexcept { return (WLibrary)m_Library; }
 
-	INLINE CSpan<SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return CreateSpan(m_Managers); }
+	inline CSpan<SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return CreateSpan(m_Managers); }
 
 	INLINE CSpan<SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
-	INLINE TResult<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
+	inline TResult<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
 	{
 		const auto nameIT = m_PropertyMap.find(name);
 		if (nameIT == m_PropertyMap.end())
@@ -272,10 +272,9 @@ namespace greaper
 		}
 	}
 
-	INLINE void IGreaperLibrary::OnLogActivation(bool active, IInterface* oldLog, const SPtr<IInterface>& newLog) noexcept
+	INLINE void IGreaperLibrary::OnLogActivation(bool active, UNUSED IInterface* oldLog, const SPtr<IInterface>& newLog) noexcept
 	{
 		using namespace std::placeholders;
-		UNUSED(oldLog);
 
 		if (!active) // a new log manager was activated or the current was deactivated
 		{

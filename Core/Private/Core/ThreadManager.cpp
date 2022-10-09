@@ -3,15 +3,13 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#pragma once
-
 #include "ThreadManager.h"
 #include <Core/Base/IThread.h>
 
 using namespace greaper;
 using namespace greaper::core;
 
-extern SPtr<ThreadManager> gThreadManager = SPtr<ThreadManager>();
+SPtr<ThreadManager> gThreadManager = {};
 
 #if PLT_WINDOWS
 using ThreadImpl = WinThreadImpl;
@@ -102,10 +100,8 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	m_ThreadDestructionEvent.Connect(m_DestructionEventHnd, [this](PThread thread) {OnThreadDestruction(thread); });
 }
 
-void ThreadManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
+void ThreadManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
 {
-	UNUSED(newDefault);
-
 	m_DestructionEventHnd.Disconnect();
 
 	// Clear threads

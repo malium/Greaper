@@ -89,15 +89,13 @@ greaper::ReflectedTypeID_t greaper::IReflectedPlainField::GetTypeID()
 	return ReflectedTypeID_t(-1);
 }
 
-inline greaper::ReflectedSize_t greaper::IReflectedPlainField::GetDynamicSize(IReflectedType* baseType, void* object)
+inline greaper::ReflectedSize_t greaper::IReflectedPlainField::GetDynamicSize(UNUSED IReflectedType* baseType, UNUSED void* object)
 {
-	UNUSED(baseType); UNUSED(object);
 	return ReflectedSize_t(-1);
 }
 
-inline greaper::ReflectedSize_t greaper::IReflectedPlainField::GetContainerDynamicSize(IReflectedType* baseType, void* object, int64 containerIdx)
+inline greaper::ReflectedSize_t greaper::IReflectedPlainField::GetContainerDynamicSize(UNUSED IReflectedType* baseType, UNUSED void* object, UNUSED int64 containerIdx)
 {
-	UNUSED(baseType); UNUSED(object); UNUSED(containerIdx);
 	return ReflectedSize_t(-1);
 }
 

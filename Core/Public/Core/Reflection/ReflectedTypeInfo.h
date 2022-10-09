@@ -41,33 +41,33 @@ namespace greaper
 
 		virtual ReflectedTypeID_t GetReflectedTypeID()const = 0;
 
-		virtual void OnSerializationStarted(IReflectedType* obj)
+		virtual void OnSerializationStarted(UNUSED IReflectedType* obj)
 		{
-			UNUSED(obj);
+
 		}
 
-		virtual void OnSerializationEnded(IReflectedType* obj)
+		virtual void OnSerializationEnded(UNUSED IReflectedType* obj)
 		{
-			UNUSED(obj);
+
 		}
 
-		virtual void OnDeserializationStarted(IReflectedType* obj)
+		virtual void OnDeserializationStarted(UNUSED IReflectedType* obj)
 		{
-			UNUSED(obj);
+
 		}
 
-		virtual void OnDeserializationEnded(IReflectedType* obj)
+		virtual void OnDeserializationEnded(UNUSED IReflectedType* obj)
 		{
-			UNUSED(obj);
+
 		}
 
 		INLINE uint32 GetFieldCount()const noexcept { return m_Fields.size(); }
 
-		Result<IReflectedField*> GetField(sizet index)const noexcept;
+		TResult<IReflectedField*> GetField(sizet index)const noexcept;
 
-		Result<IReflectedField*> FindField(const String& name)const noexcept;
+		TResult<IReflectedField*> FindField(const String& name)const noexcept;
 
-		Result<IReflectedField*> FindField(ReflectedFieldID_t fieldID)const noexcept;
+		TResult<IReflectedField*> FindField(ReflectedFieldID_t fieldID)const noexcept;
 
 		virtual void _RegisterDerivedClass(IReflectedTypeInfo* derivedClass) = 0;
 
@@ -121,14 +121,14 @@ namespace greaper
 		}
 	}
 
-	INLINE Result<IReflectedField*> IReflectedTypeInfo::GetField(sizet index)const noexcept
+	INLINE TResult<IReflectedField*> IReflectedTypeInfo::GetField(sizet index)const noexcept
 	{
 		if (m_Fields.size() <= index)
-			return CreateFailure<IReflectedField*>("Trying to get an out of bounds index.");
-		return CreateResult(m_Fields[index]);
+			return Result::CreateFailure<IReflectedField*>("Trying to get an out of bounds index."sv);
+		return Result::CreateSuccess(m_Fields[index]);
 	}
 
-	INLINE Result<IReflectedField*> IReflectedTypeInfo::FindField(const String& name)const noexcept
+	INLINE TResult<IReflectedField*> IReflectedTypeInfo::FindField(const String& name)const noexcept
 	{
 		IReflectedField* field = nullptr;
 
@@ -142,11 +142,11 @@ namespace greaper
 		}
 
 		if (field == nullptr)
-			return CreateFailure<IReflectedField*>(Format("Couldn't find field '%s'.", name.c_str()));
-		return CreateResult(field);
+			return Result::CreateFailure<IReflectedField*>(Format("Couldn't find field '%s'.", name.c_str()));
+		return Result::CreateSuccess(field);
 	}
 
-	INLINE Result<IReflectedField*> IReflectedTypeInfo::FindField(ReflectedFieldID_t fieldID)const noexcept
+	INLINE TResult<IReflectedField*> IReflectedTypeInfo::FindField(ReflectedFieldID_t fieldID)const noexcept
 	{
 		IReflectedField* field = nullptr;
 
@@ -160,8 +160,8 @@ namespace greaper
 		}
 
 		if (field == nullptr)
-			return CreateFailure<IReflectedField*>(Format("Couldn't find field with fieldID '%d'.", fieldID));
-		return CreateResult(field);
+			return Result::CreateFailure<IReflectedField*>(Format("Couldn't find field with fieldID '%d'.", fieldID));
+		return Result::CreateSuccess(field);
 	}
 }
 

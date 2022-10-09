@@ -110,7 +110,7 @@ namespace greaper
 				m_Control->DecWeakReference();
 		}
 
-		INLINE SharedPointer<T> lock()const noexcept
+		inline SharedPointer<T> lock()const noexcept
 		{
 			SharedPointer<T> shared;
 

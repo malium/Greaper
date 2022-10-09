@@ -59,7 +59,7 @@ namespace greaper
 		
 		virtual const StringView& GetInterfaceName()const noexcept = 0;
 		
-		WPtr<IGreaperLibrary> GetLibrary()const noexcept;
+		const WPtr<IGreaperLibrary>& GetLibrary()const noexcept;
 
 		void Initialize(WPtr<IGreaperLibrary> library)noexcept;
 
@@ -111,7 +111,7 @@ namespace greaper
 
 	}
 
-	INLINE WPtr<IGreaperLibrary> IInterface::GetLibrary()const noexcept { return m_Library; }
+	inline const WPtr<IGreaperLibrary>& IInterface::GetLibrary()const noexcept { return m_Library; }
 
 	INLINE void IInterface::Initialize(WPtr<IGreaperLibrary> library) noexcept
 	{

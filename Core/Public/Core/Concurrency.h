@@ -730,9 +730,9 @@ namespace greaper
 
 		}
 
-		explicit IAsyncOp(AsyncOpEmpty empty)
+		explicit IAsyncOp(UNUSED AsyncOpEmpty empty)
 		{
-			UNUSED(empty);
+
 		}
 
 		explicit IAsyncOp(const SPtr<AsyncOpSyncData>& syncData)
@@ -742,10 +742,10 @@ namespace greaper
 
 		}
 
-		IAsyncOp(AsyncOpEmpty empty, const SPtr<AsyncOpSyncData>& syncData)
+		IAsyncOp(UNUSED AsyncOpEmpty empty, const SPtr<AsyncOpSyncData>& syncData)
 			:m_SyncData(syncData)
 		{
-			UNUSED(empty);
+
 		}
 
 		bool HasCompleted()const

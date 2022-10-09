@@ -309,10 +309,10 @@ namespace greaper
 		}
 		INLINE ~Span()noexcept = default;
 
-		INLINE constexpr Impl::SpanIterator<T> begin()const noexcept { return Impl::SpanIterator<T>(*this, 0); }
-		INLINE constexpr Impl::SpanIterator<T> end()const noexcept { return Impl::SpanIterator<T>(*this, GetSizeFn()); }
-		INLINE constexpr Impl::SpanReverseIterator<T> rbegin()const noexcept { return Impl::SpanReverseIterator<T>(*this, GetSizeFn() - 1); }
-		INLINE constexpr Impl::SpanReverseIterator<T> rend()const noexcept { return Impl::SpanReverseIterator<T>(*this, -1); }
+		inline constexpr Impl::SpanIterator<T> begin()const noexcept { return Impl::SpanIterator<T>(*this, 0); }
+		inline constexpr Impl::SpanIterator<T> end()const noexcept { return Impl::SpanIterator<T>(*this, GetSizeFn()); }
+		inline constexpr Impl::SpanReverseIterator<T> rbegin()const noexcept { return Impl::SpanReverseIterator<T>(*this, GetSizeFn() - 1); }
+		inline constexpr Impl::SpanReverseIterator<T> rend()const noexcept { return Impl::SpanReverseIterator<T>(*this, -1); }
 	};
 
 	template<class T>
@@ -375,10 +375,10 @@ namespace greaper
 		}
 		INLINE ~CSpan()noexcept = default;
 
-		INLINE constexpr Impl::SpanConstIterator<T> begin()const noexcept { return Impl::SpanConstIterator<T>(*this, 0); }
-		INLINE constexpr Impl::SpanConstIterator<T> end()const noexcept { return Impl::SpanConstIterator<T>(*this, GetSizeFn()); }
-		INLINE constexpr Impl::SpanConstReverseIterator<T> rbegin()const noexcept { return Impl::SpanConstReverseIterator<T>(*this, GetSizeFn() - 1); }
-		INLINE constexpr Impl::SpanConstReverseIterator<T> rend()const noexcept { return Impl::SpanConstReverseIterator<T>(*this, -1); }
+		inline constexpr Impl::SpanConstIterator<T> begin()const noexcept { return Impl::SpanConstIterator<T>(*this, 0); }
+		inline constexpr Impl::SpanConstIterator<T> end()const noexcept { return Impl::SpanConstIterator<T>(*this, GetSizeFn()); }
+		inline constexpr Impl::SpanConstReverseIterator<T> rbegin()const noexcept { return Impl::SpanConstReverseIterator<T>(*this, GetSizeFn() - 1); }
+		inline constexpr Impl::SpanConstReverseIterator<T> rend()const noexcept { return Impl::SpanConstReverseIterator<T>(*this, -1); }
 	};
 
 	template<class T>

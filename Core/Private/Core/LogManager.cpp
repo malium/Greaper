@@ -9,7 +9,7 @@
 using namespace greaper;
 using namespace core;
 
-greaper::SPtr<greaper::core::LogManager> gLogManager = greaper::SPtr<greaper::core::LogManager>();
+greaper::SPtr<greaper::core::LogManager> gLogManager = {};
 
 void LogManager::OnAsyncChanged(IProperty* prop)
 {
@@ -74,11 +74,13 @@ void LogManager::StartThreadMode()
 void LogManager::StopThreadMode()
 {
 	m_Threaded = false;
-	m_QueueSignal.notify_all();
-	if (m_AsyncThread != nullptr)
+	while (m_AsyncThread != nullptr)
 	{
-		m_AsyncThread->Join();
-		m_AsyncThread.reset();
+		m_QueueSignal.notify_all();
+		if (m_AsyncThread->TryJoin())
+			m_AsyncThread.reset();
+		else
+			THREAD_YIELD();
 	}
 }
 
@@ -168,9 +170,8 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	}
 }
 
-void LogManager::OnDeactivation(const SPtr<IInterface>& newDefault) noexcept
+void LogManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
 {
-	UNUSED(newDefault);
 	// deinit async logging
 	if (m_Threaded)
 	{

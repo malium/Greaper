@@ -147,7 +147,7 @@ namespace greaper
 		static String ToString(const Container_t& data)
 		{
 			String str;
-			for(sizet i = 0; i < N; ++i)
+			for(decltype(N) i = 0; i < N; ++i)
 			{
 				str += ReflectedToString(data[i]);
 				if(i < (N - 1))
@@ -162,7 +162,7 @@ namespace greaper
 			
 			VerifyEqual(vec.size(), data.size(), "Something went wrong while deserializing an array from string.");
 
-			for(int i = 0; i < N; ++i)
+			for(decltype(N) i = 0; i < N; ++i)
 			{
 				ReflectedFromString(data[i], vec[i]);
 			}
@@ -247,10 +247,10 @@ namespace greaper
 			data.clear();
 			if(data.capacity() < vec.size())
 				data.reserve(vec.size());
-			for(int i = 0; i < vec.size(); ++i)
+			for (const auto& elem : vec)
 			{
 				T value;
-				ReflectedFromString(value, vec[i]);
+				ReflectedFromString(value, elem);
 				data.push_back(std::move(value));
 			}
 		}

@@ -130,9 +130,8 @@ INLINE void greaper::ReflectedFromString(T& data, const String& str)
 }
 
 template<class T>
-INLINE greaper::ReflectedSize_t greaper::ReflectedWriteWithSizeHeader(IStream& stream, const T& data, std::function<ReflectedSize_t()> fn)
+INLINE greaper::ReflectedSize_t greaper::ReflectedWriteWithSizeHeader(IStream& stream, UNUSED const T& data, std::function<ReflectedSize_t()> fn)
 {
-	UNUSED(data);
 	const auto sizePos = stream.Tell();
 	ReflectedSize_t size = 0;
 	stream.Write(&size, sizeof(size));

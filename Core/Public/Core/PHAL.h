@@ -278,7 +278,7 @@
 #endif
 /* Unreferenced Parameter warnings removal */
 #ifndef UNUSED
-#define UNUSED(p) (p)
+#define UNUSED [[maybe_unused]]
 #endif
 /* Alignment */
 #ifndef ALIGN_BEGIN

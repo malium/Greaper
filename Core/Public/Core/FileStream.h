@@ -128,9 +128,8 @@ namespace greaper
 		return m_Stream->eof();
 	}
 
-	INLINE SPtr<IStream> FileStream::Clone(bool copyData) const noexcept
+	INLINE SPtr<IStream> FileStream::Clone(UNUSED bool copyData) const noexcept
 	{
-		UNUSED(copyData);
 		return SPtr<IStream>(Construct<FileStream>(m_Path, GetAccessMode(), m_FreeOnClose));
 	}
 

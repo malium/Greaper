@@ -42,7 +42,7 @@ namespace greaper
 	{
 		struct LnxMutexImpl
 		{
-			static bool IsValid(const MutexHandle& handle) noexcept
+			static bool IsValid(UNUSED const MutexHandle& handle) noexcept
 			{
 				return true;
 			}
@@ -72,9 +72,8 @@ namespace greaper
 				return pthread_mutex_trylock(&handle) != 0;
 			}
 
-			static void Invalidate(MutexHandle& handle) noexcept
+			static void Invalidate(UNUSED MutexHandle& handle) noexcept
 			{
-				UNUSED(handle);
 				/* No-op */
 			}
 		};
@@ -82,7 +81,7 @@ namespace greaper
 
 		struct LnxRecursiveMutexImpl
 		{
-			static bool IsValid(const RecursiveMutexHandle& handle) noexcept
+			static bool IsValid(UNUSED const RecursiveMutexHandle& handle) noexcept
 			{
 				return true;
 			}
@@ -116,9 +115,8 @@ namespace greaper
 				return pthread_mutex_trylock(&handle) != 0;
 			}
 
-			static void Invalidate(RecursiveMutexHandle& handle) noexcept
+			static void Invalidate(UNUSED RecursiveMutexHandle& handle) noexcept
 			{
-				UNUSED(handle);
 				/* No-op */
 			}
 		};
@@ -126,7 +124,7 @@ namespace greaper
 
 		struct LnxRWMutexImpl
 		{
-			static bool IsValid(const RWMutexHandle& handle) noexcept
+			static bool IsValid(UNUSED const RWMutexHandle& handle) noexcept
 			{
 				return true;
 			}
@@ -171,9 +169,8 @@ namespace greaper
 				return pthread_rwlock_tryrdlock(&handle) != 0;
 			}
 
-			static void Invalidate(RWMutexHandle& handle) noexcept
+			static void Invalidate(UNUSED RWMutexHandle& handle) noexcept
 			{
-				UNUSED(handle);
 				/* No-op */
 			}
 		};
@@ -181,7 +178,7 @@ namespace greaper
 
 		struct LnxSignalImpl
 		{
-			static bool IsValid(const SignalHandle& handle) noexcept
+			static bool IsValid(UNUSED const SignalHandle& handle) noexcept
 			{
 				return true;
 			}
@@ -247,9 +244,8 @@ namespace greaper
 				Break("ConditionVariables and RWMutex don't currently work together under Linux.");
 				return true;
 			}
-			static void Invalidate(SignalHandle& handle) noexcept
+			static void Invalidate(UNUSED SignalHandle& handle) noexcept
 			{
-				UNUSED(handle);
 				/* No-op */
 			}
 		};

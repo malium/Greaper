@@ -121,7 +121,7 @@ namespace greaper
 			else
 			{
 				m_OnManagerActivation.Disconnect();
-				auto libW = oldManager->GetLibrary();
+				const auto& libW = oldManager->GetLibrary();
 				VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.");
 				auto lib = libW.lock();
 				auto appW = lib->GetApplication();
@@ -171,7 +171,7 @@ namespace greaper
 				m_State = ThreadState_t::STOPPED;
 				m_ID = InvalidThreadID;
 				auto mgr = (PInterface)m_Manager.lock();
-				auto wlib = mgr->GetLibrary();
+				const auto& wlib = mgr->GetLibrary();
 				VerifyNot(wlib.expired(), "Something went wrong trying to create a WinThread.");
 				auto lib = wlib.lock();
 				lib->LogError(

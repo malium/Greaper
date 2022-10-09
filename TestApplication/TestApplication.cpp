@@ -58,10 +58,8 @@ int main(int argc, char* argv[])
 	return MainCode(hInstance, argc, argv);
 }
 #else /* !_CONSOLE */
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
+INT WINAPI WinMain(HINSTANCE hInstance, UNUSED HINSTANCE hPrevInstance, LPSTR lpCmdLine, UNUSED int nShowCmd)
 {
-	UNUSED(nShowCmd);
-	UNUSED(hPrevInstance);
 	int argc = 0;
 
 	auto argv = greaper::UPtr<LPSTR>(CommandLineToArgvA(lpCmdLine, &argc), &FreeArgvA);
@@ -193,7 +191,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 		gCoreLib->Close();
 		gCoreLib.reset();
 	}
-	catch (std::exception e)
+	catch (const std::exception& e)
 	{
 		DEBUG_OUTPUT(e.what());
 	}

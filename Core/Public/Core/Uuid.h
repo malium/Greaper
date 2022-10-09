@@ -37,23 +37,23 @@ namespace greaper
 		INLINE Uuid& operator=(Uuid&& other) noexcept = default;
 		~Uuid()noexcept = default;
 
-		INLINE Uuid& operator=(const StringView& view) noexcept;
-		INLINE Uuid& operator=(const String& str) noexcept;
+		Uuid& operator=(const StringView& view) noexcept;
+		Uuid& operator=(const String& str) noexcept;
 
-		[[nodiscard]] INLINE String ToString()const noexcept;
-		INLINE void FromString(const String& str) noexcept;
+		[[nodiscard]] String ToString()const noexcept;
+		void FromString(const String& str) noexcept;
 
 		/**
 		 * @brief Requests to the OS a random Uuid
 		 * 
 		 * @return Uuid The new random Uuid 
 		 */
-		[[nodiscard]] INLINE static Uuid GenerateRandom() noexcept;
+		[[nodiscard]] static Uuid GenerateRandom() noexcept;
 
-		INLINE constexpr bool IsEmpty()const noexcept;
-		INLINE constexpr const uint32* GetData()const noexcept;
+		constexpr bool IsEmpty()const noexcept;
+		constexpr const uint32* GetData()const noexcept;
 		
-		INLINE static constexpr Uuid Empty()noexcept;
+		static constexpr Uuid Empty()noexcept;
 
 		friend constexpr bool operator==(const Uuid& left, const Uuid& right)noexcept;
 		friend constexpr bool operator<(const Uuid& left, const Uuid& right)noexcept;

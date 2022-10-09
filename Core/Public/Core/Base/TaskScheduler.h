@@ -89,9 +89,9 @@ namespace greaper
 
 	}
 
-	INLINE void TaskScheduler::WaitUntilTaskDone(Task* task)
+	INLINE void TaskScheduler::WaitUntilTaskDone(UNUSED Task* task)
 	{
-		UNUSED(task);
+
 	}
 
 	INLINE TaskScheduler::TaskScheduler(WThreadManager thManager, uint32 taskHandlerCount, StringView schedulerName)

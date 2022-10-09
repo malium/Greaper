@@ -32,16 +32,16 @@ namespace greaper
 	}
 
 	INLINE IStream::IStream(const uint16 accessMode)noexcept
-		:m_Access(accessMode)
-		,m_Size(0)
+		:m_Size(0)
+		,m_Access(accessMode)
 	{
 
 	}
 
 	INLINE IStream::IStream(StringView name, const uint16 accessMode)noexcept
 		:m_Name(name)
-		,m_Access(accessMode)
 		,m_Size(0)
+		,m_Access(accessMode)
 	{
 
 	}

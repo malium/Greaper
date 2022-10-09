@@ -77,7 +77,7 @@ namespace greaper
 			else
 			{
 				m_OnManagerActivation.Disconnect();
-				auto libW = oldManager->GetLibrary();
+				const auto& libW = oldManager->GetLibrary();
 				VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.", 0);
 				auto lib = libW.lock();
 				auto appW = lib->GetApplication();
@@ -152,7 +152,11 @@ namespace greaper
 			,m_Name(name)
 		{
 			if (setName)
-				auto ret = pthread_setname_np(m_Handle, m_Name.c_str());
+			{
+				auto err = pthread_setname_np(m_Handle, m_Name.c_str());
+				if (err != 0)
+					DEBUG_OUTPUT(Format("pthread_setname_np() failed, error code " I32_HEX_FMT, err).c_str());
+			}
 			auto mgr = m_Manager.lock();
 			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const SPtr<IInterface>& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}

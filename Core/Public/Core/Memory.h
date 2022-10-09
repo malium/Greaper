@@ -176,10 +176,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		constexpr Destructor() noexcept = default;
 
 		template<class T2, std::enable_if_t<std::is_convertible<T2*, T*>::value, int> = 0>
-		constexpr Destructor(const Destructor<T2, _Alloc_>& other)
-		{
-			UNUSED(other);
-		}
+		constexpr Destructor(const Destructor<T2, _Alloc_>&) {	}
 
 		void operator()(T* ptr)const
 		{
@@ -203,7 +200,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		StdAlloc(StdAlloc&&)noexcept = default;
 		StdAlloc(const StdAlloc&)noexcept = default;
 
-		template<class U, class Alloc2> INLINE StdAlloc(const StdAlloc<U, Alloc2>& other) { UNUSED(other); }
+		template<class U, class Alloc2> INLINE StdAlloc(const StdAlloc<U, Alloc2>&) {  }
 		template<class U, class Alloc2> INLINE constexpr bool operator==(const StdAlloc<U, Alloc2>&) const noexcept { return true; }
 		template<class U, class Alloc2> INLINE constexpr bool operator!=(const StdAlloc<U, Alloc2>&) const noexcept { return false; }
 
@@ -373,9 +370,9 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 			Destroy<T, _Alloc_>(ptr);
 		}
 		template<class T>
-		INLINE void EmptyDeleter(T* ptr)
+		INLINE void EmptyDeleter(UNUSED T* ptr)
 		{
-			UNUSED(ptr);
+
 		}
 		template<class T, class _Alloc_ = GenericAllocator>
 		INLINE void CStrucDeleter(T* ptr)

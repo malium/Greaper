@@ -10,7 +10,7 @@ INLINE void greaper::WinOSPlatform::Sleep(uint32 millis) noexcept
 	::Sleep(millis);
 }
 
-INLINE greaper::String greaper::WinOSPlatform::GetExceptionMessage(PEXCEPTION_RECORD record)
+inline greaper::String greaper::WinOSPlatform::GetExceptionMessage(PEXCEPTION_RECORD record)
 {
 	StringView errorType;
 	switch (record->ExceptionCode)

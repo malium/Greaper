@@ -10,21 +10,20 @@
 #include <Core/Property.h>
 
 #if GREAPER_CORE_DLL
-//extern greaper::core::GreaperCoreLibrary* gCoreLibrary = nullptr;
-extern greaper::SPtr<greaper::core::GreaperCoreLibrary> gCoreLibrary = greaper::SPtr<greaper::core::GreaperCoreLibrary>();
+
+greaper::SPtr<greaper::core::GreaperCoreLibrary> gCoreLibrary = {};
+
 #if PLT_WINDOWS
 #define DLL_PROCESS_ATTACH   1
 #define DLL_THREAD_ATTACH    2
 #define DLL_THREAD_DETACH    3
 #define DLL_PROCESS_DETACH   0
 
-int __stdcall DllMain(HINSTANCE hModule,
+int __stdcall DllMain(UNUSED HINSTANCE hModule,
 	unsigned long  ul_reason_for_call,
-	void* lpReserved
+	UNUSED void* lpReserved
 )
 {
-	UNUSED(hModule);
-	UNUSED(lpReserved);
 	switch (ul_reason_for_call)
 	{
 	case DLL_PROCESS_ATTACH:
@@ -37,7 +36,7 @@ int __stdcall DllMain(HINSTANCE hModule,
 }
 #endif
 BEGIN_C
-DLLEXPORT void* CDECL _Greaper();
+DLLEXPORT void* _Greaper();
 END_C
 
 void* _Greaper()
