@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -32,7 +32,7 @@
 #if COMPILER_MSVC
 #define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__))
 #else
-#define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__));
+#define Break(msg, ...) greaper::Impl::_TriggerBreak(greaper::Format("STOP! at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__))
 #endif
 
 #if GREAPER_ENABLE_BREAK
@@ -329,7 +329,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	};
 
 	template<typename T, class _Alloc_ = GenericAllocator>
-	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const T* fmt, ...)//FUNCTION_VARARGS_END(1, 2)
+	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const T* fmt, ...)
 	{
 		va_list argList;
 		va_start(argList, fmt);
@@ -345,6 +345,29 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		str.resize(size + 1, (T)0);
 
 		Snprintf::Fn(str.data(), str.size(), fmt, argList);
+
+		va_end(argList);
+
+		return str;
+	}
+
+	template<typename T, class _Alloc_ = GenericAllocator>
+	[[nodiscard]] BasicString<T, StdAlloc<T, _Alloc_>> Format(const BasicString<T, _Alloc_>& fmt, ...)
+	{
+		va_list argList;
+		va_start(argList, fmt.c_str());
+
+		const auto size = (ssizet)Snprintf::Fn((T*)nullptr, 0, fmt.c_str(), argList);
+
+		VerifyGreaterEqual(size, 0, "Error while formatting");
+
+		va_end(argList);
+		va_start(argList, fmt);
+
+		BasicString<T, StdAlloc<T, _Alloc_>> str{};
+		str.resize(size + 1, (T)0);
+
+		Snprintf::Fn(str.data(), str.size(), fmt.c_str(), argList);
 
 		va_end(argList);
 
@@ -383,6 +406,16 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		using SPtrDeleterFn_t = std::function<void(T*)>;
 	}
 }
+
+struct SourceLocation
+{
+	greaper::StringView Function;
+	greaper::StringView File;
+	uint32 Line = 0;
+
+	constexpr SourceLocation()noexcept = default;
+};
+#define GETSOURCELOC() SourceLocation{ __FUNCSIG__, __FILE__, (uint32)__LINE__ }
 
 #include "Base/UPtr.h"
 #include "Base/SPtr.h"

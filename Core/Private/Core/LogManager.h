@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -13,7 +13,7 @@
 #include <Core/Property.h>
 #include <Core/Concurrency.h>
 #include <Core/IThreadManager.h>
-#include <Core/Base/TaskScheduler.h>
+#include <Core/MPMCTaskScheduler.h>
 
 namespace greaper::core
 {

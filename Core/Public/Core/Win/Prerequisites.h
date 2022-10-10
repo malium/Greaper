@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -26,7 +26,7 @@ typedef WinTypes PlatformTypes;
 #define NOINLINE __declspec(noinline)							/** Forces code to NOT be inlined */
 #define FUNCTION_NO_RETURN_START __declspec(noreturn)			/** Indicate that the function never returns. */
 #define FUNCTION_NO_RETURN_END
-#define FUNCTION_FULL __FUNCTION__
+#define FUNCTION_FULL __FUNCSIG__
 #define GREAPER_DLLEXT ".dll"
 
 /* Supported Windows version */

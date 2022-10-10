@@ -107,9 +107,6 @@
     <ClInclude Include="Public\Core\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Core\Base\Span.h" />
     <ClInclude Include="Public\Core\Base\SPtr.h" />
-    <ClInclude Include="Public\Core\Base\Task.h" />
-    <ClInclude Include="Public\Core\Base\TaskScheduler.h" />
-    <ClInclude Include="Public\Core\Base\ThreadPool.h" />
     <ClInclude Include="Public\Core\Base\UPtr.h" />
     <ClInclude Include="Public\Core\Base\Utils.h" />
     <ClInclude Include="Public\Core\Base\VideoMode.h" />
@@ -135,6 +132,7 @@
     <ClInclude Include="Public\Core\Lnx\Prerequisites.h" />
     <ClInclude Include="Public\Core\Memory.h" />
     <ClInclude Include="Public\Core\MemoryStream.h" />
+    <ClInclude Include="Public\Core\MPMCTaskScheduler.h" />
     <ClInclude Include="Public\Core\PHAL.h" />
     <ClInclude Include="Public\Core\Platform.h" />
     <ClInclude Include="Public\Core\Property.h" />
@@ -158,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl" />
+    <None Include="Public\Core\Base\MPMCTaskScheduler.inl" />
     <None Include="Public\Core\Base\Stream.inl" />
     <None Include="Public\Core\Base\Uuid.inl" />
     <None Include="Public\Core\Lnx\LnxPlatform.inl" />

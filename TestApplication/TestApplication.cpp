@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2021 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -197,6 +197,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 	}
 	catch (const std::exception& e)
 	{
+		TRIGGER_BREAKPOINT();
 		DEBUG_OUTPUT(e.what());
 	}
 

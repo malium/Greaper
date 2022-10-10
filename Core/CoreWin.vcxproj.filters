@@ -95,15 +95,6 @@
     <ClInclude Include="Public\Core\Base\SPtr.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Public\Core\Base\Task.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Core\Base\TaskScheduler.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="Public\Core\Base\ThreadPool.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Public\Core\Base\UPtr.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -239,6 +230,9 @@
     <ClInclude Include="Public\Core\Uuid.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Core\MPMCTaskScheduler.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -260,6 +254,9 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Public\Core\Win\WinThreadImpl.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Base\MPMCTaskScheduler.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>
