@@ -13,6 +13,7 @@
 #include "IThreadManager.h"
 #include "Base/IThread.h"
 #include "Enumeration.h"
+#include "Result.h"
 
 ENUMERATION(TaskState, Inactive, InProgress, Completed);
 
@@ -23,17 +24,16 @@ namespace greaper
 		class Task
 		{
 		public:
-			Task(StringView name, std::function<void()> workFn)noexcept;
-			Task(String name, std::function<void()> workFn)noexcept;
+			constexpr Task()noexcept = default;
 
 			TaskState_t GetCurrentState()const noexcept;
 
 			friend MPMCTaskScheduler;
 
 		private:
-			String m_Name;
-			std::function<void()> m_WorkFn;
-			TaskState_t m_State;
+			String m_Name{};
+			std::function<void()> m_WorkFn = nullptr;
+			TaskState_t m_State = TaskState_t::Inactive;
 		};
 
 		class HTask
@@ -43,7 +43,17 @@ namespace greaper
 
 			friend MPMCTaskScheduler;
 
+			constexpr HTask()noexcept = default;
+			HTask(WPtr<Task> task, WPtr<MPMCTaskScheduler> scheduler)noexcept;
+
 		public:
+
+			HTask(const HTask&)noexcept = default;
+			HTask(HTask&&)noexcept = default;
+			HTask& operator=(const HTask&)noexcept = default;
+			HTask& operator=(HTask&&)noexcept = default;
+			~HTask()noexcept = default;
+
 			void WaitUntilFinish()noexcept;
 		};
 	}
@@ -51,7 +61,8 @@ namespace greaper
 	class MPMCTaskScheduler
 	{
 	public:
-		static SPtr<MPMCTaskScheduler> Create(sizet workerCount)noexcept;
+		template<class _Alloc_ = GenericAllocator>
+		static SPtr<MPMCTaskScheduler> Create(WThreadManager threadMgr, StringView name, sizet workerCount)noexcept;
 
 		~MPMCTaskScheduler()noexcept;
 
@@ -59,33 +70,40 @@ namespace greaper
 		MPMCTaskScheduler& operator=(const MPMCTaskScheduler&) = delete;
 
 		sizet GetWorkerCount()const noexcept;
-		void SetWorkerCount(sizet count)noexcept;
+		EmptyResult SetWorkerCount(sizet count)noexcept;
 
-		Impl::HTask AddTask(StringView name, std::function<void()> workFn)noexcept;
-		Impl::HTask AddTask(String name, std::function<void()> workFn)noexcept;
+		TResult<Impl::HTask> AddTask(StringView name, std::function<void()> workFn)noexcept;
 
-		Vector<Impl::HTask> AddTasks(const Vector<std::tuple<StringView, std::function<void()>>>& tasks)noexcept;
-		Vector<Impl::HTask> AddTasks(const Vector<std::tuple<String, std::function<void()>>>& tasks)noexcept;
+		TResult<Vector<Impl::HTask>> AddTasks(const Vector<std::tuple<StringView, std::function<void()>>>& tasks)noexcept;
 
 		void WaitUntilTaskIsFinish(const Impl::HTask& task)noexcept;
 		void WaitUntilFinishAllTasks()noexcept;
 
+		const String& GetName()const noexcept;
+
 	private:
+		WThreadManager m_ThreadManager;
+		String m_Name;
+
 		Vector<PThread> m_TaskWorkers;
 		mutable Mutex m_TaskWorkersMutex;
 
 		Vector<SPtr<Impl::Task>> m_TaskQueue;
-		mutable Mutex m_QueueMutex;
-		Signal m_QueueSignal;
+		mutable Mutex m_TaskQueueMutex;
+		Signal m_TaskQueueSignal;
 
 		Vector<Impl::Task*> m_FreeTaskPool;
 		mutable Mutex m_FreeTaskPoolMutex;
 
 		SPtr<MPMCTaskScheduler> m_This;
-		
-		explicit MPMCTaskScheduler(sizet workerCount = 0)noexcept;
 
-		static void WorkerFn(MPMCTaskScheduler& scheduler, PThread thread)noexcept;
+		void Stop()noexcept;
+
+		bool AreThereAnyAvailableWorker()const noexcept;
+		
+		MPMCTaskScheduler(WThreadManager threadMgr, StringView name, sizet workerCount)noexcept;
+
+		static void WorkerFn(MPMCTaskScheduler& scheduler, sizet id)noexcept;
 	};
 }
 

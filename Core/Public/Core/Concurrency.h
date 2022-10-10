@@ -306,7 +306,7 @@ namespace greaper
 		}
 	};
 
-	struct AdoptLock { explicit AdoptLock() = default; };
+	struct AdoptLock { explicit AdoptLock()noexcept = default; };
 	
 	/*** Locks a given mutex and unlocks it when out of scope */
 	template<class Mtx>

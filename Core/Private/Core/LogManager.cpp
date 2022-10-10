@@ -33,15 +33,7 @@ void LogManager::StartThreadMode()
 {
 	VerifyNot(m_Library.expired(), "Trying to set as async LogManager, but its library has expired.");
 	auto lib = m_Library.lock();
-	/*auto wApp = lib->GetApplication();
-	if (wApp.expired())
-	{
-		lib->LogError("Trying to set as async LogManager, but this library does not have an application connected.");
-		m_Threaded = false;
-		GetAsyncLog().lock()->SetValue(false, true);
-		return;
-	}
-	auto app = wApp.lock();*/
+
 	auto thmgrRes = gApplication->GetActiveInterface(IThreadManager::InterfaceUUID);
 	if (thmgrRes.HasFailed())
 	{
