@@ -53,7 +53,7 @@ namespace greaper
 
 		virtual void RemoveLogWriter(sizet writerID)noexcept = 0;
 
-		virtual std::tuple<CSpan<LogData>, Mutex&> GetMessages()const noexcept = 0;
+		virtual void AccessMessages(const std::function<void(CSpan<LogData>)>& accessFn)const noexcept = 0;
 
 		virtual void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept = 0;
 

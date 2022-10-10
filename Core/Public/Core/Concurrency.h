@@ -366,6 +366,8 @@ namespace greaper
 
 		SharedLock(const SharedLock&) = delete;
 		SharedLock& operator=(const SharedLock&) = delete;
+		SharedLock(SharedLock&&)noexcept = default;
+		SharedLock& operator=(SharedLock&&)noexcept = default;
 
 		RWMutex* mutex() noexcept
 		{

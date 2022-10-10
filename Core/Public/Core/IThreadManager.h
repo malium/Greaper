@@ -36,7 +36,7 @@ namespace greaper
 
 		virtual ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept = 0;
 
-		virtual std::tuple<CSpan<PThread>, RecursiveMutex&> GetThreads()const noexcept = 0;
+		virtual void AccessThreads(const std::function<void(CSpan<PThread>)>& accessFn)const noexcept = 0;
 	};
 }
 

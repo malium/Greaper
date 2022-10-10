@@ -9,7 +9,6 @@
 #define CORE_PROPERTY_H 1
 
 #include <utility>
-
 #include "Memory.h"
 #include "Base/PropertyValidator.h"
 //#include "Base/PropertyConverter.h"
@@ -38,9 +37,9 @@ namespace greaper
 		virtual bool IsConstant()const noexcept = 0;
 		virtual bool IsStatic()const noexcept = 0;
 		virtual bool SetValueFromString(const String& value) noexcept = 0;
-		virtual const String& GetStringValue()const noexcept = 0;
+		virtual void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept = 0;
 		virtual ModificationEvent_t* GetOnModificationEvent()const noexcept = 0;
-		virtual WPtr<IGreaperLibrary> GetLibrary()const noexcept = 0;
+		virtual const WPtr<IGreaperLibrary>& GetLibrary()const noexcept = 0;
 	};
 
 	template<class T, class _Alloc_ = GenericAllocator>
@@ -78,7 +77,7 @@ namespace greaper
 		bool m_Static;		// Created at the start of the program cannot be saved
 		bool m_Constant;	// Cannot be modified
 
-		TProperty(WPtr<IGreaperLibrary> library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
+		INLINE TProperty(WPtr<IGreaperLibrary> library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
 			bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr) noexcept
 			:m_Value(std::move(initialValue))
 			, m_PropertyName(propertyName)
@@ -91,7 +90,7 @@ namespace greaper
 		{
 			if (m_PropertyValidator == nullptr)
 			{
-				m_PropertyValidator = new PropertyValidatorNone<T>();
+				m_PropertyValidator = Construct<PropertyValidatorNone<T>>();
 			}
 			m_PropertyValidator->Validate(m_Value, &m_Value);
 			m_StringValue = ReflectedPlainType<T>::ToString(m_Value);
@@ -108,46 +107,45 @@ namespace greaper
 		TProperty(const TProperty&) = delete;
 		TProperty& operator=(const TProperty&) = delete;
 
-		[[nodiscard]] const String& GetPropertyName()const noexcept override
+		[[nodiscard]] INLINE const String& GetPropertyName()const noexcept override
 		{
 			return m_PropertyName;
 		}
-		[[nodiscard]] const String& GetPropertyInfo()const noexcept override
+		[[nodiscard]] INLINE const String& GetPropertyInfo()const noexcept override
 		{
 			return m_PropertyInfo;
 		}
-		[[nodiscard]] TPropertyValidator<T>* GetPropertyValidator()const noexcept
+		[[nodiscard]] INLINE TPropertyValidator<T>* GetPropertyValidator()const noexcept
 		{
 			return m_PropertyValidator;
 		}
-		[[nodiscard]] bool IsConstant()const noexcept override
+		[[nodiscard]] INLINE bool IsConstant()const noexcept override
 		{
 			return m_Constant;
 		}
-		[[nodiscard]] bool IsStatic()const noexcept override
+		[[nodiscard]] INLINE bool IsStatic()const noexcept override
 		{
 			return m_Static;
 		}
 		bool SetValue(const T& value, bool triggerEvent = true) noexcept;
-		bool SetValueFromString(const String& value) noexcept override
+		INLINE bool SetValueFromString(const String& value) noexcept override
 		{
-			//return SetValue(TPropertyConverter<T>::FromString(value));
 			T temp;
 			ReflectedPlainType<T>::FromString(temp, value);
 			return SetValue(temp);
 		}
-		[[nodiscard]] const T& GetValue()const noexcept
+		INLINE void AccessValue(const std::function<void(const T&)>& accessFn)const noexcept
 		{
-			auto lock = SharedLock(m_Mutex);
-			return m_Value;
+			auto lck = SharedLock(m_Mutex);
+			accessFn(m_Value);
 		}
-		[[nodiscard]] const String& GetStringValue()const noexcept override
+		INLINE void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept
 		{
-			auto lock = SharedLock(m_Mutex);
-			return m_StringValue;
+			auto lck = SharedLock(m_Mutex);
+			accessFn(m_StringValue);
 		}
-		[[nodiscard]] ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
-		[[nodiscard]] WPtr<IGreaperLibrary> GetLibrary()const noexcept override { return m_Library; }
+		[[nodiscard]] INLINE ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
+		[[nodiscard]] INLINE const WPtr<IGreaperLibrary>& GetLibrary()const noexcept override { return m_Library; }
 	};
 
 	// Greaper Core specialization
@@ -160,8 +158,6 @@ namespace greaper
 	// A way to retrieve the RTI_ID from the type Property
 	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
-
-	
 }
 
 #endif /* CORE_PROPERTY_H */

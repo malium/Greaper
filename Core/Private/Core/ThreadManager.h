@@ -59,9 +59,10 @@ namespace greaper::core
 		
 		INLINE ThreadDestructionEvent_t* GetThreadDestructionEvent()const noexcept override { return &m_ThreadDestructionEvent; }
 
-		INLINE std::tuple<CSpan<PThread>, RecursiveMutex&> GetThreads()const noexcept override
+		INLINE void AccessThreads(const std::function<void(CSpan<PThread>)>& accessFn)const noexcept override
 		{
-			return { CreateSpan(m_Threads), (RecursiveMutex&)m_ThreadMutex };
+			auto lck = Lock(m_ThreadMutex);
+			accessFn(CreateSpan(m_Threads));
 		}
 	};
 }

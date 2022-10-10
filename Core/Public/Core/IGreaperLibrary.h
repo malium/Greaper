@@ -94,7 +94,7 @@ namespace greaper
 
 		void OnNewLog(const SPtr<IInterface>& newInterface)noexcept;
 
-		void OnLogActivation(bool active, IInterface* oldLog, const SPtr<IInterface>& newLog)noexcept;
+		void OnLogActivation(bool active, UNUSED IInterface* oldLog, const SPtr<IInterface>& newLog)noexcept;
 
 		void DumpStoredLogs()noexcept;
 
@@ -375,7 +375,7 @@ namespace greaper
 	}
 
 	template<class T>
-	bool TProperty<T>::SetValue(const T& value, bool triggerEvent) noexcept
+	inline bool TProperty<T>::SetValue(const T& value, bool triggerEvent) noexcept
 	{
 		VerifyNot(m_Library.expired(), "Trying to set a value to a disconnected Property.");
 		auto lib = m_Library.lock();

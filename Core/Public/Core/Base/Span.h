@@ -395,13 +395,13 @@ namespace greaper
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE constexpr Span<T> CreateSpan(Vector<T, _Alloc_>& vec)noexcept
+	inline constexpr Span<T> CreateSpan(Vector<T, _Alloc_>& vec)noexcept
 	{
 		return Span<T>([vec]() {return vec.size(); }, [vec](std::size_t idx) -> T& {return vec.at(idx); });
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE constexpr CSpan<T> CreateSpan(const Vector<T, _Alloc_>& vec)noexcept
+	inline constexpr CSpan<T> CreateSpan(const Vector<T, _Alloc_>& vec)noexcept
 	{
 		return CSpan<T>([vec]() {return vec.size(); }, [vec](std::size_t idx) -> const T& {return vec.at(idx); });
 	}

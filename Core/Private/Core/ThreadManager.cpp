@@ -68,23 +68,22 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	{
 		const auto& other = (const PThreadManager&)oldDefault;
 		// Copy threads
-		auto lckTh = Lock(m_ThreadMutex);
-		auto rangeTuple = other->GetThreads();
-		auto lckRng = Lock(std::get<1>(rangeTuple));
-		const auto& span = std::get<0>(rangeTuple);
-		const auto thCount = span.GetSizeFn();
-		if (m_Threads.capacity() < thCount)
-			m_Threads.reserve(thCount);
+		other->AccessThreads([this](CSpan<PThread> threads)
+			{
+				auto lck = Lock(m_ThreadMutex);
+				const auto count = threads.GetSizeFn();
+				if (m_Threads.capacity() < count)
+					m_Threads.reserve(count);
+				for (const auto& thread : threads)
+				{
+					if (thread == nullptr)
+						continue;
 
-		for (const auto& thread : span)
-		{
-			if (thread == nullptr)
-				continue;
-	
-			m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
-			m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
-			m_Threads.push_back(thread);
-		}
+					m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
+					m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
+					m_Threads.push_back(thread);
+				}
+			});
 	}
 	else
 	{

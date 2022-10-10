@@ -56,7 +56,7 @@ namespace greaper::core
 
 		void OnActivation(const SPtr<IInterface>& oldDefault)noexcept override;
 
-		void OnDeactivation(const SPtr<IInterface>& newDefault)noexcept override;
+		void OnDeactivation(UNUSED const SPtr<IInterface>& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 
@@ -72,7 +72,11 @@ namespace greaper::core
 
 		void RemoveLogWriter(sizet writerID)noexcept override;
 
-		std::tuple<CSpan<LogData>, Mutex&> GetMessages()const noexcept override;
+		INLINE void AccessMessages(const std::function<void(CSpan<LogData>)>& accessFn)const noexcept override
+		{
+			auto lck = Lock(m_MessagesMutex);
+			accessFn(CreateSpan(m_Messages));
+		}
 
 		void Log(LogLevel_t level, const String& message, StringView libraryName)noexcept override;
 

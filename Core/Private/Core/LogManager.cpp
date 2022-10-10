@@ -4,12 +4,13 @@
 ***********************************************************************************/
 
 #include "LogManager.h"
-#include <Core/IApplication.h>
+#include "Application.h"
 
 using namespace greaper;
 using namespace core;
 
-greaper::SPtr<greaper::core::LogManager> gLogManager = {};
+SPtr<LogManager> gLogManager = {};
+extern SPtr<Application> gApplication;
 
 void LogManager::OnAsyncChanged(IProperty* prop)
 {
@@ -17,10 +18,12 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 		return;
 
 	auto* async = (AsyncLogProp_t*)prop;
-	if (m_Threaded == async->GetValue())
+	bool asyncVal;
+	async->AccessValue([&asyncVal](const bool& b) { asyncVal = b; });
+	if (m_Threaded == asyncVal)
 		return; // no change
 
-	if (async->GetValue())
+	if (asyncVal)
 		StartThreadMode();
 	else
 		StopThreadMode();
@@ -30,7 +33,7 @@ void LogManager::StartThreadMode()
 {
 	VerifyNot(m_Library.expired(), "Trying to set as async LogManager, but its library has expired.");
 	auto lib = m_Library.lock();
-	auto wApp = lib->GetApplication();
+	/*auto wApp = lib->GetApplication();
 	if (wApp.expired())
 	{
 		lib->LogError("Trying to set as async LogManager, but this library does not have an application connected.");
@@ -38,8 +41,8 @@ void LogManager::StartThreadMode()
 		GetAsyncLog().lock()->SetValue(false, true);
 		return;
 	}
-	auto app = wApp.lock();
-	auto thmgrRes = app->GetActiveInterface(IThreadManager::InterfaceUUID);
+	auto app = wApp.lock();*/
+	auto thmgrRes = gApplication->GetActiveInterface(IThreadManager::InterfaceUUID);
 	if (thmgrRes.HasFailed())
 	{
 		lib->LogError("Trying to set as async LogManager, but couldn't obtain a ThreadManager, reason: " + thmgrRes.GetFailMessage());
@@ -149,22 +152,25 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	if (oldDefault != nullptr)
 	{
 		const auto& other = (const PLogManager&)oldDefault;
-		auto lckMsg = Lock(m_MessagesMutex);
-		auto rangeTuple = other->GetMessages();
-		auto lckRng = Lock(std::get<1>(rangeTuple));
-		auto messages = std::get<0>(rangeTuple);
-		const auto msgCount = messages.GetSizeFn();
-		if (m_Messages.capacity() < msgCount)
-			m_Messages.reserve(msgCount);
-
-		for (const auto& msg : messages)
-		{
-			m_Messages.push_back(msg);
-		}
+		
+		other->AccessMessages([this](CSpan<LogData> messages)
+			{
+				auto lckMsg = Lock(m_MessagesMutex);
+				const auto msgCount = messages.GetSizeFn();
+				if (m_Messages.capacity() < msgCount)
+					m_Messages.reserve(msgCount);
+				for (const auto& msg : messages)
+				{
+					m_Messages.push_back(msg);
+				}
+			});
 	}
 	
 	auto asyncProp = GetAsyncLog().lock();
-	if (asyncProp->GetValue())
+
+	bool asyncVal;
+	asyncProp->AccessValue([&asyncVal](const bool& b) { asyncVal = b; });
+	if (asyncVal)
 	{
 		StartThreadMode();
 	}
@@ -269,11 +275,6 @@ void LogManager::RemoveLogWriter(sizet writerID) noexcept
 		return;
 
 	m_Writers[writerID].reset();
-}
-
-std::tuple<CSpan<LogData>, Mutex&> LogManager::GetMessages() const noexcept
-{
-	return { CreateSpan(m_Messages), (Mutex&)m_MessagesMutex };
 }
 
 void LogManager::Log(LogLevel_t level, const String& message, StringView libraryName)noexcept
