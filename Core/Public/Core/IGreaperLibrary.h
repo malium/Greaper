@@ -131,9 +131,13 @@ namespace greaper
 
 	INLINE void IGreaperLibrary::InitLibrary(PLibrary lib, SPtr<IApplication> app) noexcept
 	{
+		using namespace std::placeholders;
+
 		VerifyEqual(m_InitializationState, InitState_t::Stopped, "Trying to initialize a library that is not fully stopped.");
 
-		using namespace std::placeholders;
+		Log(Format("Initializing %s library ver. %d.%d.%d.%d...", GetLibraryName().data(),
+			VERSION_GET_MAJOR(GetLibraryVersion()), VERSION_GET_MINOR(GetLibraryVersion()),
+			VERSION_GET_PATCH(GetLibraryVersion()), VERSION_GET_REV(GetLibraryVersion())));
 
 		m_InitializationState = InitState_t::Starting;
 
@@ -170,6 +174,7 @@ namespace greaper
 																	{ OnNewLog(newInterface); });
 		}
 
+		Log(Format("%s has been initialized.", GetLibraryName().data()));
 		m_InitializationState = InitState_t::Started;
 	}
 
@@ -177,17 +182,21 @@ namespace greaper
 	{
 		VerifyEqual(m_InitializationState, InitState_t::Started, "Trying to deinitialize a library that is not fully started.");
 
-		m_InitializationState = InitState_t::Stopping;
+		Log(Format("Deinitializing %s...", GetLibraryName().data()));
 
-		m_OnLogActivation.Disconnect();
-		m_OnNewLog.Disconnect();
-		m_LogActivated = false;
-		m_LogManager.reset();
+		m_InitializationState = InitState_t::Stopping;
 
 		DeinitReflection();
 		DeinitProperties();
 		DeinitManagers();
 		Deinitialize();
+
+		Log(Format("%s has been deinitialized.", GetLibraryName().data()));
+
+		m_OnLogActivation.Disconnect();
+		m_OnNewLog.Disconnect();
+		m_LogActivated = false;
+		m_LogManager.reset();
 
 		m_InitializationState = InitState_t::Stopped;
 	}
@@ -318,6 +327,10 @@ namespace greaper
 			m_LogManager->_Log(log);
 		m_InitLogs.clear();
 	}
+	
+	INLINE bool IGreaperLibrary::IsInitialized() const noexcept { return m_InitializationState == InitState_t::Started; }
+	
+	INLINE InitState_t IGreaperLibrary::GetInitializationState() const noexcept { return m_InitializationState; }
 
 	template<class T>
 	class TGreaperLibrary : public IGreaperLibrary
@@ -356,10 +369,6 @@ namespace greaper
 		}
 		return Result::CreateSuccess(prop);
 	}
-	
-	INLINE bool IGreaperLibrary::IsInitialized() const noexcept { return m_InitializationState == InitState_t::Started; }
-	
-	INLINE InitState_t IGreaperLibrary::GetInitializationState() const noexcept { return m_InitializationState; }
 	
 	template<class T>
 	INLINE TResult<WProperty<T>> GetProperty(const WPtr<IGreaperLibrary>& library, const String& name)
@@ -409,6 +418,70 @@ namespace greaper
 		if (triggerEvent)
 			m_OnModificationEvent.Trigger(this);
 		return true;
+	}
+
+	//// Interface methods to avoid circle dependency
+	INLINE void IInterface::Initialize(WPtr<IGreaperLibrary> library) noexcept
+	{
+		VerifyEqual(m_InitializationState, InitState_t::Stopped, "Trying to initialize an already initialized Interface '%s'.", GetInterfaceName().data());
+
+		auto lib = library.lock();
+		lib->Log(Format("Initializing %s from %s...", GetInterfaceName().data(), lib->GetLibraryName().data()));
+
+		m_InitializationState = InitState_t::Starting;
+		m_Library = std::move(library);
+
+		OnInitialization();
+
+		lib->Log(Format("%s from %s has been initialized.", GetInterfaceName().data(), lib->GetLibraryName().data()));
+		m_InitializationState = InitState_t::Started;
+		m_InitEvent.Trigger(true);
+	}
+
+	INLINE void IInterface::Deinitialize() noexcept
+	{
+		VerifyEqual(m_InitializationState, InitState_t::Started, "Trying to deinitialize an already deinitialized Interface '%s'.", GetInterfaceName().data());
+
+		auto lib = m_Library.lock();
+		lib->Log(Format("Deinitializing %s from %s...", GetInterfaceName().data(), lib->GetLibraryName().data()));
+
+		m_InitializationState = InitState_t::Stopping;
+		OnDeinitialization();
+
+		m_Library.reset();
+
+		lib->Log(Format("%s from %s has been deinitialized.", GetInterfaceName().data(), lib->GetLibraryName().data()));
+
+		m_InitializationState = InitState_t::Stopped;
+		m_InitEvent.Trigger(false);
+	}
+
+	INLINE void IInterface::Activate(const SPtr<IInterface>& oldDefault) noexcept
+	{
+		VerifyEqual(m_ActiveState, InitState_t::Stopped, "Trying to activate an already activated Interface '%s'.", GetInterfaceName().data());
+
+		auto lib = m_Library.lock();
+		lib->Log(Format("Activating %s from %s...", GetInterfaceName().data(), lib->GetLibraryName().data()));
+
+		m_ActiveState = InitState_t::Starting;
+		OnActivation(oldDefault);
+
+		m_ActiveState = InitState_t::Started;
+		m_ActivationEvent.Trigger(true, this, (SPtr<IInterface>)oldDefault);
+	}
+
+	INLINE void IInterface::Deactivate(const SPtr<IInterface>& newDefault) noexcept
+	{
+		VerifyEqual(m_ActiveState, InitState_t::Started, "Trying to deactivate an already deactivated Interface '%s'.", GetInterfaceName().data());
+
+		auto lib = m_Library.lock();
+		lib->Log(Format("Deactivating %s from %s...", GetInterfaceName().data(), lib->GetLibraryName().data()));
+
+		m_ActiveState = InitState_t::Stopping;
+		OnDeactivation(newDefault);
+
+		m_ActiveState = InitState_t::Stopped;
+		m_ActivationEvent.Trigger(false, this, (SPtr<IInterface>)newDefault);
 	}
 }
 

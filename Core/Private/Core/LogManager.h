@@ -15,6 +15,8 @@
 #include <Core/IThreadManager.h>
 #include <Core/MPMCTaskScheduler.h>
 
+#define LOGMANAGER_USE_MPMC 1
+
 namespace greaper::core
 {
 	class LogManager final : public ILogManager
@@ -28,13 +30,18 @@ namespace greaper::core
 
 		AsyncLogProp_t::ModificationEventHandler_t m_OnAsyncProp;
 
+#if !LOGMANAGER_USE_MPMC
 		Vector<LogData> m_QueuedMessages;
 		Mutex m_QueueMutex;
 		Signal m_QueueSignal;
+#endif
 		bool m_Threaded;
 		Mutex m_WriterMutex;
 		Vector<SPtr<ILogWriter>> m_Writers;
 		PThread m_AsyncThread;
+#if LOGMANAGER_USE_MPMC
+		SPtr<MPMCTaskScheduler> m_Scheduler;
+#endif
 
 		Vector<LogData> m_Messages;
 		mutable Mutex m_MessagesMutex;

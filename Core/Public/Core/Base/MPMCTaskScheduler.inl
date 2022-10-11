@@ -1,4 +1,3 @@
-#include "MPMCTaskScheduler.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
@@ -41,17 +40,18 @@ namespace greaper
 	INLINE MPMCTaskScheduler::~MPMCTaskScheduler() noexcept
 	{
 		Stop();
+		m_This.reset();
 	}
 
-	INLINE sizet MPMCTaskScheduler::GetWorkerCount() const noexcept { LOCK(m_TaskWorkersMutex); return m_TaskWorkers.size(); }
+	INLINE sizet MPMCTaskScheduler::GetWorkerCount() const noexcept { auto lck = SharedLock(m_TaskWorkersMutex); return m_TaskWorkers.size(); }
 
-	INLINE EmptyResult MPMCTaskScheduler::SetWorkerCount(sizet count) noexcept
+	inline EmptyResult MPMCTaskScheduler::SetWorkerCount(sizet count) noexcept
 	{
 		m_TaskWorkersMutex.lock();
 		if (m_TaskWorkers.size() == count)
 		{
 			m_TaskWorkersMutex.unlock();
-			return;
+			return Result::CreateSuccess();
 		}
 		// Add new workers
 		if (m_TaskWorkers.size() < count)
@@ -98,10 +98,11 @@ namespace greaper
 				m_TaskWorkers.erase(m_TaskWorkers.begin() + (sz - 1));
 			}
 		}
+		return Result::CreateSuccess();
 	}
-	INLINE TResult<Impl::HTask> MPMCTaskScheduler::AddTask(StringView name, std::function<void()> workFn) noexcept
+	inline TResult<Impl::HTask> MPMCTaskScheduler::AddTask(StringView name, std::function<void()> workFn) noexcept
 	{
-		auto wkLck = Lock(m_TaskWorkersMutex); // we keep the lock so if there's only 1 task worker and someone wants to remove it, we can still schedule this task
+		auto wkLck = SharedLock(m_TaskWorkersMutex); // we keep the lock so if there's only 1 task worker and someone wants to remove it, we can still schedule this task
 		if (!AreThereAnyAvailableWorker())
 		{
 			return Result::CreateFailure<Impl::HTask>(
@@ -124,7 +125,7 @@ namespace greaper
 			taskPtr->m_State = TaskState_t::Inactive;
 			taskPtr->m_WorkFn = std::move(workFn);
 		}
-		SPtr<Impl::Task> task{ taskPtr };
+		SPtr<Impl::Task> task{ taskPtr , &Impl::EmptyDeleter<Impl::Task> };
 
 		Impl::HTask hTask;
 		hTask.m_Scheduler = (WPtr<MPMCTaskScheduler>)m_This;
@@ -137,7 +138,7 @@ namespace greaper
 		
 		return Result::CreateSuccess(hTask);
 	}
-	INLINE TResult<Vector<Impl::HTask>> MPMCTaskScheduler::AddTasks(const Vector<std::tuple<StringView, std::function<void()>>>& tasks) noexcept
+	inline TResult<Vector<Impl::HTask>> MPMCTaskScheduler::AddTasks(const Vector<std::tuple<StringView, std::function<void()>>>& tasks) noexcept
 	{
 		if(tasks.empty())
 		{
@@ -146,7 +147,7 @@ namespace greaper
 		}
 
 		// we keep the lock so if there's only 1 task worker and someone wants to remove it, we can still schedule this task
-		auto wkLck = Lock(m_TaskWorkersMutex);
+		auto wkLck = SharedLock(m_TaskWorkersMutex);
 		if (!AreThereAnyAvailableWorker())
 		{
 			return Result::CreateFailure<Vector<Impl::HTask>>(
@@ -186,5 +187,105 @@ namespace greaper
 		m_TaskQueueSignal.notify_one();
 
 		return Result::CreateSuccess(hTasks);
+	}
+
+	INLINE void MPMCTaskScheduler::WaitUntilTaskIsFinish(const Impl::HTask& hTask) noexcept
+	{
+		if (hTask.m_Scheduler.expired() || hTask.m_Task.expired())
+			return;
+		if (hTask.m_Scheduler.lock() != m_This)
+			return;
+		auto task = hTask.m_Task.lock();
+
+		auto lck = UniqueLock<decltype(m_TaskQueueMutex)>(m_TaskQueueMutex);
+		while (Contains(m_TaskQueue, task))
+			m_TaskQueueSignal.wait(lck);
+	}
+	INLINE void MPMCTaskScheduler::WaitUntilFinishAllTasks() noexcept
+	{
+		// Don't add more tasks nor change the amount of workers
+		auto wkLck = Lock(m_TaskWorkersMutex);
+
+		// Wait until no more tasks
+		auto lck = UniqueLock<decltype(m_TaskQueueMutex)>(m_TaskQueueMutex);
+		while (!m_TaskQueue.empty())
+			m_TaskQueueSignal.wait(lck);
+	}
+	INLINE const String& MPMCTaskScheduler::GetName() const noexcept { return m_Name; }
+
+	INLINE void MPMCTaskScheduler::Stop() noexcept
+	{
+		SetWorkerCount(0);
+		
+		for (auto& task : m_TaskQueue)
+		{
+			task->m_State = TaskState_t::InProgress;
+			task->m_WorkFn();
+			task->m_State = TaskState_t::Completed;
+			Destroy(task.get());
+		}
+		m_TaskQueue.clear();
+		for (auto* task : m_FreeTaskPool)
+		{
+			Destroy(task);
+		}
+	}
+	INLINE bool MPMCTaskScheduler::AreThereAnyAvailableWorker() const noexcept
+	{
+		if (m_TaskWorkers.empty())
+			return false; // There are no workers!
+
+		for (auto& worker : m_TaskWorkers)
+		{
+			if (worker != nullptr)
+				return true; // An active worker found!
+		}
+		return false; // There is no active worker
+	}
+	INLINE MPMCTaskScheduler::MPMCTaskScheduler(WThreadManager threadMgr, StringView name, sizet workerCount)noexcept
+		:m_ThreadManager(std::move(threadMgr))
+		,m_Name(name)
+		,m_This(this, &Impl::EmptyDeleter<MPMCTaskScheduler>)
+	{
+		SetWorkerCount(workerCount);
+	}
+	INLINE bool MPMCTaskScheduler::CanWorkerContinueWorking(sizet workerID)const noexcept
+	{
+		auto lck = SharedLock(m_TaskWorkersMutex);
+		return m_TaskWorkers.size() > workerID && m_TaskWorkers[workerID] != nullptr;
+	}
+	INLINE void MPMCTaskScheduler::WorkerFn(MPMCTaskScheduler& scheduler, sizet id) noexcept
+	{
+		while (true)
+		{
+			auto taskLck = UniqueLock<decltype(m_TaskQueueMutex)>(scheduler.m_TaskQueueMutex);
+			bool canWork = scheduler.CanWorkerContinueWorking(id);
+			
+			// Wait for work or an stop request
+			while (scheduler.m_TaskQueue.empty() && canWork)
+			{
+				scheduler.m_TaskQueueSignal.wait(taskLck);
+				canWork = scheduler.CanWorkerContinueWorking(id);
+			}
+
+			// Stop working
+			if (!canWork)
+				break;
+
+			// Do one task
+			if (!scheduler.m_TaskQueue.empty())
+			{
+				auto& task = scheduler.m_TaskQueue.front();
+				task->m_State = TaskState_t::InProgress;
+				task->m_WorkFn();
+				task->m_State = TaskState_t::Completed;
+				
+				{
+					auto freeLck = Lock(scheduler.m_FreeTaskPoolMutex);
+					scheduler.m_FreeTaskPool.push_back(task.get());
+					scheduler.m_TaskQueue.pop_front();
+				}
+			}
+		}
 	}
 }

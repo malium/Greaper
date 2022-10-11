@@ -70,7 +70,7 @@ void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
 
 
 
-	for (auto mgr : m_Managers)
+	for (const auto& mgr : m_Managers)
 	{
 		mgr->Initialize((WGreaperLib)gCoreLibrary);
 		m_Application->RegisterInterface(mgr);

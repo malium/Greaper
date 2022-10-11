@@ -9,7 +9,6 @@
 #define CORE_INTERFACE_H 1
 
 #include <utility>
-//#include <span>
 
 #include "Uuid.h"
 #include "Event.h"
@@ -112,54 +111,6 @@ namespace greaper
 	}
 
 	inline const WPtr<IGreaperLibrary>& IInterface::GetLibrary()const noexcept { return m_Library; }
-
-	INLINE void IInterface::Initialize(WPtr<IGreaperLibrary> library) noexcept
-	{
-		VerifyEqual(m_InitializationState, InitState_t::Stopped, "Trying to initialize an already initialized Interface '%s'.", GetInterfaceName().data());
-		
-		m_InitializationState = InitState_t::Starting;
-		m_Library = std::move(library);
-
-		OnInitialization();
-
-		m_InitializationState = InitState_t::Started;
-		m_InitEvent.Trigger(true);
-	}
-
-	INLINE void IInterface::Deinitialize() noexcept
-	{
-		VerifyEqual(m_InitializationState, InitState_t::Started, "Trying to deinitialize an already deinitialized Interface '%s'.", GetInterfaceName().data());
-
-		m_InitializationState = InitState_t::Stopping;
-		OnDeinitialization();
-
-		m_Library.reset();
-
-		m_InitializationState = InitState_t::Stopped;
-		m_InitEvent.Trigger(false);
-	}
-
-	INLINE void IInterface::Activate(const SPtr<IInterface>& oldDefault) noexcept
-	{
-		VerifyEqual(m_ActiveState, InitState_t::Stopped, "Trying to activate an already activated Interface '%s'.", GetInterfaceName().data());
-
-		m_ActiveState = InitState_t::Starting;
-		OnActivation(oldDefault);
-
-		m_ActiveState = InitState_t::Started;
-		m_ActivationEvent.Trigger(true, this, (SPtr<IInterface>)oldDefault);
-	}
-
-	INLINE void IInterface::Deactivate(const SPtr<IInterface>& newDefault) noexcept
-	{
-		VerifyEqual(m_ActiveState, InitState_t::Started, "Trying to deactivate an already deactivated Interface '%s'.", GetInterfaceName().data());
-
-		m_ActiveState = InitState_t::Stopping;
-		OnDeactivation(newDefault);
-
-		m_ActiveState = InitState_t::Stopped;
-		m_ActivationEvent.Trigger(false, this, (SPtr<IInterface>)newDefault);
-	}
 
 	INLINE bool IInterface::IsActive() const noexcept { return m_ActiveState == InitState_t::Started; }
 

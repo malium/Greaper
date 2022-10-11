@@ -607,17 +607,32 @@ namespace std
 namespace greaper
 {
 	template<class T, class _Alloc_>
-	ssizet IndexOf(const Vector<T, _Alloc_>& container, const T& element) noexcept
+	INLINE ssizet IndexOf(const Vector<T, _Alloc_>& container, const T& element) noexcept
 	{
-		for (std::size_t i = 0; i < container.size(); ++i)
+		for (auto it = container.cbegin(); it != container.cend(); ++it)
+		{
+			if ((*it) == element)
+				return std::distance(container.begin(), it);
+		}
+		/*for (std::size_t i = 0; i < container.size(); ++i)
 		{
 			if (container[i] == element)
 				return (ssizet)i;
+		}*/
+		return -1;
+	}
+	template<class T, class _Alloc_>
+	INLINE ssizet IndexOf(const Deque<T, _Alloc_>& container, const T& element) noexcept
+	{
+		for (auto it = container.cbegin(); it != container.cend(); ++it)
+		{
+			if ((*it) == element)
+				return std::distance(container.begin(), it);
 		}
 		return -1;
 	}
 	template<class T, std::size_t N>
-	ssizet IndexOf(T(&arr)[N], const T& element) noexcept
+	INLINE ssizet IndexOf(T(&arr)[N], const T& element) noexcept
 	{
 		for (std::size_t i = 0; i < N; ++i)
 		{
@@ -627,13 +642,17 @@ namespace greaper
 		return -1;
 	}
 	template<class T, class _Alloc_>
-	bool Contains(const Vector<T, _Alloc_>& container, const T& elem) noexcept
+	INLINE bool Contains(const Vector<T, _Alloc_>& container, const T& elem) noexcept
 	{
 		return IndexOf<T, _Alloc_>(container, elem) >= 0;
 	}
-
+	template<class T, class _Alloc_>
+	INLINE bool Contains(const Deque<T, _Alloc_>& container, const T& elem) noexcept
+	{
+		return IndexOf<T, _Alloc_>(container, elem) >= 0;
+	}
 	template<class T, std::size_t N>
-	bool Contains(T(&arr)[N], const T& elem) noexcept
+	INLINE bool Contains(T(&arr)[N], const T& elem) noexcept
 	{
 		return IndexOf<T, N>(arr, elem);
 	}

@@ -136,7 +136,7 @@ void Application::OnDeinitialization() noexcept
 
 	for (auto& lib : m_Libraries)
 	{
-		auto gLib = lib.Lib;
+		auto& gLib = lib.Lib;
 		if (gLib->GetLibraryUuid() == ownLib->GetLibraryUuid())
 		{
 			lib.IntefaceNameMap.clear();
@@ -651,7 +651,7 @@ TResult<PInterface> Application::GetActiveInterface(const Uuid& interfaceUUID) c
 
 	auto& iface = m_ActiveInterfaces[index];
 
-	return Result::CreateSuccess<PInterface>(std::move(iface));
+	return Result::CreateSuccess<PInterface>(iface);
 }
 
 TResult<PInterface> Application::GetActiveInterface(const StringView& interfaceName) const

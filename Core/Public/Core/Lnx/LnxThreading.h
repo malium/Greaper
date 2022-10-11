@@ -204,7 +204,8 @@ namespace greaper
 			}
 			static void WaitRW(SignalHandle& handle, RWMutexHandle& mutexHandle) noexcept
 			{
-				Break("ConditionVariables and RWMutex don't currently work together under Linux.");
+
+				Break("Signal and RWMutex don't currently work together under Linux.");
 			}
 			static void WaitRecursive(SignalHandle& handle, RecursiveMutexHandle& mutexHandle) noexcept
 			{
@@ -212,7 +213,7 @@ namespace greaper
 			}
 			static void WaitShared(SignalHandle& handle, RWMutexHandle& mutexHandle) noexcept
 			{
-				Break("ConditionVariables and RWMutex don't currently work together under Linux.");
+				Break("Signal and RWMutex don't currently work together under Linux.");
 			}
 			static bool WaitFor(SignalHandle& handle, MutexHandle& mutexHandle, uint32 millis) noexcept
 			{
@@ -226,7 +227,7 @@ namespace greaper
 			}
 			static bool WaitForRW(SignalHandle& handle, RWMutexHandle mutexHandle, uint32 millis) noexcept
 			{
-				Break("ConditionVariables and RWMutex don't currently work together under Linux.");
+				Break("Signal and RWMutex don't currently work together under Linux.");
 				return true;
 			}
 			static bool WaitForRecursive(SignalHandle& handle, RecursiveMutexHandle mutexHandle, uint32 millis) noexcept
@@ -241,7 +242,7 @@ namespace greaper
 			}
 			static bool WaitForShared(SignalHandle& handle, RWMutexHandle& mutexHandle, uint32 millis) noexcept
 			{
-				Break("ConditionVariables and RWMutex don't currently work together under Linux.");
+				Break("Signal and RWMutex don't currently work together under Linux.");
 				return true;
 			}
 			static void Invalidate(UNUSED SignalHandle& handle) noexcept

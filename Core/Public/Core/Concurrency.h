@@ -323,7 +323,7 @@ namespace greaper
 			m_Mutex.lock();
 		}
 
-		Lock(Mutex& mtx, AdoptLock)
+		Lock(Mtx& mtx, AdoptLock)
 			:m_Mutex(mtx)
 		{
 
@@ -473,7 +473,6 @@ namespace greaper
 		void wait(const UniqueLock<Mtx>& lock) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
-			Impl::SignalImpl::Wait(m_Handle, *lock.mutex()->GetHandle());
 			Wait(lock);
 		}
 

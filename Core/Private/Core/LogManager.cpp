@@ -31,6 +31,9 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 
 void LogManager::StartThreadMode()
 {
+#if LOGMANAGER_USE_MPMC
+	m_Threaded = true;
+#else
 	VerifyNot(m_Library.expired(), "Trying to set as async LogManager, but its library has expired.");
 	auto lib = m_Library.lock();
 
@@ -50,6 +53,7 @@ void LogManager::StartThreadMode()
 		GetAsyncLog().lock()->SetValue(false, true);
 		return;
 	}
+
 	ThreadConfig thcfg;
 	thcfg.ThreadFN = [this]() { RunFn(); };
 	thcfg.Name = "AsyncLogger"sv;
@@ -64,26 +68,34 @@ void LogManager::StartThreadMode()
 		return;
 	}
 	m_AsyncThread = thRes.GetValue();
+#endif
 }
 
 void LogManager::StopThreadMode()
 {
+#if LOGMANAGER_USE_MPMC
 	m_Threaded = false;
+#else
+	//uint64 count = 0;
 	while (m_AsyncThread != nullptr)
 	{
+		//++count;
 		m_QueueSignal.notify_all();
 		if (m_AsyncThread->TryJoin())
 			m_AsyncThread.reset();
 		else
 			THREAD_YIELD();
 	}
+	//DEBUG_OUTPUT((std::to_string(count) + '\n').c_str());
+#endif
 }
 
 void LogManager::RunFn()
 {
+#if !LOGMANAGER_USE_MPMC
 	while (m_Threaded)
 	{
-		auto lck = UniqueLock<Mutex>(m_QueueMutex);
+		auto lck = UniqueLock<decltype(m_QueueMutex)>(m_QueueMutex);
 		while (m_QueuedMessages.empty() && m_Threaded)
 			m_QueueSignal.wait(lck);
 
@@ -95,6 +107,7 @@ void LogManager::RunFn()
 		if (!m_Threaded)
 			break; // stop thread
 	}
+#endif
 }
 
 void LogManager::LogToWriters(const LogData& data)
@@ -122,6 +135,7 @@ void LogManager::OnInitialization() noexcept
 			break;
 		}
 	}
+
 }
 
 void LogManager::OnDeinitialization() noexcept
@@ -129,8 +143,10 @@ void LogManager::OnDeinitialization() noexcept
 	if (m_Threaded)
 	{
 		m_Threaded = false;
+#if !LOGMANAGER_USE_MPMC
 		m_QueueSignal.notify_all();
 		m_AsyncThread->Join();
+#endif
 	}
 	{
 		LOCK(m_WriterMutex);
@@ -158,6 +174,18 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 			});
 	}
 	
+#if LOGMANAGER_USE_MPMC
+	auto thmgrRes = gApplication->GetActiveInterface(IThreadManager::InterfaceUUID);
+	if (thmgrRes.IsOk())
+	{
+		m_Scheduler = MPMCTaskScheduler::Create((WThreadManager)thmgrRes.GetValue(), "AsyncLogger"sv, 1);
+	}
+	else
+	{
+		m_Scheduler.reset();
+	}
+#endif
+
 	auto asyncProp = GetAsyncLog().lock();
 
 	bool asyncVal;
@@ -174,6 +202,9 @@ void LogManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexc
 	if (m_Threaded)
 	{
 		StopThreadMode();
+#if LOGMANAGER_USE_MPMC
+		m_Scheduler.reset();
+#endif
 	}
 	// clear messages
 	{
@@ -282,10 +313,17 @@ void LogManager::_Log(const LogData& data)noexcept
 	}
 	else
 	{
+#if LOGMANAGER_USE_MPMC
+		m_Scheduler->AddTask("LogTask", [data, this]()
+			{ 
+				LogToWriters(data);
+			});
+#else
 		m_QueueMutex.lock();
 		m_QueuedMessages.push_back(data);
 		m_QueueMutex.unlock();
 		m_QueueSignal.notify_one();
+#endif
 	}
 
 	{

@@ -40,7 +40,7 @@ namespace greaper::core
 
 		void Deinitialize()noexcept override;
 
-		uint32 GetLibraryVersion()const noexcept override { return 0; }
+		uint32 GetLibraryVersion()const noexcept override { return GREAPER_CORE_VERSION; }
 	};
 }
 
