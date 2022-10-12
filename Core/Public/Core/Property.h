@@ -37,6 +37,7 @@ namespace greaper
 		virtual bool IsConstant()const noexcept = 0;
 		virtual bool IsStatic()const noexcept = 0;
 		virtual bool SetValueFromString(const String& value) noexcept = 0;
+		virtual String GetStringValueCopy()const noexcept = 0;
 		virtual void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept = 0;
 		virtual ModificationEvent_t* GetOnModificationEvent()const noexcept = 0;
 		virtual const WPtr<IGreaperLibrary>& GetLibrary()const noexcept = 0;
@@ -134,10 +135,20 @@ namespace greaper
 			ReflectedPlainType<T>::FromString(temp, value);
 			return SetValue(temp);
 		}
+		INLINE [[nodiscard]] T GetValueCopy()const noexcept
+		{
+			auto lck = SharedLock(m_Mutex);
+			return { m_Value };
+		}
 		INLINE void AccessValue(const std::function<void(const T&)>& accessFn)const noexcept
 		{
 			auto lck = SharedLock(m_Mutex);
 			accessFn(m_Value);
+		}
+		INLINE [[nodiscard]] String GetStringValueCopy()const noexcept override
+		{
+			auto lck = SharedLock(m_Mutex);
+			return { m_StringValue };
 		}
 		INLINE void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept
 		{

@@ -152,10 +152,8 @@ void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 
 	auto appNameProp = gApplication->GetApplicationName().lock();
 	auto appVersionProp = gApplication->GetApplicationVersion().lock();
-	uint32 appVersion;
-	String appName;
-	appVersionProp->AccessValue([&appVersion](const uint32& u) { appVersion = u; });
-	appNameProp->AccessValue([&appName](const String& s) { appName = s; });
+	uint32 appVersion = appVersionProp->GetValueCopy();
+	String appName = appNameProp->GetValueCopy();
 	gCore->Log(Format("Successfully started %s! Version:%d.%d.%d.%d", appName.c_str(), VERSION_GET_MAJOR(appVersion),
 		VERSION_GET_MINOR(appVersion), VERSION_GET_PATCH(appVersion), VERSION_GET_REV(appVersion)));
 }
@@ -164,8 +162,7 @@ void GreaperCoreLibClose()
 {
 	using namespace greaper;
 
-	String appName;
-	gApplication->GetApplicationName().lock()->AccessValue([&appName](const String& s) { appName = s; });
+	String appName = gApplication->GetApplicationName().lock()->GetValueCopy();
 	gCore->Log(Format("Closing %s...", appName.c_str()));
 
 	gThreadManger.reset();
