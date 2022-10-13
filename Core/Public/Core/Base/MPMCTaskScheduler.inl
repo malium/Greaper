@@ -214,6 +214,7 @@ namespace greaper
 	INLINE const String& MPMCTaskScheduler::GetName() const noexcept { return m_Name; }
 	INLINE void MPMCTaskScheduler::OnNewManager(const PInterface& newInterface) noexcept
 	{
+		auto lck = SharedLock(m_TaskWorkersMutex);
 		if (newInterface == nullptr || newInterface->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
 			return;
 
@@ -224,6 +225,7 @@ namespace greaper
 	}
 	INLINE void MPMCTaskScheduler::OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface) noexcept
 	{
+		auto lck = SharedLock(m_TaskWorkersMutex);
 		if (active)
 			return;
 
