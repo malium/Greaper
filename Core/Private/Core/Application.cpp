@@ -72,7 +72,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 		}
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		iface->Activate(PInterface());
-		m_OnInterfaceActivation.Trigger((PInterface)iface);
+		m_OnInterfaceActivation.Trigger(iface);
 	}
 	m_InterfacesToAdd.clear();
 
@@ -83,7 +83,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 		const auto ifaceIDX = uuidIT->second;
 		auto& oiFace = m_ActiveInterfaces[ifaceIDX];
 		iface->Activate(oiFace);
-		m_OnInterfaceActivation.Trigger((PInterface)iface);
+		m_OnInterfaceActivation.Trigger(iface);
 		m_ActiveInterfaces[ifaceIDX] = iface;
 		oiFace->Deactivate(iface);
 	}

@@ -98,6 +98,12 @@ namespace greaper
 
 		SPtr<MPMCTaskScheduler> m_This;
 
+		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
+		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
+
+		void OnNewManager(const PInterface& newInterface)noexcept;
+		void OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface)noexcept;
+
 		void Stop()noexcept;
 
 		bool AreThereAnyAvailableWorker()const noexcept;

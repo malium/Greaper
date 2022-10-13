@@ -134,9 +134,7 @@ namespace greaper
 
 		void OnNewManager(const PInterface& newManager)noexcept
 		{
-			if (newManager == nullptr)
-				return;
-			if (newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
+			if (newManager == nullptr || newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
 				return;
 
 			m_Manager = (WPtr<IThreadManager>)newManager;

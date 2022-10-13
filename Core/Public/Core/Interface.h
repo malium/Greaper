@@ -46,7 +46,7 @@ namespace greaper
 
 	public:
 		using InitializationEvt_t = Event<bool>;
-		using ActivationEvt_t = Event<bool, IInterface*, SPtr<IInterface>>;
+		using ActivationEvt_t = Event<bool, IInterface*, const SPtr<IInterface>&>;
 
 		IInterface()noexcept;
 		virtual ~IInterface()noexcept = default;

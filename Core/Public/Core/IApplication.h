@@ -47,7 +47,7 @@ namespace greaper
 		
 		using OnCloseEvent_t = Event<void>;
 
-		using OnInterfaceActivationEvent_t = Event<PInterface>;
+		using OnInterfaceActivationEvent_t = Event<const PInterface&>;
 
 		virtual ~IApplication()noexcept = default;
 

@@ -10,7 +10,6 @@
 
 #include "CorePrerequisites.h"
 #include "Interface.h"
-#include "Event.h"
 
 namespace greaper
 {

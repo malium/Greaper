@@ -18,8 +18,7 @@ void LogManager::OnAsyncChanged(IProperty* prop)
 		return;
 
 	auto* async = (AsyncLogProp_t*)prop;
-	bool asyncVal;
-	async->AccessValue([&asyncVal](const bool& b) { asyncVal = b; });
+	bool asyncVal = async->GetValueCopy();
 	if (m_Threaded == asyncVal)
 		return; // no change
 
@@ -188,8 +187,7 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 
 	auto asyncProp = GetAsyncLog().lock();
 
-	bool asyncVal;
-	asyncProp->AccessValue([&asyncVal](const bool& b) { asyncVal = b; });
+	bool asyncVal = asyncProp->GetValueCopy();
 	if (asyncVal)
 	{
 		StartThreadMode();

@@ -212,7 +212,43 @@ namespace greaper
 			m_TaskQueueSignal.wait(lck);
 	}
 	INLINE const String& MPMCTaskScheduler::GetName() const noexcept { return m_Name; }
+	INLINE void MPMCTaskScheduler::OnNewManager(const PInterface& newInterface) noexcept
+	{
+		if (newInterface == nullptr || newInterface->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
+			return;
 
+		m_ThreadManager = (WThreadManager)newInterface;
+		m_OnManagerActivation.Disconnect(); // double check we are not connected
+		newInterface->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldInterface, const PInterface& newInterface) { OnManagerActivation(active, oldInterface, newInterface); });
+		m_OnNewManager.Disconnect();
+	}
+	INLINE void MPMCTaskScheduler::OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface) noexcept
+	{
+		if (active)
+			return;
+
+		// Change of ThreadManager
+		if (newInterface != nullptr)
+		{
+			const auto& newThreadMgr = (const PThreadManager&)newInterface;
+			m_OnManagerActivation.Disconnect();
+			newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
+			m_ThreadManager = (WThreadManager)newThreadMgr;
+		}
+		// ThreadManager deactivated, wait until a new one is active
+		else
+		{
+			m_OnManagerActivation.Disconnect();
+			const auto& libW = oldInterface->GetLibrary();
+			VerifyNot(libW.expired(), "Trying to connect to InterfaceActivationEvent but GreaperLibrary was expired.");
+			auto lib = libW.lock();
+			auto appW = lib->GetApplication();
+			VerifyNot(appW.expired(), "Trying to connect to InterfaceActivationEvent but Application was expired.");
+			auto app = appW.lock();
+			m_OnNewManager.Disconnect(); // double check we are not connected
+			app->GetOnInterfaceActivationEvent()->Connect(m_OnNewManager, [this](const PInterface& newManager) { OnNewManager(newManager); });
+		}
+	}
 	INLINE void MPMCTaskScheduler::Stop() noexcept
 	{
 		SetWorkerCount(0);
@@ -247,6 +283,9 @@ namespace greaper
 		,m_Name(name)
 		,m_This(this, &Impl::EmptyDeleter<MPMCTaskScheduler>)
 	{
+		VerifyNot(m_ThreadManager.expired(), "Trying to initialize a MPMCTaskScheduler, but an expired ThreadManager was given.");
+		auto mgr = m_ThreadManager.lock();
+		mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldInterface, const PInterface& newInterface) { OnManagerActivation(active, oldInterface, newInterface); });
 		SetWorkerCount(workerCount);
 	}
 	INLINE bool MPMCTaskScheduler::CanWorkerContinueWorking(sizet workerID)const noexcept

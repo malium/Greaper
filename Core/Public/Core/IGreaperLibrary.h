@@ -467,7 +467,7 @@ namespace greaper
 		OnActivation(oldDefault);
 
 		m_ActiveState = InitState_t::Started;
-		m_ActivationEvent.Trigger(true, this, (SPtr<IInterface>)oldDefault);
+		m_ActivationEvent.Trigger(true, this, oldDefault);
 	}
 
 	INLINE void IInterface::Deactivate(const SPtr<IInterface>& newDefault) noexcept
@@ -481,7 +481,7 @@ namespace greaper
 		OnDeactivation(newDefault);
 
 		m_ActiveState = InitState_t::Stopped;
-		m_ActivationEvent.Trigger(false, this, (SPtr<IInterface>)newDefault);
+		m_ActivationEvent.Trigger(false, this, newDefault);
 	}
 }
 

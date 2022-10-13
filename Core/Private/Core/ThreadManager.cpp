@@ -96,7 +96,7 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 		m_ThreadIDMap.insert_or_assign(curTh->GetID(), m_Threads.size());
 		m_Threads.push_back((PThread)curTh);
 	}
-	m_ThreadDestructionEvent.Connect(m_DestructionEventHnd, [this](PThread thread) {OnThreadDestruction(thread); });
+	m_ThreadDestructionEvent.Connect(m_DestructionEventHnd, [this](const PThread& thread) {OnThreadDestruction(thread); });
 }
 
 void ThreadManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
