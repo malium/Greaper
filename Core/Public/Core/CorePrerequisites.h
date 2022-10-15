@@ -33,6 +33,9 @@ namespace greaper
 	class IThreadManager; using PThreadManager = SPtr<IThreadManager>; using WThreadManager = WPtr<IThreadManager>;
 	class IThread; using PThread = SPtr<IThread>; using WThread = WPtr<IThread>;
 	struct ThreadConfig;
+	class ICommandManager; using PCommandManager = SPtr<ICommandManager>; using WCommandManager = WPtr<ICommandManager>;
+	class ICommand; using PCommand = SPtr<ICommand>; using WCommand = WPtr<ICommand>;
+	class IConsole; using PConsole = SPtr<IConsole>; using WConsole = WPtr<IConsole>;
 	class IGreaperLibrary; using PGreaperLib = SPtr<IGreaperLibrary>; using WGreaperLib = WPtr<IGreaperLibrary>;
 	class IProperty; using PIProperty = SPtr<IProperty>; using WIProperty = WPtr<IProperty>;
 	template<class T> class TProperty; template<class T> using PProperty = SPtr<TProperty<T>>; template<class T> using WProperty = WPtr<TProperty<T>>;

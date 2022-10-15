@@ -7,7 +7,7 @@
 #include "Application.h"
 #include "LogManager.h"
 #include "ThreadManager.h"
-#include <Core/Property.h>
+#include "CommandManager.h"
 
 #if GREAPER_CORE_DLL
 
@@ -65,8 +65,10 @@ void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
 	m_Application->Initialize((WGreaperLib)gCoreLibrary);
 
 	// add more managers
-	m_Managers.push_back(SPtr<IInterface>(Construct<ThreadManager>()));
-	m_Managers.push_back(SPtr<IInterface>(Construct<LogManager>()));
+	m_Managers.push_back((PInterface)Construct<ThreadManager>());
+	m_Managers.push_back((PInterface)Construct<LogManager>());
+	m_Managers.push_back((PInterface)Construct<CommandManager>());
+
 
 
 

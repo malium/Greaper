@@ -45,41 +45,39 @@ namespace greaper
 		DEF_PROP(ApplicationVersion, uint32);
 		DEF_PROP(LoadedLibraries, WStringVec);
 		
-		using OnCloseEvent_t = Event<void>;
-
 		using OnInterfaceActivationEvent_t = Event<const PInterface&>;
 
 		virtual ~IApplication()noexcept = default;
 
-		virtual TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath) = 0;
+		virtual TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)noexcept = 0;
 
-		virtual TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName) = 0;
+		virtual TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)const noexcept = 0;
 
-		virtual TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID) = 0;
+		virtual TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept = 0;
 
-		virtual EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library) = 0;
+		virtual EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept = 0;
 
-		virtual EmptyResult RegisterInterface(const PInterface& interface) = 0;
+		virtual EmptyResult RegisterInterface(const PInterface& interface)noexcept = 0;
 
-		virtual EmptyResult UnregisterInterface(const PInterface& interface) = 0;
+		virtual EmptyResult UnregisterInterface(const PInterface& interface)noexcept = 0;
 
-		virtual EmptyResult ActivateInterface(const PInterface& interface) = 0;
+		virtual EmptyResult ActivateInterface(const PInterface& interface)noexcept = 0;
 		
-		virtual EmptyResult DeactivateInterface(const Uuid& interfaceUUID) = 0;
+		virtual EmptyResult DeactivateInterface(const Uuid& interfaceUUID)noexcept = 0;
 
-		virtual EmptyResult DeactivateInterface(const StringView& interfaceName) = 0;
+		virtual EmptyResult DeactivateInterface(const StringView& interfaceName)noexcept = 0;
 
-		virtual TResult<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const = 0;
+		virtual TResult<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const noexcept = 0;
 
-		virtual TResult<PInterface> GetActiveInterface(const StringView& interfaceName)const = 0;
+		virtual TResult<PInterface> GetActiveInterface(const StringView& interfaceName)const noexcept = 0;
 
-		virtual TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const = 0;
+		virtual TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const noexcept = 0;
 
-		virtual TResult<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const = 0;
+		virtual TResult<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const noexcept = 0;
 
-		virtual TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const = 0;
+		virtual TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const noexcept = 0;
 
-		virtual TResult<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const = 0;
+		virtual TResult<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const noexcept = 0;
 
 		virtual OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept = 0;
 
@@ -95,8 +93,12 @@ namespace greaper
 
 		virtual WPtr<CommandLineProp_t> GetCommandLine()const noexcept = 0;
 
+		virtual Vector<SPtr<IGreaperLibrary>> GetRegisteredLibrariesCopy()const noexcept = 0;
+
+		virtual Vector<SPtr<IInterface>> GetActiveInterfacesCopy()const noexcept = 0;
+
 		template<class T>
-		TResult<SPtr<T>> RegisterGreaperLibraryT(const WStringView& libPath)
+		INLINE TResult<SPtr<T>> RegisterGreaperLibraryT(const WStringView& libPath)noexcept
 		{
 			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to register a GreaperLibrary "
 				"but its implementation doesn't derive from IGreaperLibrary.");
@@ -108,7 +110,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<WPtr<T>> GetGreaperLibraryT(const StringView& libraryName)
+		INLINE TResult<WPtr<T>> GetGreaperLibraryT(const StringView& libraryName)const noexcept
 		{
 			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to get a GreaperLibrary "
 				"but its implementation doesn't derive from IGreaperLibrary.");
@@ -120,7 +122,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<WPtr<T>> GetGreaperLibraryT(const Uuid& libraryUUID)
+		INLINE TResult<WPtr<T>> GetGreaperLibraryT(const Uuid& libraryUUID)const noexcept
 		{
 			static_assert(std::is_base_of_v<IGreaperLibrary, T>, "Trying to get a GreaperLibrary "
 				"but its implementation doesn't derive from IGreaperLibrary.");
@@ -132,7 +134,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<SPtr<T>> GetActiveInterfaceT(const Uuid& interfaceUUID)const
+		INLINE TResult<SPtr<T>> GetActiveInterfaceT(const Uuid& interfaceUUID)const noexcept
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetActiveInterface(interfaceUUID);
@@ -143,7 +145,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<SPtr<T>> GetActiveInterfaceT(const StringView& interfaceName)const
+		INLINE TResult<SPtr<T>> GetActiveInterfaceT(const StringView& interfaceName)const noexcept
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetActiveInterface(interfaceName);
@@ -154,7 +156,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<SPtr<T>> GetInterfaceT(const Uuid& interfaceUUID, const Uuid& libraryUUID)const
+		INLINE TResult<SPtr<T>> GetInterfaceT(const Uuid& interfaceUUID, const Uuid& libraryUUID)const noexcept
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceUUID, libraryUUID);
@@ -165,7 +167,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<SPtr<T>> GetInterfaceT(const StringView& interfaceName, const StringView& libraryName)const
+		INLINE TResult<SPtr<T>> GetInterfaceT(const StringView& interfaceName, const StringView& libraryName)const noexcept
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceName, libraryName);
@@ -176,7 +178,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<SPtr<T>> GetInterfaceT(const Uuid& interfaceUUID, const StringView& libraryName)const
+		INLINE TResult<SPtr<T>> GetInterfaceT(const Uuid& interfaceUUID, const StringView& libraryName)const noexcept
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceUUID, libraryName);
@@ -187,7 +189,7 @@ namespace greaper
 		}
 
 		template<class T>
-		TResult<SPtr<T>> GetInterfaceT(const StringView& interfaceName, const Uuid& libraryUUID)const
+		INLINE TResult<SPtr<T>> GetInterfaceT(const StringView& interfaceName, const Uuid& libraryUUID)const noexcept
 		{
 			static_assert(IsInterface<T>::value, "Trying to get an interface that does not derive from IInterface.");
 			auto res = GetInterface(interfaceName, libraryUUID);

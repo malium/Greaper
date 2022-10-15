@@ -91,8 +91,7 @@ void Application::UpdateActiveInterfaceList()noexcept
 }
 
 Application::Application()
-	:m_OnClose("OnClose"sv)
-	,m_OnInterfaceActivation("OnInterfaceActivation"sv)
+	:m_OnInterfaceActivation("OnInterfaceActivation"sv)
 {
 
 }
@@ -267,7 +266,7 @@ void Application::DeinitSerialization() noexcept
 {
 }
 
-TResult<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringView& libPath)
+TResult<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringView& libPath)noexcept
 {
 	PLibrary lib{ Construct<Library>(libPath) };
 
@@ -301,7 +300,7 @@ TResult<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WString
 	return Result::CreateSuccess(gLib);
 }
 
-TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const StringView& libraryName)
+TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const StringView& libraryName)const noexcept
 {
 	if (auto findIT = m_LibraryNameMap.find(libraryName); findIT != m_LibraryNameMap.end())
 	{
@@ -316,7 +315,7 @@ TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const StringView& 
 	return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryName.data()));
 }
 
-TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const Uuid& libraryUUID)
+TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const Uuid& libraryUUID)const noexcept
 {
 	if (const auto findIT = m_LibraryUuidMap.find(libraryUUID); findIT != m_LibraryUuidMap.end())
 	{
@@ -331,7 +330,7 @@ TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const Uuid& librar
 	return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryUUID.ToString().c_str()));
 }
 
-EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
+EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept
 {
 	if (library == nullptr)
 		return Result::CreateFailure("Trying to unregister a nullptr GreaperLibrary"sv);
@@ -396,7 +395,7 @@ EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)
 	return Result::CreateSuccess();
 }
 
-EmptyResult Application::RegisterInterface(const PInterface& interface)
+EmptyResult Application::RegisterInterface(const PInterface& interface)noexcept
 {
 	if (interface == nullptr)
 		return Result::CreateFailure("Trying to register a nullptr interface."sv);
@@ -437,7 +436,7 @@ EmptyResult Application::RegisterInterface(const PInterface& interface)
 	return Result::CreateSuccess();
 }
 
-EmptyResult Application::UnregisterInterface(const PInterface& interface)
+EmptyResult Application::UnregisterInterface(const PInterface& interface)noexcept
 {
 	if (interface == nullptr)
 		return Result::CreateFailure("Trying to unregister a nullptr interface."sv);
@@ -504,7 +503,7 @@ EmptyResult Application::UnregisterInterface(const PInterface& interface)
 	return Result::CreateSuccess();
 }
 
-EmptyResult Application::ActivateInterface(const PInterface& interface)
+EmptyResult Application::ActivateInterface(const PInterface& interface)noexcept
 {
 	if (interface == nullptr)
 		return Result::CreateFailure("Trying to make default a nullptr interface, if you want to remove an Active interface call StopInterfaceDefault."sv);
@@ -539,7 +538,7 @@ EmptyResult Application::ActivateInterface(const PInterface& interface)
 	return Result::CreateSuccess();
 }
 
-EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
+EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)noexcept
 {
 	LOCK(m_ActiveMutex);
 	PInterface interface;
@@ -587,7 +586,7 @@ EmptyResult Application::DeactivateInterface(const Uuid& interfaceUUID)
 	return Result::CreateSuccess();
 }
 
-EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
+EmptyResult Application::DeactivateInterface(const StringView& interfaceName)noexcept
 {
 	LOCK(m_ActiveMutex);
 	PInterface interface;
@@ -636,7 +635,7 @@ EmptyResult Application::DeactivateInterface(const StringView& interfaceName)
 	return Result::CreateSuccess();
 }
 
-TResult<PInterface> Application::GetActiveInterface(const Uuid& interfaceUUID) const
+TResult<PInterface> Application::GetActiveInterface(const Uuid& interfaceUUID) const noexcept
 {
 	LOCK(m_ActiveMutex);
 
@@ -654,7 +653,7 @@ TResult<PInterface> Application::GetActiveInterface(const Uuid& interfaceUUID) c
 	return Result::CreateSuccess<PInterface>(iface);
 }
 
-TResult<PInterface> Application::GetActiveInterface(const StringView& interfaceName) const
+TResult<PInterface> Application::GetActiveInterface(const StringView& interfaceName) const noexcept
 {
 	LOCK(m_ActiveMutex);
 
@@ -672,7 +671,7 @@ TResult<PInterface> Application::GetActiveInterface(const StringView& interfaceN
 	return Result::CreateSuccess(iface);
 }
 
-TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID) const
+TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID) const noexcept
 {
 	const auto libUuidIT = m_LibraryUuidMap.find(libraryUUID);
 	if (libUuidIT == m_LibraryUuidMap.end())
@@ -697,7 +696,7 @@ TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const U
 	return Result::CreateSuccess(iface);
 }
 
-TResult<PInterface> Application::GetInterface(const StringView& interfaceName, const StringView& libraryName) const
+TResult<PInterface> Application::GetInterface(const StringView& interfaceName, const StringView& libraryName) const noexcept
 {
 	const auto libNameIT = m_LibraryNameMap.find(libraryName);
 	if (libNameIT == m_LibraryNameMap.end())
@@ -722,7 +721,7 @@ TResult<PInterface> Application::GetInterface(const StringView& interfaceName, c
 	return Result::CreateSuccess(iface);
 }
 
-TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const StringView& libraryName) const
+TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const StringView& libraryName) const noexcept
 {
 	const auto libNameIT = m_LibraryNameMap.find(libraryName);
 	if (libNameIT == m_LibraryNameMap.end())
@@ -747,7 +746,7 @@ TResult<PInterface> Application::GetInterface(const Uuid& interfaceUUID, const S
 	return Result::CreateSuccess(iface);
 }
 
-TResult<PInterface> Application::GetInterface(const StringView& interfaceName, const Uuid& libraryUUID) const
+TResult<PInterface> Application::GetInterface(const StringView& interfaceName, const Uuid& libraryUUID) const noexcept
 {
 	const auto libUuidIT = m_LibraryUuidMap.find(libraryUUID);
 	if (libUuidIT == m_LibraryUuidMap.end())

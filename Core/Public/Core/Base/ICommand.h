@@ -10,68 +10,64 @@
 
 #include "../Memory.h"
 #include "../StringUtils.h"
-#include <utility>
-
 #include "../Result.h"
 
 namespace greaper
 {
-    struct CommandInfo
-    {
-        String CommandName;
-        StringVec CommandArgs;
+	struct CommandInfo
+	{
+		String CommandName;
+		StringVec CommandArgs;
 
-        static Result<CommandInfo> FromConsole(const String& cmdLine);
-    };
+		static TResult<CommandInfo> FromConsole(const String& cmdLine)noexcept;
+	};
 
-    class ICommand
-    {
-        String m_CommandName;
-        String m_HelpMessage;
-        bool m_Active;
-        bool m_CanBeUndone;
+	class ICommand
+	{
+		String m_CommandName;
+		String m_HelpMessage;
+		bool m_Active;
 
-    public:
-        explicit ICommand(String commandName, String helpMessage = "", bool canBeUndone = false)noexcept;
+	public:
+		explicit ICommand(StringView commandName, StringView helpMessage = ""sv)noexcept;
 
-        virtual ~ICommand()noexcept = default;
+		virtual ~ICommand()noexcept = default;
 
-        virtual bool DoCommand(const StringVec& args)noexcept = 0;
+		virtual EmptyResult DoCommand(const StringVec& args)noexcept = 0;
 
-        virtual bool UndoCommand(const StringVec& args) { return true; }
+		virtual EmptyResult UndoCommand(UNUSED const StringVec& args)noexcept { return Result::CreateSuccess(); }
 
-        const String& GetCommandName()const noexcept { return m_CommandName; }
+		INLINE const String& GetCommandName()const noexcept { return m_CommandName; }
 
-        const String& GetHelpMessage()const noexcept { return m_HelpMessage; }
+		INLINE const String& GetHelpMessage()const noexcept { return m_HelpMessage; }
 
-        void SetActive(bool active) noexcept { m_Active = active; }
+		INLINE void SetActive(bool active) noexcept { m_Active = active; }
 
-        bool IsActive()const noexcept { return m_Active; }
+		INLINE bool IsActive()const noexcept { return m_Active; }
 
-        bool CanBeUndone()const noexcept { return m_CanBeUndone; }
-    };
+		virtual bool CanBeUndone()const noexcept = 0;
+	};
 
-    Result<CommandInfo> CommandInfo::FromConsole(const String& cmdLine) 
-    {
-        auto vec = StringUtils::SeparateBySpace(cmdLine);
+	INLINE TResult<CommandInfo> CommandInfo::FromConsole(const String& cmdLine)noexcept
+	{
+		auto vec = StringUtils::SeparateBySpace(cmdLine);
 
-        if(vec.empty())
-            return CreateFailure<CommandInfo>("Couldn't recognize the command name nor its arguments from the given command line."sv);
-        CommandInfo info;
-        info.CommandName = vec[0];
-        vec.erase(vec.begin());
-        info.CommandArgs = vec;
-        return CreateResult(info);
-    }
+		if(vec.empty())
+			return Result::CreateFailure<CommandInfo>("Couldn't recognize the command name nor its arguments from the given command line."sv);
+		CommandInfo info;
+		info.CommandName = vec[0];
+		vec.erase(vec.begin());
+		info.CommandArgs = vec;
+		return Result::CreateSuccess(info);
+	}
 
-    INLINE ICommand::ICommand(String commandName, String helpMessage, bool canBeUndone) noexcept
-        :m_CommandName(std::move(commandName))
-        ,m_HelpMessage(std::move(helpMessage))
-        ,m_Active(true)
-        ,m_CanBeUndone(canBeUndone)
-    {
+	INLINE ICommand::ICommand(StringView commandName, StringView helpMessage) noexcept
+		:m_CommandName(commandName)
+		,m_HelpMessage(helpMessage)
+		,m_Active(true)
+	{
 
-    }
+	}
 }
 
 #endif /* CORE_I_COMMAND_H */

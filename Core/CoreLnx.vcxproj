@@ -80,12 +80,14 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core\Application.cpp" />
+    <ClCompile Include="Private\Core\CommandManager.cpp" />
     <ClCompile Include="Private\Core\GreaperCoreDLL.cpp" />
     <ClCompile Include="Private\Core\LogManager.cpp" />
     <ClCompile Include="Private\Core\ThreadManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Private\Core\Application.h" />
+    <ClInclude Include="Private\Core\CommandManager.h" />
     <ClInclude Include="Private\Core\GreaperCoreDLL.h" />
     <ClInclude Include="Private\Core\ImplPrerequisites.h" />
     <ClInclude Include="Private\Core\LogManager.h" />

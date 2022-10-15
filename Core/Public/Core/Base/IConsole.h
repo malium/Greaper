@@ -28,7 +28,7 @@ namespace greaper
         
         virtual TAsyncOp<String> ReadFromConsole()noexcept = 0;
 
-        virtual ConsoleEvt_t*const GetConsoleEvent()noexcept = 0;
+        virtual ConsoleEvt_t* GetConsoleEvent()const noexcept = 0;
 
         virtual void SetCursorPosition(std::pair<int16, int16> position)noexcept = 0;
 

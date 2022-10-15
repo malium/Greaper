@@ -29,7 +29,6 @@ namespace greaper::core
 			COUNT
 		};
 
-		OnCloseEvent_t m_OnClose;
 		mutable OnInterfaceActivationEvent_t m_OnInterfaceActivation;
 
 		struct LibInfo
@@ -65,9 +64,9 @@ namespace greaper::core
 
 		void OnDeinitialization()noexcept override;
 
-		void OnActivation(const SPtr<IInterface>& oldDefault)noexcept override;
+		void OnActivation(UNUSED const SPtr<IInterface>& oldDefault)noexcept override;
 
-		void OnDeactivation(const SPtr<IInterface>& newDefault)noexcept override;
+		void OnDeactivation(UNUSED const SPtr<IInterface>& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 
@@ -77,49 +76,60 @@ namespace greaper::core
 
 		void DeinitSerialization()noexcept override;
 
-		TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)override;
+		TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)noexcept override;
 
-		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)override;
+		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)const noexcept override;
 
-		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)override;
+		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept override;
 
-		EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)override;
+		EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept override;
 
-		EmptyResult RegisterInterface(const PInterface& interface)override;
+		EmptyResult RegisterInterface(const PInterface& interface)noexcept override;
 
-		EmptyResult UnregisterInterface(const PInterface& interface)override;
+		EmptyResult UnregisterInterface(const PInterface& interface)noexcept override;
 
-		EmptyResult ActivateInterface(const PInterface& interface)override;
+		EmptyResult ActivateInterface(const PInterface& interface)noexcept override;
 
-		EmptyResult DeactivateInterface(const Uuid& interfaceUUID)override;
+		EmptyResult DeactivateInterface(const Uuid& interfaceUUID)noexcept override;
 
-		EmptyResult DeactivateInterface(const StringView& interfaceName)override;
+		EmptyResult DeactivateInterface(const StringView& interfaceName)noexcept override;
 
-		TResult<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const  override;
+		TResult<PInterface> GetActiveInterface(const Uuid& interfaceUUID)const noexcept override;
 
-		TResult<PInterface> GetActiveInterface(const StringView& interfaceName)const override;
+		TResult<PInterface> GetActiveInterface(const StringView& interfaceName)const noexcept override;
 
-		TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const override;
+		TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const Uuid& libraryUUID)const noexcept override;
 
-		TResult<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const override;
+		TResult<PInterface> GetInterface(const StringView& interfaceName, const StringView& libraryName)const noexcept override;
 
-		TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const override;
+		TResult<PInterface> GetInterface(const Uuid& interfaceUUID, const StringView& libraryName)const noexcept override;
 
-		TResult<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const override;
+		TResult<PInterface> GetInterface(const StringView& interfaceName, const Uuid& libraryUUID)const noexcept override;
 
 		OnInterfaceActivationEvent_t* GetOnInterfaceActivationEvent()const noexcept override { return &m_OnInterfaceActivation; }
 
-		WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept override { return (WPtr<ApplicationNameProp_t>)m_Properties[(sizet)ApplicationName]; }
+		WPtr<ApplicationNameProp_t> GetApplicationName()const noexcept override { return (WPtr<ApplicationNameProp_t>)m_Properties[(std::size_t)ApplicationName]; }
 
-		WPtr<CompilationInfoProp_t> GetCompilationInfo()const noexcept override { return (WPtr<CompilationInfoProp_t>)m_Properties[(sizet)CompilationInfo]; }
+		WPtr<CompilationInfoProp_t> GetCompilationInfo()const noexcept override { return (WPtr<CompilationInfoProp_t>)m_Properties[(std::size_t)CompilationInfo]; }
 
-		WPtr<ApplicationVersionProp_t> GetApplicationVersion()const noexcept override { return (WPtr<ApplicationVersionProp_t>)m_Properties[(sizet)ApplicationVersion]; }
+		WPtr<ApplicationVersionProp_t> GetApplicationVersion()const noexcept override { return (WPtr<ApplicationVersionProp_t>)m_Properties[(std::size_t)ApplicationVersion]; }
 
-		WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept override { return (WPtr<LoadedLibrariesProp_t>)m_Properties[(sizet)LoadedLibraries]; }
+		WPtr<LoadedLibrariesProp_t> GetLoadedLibrariesNames()const noexcept override { return (WPtr<LoadedLibrariesProp_t>)m_Properties[(std::size_t)LoadedLibraries]; }
 
-		WPtr<CommandLineProp_t> GetCommandLine()const noexcept override { return (WPtr<CommandLineProp_t>)m_Properties[(sizet)CommandLine]; }
+		WPtr<CommandLineProp_t> GetCommandLine()const noexcept override { return (WPtr<CommandLineProp_t>)m_Properties[(std::size_t)CommandLine]; }
 
-		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return (WPtr<AppInstanceProp_t>)m_Properties[(sizet)AppInstance]; }
+		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return (WPtr<AppInstanceProp_t>)m_Properties[(std::size_t)AppInstance]; }
+
+		[[nodiscard]] Vector<SPtr<IGreaperLibrary>> GetRegisteredLibrariesCopy()const noexcept override
+		{
+			Vector<SPtr<IGreaperLibrary>> vec{ m_Libraries.size()};
+			for (const LibInfo& lib : m_Libraries)
+				vec.push_back(lib.Lib);
+			
+			return vec;
+		}
+
+		[[nodiscard]] Vector<SPtr<IInterface>> GetActiveInterfacesCopy()const noexcept override { LOCK(m_ActiveMutex); return Vector<SPtr<IInterface>>{m_ActiveInterfaces}; }
 	};
 }
 

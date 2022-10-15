@@ -135,7 +135,7 @@ namespace greaper
 			ReflectedPlainType<T>::FromString(temp, value);
 			return SetValue(temp);
 		}
-		INLINE [[nodiscard]] T GetValueCopy()const noexcept
+		INLINE T GetValueCopy()const noexcept
 		{
 			auto lck = SharedLock(m_Mutex);
 			return { m_Value };
@@ -145,7 +145,7 @@ namespace greaper
 			auto lck = SharedLock(m_Mutex);
 			accessFn(m_Value);
 		}
-		INLINE [[nodiscard]] String GetStringValueCopy()const noexcept override
+		INLINE String GetStringValueCopy()const noexcept override
 		{
 			auto lck = SharedLock(m_Mutex);
 			return { m_StringValue };

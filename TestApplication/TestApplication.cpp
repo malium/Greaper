@@ -79,7 +79,7 @@ int main(int argc, char* argv[])
 }
 #endif
 
-void SetProperties(void* hInstance, int32 argc, achar** argv)
+static void SetProperties(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
 
@@ -108,7 +108,7 @@ void SetProperties(void* hInstance, int32 argc, achar** argv)
 		gCore->LogError(propLogAsyncRes.GetFailMessage());
 }
 
-void ActivateManagers()
+static void ActivateManagers()
 {
 	using namespace greaper;
 	auto app = gCore->GetApplication();
@@ -132,7 +132,7 @@ void ActivateManagers()
 	gApplication->ActivateInterface((const PInterface&)gLogManager);
 }
 
-void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
+static void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
 
@@ -158,7 +158,7 @@ void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 		VERSION_GET_MINOR(appVersion), VERSION_GET_PATCH(appVersion), VERSION_GET_REV(appVersion)));
 }
 
-void GreaperCoreLibClose()
+static void GreaperCoreLibClose()
 {
 	using namespace greaper;
 
