@@ -45,7 +45,7 @@ namespace greaper
 		virtual EmptyResult CreateConsole()noexcept = 0;
 
 		template<class T, class _Alloc_ = GenericAllocator, class... Args>
-		INLINE EmptyResult AddCommandT(Args&&... args)const noexcept
+		INLINE EmptyResult AddCommandT(Args&&... args)noexcept
 		{
 			static_assert(std::is_base_of_v<ICommand, T>, "Trying to create a Command which doesn't derive from ICommand");
 			auto cmd = PCommand((ICommand*)Construct<T, _Alloc_>(args...), &Impl::DefaultDeleter<ICommand, _Alloc_>);

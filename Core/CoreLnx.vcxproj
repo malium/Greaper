@@ -150,8 +150,12 @@
     <ClInclude Include="Public\Core\Stream.h" />
     <ClInclude Include="Public\Core\StringUtils.h" />
     <ClInclude Include="Public\Core\Uuid.h" />
-    <ClInclude Include="Public\Core\Win\MinWinHeader.h" />
     <ClInclude Include="Public\Core\Win\Prerequisites.h" />
+    <ClInclude Include="Public\Core\Win\Win32Base.h" />
+    <ClInclude Include="Public\Core\Win\Win32Concurrency.h" />
+    <ClInclude Include="Public\Core\Win\Win32DbgHelp.h" />
+    <ClInclude Include="Public\Core\Win\Win32PSAPI.h" />
+    <ClInclude Include="Public\Core\Win\Win32Uuid.h" />
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
     <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
