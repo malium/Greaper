@@ -12,7 +12,6 @@
 #include "Base/IWindow.h"
 #include "Result.h"
 #include "Base/DisplayAdapter.h"
-#include <ranges>
 
 namespace greaper
 {

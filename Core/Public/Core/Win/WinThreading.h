@@ -9,6 +9,7 @@
 #define CORE_WIN_THREADING_H 1
 
 #include "../CorePrerequisites.h"
+#include "Win32Concurrency.h"
 
 namespace greaper
 {
@@ -48,37 +49,37 @@ namespace greaper
 	{
 		struct WinMutexImpl
 		{
-			static bool IsValid(const MutexHandle& handle) noexcept
+			INLINE static bool IsValid(const MutexHandle& handle) noexcept
 			{
 				return handle.Ptr != reinterpret_cast<PVOID>(-1);
 			}
 
-			static void Initialize(MutexHandle& handle) noexcept
+			INLINE static void Initialize(MutexHandle& handle) noexcept
 			{
 				InitializeSRWLock(&handle);
 			}
 
-			static void Deinitialize(UNUSED MutexHandle& handle) noexcept
+			INLINE static void Deinitialize(UNUSED MutexHandle& handle) noexcept
 			{
 
 			}
 
-			static void Lock(MutexHandle& handle) noexcept
+			INLINE static void Lock(MutexHandle& handle) noexcept
 			{
 				AcquireSRWLockExclusive(&handle);
 			}
 
-			static void Unlock(MutexHandle& handle) noexcept
+			INLINE static void Unlock(MutexHandle& handle) noexcept
 			{
 				ReleaseSRWLockExclusive(&handle);
 			}
 
-			static bool TryLock(MutexHandle& handle) noexcept
+			INLINE static bool TryLock(MutexHandle& handle) noexcept
 			{				
 				return TryAcquireSRWLockExclusive(&handle) != FALSE;
 			}
 
-			static void Invalidate(MutexHandle& handle) noexcept
+			INLINE static void Invalidate(MutexHandle& handle) noexcept
 			{
 				handle.Ptr = reinterpret_cast<PVOID>(-1);
 			}
@@ -87,37 +88,37 @@ namespace greaper
 
 		struct WinRecursiveMutexImpl
 		{
-			static bool IsValid(const RecursiveMutexHandle& handle) noexcept
+			INLINE static bool IsValid(const RecursiveMutexHandle& handle) noexcept
 			{
 				return handle.LockSemaphore != INVALID_HANDLE_VALUE;
 			}
 
-			static void Initialize(RecursiveMutexHandle& handle) noexcept
+			INLINE static void Initialize(RecursiveMutexHandle& handle) noexcept
 			{
 				InitializeCriticalSection(&handle);
 			}
 
-			static void Deinitialize(RecursiveMutexHandle& handle) noexcept
+			INLINE static void Deinitialize(RecursiveMutexHandle& handle) noexcept
 			{
 				DeleteCriticalSection(&handle);
 			}
 
-			static void Lock(RecursiveMutexHandle& handle) noexcept
+			INLINE static void Lock(RecursiveMutexHandle& handle) noexcept
 			{
 				EnterCriticalSection(&handle);
 			}
 
-			static void Unlock(RecursiveMutexHandle& handle) noexcept
+			INLINE static void Unlock(RecursiveMutexHandle& handle) noexcept
 			{
 				LeaveCriticalSection(&handle);
 			}
 
-			static bool TryLock(RecursiveMutexHandle& handle) noexcept
+			INLINE static bool TryLock(RecursiveMutexHandle& handle) noexcept
 			{				
 				return TryEnterCriticalSection(&handle) != FALSE;
 			}
 
-			static void Invalidate(RecursiveMutexHandle& handle) noexcept
+			INLINE static void Invalidate(RecursiveMutexHandle& handle) noexcept
 			{
 				handle.LockSemaphore = INVALID_HANDLE_VALUE;
 			}
@@ -126,52 +127,52 @@ namespace greaper
 
 		struct WinRWMutexImpl
 		{
-			static bool IsValid(const RWMutexHandle& handle) noexcept
+			INLINE static bool IsValid(const RWMutexHandle& handle) noexcept
 			{
 				return handle.Ptr != reinterpret_cast<PVOID>(-1);
 			}
 
-			static void Initialize(RWMutexHandle& handle) noexcept
+			INLINE static void Initialize(RWMutexHandle& handle) noexcept
 			{
 				InitializeSRWLock(&handle);
 			}
 
-			static void Deinitialize(UNUSED RWMutexHandle& handle) noexcept
+			INLINE static void Deinitialize(UNUSED RWMutexHandle& handle) noexcept
 			{
 
 			}
 
-			static void Lock(RWMutexHandle& handle) noexcept
+			INLINE static void Lock(RWMutexHandle& handle) noexcept
 			{
 				AcquireSRWLockExclusive(&handle);
 			}
 
-			static void LockShared(RWMutexHandle& handle) noexcept
+			INLINE static void LockShared(RWMutexHandle& handle) noexcept
 			{
 				AcquireSRWLockShared(&handle);
 			}
 
-			static void Unlock(RWMutexHandle& handle) noexcept
+			INLINE static void Unlock(RWMutexHandle& handle) noexcept
 			{
 				ReleaseSRWLockExclusive(&handle);
 			}
 
-			static void UnlockShared(RWMutexHandle& handle) noexcept
+			INLINE static void UnlockShared(RWMutexHandle& handle) noexcept
 			{
 				ReleaseSRWLockShared(&handle);
 			}
 
-			static bool TryLock(RWMutexHandle& handle) noexcept
+			INLINE static bool TryLock(RWMutexHandle& handle) noexcept
 			{				
 				return TryAcquireSRWLockExclusive(&handle) != FALSE;
 			}
 
-			static bool TryLockShared(RWMutexHandle& handle) noexcept
+			INLINE static bool TryLockShared(RWMutexHandle& handle) noexcept
 			{				
 				return TryAcquireSRWLockShared(&handle) != FALSE;
 			}
 
-			static void Invalidate(RWMutexHandle& handle) noexcept
+			INLINE static void Invalidate(RWMutexHandle& handle) noexcept
 			{
 				handle.Ptr = reinterpret_cast<PVOID>(-1);
 			}
@@ -180,59 +181,59 @@ namespace greaper
 
 		struct WinSignalImpl
 		{
-			static bool IsValid(const SignalHandle& handle) noexcept
+			INLINE static bool IsValid(const SignalHandle& handle) noexcept
 			{
 				return handle.Ptr != reinterpret_cast<PVOID>(-1);
 			}
-			static void Initialize(SignalHandle& handle) noexcept
+			INLINE static void Initialize(SignalHandle& handle) noexcept
 			{
 				InitializeConditionVariable(&handle);
 			}
-			static void Deinitialize(UNUSED SignalHandle& handle) noexcept
+			INLINE static void Deinitialize(UNUSED SignalHandle& handle) noexcept
 			{
 
 			}
-			static void NotifyOne(SignalHandle& handle) noexcept
+			INLINE static void NotifyOne(SignalHandle& handle) noexcept
 			{
 				WakeConditionVariable(&handle);
 			}
-			static void NotifyAll(SignalHandle& handle) noexcept
+			INLINE static void NotifyAll(SignalHandle& handle) noexcept
 			{
 				WakeAllConditionVariable(&handle);
 			}
-			static void Wait(SignalHandle& handle, MutexHandle& mutexHandle) noexcept
+			INLINE static void Wait(SignalHandle& handle, MutexHandle& mutexHandle) noexcept
 			{
 				SleepConditionVariableSRW(&handle, &mutexHandle, INFINITE, 0);
 			}
-			static void WaitRW(SignalHandle& handle, RWMutexHandle& mutexHandle) noexcept
+			INLINE static void WaitRW(SignalHandle& handle, RWMutexHandle& mutexHandle) noexcept
 			{
 				SleepConditionVariableSRW(&handle, &mutexHandle, INFINITE, 0);
 			}
-			static void WaitRecursive(SignalHandle& handle, RecursiveMutexHandle& mutexHandle) noexcept
+			INLINE static void WaitRecursive(SignalHandle& handle, RecursiveMutexHandle& mutexHandle) noexcept
 			{
 				SleepConditionVariableCS(&handle, &mutexHandle, INFINITE);
 			}
-			static void WaitShared(SignalHandle& handle, RWMutexHandle& mutexHandle) noexcept
+			INLINE static void WaitShared(SignalHandle& handle, RWMutexHandle& mutexHandle) noexcept
 			{
 				SleepConditionVariableSRW(&handle, &mutexHandle, INFINITE, CONDITION_VARIABLE_LOCKMODE_SHARED);
 			}
-			static bool WaitFor(SignalHandle& handle, MutexHandle& mutexHandle, uint32 millis) noexcept
+			INLINE static bool WaitFor(SignalHandle& handle, MutexHandle& mutexHandle, uint32 millis) noexcept
 			{
 				return SleepConditionVariableSRW(&handle, &mutexHandle, millis, 0);
 			}
-			static bool WaitForRW(SignalHandle& handle, RWMutexHandle mutexHandle, uint32 millis) noexcept
+			INLINE static bool WaitForRW(SignalHandle& handle, RWMutexHandle mutexHandle, uint32 millis) noexcept
 			{
 				return SleepConditionVariableSRW(&handle, &mutexHandle, millis, 0);
 			}
-			static bool WaitForRecursive(SignalHandle& handle, RecursiveMutexHandle mutexHandle, uint32 millis) noexcept
+			INLINE static bool WaitForRecursive(SignalHandle& handle, RecursiveMutexHandle mutexHandle, uint32 millis) noexcept
 			{
 				return SleepConditionVariableCS(&handle, &mutexHandle, millis);
 			}
-			static bool WaitForShared(SignalHandle& handle, RWMutexHandle& mutexHandle, uint32 millis) noexcept
+			INLINE static bool WaitForShared(SignalHandle& handle, RWMutexHandle& mutexHandle, uint32 millis) noexcept
 			{
 				return SleepConditionVariableSRW(&handle, &mutexHandle, millis, CONDITION_VARIABLE_LOCKMODE_SHARED);
 			}
-			static void Invalidate(SignalHandle& handle) noexcept
+			INLINE static void Invalidate(SignalHandle& handle) noexcept
 			{
 				handle.Ptr = reinterpret_cast<PVOID>(-1);
 			}

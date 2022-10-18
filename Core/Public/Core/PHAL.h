@@ -302,6 +302,7 @@
 /* Debug Console Output */
 #ifndef DEBUG_OUTPUT
 #define DEBUG_OUTPUT(x) std::cerr << x << std::endl
+// We use std::endl to force flush the stream
 #endif
 /* High Performance Graphics enable utility */
 #ifndef USE_HPG

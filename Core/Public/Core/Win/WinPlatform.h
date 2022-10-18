@@ -9,6 +9,9 @@
 #define CORE_WIN_PLATFORM_H 1
 
 #include "../Library.h"
+#include "Win32DbgHelp.h"
+#include "Win32PSAPI.h"
+#include "Win32Concurrency.h"
 #include <filesystem>
 #include <array>
 

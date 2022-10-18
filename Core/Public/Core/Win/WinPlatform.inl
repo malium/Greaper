@@ -341,7 +341,7 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 		if (SymGetSymFromAddr64(hProcess, fnAddr, &dummy, symbol.Get()))
 		{
 			auto sz = snprintf(fnName.data(), fnName.size(), "%s() - ", symbol->Name);
-			output.append(fnName.data(), (size_t)sz);
+			output.append(fnName.data(), (std::size_t)sz);
 		}
 
 		IMAGEHLP_LINE64 lineData;
@@ -352,7 +352,7 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 		{
 			auto sz = snprintf(fileData.data(), fileData.size(), I64_HEX_FMT " File[%s:%d (%d)]",
 				fnAddr, lineData.FileName, lineData.LineNumber, column);
-			output.append(fileData.data(), (size_t)sz);
+			output.append(fileData.data(), (std::size_t)sz);
 		}
 
 		IMAGEHLP_MODULE64 moduleData;
@@ -362,7 +362,7 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 		if (SymGetModuleInfo64(hProcess, fnAddr, &moduleData))
 		{
 			auto sz = snprintf(moduleString.data(), moduleString.size(), " Module[%s]", moduleData.ImageName);
-			output.append(moduleString.data(), (size_t)sz);
+			output.append(moduleString.data(), (std::size_t)sz);
 		}
 	}
 

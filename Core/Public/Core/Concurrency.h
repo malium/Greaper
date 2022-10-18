@@ -16,8 +16,6 @@
 #include "Lnx/LnxThreading.h"
 #endif
 #include <atomic>
-#include <mutex>
-#include <functional>
 #include <any>
 
 /*** Cross-platform concurrency primitives and utilites
@@ -40,19 +38,19 @@ namespace greaper
 	{
 		MutexHandle m_Handle;
 	public:
-		Mutex() noexcept
+		INLINE Mutex() noexcept
 		{
 			Impl::MutexImpl::Initialize(m_Handle);
 		}
 
 		Mutex(const Mutex&) = delete;
 		Mutex& operator=(const Mutex&) = delete;
-		Mutex(Mutex&& other) noexcept
+		INLINE Mutex(Mutex&& other) noexcept
 		{
 			DuplicateMemory(other.m_Handle, m_Handle);
 			Impl::MutexImpl::Invalidate(other.m_Handle);
 		}
-		Mutex& operator=(Mutex&& other)noexcept
+		INLINE Mutex& operator=(Mutex&& other)noexcept
 		{
 			if (this != &other)
 			{
@@ -63,36 +61,36 @@ namespace greaper
 			}
 			return *this;
 		}
-		~Mutex()
+		INLINE ~Mutex()
 		{
 			if (Impl::MutexImpl::IsValid(m_Handle))
 				Impl::MutexImpl::Deinitialize(m_Handle);
 		}
 
-		void lock() noexcept
+		INLINE void lock() noexcept
 		{
 			Verify(Impl::MutexImpl::IsValid(m_Handle), "Trying to lock an invalid mutex.");
 			Impl::MutexImpl::Lock(m_Handle);
 		}
 
-		bool try_lock() noexcept
+		INLINE bool try_lock() noexcept
 		{
 			if (!Impl::MutexImpl::IsValid(m_Handle))
 				return false;
 			return Impl::MutexImpl::TryLock(m_Handle);
 		}
 
-		void unlock() noexcept
+		INLINE void unlock() noexcept
 		{
 			Verify(Impl::MutexImpl::IsValid(m_Handle), "Trying to unlock an invalid mutex.");
 			return Impl::MutexImpl::Unlock(m_Handle);
 		}
 
-		[[nodiscard]] const MutexHandle* GetHandle()const noexcept
+		INLINE [[nodiscard]] const MutexHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
-		[[nodiscard]] MutexHandle* GetHandle() noexcept
+		INLINE [[nodiscard]] MutexHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -112,18 +110,18 @@ namespace greaper
 		RecursiveMutexHandle m_Handle;
 
 	public:
-		RecursiveMutex() noexcept
+		INLINE RecursiveMutex() noexcept
 		{
 			Impl::RecursiveMutexImpl::Initialize(m_Handle);
 		}
 		RecursiveMutex(const RecursiveMutex&) = delete;
 		RecursiveMutex& operator=(const RecursiveMutex&) = delete;
-		RecursiveMutex(RecursiveMutex&& other) noexcept
+		INLINE RecursiveMutex(RecursiveMutex&& other) noexcept
 		{
 			DuplicateMemory(other.m_Handle, m_Handle);
 			Impl::RecursiveMutexImpl::Invalidate(other.m_Handle);
 		}
-		RecursiveMutex& operator=(RecursiveMutex&& other) noexcept
+		INLINE RecursiveMutex& operator=(RecursiveMutex&& other) noexcept
 		{
 			if (this != &other)
 			{
@@ -134,37 +132,37 @@ namespace greaper
 			}
 			return *this;
 		}
-		~RecursiveMutex()
+		INLINE ~RecursiveMutex()
 		{
 			if (Impl::RecursiveMutexImpl::IsValid(m_Handle))
 				Impl::RecursiveMutexImpl::Deinitialize(m_Handle);
 		}
 
-		void lock() noexcept
+		INLINE void lock() noexcept
 		{
 			Verify(Impl::RecursiveMutexImpl::IsValid(m_Handle), "Trying to lock an invalid recursive mutex");
 			Impl::RecursiveMutexImpl::Lock(m_Handle);
 		}
 
-		bool try_lock() noexcept
+		INLINE bool try_lock() noexcept
 		{
 			if (!Impl::RecursiveMutexImpl::IsValid(m_Handle))
 				return false;
 			return Impl::RecursiveMutexImpl::TryLock(m_Handle);
 		}
 
-		void unlock() noexcept
+		INLINE void unlock() noexcept
 		{
 			Verify(Impl::RecursiveMutexImpl::IsValid(m_Handle), "Trying to unlock an invalid recursive mutex");
 			Impl::RecursiveMutexImpl::Unlock(m_Handle);
 		}
 
-		[[nodiscard]] const RecursiveMutexHandle* GetHandle()const noexcept
+		INLINE [[nodiscard]] const RecursiveMutexHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
 
-		[[nodiscard]] RecursiveMutexHandle* GetHandle() noexcept
+		INLINE [[nodiscard]] RecursiveMutexHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -183,18 +181,18 @@ namespace greaper
 		RWMutexHandle m_Handle;
 
 	public:
-		RWMutex() noexcept
+		INLINE RWMutex() noexcept
 		{
 			Impl::RWMutexImpl::Initialize(m_Handle);
 		}
 		RWMutex(const RWMutex&) = delete;
 		RWMutex& operator=(const RWMutex&) = delete;
-		RWMutex(RWMutex&& other) noexcept
+		INLINE RWMutex(RWMutex&& other) noexcept
 		{
 			DuplicateMemory(other.m_Handle, m_Handle);
 			Impl::RWMutexImpl::Invalidate(other.m_Handle);
 		}
-		RWMutex& operator=(RWMutex&& other) noexcept
+		INLINE RWMutex& operator=(RWMutex&& other) noexcept
 		{
 			if (this != &other)
 			{
@@ -205,56 +203,56 @@ namespace greaper
 			}
 			return *this;
 		}
-		~RWMutex()
+		INLINE ~RWMutex()
 		{
 			if (Impl::RWMutexImpl::IsValid(m_Handle))
 				Impl::RWMutexImpl::Deinitialize(m_Handle);
 		}
 
-		void lock() noexcept
+		INLINE void lock() noexcept
 		{
 			Verify(Impl::RWMutexImpl::IsValid(m_Handle), "Trying to lock an invalid read-write mutex");
 			Impl::RWMutexImpl::Lock(m_Handle);
 		}
 
-		void lock_shared() noexcept
+		INLINE void lock_shared() noexcept
 		{
 			Verify(Impl::RWMutexImpl::IsValid(m_Handle), "Trying to lock shared an invalid read-write mutex");
 			Impl::RWMutexImpl::LockShared(m_Handle);
 		}
 
-		void unlock() noexcept
+		INLINE void unlock() noexcept
 		{
 			Verify(Impl::RWMutexImpl::IsValid(m_Handle), "Trying to unlock an invalid read-write mutex");
 			Impl::RWMutexImpl::Unlock(m_Handle);
 		}
 
-		void unlock_shared() noexcept
+		INLINE void unlock_shared() noexcept
 		{
 			Verify(Impl::RWMutexImpl::IsValid(m_Handle), "Trying to unlock shared an invalid read-write mutex");
 			Impl::RWMutexImpl::UnlockShared(m_Handle);
 		}
 
-		bool try_lock() noexcept
+		INLINE bool try_lock() noexcept
 		{
 			if (!Impl::RWMutexImpl::IsValid(m_Handle))
 				return false;
 			return Impl::RWMutexImpl::TryLock(m_Handle);
 		}
 
-		bool try_lock_shared() noexcept
+		INLINE bool try_lock_shared() noexcept
 		{
 			if (!Impl::RWMutexImpl::IsValid(m_Handle))
 				return false;
 			return Impl::RWMutexImpl::TryLockShared(m_Handle);
 		}
 
-		[[nodiscard]] const RWMutexHandle* GetHandle()const noexcept
+		INLINE [[nodiscard]] const RWMutexHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
 
-		[[nodiscard]] RWMutexHandle* GetHandle() noexcept
+		INLINE [[nodiscard]] RWMutexHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -306,8 +304,10 @@ namespace greaper
 		}
 	};
 
-	struct AdoptLock { explicit AdoptLock()noexcept = default; };
-	
+	struct AdoptLock { constexpr explicit AdoptLock()noexcept = default; };
+	struct DeferLock { constexpr explicit DeferLock()noexcept = default; };
+	struct TryToLock { constexpr explicit TryToLock()noexcept = default; };
+
 	/*** Locks a given mutex and unlocks it when out of scope */
 	template<class Mtx>
 	class Lock
@@ -317,22 +317,24 @@ namespace greaper
 	public:
 		using mutex_type = Mtx;
 
-		explicit Lock(Mtx& mtx)
+		INLINE explicit Lock(Mtx& mtx)
 			:m_Mutex(mtx)
 		{
 			m_Mutex.lock();
 		}
 
-		Lock(Mtx& mtx, AdoptLock)
+		INLINE Lock(Mtx& mtx, AdoptLock)
 			:m_Mutex(mtx)
 		{
 
 		}
 
-		~Lock()
+		INLINE ~Lock()
 		{
 			m_Mutex.unlock();
 		}
+
+		INLINE Mtx* mutex()noexcept { return &m_Mutex; }
 
 		Lock(const Lock&) = delete;
 		Lock& operator=(const Lock&) = delete;
@@ -342,7 +344,111 @@ namespace greaper
 
 	/*** Locks a mutex and unlocks it when out of scope, but ensures mutex uniqueness by allowing mutex ownership */
 	template<class Mtx>
-	using UniqueLock = std::unique_lock<Mtx>;
+	class UniqueLock
+	{
+	public:
+		constexpr UniqueLock()noexcept = default;
+
+		INLINE explicit UniqueLock(Mtx& mtx)noexcept
+			:m_Mutex(std::addressof(mtx))
+			,m_Owns(false)
+		{
+			m_Mutex->lock();
+			m_Owns = true;
+		}
+		INLINE UniqueLock(Mtx& mtx, AdoptLock)noexcept
+			:m_Mutex(std::addressof(mtx))
+			,m_Owns(true)
+		{
+
+		}
+		INLINE UniqueLock(Mtx& mtx, DeferLock)noexcept
+			:m_Mutex(std::addressof(mtx))
+			,m_Owns(false)
+		{
+
+		}
+		INLINE UniqueLock(Mtx& mtx, TryToLock)noexcept
+			:m_Mutex(std::addressof(mtx))
+			,m_Owns(m_Mutex->try_lock())
+		{
+
+		}
+		INLINE UniqueLock(UniqueLock&& other)noexcept
+			:m_Mutex(other.m_Mutex)
+			,m_Owns(other.m_Owns)
+		{
+			other.m_Mutex = nullptr;
+			other.m_Owns = false;
+		}
+		INLINE UniqueLock& operator=(UniqueLock&& other)noexcept
+		{
+			if (this != std::addressof(other))
+			{
+				if (m_Owns)
+					m_Mutex->unlock();
+
+				m_Mutex = other.m_Mutex;
+				m_Owns = other.m_Owns;
+				other.m_Mutex = nullptr;
+				other.m_Owns = false;
+			}
+			return *this;
+		}
+		INLINE ~UniqueLock()noexcept
+		{
+			if (m_Owns)
+				m_Mutex->unlock();
+		}
+
+		UniqueLock(const UniqueLock&) = delete;
+		UniqueLock& operator=(const UniqueLock&) = delete;
+
+		INLINE void lock()noexcept
+		{
+			m_Mutex->lock();
+			m_Owns = true;
+		}
+
+		INLINE bool try_lock()noexcept
+		{
+			m_Owns = m_Mutex->try_lock();
+			return m_Owns;
+		}
+
+		INLINE void unlock()noexcept
+		{
+			if (!m_Mutex || !m_Owns)
+				Break("Trying to unlock an invalid UniqueLock.");
+
+			m_Mutex->unlock();
+			m_Owns = false;
+		}
+
+		INLINE void swap(UniqueLock& other)noexcept
+		{
+			std::swap(m_Mutex, other.m_Mutex);
+			std::swap(m_Owns, other.m_Owns);
+		}
+
+		INLINE Mtx* release()noexcept
+		{
+			auto* mtx = m_Mutex;
+			m_Mutex = nullptr;
+			m_Owns = false;
+			return mtx;
+		}
+
+		INLINE bool owns_lock()const noexcept { return m_Owns; }
+
+		INLINE explicit operator bool()const noexcept { return m_Owns; }
+
+		INLINE Mtx* mutex()const noexcept { return m_Mutex; }
+
+	private:
+		Mtx* m_Mutex = nullptr;
+		bool m_Owns = false;
+	};
 
 	/*** Locks a given read-write mutex on its shared configuration and unlocks it when out of scope */
 	class SharedLock
@@ -352,13 +458,13 @@ namespace greaper
 	public:
 		using mutex_type = RWMutex;
 
-		explicit SharedLock(RWMutex& mutex) noexcept
+		INLINE explicit SharedLock(RWMutex& mutex) noexcept
 			:m_Mutex(mutex)
 		{
 			m_Mutex.lock_shared();
 		}
 
-		SharedLock(RWMutex& mutex, AdoptLock) noexcept
+		INLINE SharedLock(RWMutex& mutex, AdoptLock) noexcept
 			:m_Mutex(mutex)
 		{
 
@@ -369,12 +475,12 @@ namespace greaper
 		SharedLock(SharedLock&&)noexcept = default;
 		SharedLock& operator=(SharedLock&&)noexcept = default;
 
-		RWMutex* mutex() noexcept
+		INLINE RWMutex* mutex() noexcept
 		{
 			return &m_Mutex;
 		}
 
-		~SharedLock()
+		INLINE ~SharedLock()
 		{
 			m_Mutex.unlock_shared();
 		}
@@ -395,35 +501,35 @@ namespace greaper
 	{
 		SignalHandle m_Handle;
 
-		void Wait(const UniqueLock<Mutex>& lock) noexcept
+		INLINE void Wait(const UniqueLock<Mutex>& lock) noexcept
 		{
 			Impl::SignalImpl::Wait(m_Handle, *lock.mutex()->GetHandle());
 		}
-		void Wait(const UniqueLock<RWMutex>& lock) noexcept
+		INLINE void Wait(const UniqueLock<RWMutex>& lock) noexcept
 		{
 			Impl::SignalImpl::WaitRW(m_Handle, *lock.mutex()->GetHandle());
 		}
-		void Wait(const UniqueLock<RecursiveMutex>& lock) noexcept
+		INLINE void Wait(const UniqueLock<RecursiveMutex>& lock) noexcept
 		{
 			Impl::SignalImpl::WaitRecursive(m_Handle, *lock.mutex()->GetHandle());
 		}
-		void WaitShared(const UniqueLock<RWMutex>& lock) noexcept
+		INLINE void WaitShared(const UniqueLock<RWMutex>& lock) noexcept
 		{
 			Impl::SignalImpl::WaitShared(m_Handle, *lock.mutex()->GetHandle());
 		}
-		bool WaitFor(const UniqueLock<Mutex>& lock, const uint32 millis) noexcept
+		INLINE bool WaitFor(const UniqueLock<Mutex>& lock, const uint32 millis) noexcept
 		{
 			return Impl::SignalImpl::WaitFor(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
-		bool WaitFor(const UniqueLock<RWMutex>& lock, const uint32 millis) noexcept
+		INLINE bool WaitFor(const UniqueLock<RWMutex>& lock, const uint32 millis) noexcept
 		{
 			return Impl::SignalImpl::WaitForRW(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
-		bool WaitFor(const UniqueLock<RecursiveMutex>& lock, const uint32 millis) noexcept
+		INLINE bool WaitFor(const UniqueLock<RecursiveMutex>& lock, const uint32 millis) noexcept
 		{
 			return Impl::SignalImpl::WaitForRecursive(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
-		bool WaitForShared(const UniqueLock<RWMutex>& lock, const uint32 millis) noexcept
+		INLINE bool WaitForShared(const UniqueLock<RWMutex>& lock, const uint32 millis) noexcept
 		{
 			return Impl::SignalImpl::WaitForShared(m_Handle, *lock.mutex()->GetHandle(), millis);
 		}
@@ -457,33 +563,33 @@ namespace greaper
 				Impl::SignalImpl::Deinitialize(m_Handle);
 		}
 
-		void notify_one() noexcept
+		INLINE void notify_one() noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			Impl::SignalImpl::NotifyOne(m_Handle);
 		}
 
-		void notify_all() noexcept
+		INLINE void notify_all() noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			Impl::SignalImpl::NotifyAll(m_Handle);
 		}
 
 		template<class Mtx>
-		void wait(const UniqueLock<Mtx>& lock) noexcept
+		INLINE void wait(const UniqueLock<Mtx>& lock) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			Wait(lock);
 		}
 
-		void wait_shared(const UniqueLock<RWMutex>& lock) noexcept
+		INLINE void wait_shared(const UniqueLock<RWMutex>& lock) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			WaitShared(lock);
 		}
 
 		template<class Mtx, class Pred>
-		void wait(const UniqueLock<Mtx>& lock, Pred pred) noexcept
+		INLINE void wait(const UniqueLock<Mtx>& lock, Pred pred) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			while (!pred())
@@ -491,7 +597,7 @@ namespace greaper
 		}
 
 		template<class Pred>
-		void wait_shared(const UniqueLock<RWMutex>& lock, Pred pred) noexcept
+		INLINE void wait_shared(const UniqueLock<RWMutex>& lock, Pred pred) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			while (!pred())
@@ -499,7 +605,7 @@ namespace greaper
 		}
 
 		template<class Mtx, class Rep, class Period>
-		bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::duration<Rep, Period>& relativeTime) noexcept
+		INLINE bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::duration<Rep, Period>& relativeTime) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime).count();
@@ -507,7 +613,7 @@ namespace greaper
 		}
 
 		template<class Rep, class Period>
-		bool wait_for_shared(const UniqueLock<RWMutex>& lock, const std::chrono::duration<Rep, Period>& relativeTime) noexcept
+		INLINE bool wait_for_shared(const UniqueLock<RWMutex>& lock, const std::chrono::duration<Rep, Period>& relativeTime) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime).count();
@@ -515,7 +621,7 @@ namespace greaper
 		}
 
 		template<class Mtx, class Rep, class Period, class Pred>
-		bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::duration<Rep, Period>& relativeTime, Pred pred) noexcept
+		INLINE bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::duration<Rep, Period>& relativeTime, Pred pred) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime).count();
@@ -528,7 +634,7 @@ namespace greaper
 		}
 
 		template<class Rep, class Period, class Pred>
-		bool wait_for_shared(const UniqueLock<RWMutex>& lock, const std::chrono::duration<Rep, Period>& relativeTime, Pred pred) noexcept
+		INLINE bool wait_for_shared(const UniqueLock<RWMutex>& lock, const std::chrono::duration<Rep, Period>& relativeTime, Pred pred) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto millis = std::chrono::duration_cast<std::chrono::milliseconds>(relativeTime).count();
@@ -541,7 +647,7 @@ namespace greaper
 		}
 
 		template<class Mtx, class _Clock, class _Duration>
-		bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime) noexcept
+		INLINE bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto relativeTime = absoluteTime - _Clock::now();
@@ -550,7 +656,7 @@ namespace greaper
 		}
 
 		template<class _Clock, class _Duration>
-		bool wait_for_shared(const UniqueLock<RWMutex>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime) noexcept
+		INLINE bool wait_for_shared(const UniqueLock<RWMutex>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto relativeTime = absoluteTime - _Clock::now();
@@ -559,7 +665,7 @@ namespace greaper
 		}
 
 		template<class Mtx, class _Clock, class _Duration, class Pred>
-		bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime, Pred pred) noexcept
+		INLINE bool wait_for(const UniqueLock<Mtx>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime, Pred pred) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto relativeTime = absoluteTime - _Clock::now();
@@ -573,7 +679,7 @@ namespace greaper
 		}
 
 		template<class _Clock, class _Duration, class Pred>
-		bool wait_for(const UniqueLock<RWMutex>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime, Pred pred) noexcept
+		INLINE bool wait_for(const UniqueLock<RWMutex>& lock, const std::chrono::time_point<_Clock, _Duration>& absoluteTime, Pred pred) noexcept
 		{
 			Verify(Impl::SignalImpl::IsValid(m_Handle), "Trying to use an invalid SignalHandle.");
 			const auto relativeTime = absoluteTime - _Clock::now();
@@ -586,12 +692,12 @@ namespace greaper
 			return true;
 		}
 
-		[[nodiscard]] const SignalHandle* GetHandle()const noexcept
+		INLINE [[nodiscard]] const SignalHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
 
-		[[nodiscard]] SignalHandle* GetHandle() noexcept
+		INLINE [[nodiscard]] SignalHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -606,7 +712,7 @@ namespace greaper
 		const sizet m_MaxCount;
 
 	public:
-		explicit Semaphore(sizet maxCount = 0) noexcept
+		INLINE explicit Semaphore(sizet maxCount = 0) noexcept
 			:m_Count(maxCount)
 			,m_MaxCount(maxCount)
 		{
@@ -618,21 +724,21 @@ namespace greaper
 		Semaphore& operator=(Semaphore&& other)noexcept = default;
 		~Semaphore() = default;
 
-		INLINE void notify()
+		INLINE void notify()noexcept
 		{
 			auto lck = UniqueLock<Mutex>(m_Mutex); // can throw
 			++m_Count;
 			m_Signal.notify_one();
 		}
 
-		INLINE void wait()
+		INLINE void wait()noexcept
 		{
 			UniqueLock<Mutex> lck(m_Mutex); // can throw
 			m_Signal.wait(lck, [&]{return m_Count > 0;});
 			--m_Count;
 		}
 
-		INLINE bool try_wait()
+		INLINE bool try_wait()noexcept
 		{
 			Lock<Mutex> lck(m_Mutex); // can throw
 			if(m_Count > 0)
@@ -663,7 +769,7 @@ namespace greaper
 		sizet m_Generation;
 
 	public:
-		explicit Barrier(sizet maxCount = 0)
+		INLINE explicit Barrier(sizet maxCount = 0)noexcept
 			:m_MaxCount(maxCount)
 			,m_Count(maxCount)
 			,m_Generation(0)
@@ -671,7 +777,7 @@ namespace greaper
 
 		}
 
-		void sync()
+		INLINE void sync()noexcept
 		{
 			UniqueLock<Mutex> lck(m_Mutex);
 			const auto gen = m_Generation;
@@ -687,12 +793,12 @@ namespace greaper
 			}
 		}
 
-		[[nodiscard]] INLINE sizet GetMaxCount()const { return m_MaxCount; }
+		[[nodiscard]] INLINE sizet GetMaxCount()const noexcept { return m_MaxCount; }
 
-		[[nodiscard]] INLINE const Signal& GetSignal()const { return m_Signal; }
-		[[nodiscard]] INLINE Signal& GetSignal() { return m_Signal; }
-		[[nodiscard]] INLINE const Mutex& GetMutex()const { return m_Mutex; }
-		[[nodiscard]] INLINE Mutex& GetMutex() { return m_Mutex; }
+		[[nodiscard]] INLINE const Signal& GetSignal()const noexcept { return m_Signal; }
+		[[nodiscard]] INLINE Signal& GetSignal()noexcept { return m_Signal; }
+		[[nodiscard]] INLINE const Mutex& GetMutex()const noexcept { return m_Mutex; }
+		[[nodiscard]] INLINE Mutex& GetMutex()noexcept { return m_Mutex; }
 	};
 
 	struct AsyncOpSyncData

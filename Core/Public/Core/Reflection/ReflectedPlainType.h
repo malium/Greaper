@@ -138,8 +138,8 @@ INLINE greaper::ReflectedSize_t greaper::ReflectedWriteWithSizeHeader(IStream& s
 	size = fn() + sizeof(size);
 	VerifyGreater(size, 0, "Trying to write a zero length type.");
 	stream.Seek(sizePos);
-	stream.Write(&size, sizeof(size));
-	stream.Skip(size - sizeof(size));
+	stream.Write(&size, (ssizet)sizeof(size));
+	stream.Skip((ssizet)(size - sizeof(size)));
 	return size;
 }
 

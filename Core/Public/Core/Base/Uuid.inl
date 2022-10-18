@@ -3,7 +3,9 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-//#include "../Uuid.h"
+#if PLT_WINDOWS
+#include "../Win/Win32Uuid.h"
+#endif
 
 namespace greaper
 {

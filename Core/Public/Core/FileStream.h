@@ -73,7 +73,7 @@ namespace greaper
 		}
 
 		m_Stream->seekg(0, std::ios_base::end);
-		m_Size = m_Stream->tellg();
+		m_Size = (ssizet)m_Stream->tellg();
 		m_Stream->seekg(0, std::ios_base::beg);
 	}
 

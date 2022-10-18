@@ -31,32 +31,14 @@ typedef WinTypes PlatformTypes;
 
 /* Supported Windows version */
 #ifndef GREAPER_MIN_WINDOWS_SUPPORTED
-#define GREAPER_MIN_WINDOWS_SUPPORTED 0x0601
-#define _WIN32_WINNT 0x0601 //! Windows 7
-#else
+#define GREAPER_MIN_WINDOWS_SUPPORTED 0x0601 //! Windows 7
+#endif
 #define _WIN32_WINNT GREAPER_MIN_WINDOWS_SUPPORTED
-#endif
-
-/* Windows extra headers remove */
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN 1
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX 1
-#endif
-#ifndef VC_EXTRALEAN
-#define VC_EXTRALEAN 1
-#endif
 
 /* Enable triggering a breakpoint in our IDE */
 #ifndef TRIGGER_BREAKPOINT
-//extern void CDECL __debugbreak();
-//#define TRIGGER_BREAKPOINT() __debugbreak()
-// Use the MinWinHeader import
 #define TRIGGER_BREAKPOINT() DebugBreak()
 #endif
-
-#define NOVTABLE __declspec(novtable)
 
 /* String constants */
 #ifndef PATH_SEPARATOR
@@ -75,7 +57,7 @@ typedef WinTypes PlatformTypes;
 
 #define FUNCTION_VARARGS_END(...)
 
-#include "MinWinHeader.h"
+#include "Win32Base.h"
 
 #define PlatformAlloc(bytes) HeapAlloc(GetProcessHeap(), 0, bytes)
 #define PlatformDealloc(mem) HeapFree(GetProcessHeap(), 0, mem)
