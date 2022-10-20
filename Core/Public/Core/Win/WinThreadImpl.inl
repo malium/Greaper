@@ -60,21 +60,35 @@ namespace greaper
 			return EXIT_SUCCESS;
 		}
 
-		void SetName()
+		void SetNameKernel()
 		{
-			typedef HRESULT(WINAPI* SetThreadDescription)(HANDLE hThread, PCWSTR lpThreadDescription);
-			auto* setThreadDescription = reinterpret_cast<SetThreadDescription>(
-				GetProcAddress(GetModuleHandleA("kernel32.dll"), "SetThreadDescription"));
+			using SetThreadDescription_t = HRESULT(WINAPI*)(HANDLE hThread, PCWSTR lpThreadDescription);
+			SetThreadDescription_t SetThreadDescription = nullptr;
 
-			if(setThreadDescription == nullptr)
-				setThreadDescription = reinterpret_cast<SetThreadDescription>(
-					GetProcAddress(GetModuleHandleA("KernelBase.dll"), "SetThreadDescription"));
-			if (setThreadDescription != nullptr)
+			{
+				Library kernel32{ L"kernel32.dll"sv };
+				auto fnRes = kernel32.GetFunction("SetThreadDescription"sv);
+				if (fnRes.IsOk() && fnRes.GetValue() != nullptr)
+					SetThreadDescription = (SetThreadDescription_t)fnRes.GetValue();
+			}
+			if (SetThreadDescription == nullptr)
+			{
+				Library kernelBase{ L"KernelBase.dll"sv };
+				auto fnRes = kernelBase.GetFunction("SetThreadDescription"sv);
+				if (fnRes.IsOk() && fnRes.GetValue() != nullptr)
+					SetThreadDescription = (SetThreadDescription_t)fnRes.GetValue();
+			}
+
+			if (SetThreadDescription != nullptr)
 			{
 				wchar wName[MAX_PATH];
 				mbstowcs(wName, m_Name.c_str(), MAX_PATH);
-				setThreadDescription(m_Handle, wName);
+				SetThreadDescription(m_Handle, wName);
 			}
+		}
+		void SetName()
+		{
+			SetNameKernel();
 
 			struct ThreadNameInfo
 			{
