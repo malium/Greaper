@@ -8,8 +8,7 @@
 #ifndef CORE_INTERFACE_H
 #define CORE_INTERFACE_H 1
 
-#include <utility>
-
+#include "CorePrerequisites.h"
 #include "Uuid.h"
 #include "Event.h"
 #include "Enumeration.h"
@@ -40,13 +39,13 @@ namespace greaper
 
 		virtual void OnDeinitialization()noexcept = 0;
 
-		virtual void OnActivation(const SPtr<IInterface>& oldDefault)noexcept = 0;
+		virtual void OnActivation(const PInterface& oldDefault)noexcept = 0;
 
-		virtual void OnDeactivation(const SPtr<IInterface>& newDefault)noexcept = 0;
+		virtual void OnDeactivation(const PInterface& newDefault)noexcept = 0;
 
 	public:
 		using InitializationEvt_t = Event<bool>;
-		using ActivationEvt_t = Event<bool, IInterface*, const SPtr<IInterface>&>;
+		using ActivationEvt_t = Event<bool, IInterface*, const PInterface&>;
 
 		IInterface()noexcept;
 		virtual ~IInterface()noexcept = default;
@@ -58,15 +57,15 @@ namespace greaper
 		
 		virtual const StringView& GetInterfaceName()const noexcept = 0;
 		
-		const WPtr<IGreaperLibrary>& GetLibrary()const noexcept;
+		const WGreaperLib& GetLibrary()const noexcept;
 
-		void Initialize(WPtr<IGreaperLibrary> library)noexcept;
+		void Initialize(WGreaperLib library)noexcept;
 
 		void Deinitialize()noexcept;
 
-		void Activate(const SPtr<IInterface>& oldDefault)noexcept;
+		void Activate(const PInterface& oldDefault)noexcept;
 
-		void Deactivate(const SPtr<IInterface>& newDefault)noexcept;
+		void Deactivate(const PInterface& newDefault)noexcept;
 
 		virtual void InitProperties()noexcept = 0;
 
@@ -88,13 +87,13 @@ namespace greaper
 
 		ActivationEvt_t* GetActivationEvent()const noexcept;
 
-		CSpan<WPtr<IProperty>> GetProperties()const noexcept;
+		CSpan<WIProperty> GetProperties()const noexcept;
 
 	protected:
-		WPtr<IGreaperLibrary> m_Library;
+		WGreaperLib m_Library;
 		mutable InitializationEvt_t m_InitEvent;
 		mutable ActivationEvt_t m_ActivationEvent;
-		Vector<WPtr<IProperty>> m_Properties;
+		Vector<WIProperty> m_Properties;
 
 	private:
 		InitState_t m_InitializationState;
@@ -110,7 +109,7 @@ namespace greaper
 
 	}
 
-	inline const WPtr<IGreaperLibrary>& IInterface::GetLibrary()const noexcept { return m_Library; }
+	inline const WGreaperLib& IInterface::GetLibrary()const noexcept { return m_Library; }
 
 	INLINE bool IInterface::IsActive() const noexcept { return m_ActiveState == InitState_t::Started; }
 
@@ -124,10 +123,7 @@ namespace greaper
 
 	INLINE IInterface::ActivationEvt_t* IInterface::GetActivationEvent() const noexcept { return &m_ActivationEvent; }
 
-	INLINE CSpan<WPtr<IProperty>> IInterface::GetProperties() const noexcept { return CreateSpan(m_Properties); }
-
-	using PInterface = SPtr<IInterface>;
-	using WInterface = WPtr<IInterface>;
+	INLINE CSpan<WIProperty> IInterface::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
 	template<class T>
 	class TInterface : public IInterface
@@ -135,9 +131,9 @@ namespace greaper
 	public:
 		virtual ~TInterface()noexcept = default;
 
-		const Uuid& GetInterfaceUUID()const noexcept override { return T::InterfaceUUID; }
+		const Uuid& GetInterfaceUUID()const noexcept final { return T::InterfaceUUID; }
 
-		const StringView& GetInterfaceName()const noexcept override { return T::InterfaceName; }
+		const StringView& GetInterfaceName()const noexcept final { return T::InterfaceName; }
 	};
 
 	template<class T>

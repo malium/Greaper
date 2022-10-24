@@ -40,11 +40,11 @@ namespace greaper
 		virtual String GetStringValueCopy()const noexcept = 0;
 		virtual void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept = 0;
 		virtual ModificationEvent_t* GetOnModificationEvent()const noexcept = 0;
-		virtual const WPtr<IGreaperLibrary>& GetLibrary()const noexcept = 0;
+		virtual const WGreaperLib& GetLibrary()const noexcept = 0;
 	};
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo = {},
+	TResult<PProperty<T>> CreateProperty(WGreaperLib library, StringView propertyName, T initialValue, StringView propertyInfo = {},
 		bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr);
 
 	/**
@@ -64,7 +64,7 @@ namespace greaper
 	 * @tparam T - Base type of the property, must be a serializable type or a pod type 
 	 */
 	template<class T>
-	class TProperty : public IProperty
+	class TProperty final : public IProperty
 	{
 		T m_Value;
 		String m_PropertyName;
@@ -72,13 +72,13 @@ namespace greaper
 		String m_StringValue;	// When a property is changed, needs to update this value
 		mutable ModificationEvent_t m_OnModificationEvent;
 		TPropertyValidator<T>* m_PropertyValidator;
-		WPtr<IGreaperLibrary> m_Library;
+		WGreaperLib m_Library;
 		mutable RWMutex m_Mutex;
 
 		bool m_Static;		// Created at the start of the program cannot be saved
 		bool m_Constant;	// Cannot be modified
 
-		INLINE TProperty(WPtr<IGreaperLibrary> library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
+		INLINE TProperty(WGreaperLib library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
 			bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr) noexcept
 			:m_Value(std::move(initialValue))
 			, m_PropertyName(propertyName)
@@ -99,7 +99,7 @@ namespace greaper
 		}
 
 		template<class _T_, class _Alloc_>
-		friend TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
+		friend TResult<PProperty<T>> CreateProperty(WGreaperLib library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
 			bool isConstant, bool isStatic, TPropertyValidator<_T_>* validator);
 		MemoryFriend();
 	public:
@@ -156,7 +156,7 @@ namespace greaper
 			accessFn(m_StringValue);
 		}
 		[[nodiscard]] INLINE ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
-		[[nodiscard]] INLINE const WPtr<IGreaperLibrary>& GetLibrary()const noexcept override { return m_Library; }
+		[[nodiscard]] INLINE const WGreaperLib& GetLibrary()const noexcept override { return m_Library; }
 	};
 
 	// Greaper Core specialization

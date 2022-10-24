@@ -61,9 +61,9 @@ namespace greaper::core
 
 		void OnDeinitialization()noexcept override;
 
-		void OnActivation(const SPtr<IInterface>& oldDefault)noexcept override;
+		void OnActivation(const PInterface& oldDefault)noexcept override;
 
-		void OnDeactivation(UNUSED const SPtr<IInterface>& newDefault)noexcept override;
+		void OnDeactivation(UNUSED const PInterface& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 

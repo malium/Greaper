@@ -33,7 +33,7 @@ namespace greaper::core
 
 		struct LibInfo
 		{
-			SPtr<IGreaperLibrary> Lib;
+			PGreaperLib Lib;
 			UnorderedMap<StringView, sizet> IntefaceNameMap;
 			UnorderedMap<Uuid, sizet> InterfaceUuidMap;
 			Vector<PInterface> Interfaces;
@@ -52,7 +52,7 @@ namespace greaper::core
 		Vector<PInterface> m_InterfacesToRemove;
 		Vector<PInterface> m_InterfacesToAdd;
 
-		EmptyResult RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLib);
+		EmptyResult RegisterGreaperLibrary(const PGreaperLib& gLib);
 
 		void UpdateActiveInterfaceList()noexcept;
 
@@ -64,9 +64,9 @@ namespace greaper::core
 
 		void OnDeinitialization()noexcept override;
 
-		void OnActivation(UNUSED const SPtr<IInterface>& oldDefault)noexcept override;
+		void OnActivation(UNUSED const PInterface& oldDefault)noexcept override;
 
-		void OnDeactivation(UNUSED const SPtr<IInterface>& newDefault)noexcept override;
+		void OnDeactivation(UNUSED const PInterface& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 
@@ -76,13 +76,13 @@ namespace greaper::core
 
 		void DeinitSerialization()noexcept override;
 
-		TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)noexcept override;
+		TResult<PGreaperLib> RegisterGreaperLibrary(const WStringView& libPath)noexcept override;
 
-		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)const noexcept override;
+		TResult<PGreaperLib> GetGreaperLibrary(const StringView& libraryName)const noexcept override;
 
-		TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept override;
+		TResult<PGreaperLib> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept override;
 
-		EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept override;
+		EmptyResult UnregisterGreaperLibrary(const PGreaperLib& library)noexcept override;
 
 		EmptyResult RegisterInterface(const PInterface& interface)noexcept override;
 
@@ -120,16 +120,16 @@ namespace greaper::core
 
 		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return (WPtr<AppInstanceProp_t>)m_Properties[(std::size_t)AppInstance]; }
 
-		[[nodiscard]] Vector<SPtr<IGreaperLibrary>> GetRegisteredLibrariesCopy()const noexcept override
+		[[nodiscard]] Vector<PGreaperLib> GetRegisteredLibrariesCopy()const noexcept override
 		{
-			Vector<SPtr<IGreaperLibrary>> vec{ m_Libraries.size()};
+			Vector<PGreaperLib> vec{ m_Libraries.size()};
 			for (const LibInfo& lib : m_Libraries)
 				vec.push_back(lib.Lib);
 			
 			return vec;
 		}
 
-		[[nodiscard]] Vector<SPtr<IInterface>> GetActiveInterfacesCopy()const noexcept override { LOCK(m_ActiveMutex); return Vector<SPtr<IInterface>>{m_ActiveInterfaces}; }
+		[[nodiscard]] Vector<PInterface> GetActiveInterfacesCopy()const noexcept override { LOCK(m_ActiveMutex); return Vector<PInterface>{m_ActiveInterfaces}; }
 	};
 }
 

@@ -21,7 +21,7 @@ namespace greaper
 	class IGreaperLibrary
 	{
 	protected:
-		EmptyResult RegisterProperty(const SPtr<IProperty>& property)noexcept;
+		EmptyResult RegisterProperty(const PIProperty& property)noexcept;
 
 		virtual void Initialize()noexcept = 0;
 
@@ -45,7 +45,7 @@ namespace greaper
 
 		virtual ~IGreaperLibrary() = default;
 
-		void InitLibrary(PLibrary lib, SPtr<IApplication> app)noexcept;
+		void InitLibrary(PLibrary lib, PApplication app)noexcept;
 
 		void DeinitLibrary()noexcept;
 
@@ -53,15 +53,15 @@ namespace greaper
 
 		virtual const StringView& GetLibraryName()const noexcept = 0;
 
-		WPtr<IApplication> GetApplication()const noexcept;
+		WApplication GetApplication()const noexcept;
 
-		WPtr<Library> GetOSLibrary()const noexcept;
+		WLibrary GetOSLibrary()const noexcept;
 
-		CSpan<SPtr<IInterface>> GetManagers()const noexcept;
+		CSpan<PInterface> GetManagers()const noexcept;
 
-		CSpan<SPtr<IProperty>> GetProperties()const noexcept;
+		CSpan<PIProperty> GetProperties()const noexcept;
 
-		TResult<WPtr<IProperty>> GetProperty(const StringView& name)const noexcept;
+		TResult<WIProperty> GetProperty(const StringView& name)const noexcept;
 
 		virtual uint32 GetLibraryVersion()const noexcept = 0;
 
@@ -80,32 +80,32 @@ namespace greaper
 		void LogCritical(const String& message)const noexcept;
 
 		template<class T, class _Alloc_>
-		friend TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary>, StringView, T, StringView,
+		friend TResult<PProperty<T>> CreateProperty(WGreaperLib, StringView, T, StringView,
 			bool, bool, TPropertyValidator<T>*);
 
 	private:
 		PLibrary m_Library;
 		mutable Vector<LogData> m_InitLogs;
-		SPtr<ILogManager> m_LogManager;
+		PLogManager m_LogManager;
 		bool m_LogActivated = false;
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewLog;
 		IInterface::ActivationEvt_t::HandlerType m_OnLogActivation;
 		InitState_t m_InitializationState = InitState_t::Stopped;
 
-		void OnNewLog(const SPtr<IInterface>& newInterface)noexcept;
+		void OnNewLog(const PInterface& newInterface)noexcept;
 
-		void OnLogActivation(bool active, UNUSED IInterface* oldLog, const SPtr<IInterface>& newLog)noexcept;
+		void OnLogActivation(bool active, UNUSED IInterface* oldLog, const PInterface& newLog)noexcept;
 
 		void DumpStoredLogs()noexcept;
 
 	protected:
-		SPtr<IApplication> m_Application;
+		PApplication m_Application;
 		Vector<PInterface> m_Managers;
 		UnorderedMap<StringView, sizet> m_PropertyMap;
-		Vector<SPtr<IProperty>> m_Properties;
+		Vector<PIProperty> m_Properties;
 	};
 
-	inline EmptyResult IGreaperLibrary::RegisterProperty(const SPtr<IProperty>& property) noexcept
+	inline EmptyResult IGreaperLibrary::RegisterProperty(const PIProperty& property) noexcept
 	{
 		const auto nameIT = m_PropertyMap.find(property->GetPropertyName());
 		if (nameIT != m_PropertyMap.end())
@@ -129,7 +129,7 @@ namespace greaper
 		return Result::CreateSuccess();
 	}
 
-	INLINE void IGreaperLibrary::InitLibrary(PLibrary lib, SPtr<IApplication> app) noexcept
+	INLINE void IGreaperLibrary::InitLibrary(PLibrary lib, PApplication app) noexcept
 	{
 		using namespace std::placeholders;
 
@@ -201,15 +201,15 @@ namespace greaper
 		m_InitializationState = InitState_t::Stopped;
 	}
 
-	inline WPtr<IApplication> IGreaperLibrary::GetApplication() const noexcept { return (WApplication)m_Application; }
+	inline WApplication IGreaperLibrary::GetApplication() const noexcept { return (WApplication)m_Application; }
 
-	INLINE WPtr<Library> IGreaperLibrary::GetOSLibrary() const noexcept { return (WLibrary)m_Library; }
+	INLINE WLibrary IGreaperLibrary::GetOSLibrary() const noexcept { return (WLibrary)m_Library; }
 
-	inline CSpan<SPtr<IInterface>> IGreaperLibrary::GetManagers() const noexcept { return CreateSpan(m_Managers); }
+	inline CSpan<PInterface> IGreaperLibrary::GetManagers() const noexcept { return CreateSpan(m_Managers); }
 
-	INLINE CSpan<SPtr<IProperty>> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
+	INLINE CSpan<PIProperty> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
-	inline TResult<WPtr<IProperty>> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
+	inline TResult<WIProperty> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
 	{
 		const auto nameIT = m_PropertyMap.find(name);
 		if (nameIT == m_PropertyMap.end())
@@ -260,7 +260,7 @@ namespace greaper
 			m_InitLogs.push_back(LogData{ message, std::chrono::system_clock::now(), LogLevel_t::CRITICAL, GetLibraryName() });
 	}
 
-	INLINE void IGreaperLibrary::OnNewLog(const SPtr<IInterface>& newInterface) noexcept
+	INLINE void IGreaperLibrary::OnNewLog(const PInterface& newInterface) noexcept
 	{
 		using namespace std::placeholders;
 
@@ -281,7 +281,7 @@ namespace greaper
 		}
 	}
 
-	INLINE void IGreaperLibrary::OnLogActivation(bool active, UNUSED IInterface* oldLog, const SPtr<IInterface>& newLog) noexcept
+	INLINE void IGreaperLibrary::OnLogActivation(bool active, UNUSED IInterface* oldLog, const PInterface& newLog) noexcept
 	{
 		using namespace std::placeholders;
 
@@ -336,9 +336,9 @@ namespace greaper
 	class TGreaperLibrary : public IGreaperLibrary
 	{
 	public:
-		const Uuid& GetLibraryUuid()const noexcept override { return T::LibraryUUID; }
+		const Uuid& GetLibraryUuid()const noexcept final { return T::LibraryUUID; }
 
-		const StringView& GetLibraryName()const noexcept override { return T::LibraryName; }
+		const StringView& GetLibraryName()const noexcept final { return T::LibraryName; }
 	};
 
 	template<class T>
@@ -353,7 +353,7 @@ namespace greaper
 
 	//// Property methods to avoid circle dependency
 	template<class T, class _Alloc_>
-	TResult<SPtr<TProperty<T>>> CreateProperty(WPtr<IGreaperLibrary> library, StringView propertyName, T initialValue, StringView propertyInfo,
+	TResult<PProperty<T>> CreateProperty(WGreaperLib library, StringView propertyName, T initialValue, StringView propertyInfo,
 		bool isConstant, bool isStatic, TPropertyValidator<T>* validator)
 	{
 		auto lib = library.lock();
@@ -361,7 +361,7 @@ namespace greaper
 			return Result::CreateFailure<PProperty<T>>("Couldn't create the property, expired library given"sv);
 
 		TProperty<T>* propPtr = Construct<TProperty<T>, _Alloc_>(library, propertyName, std::move(initialValue), propertyInfo, isConstant, isStatic, validator);
-		SPtr<TProperty<T>> prop(propPtr, Impl::SPtrDeleterFn_t<TProperty<T>>(&Impl::DefaultDeleter<TProperty<T>, _Alloc_>));
+		PProperty<T> prop(propPtr, Impl::SPtrDeleterFn_t<TProperty<T>>(&Impl::DefaultDeleter<TProperty<T>, _Alloc_>));
 		const auto res = lib->RegisterProperty((PIProperty)prop);
 		if (res.HasFailed())
 		{
@@ -371,7 +371,7 @@ namespace greaper
 	}
 	
 	template<class T>
-	INLINE TResult<WProperty<T>> GetProperty(const WPtr<IGreaperLibrary>& library, const String& name)
+	INLINE TResult<WProperty<T>> GetProperty(const WGreaperLib& library, const String& name)
 	{
 		auto lib = library.lock();
 		if (lib == nullptr)
@@ -421,7 +421,7 @@ namespace greaper
 	}
 
 	//// Interface methods to avoid circle dependency
-	INLINE void IInterface::Initialize(WPtr<IGreaperLibrary> library) noexcept
+	INLINE void IInterface::Initialize(WGreaperLib library) noexcept
 	{
 		VerifyEqual(m_InitializationState, InitState_t::Stopped, "Trying to initialize an already initialized Interface '%s'.", GetInterfaceName().data());
 
@@ -456,7 +456,7 @@ namespace greaper
 		m_InitEvent.Trigger(false);
 	}
 
-	INLINE void IInterface::Activate(const SPtr<IInterface>& oldDefault) noexcept
+	INLINE void IInterface::Activate(const PInterface& oldDefault) noexcept
 	{
 		VerifyEqual(m_ActiveState, InitState_t::Stopped, "Trying to activate an already activated Interface '%s'.", GetInterfaceName().data());
 
@@ -470,7 +470,7 @@ namespace greaper
 		m_ActivationEvent.Trigger(true, this, oldDefault);
 	}
 
-	INLINE void IInterface::Deactivate(const SPtr<IInterface>& newDefault) noexcept
+	INLINE void IInterface::Deactivate(const PInterface& newDefault) noexcept
 	{
 		VerifyEqual(m_ActiveState, InitState_t::Started, "Trying to deactivate an already deactivated Interface '%s'.", GetInterfaceName().data());
 

@@ -32,12 +32,12 @@ void CommandManager::OnDeinitialization() noexcept
 	gCommandManager.reset();
 }
 
-void CommandManager::OnActivation(UNUSED const SPtr<IInterface>& oldDefault) noexcept
+void CommandManager::OnActivation(UNUSED const PInterface& oldDefault) noexcept
 {
 
 }
 
-void CommandManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
+void CommandManager::OnDeactivation(UNUSED const PInterface& newDefault) noexcept
 {
 
 }

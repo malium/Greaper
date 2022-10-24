@@ -8,8 +8,7 @@
 #ifndef CORE_I_LOG_WRITER_H
 #define CORE_I_LOG_WRITER_H 1
 
-#include <limits>
-#include <utility>
+#include "../CorePrerequisites.h"
 
 namespace greaper
 {
@@ -17,7 +16,7 @@ namespace greaper
 	class ILogManager;
 	class ILogWriter
 	{
-		WPtr<ILogManager> m_LogManager;
+		WLogManager m_LogManager;
 		sizet m_WriterID;
 
 	public:
@@ -27,7 +26,7 @@ namespace greaper
 
 		virtual bool WritePreviousMessages()const noexcept { return false; }
 
-		INLINE void _Connect(WPtr<ILogManager> logManager, sizet writerID)noexcept
+		INLINE void _Connect(WLogManager logManager, sizet writerID)noexcept
 		{
 			m_LogManager = std::move(logManager);
 			m_WriterID = writerID;

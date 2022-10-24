@@ -13,7 +13,7 @@ using namespace greaper::core;
 
 SPtr<Application> gApplication = {};
 
-EmptyResult Application::RegisterGreaperLibrary(const SPtr<IGreaperLibrary>& gLib)
+EmptyResult Application::RegisterGreaperLibrary(const PGreaperLib& gLib)
 {
 	auto uLib = GetGreaperLibrary(gLib->GetLibraryUuid());
 	if (uLib.IsOk() && uLib.GetValue() != nullptr)
@@ -158,12 +158,12 @@ void Application::OnDeinitialization() noexcept
 	gApplication.reset();
 }
 
-void Application::OnActivation(UNUSED const SPtr<IInterface>& oldDefault) noexcept
+void Application::OnActivation(UNUSED const PInterface& oldDefault) noexcept
 {
 	/* No-op */
 }
 
-void Application::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
+void Application::OnDeactivation(UNUSED const PInterface& newDefault) noexcept
 {
 	/* No-op */
 }
@@ -266,26 +266,26 @@ void Application::DeinitSerialization() noexcept
 {
 }
 
-TResult<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WStringView& libPath)noexcept
+TResult<PGreaperLib> Application::RegisterGreaperLibrary(const WStringView& libPath)noexcept
 {
 	PLibrary lib{ Construct<Library>(libPath) };
 
 	if (!lib->IsOpen())
 	{
-		return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format(
+		return Result::CreateFailure<PGreaperLib>(Format(
 			"Trying to register a GreaperLibrary with path '%S', but couldn't be openned.", libPath.data()));
 	}
 	auto fnRes = lib->GetFunctionT<void*>("_Greaper"sv);
 	if (fnRes.HasFailed())
 	{
-		return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format(
+		return Result::CreateFailure<PGreaperLib>(Format(
 			"Trying to register a GreaperLibrary with path '%S', but does not comply with Greaper modular protocol.",
 			libPath.data()));
 	}
 	auto gLibPtr = reinterpret_cast<PGreaperLib*>(fnRes.GetValue()());
 	if (gLibPtr == nullptr || (*gLibPtr) == nullptr)
 	{
-		return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format(
+		return Result::CreateFailure<PGreaperLib>(Format(
 			"Trying to register a GreaperLibrary with path '%S', but the library returned a nullptr GreaperLibrary.",
 			libPath.data()));
 	}
@@ -293,44 +293,44 @@ TResult<SPtr<IGreaperLibrary>> Application::RegisterGreaperLibrary(const WString
 	auto res = RegisterGreaperLibrary(gLib);
 	
 	if (res.HasFailed())
-		return Result::CopyFailure<SPtr<IGreaperLibrary>>(res);
+		return Result::CopyFailure<PGreaperLib>(res);
 
-	gLib->InitLibrary(lib, (SPtr<IApplication>)gApplication);
+	gLib->InitLibrary(lib, (PApplication)gApplication);
 	
 	return Result::CreateSuccess(gLib);
 }
 
-TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const StringView& libraryName)const noexcept
+TResult<PGreaperLib> Application::GetGreaperLibrary(const StringView& libraryName)const noexcept
 {
 	if (auto findIT = m_LibraryNameMap.find(libraryName); findIT != m_LibraryNameMap.end())
 	{
 		if (m_Libraries.size() <= findIT->second)
 		{
-			return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("A GreaperLibrary with name '%s' was found, but the library list didn't have that library.", libraryName.data()));
+			return Result::CreateFailure<PGreaperLib>(Format("A GreaperLibrary with name '%s' was found, but the library list didn't have that library.", libraryName.data()));
 		}
 		auto& libInfo = m_Libraries[findIT->second];
 		return Result::CreateSuccess(libInfo.Lib);
 	}
 
-	return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryName.data()));
+	return Result::CreateFailure<PGreaperLib>(Format("Couldn't find the GreaperLibrary '%s'.", libraryName.data()));
 }
 
-TResult<SPtr<IGreaperLibrary>> Application::GetGreaperLibrary(const Uuid& libraryUUID)const noexcept
+TResult<PGreaperLib> Application::GetGreaperLibrary(const Uuid& libraryUUID)const noexcept
 {
 	if (const auto findIT = m_LibraryUuidMap.find(libraryUUID); findIT != m_LibraryUuidMap.end())
 	{
 		if (m_Libraries.size() <= findIT->second)
 		{
-			return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("A GreaperLibrary with UUID '%s' was found, but the library list didn't have that library.", libraryUUID.ToString().c_str()));
+			return Result::CreateFailure<PGreaperLib>(Format("A GreaperLibrary with UUID '%s' was found, but the library list didn't have that library.", libraryUUID.ToString().c_str()));
 		}
 		auto& libInfo = m_Libraries[findIT->second];
 		return Result::CreateSuccess(libInfo.Lib);
 	}
 
-	return Result::CreateFailure<SPtr<IGreaperLibrary>>(Format("Couldn't find the GreaperLibrary '%s'.", libraryUUID.ToString().c_str()));
+	return Result::CreateFailure<PGreaperLib>(Format("Couldn't find the GreaperLibrary '%s'.", libraryUUID.ToString().c_str()));
 }
 
-EmptyResult Application::UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept
+EmptyResult Application::UnregisterGreaperLibrary(const PGreaperLib& library)noexcept
 {
 	if (library == nullptr)
 		return Result::CreateFailure("Trying to unregister a nullptr GreaperLibrary"sv);

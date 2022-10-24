@@ -49,13 +49,13 @@ namespace greaper
 
 		virtual ~IApplication()noexcept = default;
 
-		virtual TResult<SPtr<IGreaperLibrary>> RegisterGreaperLibrary(const WStringView& libPath)noexcept = 0;
+		virtual TResult<PGreaperLib> RegisterGreaperLibrary(const WStringView& libPath)noexcept = 0;
 
-		virtual TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const StringView& libraryName)const noexcept = 0;
+		virtual TResult<PGreaperLib> GetGreaperLibrary(const StringView& libraryName)const noexcept = 0;
 
-		virtual TResult<SPtr<IGreaperLibrary>> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept = 0;
+		virtual TResult<PGreaperLib> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept = 0;
 
-		virtual EmptyResult UnregisterGreaperLibrary(SPtr<IGreaperLibrary> library)noexcept = 0;
+		virtual EmptyResult UnregisterGreaperLibrary(const PGreaperLib& library)noexcept = 0;
 
 		virtual EmptyResult RegisterInterface(const PInterface& interface)noexcept = 0;
 
@@ -93,9 +93,9 @@ namespace greaper
 
 		virtual WPtr<CommandLineProp_t> GetCommandLine()const noexcept = 0;
 
-		virtual Vector<SPtr<IGreaperLibrary>> GetRegisteredLibrariesCopy()const noexcept = 0;
+		virtual Vector<PGreaperLib> GetRegisteredLibrariesCopy()const noexcept = 0;
 
-		virtual Vector<SPtr<IInterface>> GetActiveInterfacesCopy()const noexcept = 0;
+		virtual Vector<PInterface> GetActiveInterfacesCopy()const noexcept = 0;
 
 		template<class T>
 		INLINE TResult<SPtr<T>> RegisterGreaperLibraryT(const WStringView& libPath)noexcept

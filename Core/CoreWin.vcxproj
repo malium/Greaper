@@ -120,6 +120,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,6 +151,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -179,6 +181,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -209,6 +212,7 @@
       <OpenMPSupport>false</OpenMPSupport>
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

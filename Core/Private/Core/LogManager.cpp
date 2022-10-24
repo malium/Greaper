@@ -44,7 +44,7 @@ void LogManager::StartThreadMode()
 		GetAsyncLog().lock()->SetValue(false, true);
 		return;
 	}
-	auto thmgr = (SPtr<IThreadManager>)thmgrRes.GetValue();
+	auto thmgr = (PThreadManager)thmgrRes.GetValue();
 	if (thmgr == nullptr)
 	{
 		lib->LogError("Trying to set as async LogManager, but couldn't obtain a ThreadManager.");
@@ -154,7 +154,7 @@ void LogManager::OnDeinitialization() noexcept
 	gLogManager.reset();
 }
 
-void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
+void LogManager::OnActivation(const PInterface& oldDefault) noexcept
 {
 	if (oldDefault != nullptr)
 	{
@@ -194,7 +194,7 @@ void LogManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	}
 }
 
-void LogManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
+void LogManager::OnDeactivation(UNUSED const PInterface& newDefault) noexcept
 {
 	// deinit async logging
 	if (m_Threaded)

@@ -11,12 +11,6 @@ using namespace greaper::core;
 
 SPtr<ThreadManager> gThreadManager = {};
 
-#if PLT_WINDOWS
-using ThreadImpl = WinThreadImpl;
-#elif PLT_LINUX
-using ThreadImpl = LnxThreadImpl;
-#endif
-
 void ThreadManager::OnThreadDestruction(const PThread& thread) noexcept
 {
 	if (thread == nullptr || !IsActive())
@@ -62,7 +56,7 @@ void ThreadManager::OnDeinitialization() noexcept
 	gThreadManager.reset();
 }
 
-void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
+void ThreadManager::OnActivation(const PInterface& oldDefault) noexcept
 {
 	if (oldDefault != nullptr)
 	{
@@ -89,17 +83,17 @@ void ThreadManager::OnActivation(const SPtr<IInterface>& oldDefault) noexcept
 	{
 		// Add Main Thread
 		LOCK(m_ThreadMutex);
-		auto curTh = SPtr<ThreadImpl>(AllocT<ThreadImpl>());
-		new((void*)curTh.get())ThreadImpl((WThreadManager)gThreadManager, CUR_THHND(), CUR_THID(), "Main");
+		auto curTh = PThread(AllocT<Thread>());
+		new((void*)curTh.get())Thread((WThreadManager)gThreadManager, CUR_THHND(), CUR_THID(), "Main");
 
 		m_ThreadNameMap.insert_or_assign(curTh->GetName(), m_Threads.size());
 		m_ThreadIDMap.insert_or_assign(curTh->GetID(), m_Threads.size());
-		m_Threads.push_back((PThread)curTh);
+		m_Threads.push_back(curTh);
 	}
 	m_ThreadDestructionEvent.Connect(m_DestructionEventHnd, [this](const PThread& thread) {OnThreadDestruction(thread); });
 }
 
-void ThreadManager::OnDeactivation(UNUSED const SPtr<IInterface>& newDefault) noexcept
+void ThreadManager::OnDeactivation(UNUSED const PInterface& newDefault) noexcept
 {
 	m_DestructionEventHnd.Disconnect();
 
@@ -181,11 +175,11 @@ TResult<WThread> ThreadManager::GetThread(const String& threadName) const noexce
 TResult<PThread> ThreadManager::CreateThread(const ThreadConfig& config) noexcept
 {
 	LOCK(m_ThreadMutex);
-	auto thread = SPtr<ThreadImpl>(AllocT<ThreadImpl>());
-	new((void*)thread.get())ThreadImpl((WThreadManager)gThreadManager, (PThread)thread, config);
+	auto thread = PThread(AllocT<Thread>());
+	new((void*)thread.get())Thread((WThreadManager)gThreadManager, thread, config);
 
 	m_ThreadNameMap.insert_or_assign(thread->GetName(), m_Threads.size());
 	m_ThreadIDMap.insert_or_assign(thread->GetID(), m_Threads.size());
-	m_Threads.push_back((PThread)thread);
-	return Result::CreateSuccess((PThread)thread);
+	m_Threads.push_back(thread);
+	return Result::CreateSuccess(thread);
 }

@@ -31,12 +31,21 @@ namespace greaper
 	class IApplication; using PApplication = SPtr<IApplication>; using WApplication = WPtr<IApplication>;
 	class ILogManager; using PLogManager = SPtr<ILogManager>; using WLogManager = WPtr<ILogManager>;
 	class IThreadManager; using PThreadManager = SPtr<IThreadManager>; using WThreadManager = WPtr<IThreadManager>;
-	class IThread; using PThread = SPtr<IThread>; using WThread = WPtr<IThread>;
+
+#if PLT_WINDOWS
+	class WinThreadImpl; using Thread = WinThreadImpl;
+#elif PLT_LINUX
+	class LnxThreadImpl; using Thread = LnxThreadImpl;
+#endif
+	using WThread = WPtr<Thread>; using PThread = SPtr<Thread>;
+
 	struct ThreadConfig;
 	class ICommandManager; using PCommandManager = SPtr<ICommandManager>; using WCommandManager = WPtr<ICommandManager>;
 	class ICommand; using PCommand = SPtr<ICommand>; using WCommand = WPtr<ICommand>;
 	class IConsole; using PConsole = SPtr<IConsole>; using WConsole = WPtr<IConsole>;
+	class Library; using PLibrary = SPtr<Library>; using WLibrary = WPtr<Library>;
 	class IGreaperLibrary; using PGreaperLib = SPtr<IGreaperLibrary>; using WGreaperLib = WPtr<IGreaperLibrary>;
+	class IInterface; using PInterface = SPtr<IInterface>; using WInterface = WPtr<IInterface>;
 	class IProperty; using PIProperty = SPtr<IProperty>; using WIProperty = WPtr<IProperty>;
 	template<class T> class TProperty; template<class T> using PProperty = SPtr<TProperty<T>>; template<class T> using WProperty = WPtr<TProperty<T>>;
 	template<class T> class TPropertyValidator;

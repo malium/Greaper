@@ -10,9 +10,9 @@
 
 namespace greaper
 {
-	class WinThreadImpl : IThread
+	class WinThreadImpl
 	{
-		WPtr<IThreadManager> m_Manager;
+		WThreadManager m_Manager;
 		ThreadHandle m_Handle;
 		ThreadID_t m_ID;
 		std::atomic_int8_t m_State;
@@ -21,15 +21,15 @@ namespace greaper
 		String m_Name;
 		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
-		SPtr<WinThreadImpl> m_This;
+		PThread m_This;
 		Barrier m_Barier;
 
 		static INLINE unsigned STDCALL RunFn(void* data)
 		{
 			OSPlatform::PerThreadSEHInit();
 
-			auto* thread = (SPtr<WinThreadImpl>*)data;
-			SPtr<WinThreadImpl>& winThread = *thread;
+			auto* thread = (PThread*)data;
+			PThread& winThread = *thread;
 			
 			if (winThread == nullptr)
 				return EXIT_FAILURE;
@@ -37,7 +37,7 @@ namespace greaper
 			if(!winThread->m_Manager.expired())
 			{
 				auto mgr = winThread->m_Manager.lock();
-				mgr->GetThreadCreationEvent()->Trigger((PThread)winThread);
+				mgr->GetThreadCreationEvent()->Trigger(winThread);
 			}
 
 			while (winThread->GetState() != ThreadState_t::RUNNING)
@@ -53,7 +53,7 @@ namespace greaper
 			if (!winThread->m_Manager.expired())
 			{
 				auto mgr = winThread->m_Manager.lock();
-				mgr->GetThreadDestructionEvent()->Trigger((PThread)winThread);
+				mgr->GetThreadDestructionEvent()->Trigger(winThread);
 			}
 			winThread.reset();
 
@@ -130,7 +130,7 @@ namespace greaper
 				const auto& newThreadMgr = (const PThreadManager&)newManager;
 				m_OnManagerActivation.Disconnect();
 				newThreadMgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
-				m_Manager = (WPtr<IThreadManager>)newThreadMgr;
+				m_Manager = (WThreadManager)newThreadMgr;
 			}
 			else
 			{
@@ -151,14 +151,14 @@ namespace greaper
 			if (newManager == nullptr || newManager->GetInterfaceUUID() != IThreadManager::InterfaceUUID)
 				return;
 
-			m_Manager = (WPtr<IThreadManager>)newManager;
+			m_Manager = (WThreadManager)newManager;
 			m_OnManagerActivation.Disconnect();
 			newManager->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 			m_OnNewManager.Disconnect();
 		}
 
 	public:
-		INLINE WinThreadImpl(WPtr<IThreadManager> manager, PThread self, const ThreadConfig& config)noexcept
+		INLINE WinThreadImpl(WThreadManager manager, PThread self, const ThreadConfig& config)noexcept
 			:m_Manager(std::move(manager))
 			,m_Handle(InvalidThreadHandle)
 			,m_ID(InvalidThreadID)
@@ -166,7 +166,7 @@ namespace greaper
 			,m_ThreadFn(config.ThreadFN)
 			,m_JoinsAtDestruction(config.JoinAtDestruction)
 			,m_Name(config.Name)
-			,m_This(std::move((SPtr<WinThreadImpl>)self))
+			,m_This(std::move(self))
 			,m_Barier(2)
 		{
 			if (m_Manager.expired() || m_ThreadFn == nullptr)
@@ -182,7 +182,7 @@ namespace greaper
 			{
 				m_State = ThreadState_t::STOPPED;
 				m_ID = InvalidThreadID;
-				auto mgr = (PInterface)m_Manager.lock();
+				auto mgr = m_Manager.lock();
 				const auto& wlib = mgr->GetLibrary();
 				VerifyNot(wlib.expired(), "Something went wrong trying to create a WinThread.");
 				auto lib = wlib.lock();
@@ -203,7 +203,7 @@ namespace greaper
 			m_Barier.sync();
 		}
 
-		INLINE WinThreadImpl(WPtr<IThreadManager> manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
+		INLINE WinThreadImpl(WThreadManager manager, ThreadHandle handle, ThreadID_t id, StringView name, bool setName = false)
 			:m_Manager(std::move(manager))
 			,m_Handle(handle)
 			,m_ID(id)
@@ -218,13 +218,13 @@ namespace greaper
 			mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldManager, const PInterface& newManager) { OnManagerActivation(active, oldManager, newManager); });
 		}
 
-		INLINE ~WinThreadImpl() override
+		INLINE ~WinThreadImpl()
 		{
 			if (m_JoinsAtDestruction && Joinable())
 				Join();
 		}
 
-		INLINE void Detach()override
+		INLINE void Detach()
 		{
 			m_Handle = InvalidThreadHandle;
 			m_ID = InvalidThreadID;
@@ -232,7 +232,7 @@ namespace greaper
 			m_State = ThreadState_t::UNMANAGED;
 		}
 
-		INLINE void Join()override
+		INLINE void Join()
 		{
 			if (m_State == ThreadState_t::STOPPED)
 				return;
@@ -244,13 +244,13 @@ namespace greaper
 			//m_State = ThreadState_t::STOPPED;
 		}
 
-		INLINE bool Joinable()const noexcept override
+		INLINE bool Joinable()const noexcept 
 		{
 			return m_State == ThreadState_t::RUNNING
 				&& m_Handle != InvalidThreadHandle && m_ID != InvalidThreadID;
 		}
 
-		INLINE bool TryJoin()override
+		INLINE bool TryJoin()
 		{
 			if (m_State == ThreadState_t::STOPPED)
 				return true;
@@ -272,9 +272,9 @@ namespace greaper
 			return false;
 		}
 
-		INLINE ThreadHandle GetOSHandle()const noexcept override { return m_Handle; }
+		INLINE ThreadHandle GetOSHandle()const noexcept  { return m_Handle; }
 
-		INLINE void Terminate()override
+		INLINE void Terminate()
 		{
 			Verify(Joinable(), "Trying to terminate a not Joinable thread.");
 			if (!TerminateThread(m_Handle, EXIT_FAILURE))
@@ -286,7 +286,7 @@ namespace greaper
 			m_State = ThreadState_t::STOPPED;
 		}
 
-		INLINE void Resume()override
+		INLINE void Resume()
 		{
 			if (GetState() != ThreadState_t::SUSPENDED)
 				return;
@@ -296,13 +296,12 @@ namespace greaper
 			m_Barier.sync();
 		}
 
-		INLINE ThreadID_t GetID()const noexcept override { return m_ID; }
+		INLINE ThreadID_t GetID()const noexcept  { return m_ID; }
 
-		INLINE bool JoinsAtDestruction()const noexcept override { return m_JoinsAtDestruction; }
+		INLINE bool JoinsAtDestruction()const noexcept  { return m_JoinsAtDestruction; }
 
-		INLINE const String& GetName()const noexcept override { return m_Name; }
+		INLINE const String& GetName()const noexcept  { return m_Name; }
 
-		INLINE ThreadState_t GetState()const noexcept override { return (ThreadState_t)m_State.load(); }
+		INLINE ThreadState_t GetState()const noexcept  { return (ThreadState_t)m_State.load(); }
 	};
-	using Thread = WinThreadImpl;
 }

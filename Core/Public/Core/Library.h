@@ -144,9 +144,6 @@ namespace greaper
 		Library(const Library&) = delete;
 		Library& operator=(const Library&) = delete;
 	};
-
-	using WLibrary = WPtr<Library>;
-	using PLibrary = SPtr<Library>;
 }
 
 #endif /* CORE_LIBRARY_H */
