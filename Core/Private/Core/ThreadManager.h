@@ -39,7 +39,7 @@ namespace greaper::core
 
 		void OnActivation(const PInterface& oldDefault)noexcept override;
 
-		void OnDeactivation(const PInterface& newDefault)noexcept override;
+		void OnDeactivation(UNUSED const PInterface& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 

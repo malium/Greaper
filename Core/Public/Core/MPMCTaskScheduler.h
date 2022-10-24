@@ -11,6 +11,7 @@
 #include "CorePrerequisites.h"
 #include "Concurrency.h"
 #include "IThreadManager.h"
+#include "IApplication.h"
 #include "Base/IThread.h"
 #include "Enumeration.h"
 #include "Result.h"
