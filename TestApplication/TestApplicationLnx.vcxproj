@@ -57,8 +57,8 @@
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
-    <ProjectPublicIncludePath>$(SolutionDir)Core/Public/;</ProjectPublicIncludePath>
-    <AdditionalSourcesToCopyMapping>$(SolutionDir)Core/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>$(SolutionDir)src/Public/;</ProjectPublicIncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
     <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -68,8 +68,8 @@
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
-    <ProjectPublicIncludePath>$(SolutionDir)Core/Public/;</ProjectPublicIncludePath>
-    <AdditionalSourcesToCopyMapping>$(SolutionDir)Core/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>$(SolutionDir)src/Public/;</ProjectPublicIncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
     <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -79,8 +79,8 @@
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
-    <ProjectPublicIncludePath>$(SolutionDir)Core/Public/;</ProjectPublicIncludePath>
-    <AdditionalSourcesToCopyMapping>$(SolutionDir)Core/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>$(SolutionDir)src/Public/;</ProjectPublicIncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
     <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
@@ -90,8 +90,8 @@
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
-    <ProjectPublicIncludePath>$(SolutionDir)Core/Public/;</ProjectPublicIncludePath>
-    <AdditionalSourcesToCopyMapping>$(SolutionDir)Core/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>$(SolutionDir)src/Public/;</ProjectPublicIncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
     <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
   </PropertyGroup>
   <ItemGroup>

@@ -15,6 +15,12 @@ namespace greaper
 	struct LnxOSPlatform
 	{
 		static void Sleep(uint32 millis) noexcept;
+
+		static String GetStackTrace();
+
+		static void PerThreadInit();
+
+		static void PerLibraryInit();
 	};
 	using OSPlatform = LnxOSPlatform;
 }

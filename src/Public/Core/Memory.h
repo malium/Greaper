@@ -8,7 +8,6 @@
 #ifndef GREAPER_CORE_MEMORY_H
 #define GREAPER_CORE_MEMORY_H 1
 
-#include <type_traits>
 #include <vector>
 #include <list>
 #include <forward_list>
@@ -24,7 +23,6 @@
 #include <memory>
 #include <cstdarg>
 #include <functional>
-#include <tuple>
 #if PLT_LINUX
 #include <iostream>
 #endif

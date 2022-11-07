@@ -1,3 +1,4 @@
+#include "WinPlatform.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
@@ -135,9 +136,13 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace()
 	return stackTrace;
 }
 
-INLINE void greaper::WinOSPlatform::PerThreadSEHInit()
+INLINE void greaper::WinOSPlatform::PerThreadInit()
 {
 	_set_se_translator(&WinOSPlatform::SETranslatorFn);
+}
+
+INLINE void greaper::WinOSPlatform::PerLibraryInit()
+{
 }
 
 #define LoadProc(lib, name, var)\

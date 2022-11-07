@@ -27,7 +27,9 @@ namespace greaper
 
 		static String GetStackTrace();
 
-		static void PerThreadSEHInit();
+		static void PerThreadInit();
+		
+		static void PerLibraryInit();
 
 	private:
 		static constexpr sizet MAX_STACKTRACE_DEPTH = 200;

@@ -11,7 +11,6 @@
 #include "../CorePrerequisites.h"
 #include "../Stream.h"
 #include "../Uuid.h"
-#include <functional>
 
 #ifndef REFLECTION_STRING_ELEMENT_SEPARATOR
 #define REFLECTION_STRING_ELEMENT_SEPARATOR '|'

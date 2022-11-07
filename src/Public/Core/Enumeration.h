@@ -216,7 +216,6 @@ _ENUMDEF_MIDDLE(name)						\
 #val0##sv, #val1##sv, #val2##sv, #val3##sv, #val4##sv, #val5##sv, #val6##sv, #val7##sv										\
 _ENUMDEF_ENDING(name)
 
-
 #define ENUMERATION_9(name, val0, val1, val2, val3, val4, val5, val6, val7, val8)			\
 _ENUMDEF_START(name)						\
 val0, val1, val2, val3,	val4, val5, val6, val7, val8,									\

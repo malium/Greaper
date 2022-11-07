@@ -74,7 +74,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)Core\Public\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
@@ -82,7 +82,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)Core\Public\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
@@ -90,7 +90,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)Core\Public\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
@@ -98,7 +98,7 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)Core\Public\;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
@@ -121,6 +121,7 @@
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
       <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,6 +153,7 @@
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
       <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -182,6 +184,7 @@
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
       <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,6 +216,7 @@
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
       <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -305,6 +309,17 @@
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
     <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
+    <ClInclude Include="Public\Math\Base\ReflectedConversions.h" />
+    <ClInclude Include="Public\Math\Base\Utils.inl" />
+    <ClInclude Include="Public\Math\Base\VecRef.h" />
+    <ClInclude Include="Public\Math\MathPrerequisites.h" />
+    <ClInclude Include="Public\Math\Matrix2.h" />
+    <ClInclude Include="Public\Math\Matrix3.h" />
+    <ClInclude Include="Public\Math\Matrix4.h" />
+    <ClInclude Include="Public\Math\Quaternion.h" />
+    <ClInclude Include="Public\Math\Vector2.h" />
+    <ClInclude Include="Public\Math\Vector3.h" />
+    <ClInclude Include="Public\Math\Vector4.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl" />

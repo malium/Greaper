@@ -67,7 +67,7 @@ namespace greaper
 	using ReflectedFieldID_t = int16;
 	using ReflectedTypeID_t = int64;
 	using ReflectedSize_t = int64;
-	template<class T> struct ReflectedPlainType;
+	template<class T> struct Refle2ctedPlainType;
 
 	// Reflection ID
 	enum CoreReflectedTypeID : ReflectedTypeID_t
@@ -108,7 +108,7 @@ namespace greaper
 		RTI_UnorderedMultiSet,
 
 		// Classes
-		RTI_UUID = 50,
+		RTI_UUID = 100,
 		RTI_Property,
 
 	};

@@ -8,9 +8,8 @@
 #ifndef CORE_EVENT_H
 #define CORE_EVENT_H 1
 
-#include "Memory.h"
+#include "CorePrerequisites.h"
 #include "Concurrency.h"
-#include <functional>
 
 namespace greaper
 {

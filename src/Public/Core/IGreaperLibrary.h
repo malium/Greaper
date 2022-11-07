@@ -135,9 +135,9 @@ namespace greaper
 
 		VerifyEqual(m_InitializationState, InitState_t::Stopped, "Trying to initialize a library that is not fully stopped.");
 
-		Log(Format("Initializing %s library ver. %d.%d.%d.%d...", GetLibraryName().data(),
-			VERSION_GET_MAJOR(GetLibraryVersion()), VERSION_GET_MINOR(GetLibraryVersion()),
-			VERSION_GET_PATCH(GetLibraryVersion()), VERSION_GET_REV(GetLibraryVersion())));
+		const auto [major, minor, patch, rev] = GetGreaperVersionValues(GetLibraryVersion());
+		Log(Format("Initializing %s library ver. %d.%d.%d.%d...", GetLibraryName().data(), 
+			major, minor, patch, rev));
 
 		m_InitializationState = InitState_t::Starting;
 

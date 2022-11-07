@@ -26,7 +26,7 @@ namespace greaper
 
 		static INLINE unsigned STDCALL RunFn(void* data)
 		{
-			OSPlatform::PerThreadSEHInit();
+			OSPlatform::PerThreadInit();
 
 			auto* thread = (PThread*)data;
 			PThread& winThread = *thread;

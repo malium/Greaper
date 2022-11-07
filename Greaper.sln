@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreWin", "Core\CoreWin.vcxproj", "{F36B383C-EC70-4B68-998D-3B852AF836C7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreWin", "src\CoreWin.vcxproj", "{F36B383C-EC70-4B68-998D-3B852AF836C7}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreLnx", "Core\CoreLnx.vcxproj", "{A19D8BAC-EE48-47E4-85F7-5DCE17D1F690}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CoreLnx", "src\CoreLnx.vcxproj", "{A19D8BAC-EE48-47E4-85F7-5DCE17D1F690}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApplicationWin", "TestApplication\TestApplicationWin.vcxproj", "{E86E719C-45D7-4CE8-9498-D8B945E46735}"
 	ProjectSection(ProjectDependencies) = postProject

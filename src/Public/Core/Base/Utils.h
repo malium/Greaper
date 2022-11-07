@@ -7,6 +7,7 @@
 
 #include <cstring>
 #include <type_traits>
+#include <tuple>
 
 /** Checks if a value is within range (min,max], inclusive on max and min */
 template<typename T>
@@ -103,6 +104,14 @@ INLINE constexpr T Abs(const T a)
 {
 	return (a >= (T)0) ? a : -a;
 }
+INLINE constexpr bool IsNearlyEqual(float a, float b, float tolerance = 0.0001f)
+{
+	return Abs(a - b) <= tolerance;
+}
+INLINE constexpr bool IsNearlyEqual(double a, double b, double tolerance = 0.0001)
+{
+	return Abs(a - b) <= tolerance;
+}
 /** Returns a * a */
 template<typename T>
 INLINE constexpr T Square(const T a)
@@ -121,7 +130,6 @@ INLINE constexpr T Sign(const T a)
 {
 	return ((a > (T)0) ? (T)1 : ((a) < (T)0) ? (T)-1 : (T)0);
 }
-
 /** Clamps an int32 into the int8 range. */
 INLINE constexpr int8 ClampChar(const int32 i)
 {
@@ -164,7 +172,12 @@ INLINE void SetBitValue(uint8* ptr, const uint32 index, const bool set)noexcept
 	else
 		*bytePtr &= (uint8)~mask;
 }
-
+/** Returns a tuple of each element of the version number */
+INLINE constexpr std::tuple<uint8, uint8, uint8, uint8> GetGreaperVersionValues(uint32 version)
+{
+	return { (uint8)VERSION_GET_MAJOR(version), (uint8)VERSION_GET_MINOR(version),
+		(uint8)VERSION_GET_PATCH(version), (uint8)VERSION_GET_REV(version) };
+}
 /***********************************************************************************
 *                              HASH HELPER FUNCTIONS                               *
 ***********************************************************************************/
