@@ -11,14 +11,30 @@
 #include "../Library.h"
 #include "Win32DbgHelp.h"
 #include "Win32PSAPI.h"
+#include "Win32SysInfo.h"
 #include "Win32Concurrency.h"
+#include "../Base/CPUInfo.h"
 #include <filesystem>
 #include <array>
 
 namespace greaper
 {
-	struct WinOSPlatform
+	namespace EWindowsVersion
 	{
+		enum Type
+		{
+			Unknown,
+			Windows7,
+			Windows8,
+			Windows81,
+			Windows10,
+		};
+	}
+	using WindowsVersion_t = EWindowsVersion::Type;
+
+	class WinOSPlatform
+	{
+	public:
 		static void Sleep(uint32 millis) noexcept;
 
 		static String GetExceptionMessage(PEXCEPTION_RECORD record);
@@ -27,17 +43,27 @@ namespace greaper
 
 		static String GetStackTrace();
 
-		static void PerThreadInit();
-		
-		static void PerLibraryInit();
+		static uint64 GetPhysicalRAMAmountKB()noexcept;
 
-	private:
+		static OSType_t GetOSType()noexcept { return OSType_t::Windows; }
+
+		static WindowsVersion_t GetWindowsVersion()noexcept { return WindowsVersion; }
+
+	protected:
+		static void _PerThreadInit();
+		
+		static void _PerLibraryInit();
+
+		static void DetectWindowsVersion()noexcept;
+
 		static constexpr sizet MAX_STACKTRACE_DEPTH = 200;
 		static constexpr sizet MAX_STACKTRACE_NAME_LENGTH = 1024;
 
 		static inline Mutex m_Mutex;
 
 		static inline Library PSAPI;
+
+		static inline WindowsVersion_t WindowsVersion;
 
 		typedef BOOL(WINAPI* EnumProcessModules_t)(HANDLE hProcess, HMODULE* lphModule, DWORD cb, LPDWORD lpcbNeeded);
 		typedef DWORD(WINAPI* GetModuleBaseName_t)(HANDLE hProcess, HMODULE hModule, LPSTR lpBaseName, DWORD nSize);
@@ -120,7 +146,6 @@ namespace greaper
 			String m_Message;
 		};
 	};
-	using OSPlatform = WinOSPlatform;
 }
 
 #include "WinPlatform.inl"

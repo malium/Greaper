@@ -222,6 +222,20 @@ namespace greaper::math
 				&& R3.Y == T(0)
 				&& R3.Z == T(0);
 		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f", R0.X, R0.Y, R0.Z, R0.W, R1.X, R1.Y, R1.Z, R1.W, R2.X, R2.Y, R2.Z, R2.W, R3.X, R3.Y, R3.Z, R3.W);
+			else
+				return Format("%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf", R0.X, R0.Y, R0.Z, R0.W, R1.X, R1.Y, R1.Z, R1.W, R2.X, R2.Y, R2.Z, R2.W, R3.X, R3.Y, R3.Z, R3.W);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f, %f", &R0.X, &R0.Y, &R0.Z, &R0.W, &R1.X, &R1.Y, &R1.Z, &R1.W, &R2.X, &R2.Y, &R2.Z, &R2.W, &R3.X, &R3.Y, &R3.Z, &R3.W);
+			else
+				sscanf(str.data(), "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf", &R0.X, &R0.Y, &R0.Z, &R0.W, &R1.X, &R1.Y, &R1.Z, &R1.W, &R2.X, &R2.Y, &R2.Z, &R2.W, &R3.X, &R3.Y, &R3.Z, &R3.W);
+		}
 
 		static const Matrix4Real IDENTITY;
 		static const Matrix4Real ZERO;

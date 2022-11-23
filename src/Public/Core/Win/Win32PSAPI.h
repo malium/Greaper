@@ -12,6 +12,8 @@
 
 #if WIN32_USE_GREAPER_HEADERS
 
+extern "C" {
+
 typedef struct _MODULEINFO {
 	LPVOID lpBaseOfDll;
 	DWORD SizeOfImage;
@@ -23,6 +25,8 @@ typedef struct _MODULEINFO {
 #else
 
 #endif
+
+}
 
 #else
 #include <Psapi.h>

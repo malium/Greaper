@@ -190,6 +190,20 @@ namespace greaper::math
 				&& R2.X == T(0)
 				&& R2.Y == T(0);
 		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f, %f, %f, %f, %f, %f, %f, %f", R0.X, R0.Y, R0.Z, R1.X, R1.Y, R1.Z, R2.X, R2.Y, R2.Z);
+			else
+				return Format("%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf", R0.X, R0.Y, R0.Z, R1.X, R1.Y, R1.Z, R2.X, R2.Y, R2.Z);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f, %f, %f, %f, %f, %f, %f, %f", &R0.X, &R0.Y, &R0.Z, &R1.X, &R1.Y, &R1.Z, &R2.X, &R2.Y, &R2.Z);
+			else
+				sscanf(str.data(), "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf", &R0.X, &R0.Y, &R0.Z, &R1.X, &R1.Y, &R1.Z, &R2.X, &R2.Y, &R2.Z);
+		}
 
 		static const Matrix3Real IDENTITY;
 		static const Matrix3Real ZERO;

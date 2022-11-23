@@ -9,13 +9,19 @@
 #include <type_traits>
 #include <tuple>
 
-/** Checks if a value is within range (min,max], inclusive on max and min */
+/** Checks if a value is within range [min,max) */
 template<typename T>
 INLINE constexpr bool IsWithin(const T& value, const T& min, const T& max)
 {
-	return value > min && value <= max;
+	return value >= min && value < max;
 }
-/** Checks if a value is within range [min, max], inclusive on max and min */
+/** Checks if a value is within range (min,max) */
+template<typename T>
+INLINE constexpr bool IsWithinExclusive(const T& value, const T& min, const T& max)
+{
+	return value > min && value < max;
+}
+/** Checks if a value is within range [min, max] */
 template<class T>
 INLINE constexpr bool IsWithinInclusive(const T& value, const T& min, const T& max)
 {

@@ -284,6 +284,12 @@
     <ClInclude Include="Public\Math\Quaternion.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Core\Base\CPUInfo.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Core\Win\Win32SysInfo.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -308,6 +314,9 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Public\Core\Base\MPMCTaskScheduler.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Base\Platform.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>

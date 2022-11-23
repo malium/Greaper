@@ -46,9 +46,9 @@
 #define VerifyNull(ptr, msg, ...) { if((ptr) != nullptr) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #ptr " is not nullptr, at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
 #define VerifyNotNull(ptr, msg, ...) { if((ptr) == nullptr) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #ptr " is nullptr, at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
 #define VerifyWithin(value, min, max, msg, ...) { if((value) <= (min)|| (value) >= (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not inside of (" #min ", " #max ") range , at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
-#define VerifyWithinInclusive(value, min, max, msg, ...) { if((value) < (min) || (value) > (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not inside of [" #min ", " #max "] range , at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
+#define VerifyWithinExclusive(value, min, max, msg, ...) { if((value) < (min) || (value) > (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not inside of [" #min ", " #max "] range , at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
 #define VerifyNotWithin(value, min, max, msg, ...) { if((value) >= (min) && (value) <= (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not outside of (" #min ", " #max ") range , at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
-#define VerifyNotWithinInclusive(value, min, max, msg, ...) { if((value) > (min) && (value) < (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not outside of [" #min ", " #max "] range , at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
+#define VerifyNotWithinExclusive(value, min, max, msg, ...) { if((value) > (min) && (value) < (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not outside of [" #min ", " #max "] range , at: " FUNCTION_FULL ", message: " msg, __VA_ARGS__)); }
 #else
 #define Verify(exp, msg, ...) { if(!(exp)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #exp " not verified, at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
 #define VerifyNot(exp, msg, ...) { if((exp)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: !" #exp " not verified, at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
@@ -61,9 +61,9 @@
 #define VerifyNull(ptr, msg, ...) { if((ptr) != nullptr) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #ptr " is not nullptr, at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
 #define VerifyNotNull(ptr, msg, ...) { if((ptr) == nullptr) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #ptr " is nullptr, at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
 #define VerifyWithin(value, min, max, msg, ...) { if((value) <= (min)|| (value) >= (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not inside of (" #min ", " #max ") range , at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
-#define VerifyWithinInclusive(value, min, max, msg, ...) { if((value) < (min) || (value) > (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not inside of [" #min ", " #max "] range , at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
+#define VerifyWithinExclusive(value, min, max, msg, ...) { if((value) < (min) || (value) > (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not inside of [" #min ", " #max "] range , at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
 #define VerifyNotWithin(value, min, max, msg, ...) { if((value) >= (min) && (value) <= (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not outside of (" #min ", " #max ") range , at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
-#define VerifyNotWithinInclusive(value, min, max, msg, ...) { if((value) > (min) && (value) < (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not outside of [" #min ", " #max "] range , at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
+#define VerifyNotWithinExclusive(value, min, max, msg, ...) { if((value) > (min) && (value) < (max)) greaper::Impl::_TriggerBreak(greaper::Format("STOP! exp: " #value " not outside of [" #min ", " #max "] range , at: %s, message: " msg, FUNCTION_FULL, ##__VA_ARGS__)); }
 #endif
 #else
 #define Verify(exp, ...) { volatile bool res = (exp); }
@@ -76,10 +76,10 @@
 #define VerifyLessEqual(a, b, ...) { volatile bool res = (a) <= (b); }
 #define VerifyNull(ptr, ...) { volatile bool res = (ptr) == nullptr; }
 #define VerifyNotNull(ptr, ...) { volatile bool res = (ptr) != nullptr; }
-#define VerifyWithin(val, min, max, ...) { volatile bool res = (value) > (min) && (value) < (max); }
-#define VerifyWithinInclusive(val, min, max, ...) { volatile bool res = (value) >= (min) && (value) <= (max); }
-#define VerifyNotWithin(val, min, max, ...) { volatile bool res = (value) < (min) && (value) > (max); }
-#define VerifyNotWithinInclusive(val, min, max, ...) { volatile bool res = (value) <= (min) && (value) >= (max); }
+#define VerifyWithin(val, min, max, ...) { volatile bool res = (value) <= (min)|| (value) >= (max); }
+#define VerifyWithinExclusive(val, min, max, ...) { volatile bool res = (value) < (min) || (value) > (max); }
+#define VerifyNotWithin(val, min, max, ...) { volatile bool res = (value) >= (min) && (value) <= (max); }
+#define VerifyNotWithinExclusive(val, min, max, ...) { volatile bool res = (value) > (min) && (value) < (max); }
 #endif
 
 using namespace std::string_literals;

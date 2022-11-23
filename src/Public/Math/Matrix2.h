@@ -147,6 +147,20 @@ namespace greaper::math
 		{
 			return R0.Y == T(0) && R1.X == T(0);
 		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f, %f, %f", R0.X, R0.Y, R1.X, R1.Y);
+			else
+				return Format("%lf, %lf, %lf, %lf", R0.X, R0.Y, R1.X, R1.Y);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f, %f, %f", &R0.X, &R0.Y, &R1.X, &R1.Y);
+			else
+				sscanf(str.data(), "%lf, %lf, %lf, %lf", &R0.X, &R0.Y, &R1.X, &R1.Y);
+		}
 
 		static const Matrix2Real IDENTITY;
 		static const Matrix2Real ZERO;

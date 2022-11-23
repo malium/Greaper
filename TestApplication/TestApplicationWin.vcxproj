@@ -127,6 +127,9 @@
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -158,6 +161,9 @@
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -175,7 +181,7 @@
       <PrecompiledHeaderOutputFile />
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -184,6 +190,9 @@
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -204,7 +213,7 @@
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -215,6 +224,9 @@
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="TestApplication.cpp" />

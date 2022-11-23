@@ -213,11 +213,7 @@ namespace greaper::StringUtils
 		}
 
 		template<typename T>
-		struct CaseImpl
-		{
-			int(*Lower)(int C) = &::tolower;
-			int(*Upper)(int C) = &::toupper;
-		};
+		struct CaseImpl {  };
 
 		template<>
 		struct CaseImpl<achar>
@@ -271,7 +267,7 @@ namespace greaper::StringUtils
 	 * @return BasicString<achar, _Alloca_> The converted ANSI string
 	 */
 	template<class _Alloca_ = StdAlloc<achar>>
-	BasicString<achar, _Alloca_> FromWIDE(const BasicStringView<wchar>& str)
+	BasicString<achar, _Alloca_> FromWIDE(WStringView str)
 	{
 		static_assert(std::is_same_v<achar, typename _Alloca_::value_type>, "Bad ANSI allocator type");
 
@@ -313,7 +309,6 @@ namespace greaper::StringUtils
 			u32char c32 = 0;
 			it = Impl::UTF8To32(it, str.end(), c32);
 			Impl::UTF32ToWIDE(c32, backInserter, 2);
-
 		}
 
 		return output;
@@ -328,7 +323,7 @@ namespace greaper::StringUtils
 	 * @return BasicString<wchar, _Allocw_> The Converted WIDE string
 	 */
 	template<class _Allocw_ = StdAlloc<wchar>>
-	BasicString<wchar, _Allocw_> ToWIDE(const BasicStringView<achar>& str)
+	BasicString<wchar, _Allocw_> ToWIDE(StringView str)
 	{
 		static_assert(std::is_same_v<wchar, typename _Allocw_::value_type>, "Bad WIDE allocator type");
 
@@ -342,7 +337,6 @@ namespace greaper::StringUtils
 			u32char c32 = 0;
 			it = Impl::UTF8To32(it, str.end(), c32);
 			Impl::UTF32ToWIDE(c32, backInserter, 2);
-
 		}
 
 		return output;
@@ -372,6 +366,27 @@ namespace greaper::StringUtils
 	}
 
 	/**
+	 * @brief Counts how many characters 'token' are inside the given string
+	 *
+	 * @tparam T Type of character, auto deducted by param str
+	 * @tparam _Alloca_ Allocator of the string, auto deducted by param str
+	 * @param str The string to look for tokens
+	 * @param token The character to find
+	 * @return sizet The amount of characters found
+	 */
+	template<typename T>
+	constexpr sizet Contains(BasicStringView<T> str, T token)
+	{
+		sizet count = 0;
+		for (const T c : str)
+		{
+			if (c == token)
+				++count;
+		}
+		return count;
+	}
+
+	/**
 	 * @brief Counts how many strings 'token' are inside the given string
 	 * 
 	 * @tparam T The type of character, auto deducted by param str
@@ -387,6 +402,109 @@ namespace greaper::StringUtils
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to Contains and convert a string at the same time");
 		static_assert(std::is_same_v<T, typename _AllocT_::value_type>, "Trying to Contains and convert a string at the same time");
 		
+		sizet count = 0;
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			auto itt = it;
+			bool match = true;
+			for (auto ittt = token.begin(); ittt != token.end(); ++ittt)
+			{
+				if ((*itt) != (*ittt))
+				{
+					match = false;
+					break;
+				}
+				++itt;
+			}
+			if (match)
+				++count;
+		}
+		return count;
+	}
+
+	/**
+	 * @brief Counts how many strings 'token' are inside the given string
+	 *
+	 * @tparam T The type of character, auto deducted by param str
+	 * @tparam _Alloca_ The Allocator of the string, auto deducted by param str
+	 * @tparam _AllocT_ The Allocator of the token string, auto deducted by param token
+	 * @param str The string to look for tokens
+	 * @param token The string to find
+	 * @return sizet The amount of strings found
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	sizet Contains(BasicStringView<T> str, const BasicString<T, _Alloc_>& token)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to Contains and convert a string at the same time");
+
+		sizet count = 0;
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			auto itt = it;
+			bool match = true;
+			for (auto ittt = token.begin(); ittt != token.end(); ++ittt)
+			{
+				if ((*itt) != (*ittt))
+				{
+					match = false;
+					break;
+				}
+				++itt;
+			}
+			if (match)
+				++count;
+		}
+		return count;
+	}
+
+	/**
+	 * @brief Counts how many strings 'token' are inside the given string
+	 *
+	 * @tparam T The type of character, auto deducted by param str
+	 * @tparam _Alloca_ The Allocator of the string, auto deducted by param str
+	 * @tparam _AllocT_ The Allocator of the token string, auto deducted by param token
+	 * @param str The string to look for tokens
+	 * @param token The string to find
+	 * @return sizet The amount of strings found
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	sizet Contains(const BasicString<T, _Alloc_>& str, BasicStringView<T> token)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to Contains and convert a string at the same time");
+
+		sizet count = 0;
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			auto itt = it;
+			bool match = true;
+			for (auto ittt = token.begin(); ittt != token.end(); ++ittt)
+			{
+				if ((*itt) != (*ittt))
+				{
+					match = false;
+					break;
+				}
+				++itt;
+			}
+			if (match)
+				++count;
+		}
+		return count;
+	}
+
+	/**
+	 * @brief Counts how many strings 'token' are inside the given string
+	 *
+	 * @tparam T The type of character, auto deducted by param str
+	 * @tparam _Alloca_ The Allocator of the string, auto deducted by param str
+	 * @tparam _AllocT_ The Allocator of the token string, auto deducted by param token
+	 * @param str The string to look for tokens
+	 * @param token The string to find
+	 * @return sizet The amount of strings found
+	 */
+	template<typename T>
+	constexpr sizet Contains(BasicStringView<T> str, BasicStringView<T> token)
+	{
 		sizet count = 0;
 		for (auto it = str.begin(); it != str.end(); ++it)
 		{
@@ -444,6 +562,41 @@ namespace greaper::StringUtils
 
 	/**
 	 * @brief Joins a vector of string into a single string with a given separator
+	 *
+	 * @tparam T Type of char, auto deducted from vec and separator
+	 * @tparam _Alloca_ The Allocator of the Strings inside the vector
+	 * @tparam _VAlloca_ The Allocator of the Vector
+	 * @param vec Vector of strings to compose into one
+	 * @param separator The character that will be between the strings (NULL/0) no in-between character
+	 * @return BasicString<T, _Alloca_> The string composed from all the strings in the vector
+	 */
+	template<typename T, class _Alloca_ = StdAlloc<T>, class _VAlloca_ = StdAlloc<BasicString<T, _Alloca_>>>
+	BasicString<T, _Alloca_> ComposeString(const std::vector<BasicStringView<T>, _VAlloca_>& vec, T separator = T(0))
+	{
+		static_assert(std::is_same_v<T, typename _Alloca_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloca_::value_type::value_type>, "Trying to ComposeString and convert a string at the same time");
+
+		BasicString<T, _Alloca_> rtn;
+		if (separator != T(0))
+		{
+			for (sizet i = 0; i < vec.size(); ++i)
+			{
+				rtn += vec[i];
+				if (i != (vec.size() - 1))
+					rtn += separator;
+			}
+		}
+		else
+		{
+			for (const auto& str : vec)
+				rtn += str;
+		}
+
+		return rtn;
+	}
+
+	/**
+	 * @brief Joins a vector of string into a single string with a given separator
 	 * 
 	 * @tparam T Type of char, auto deducted from vec and separator
 	 * @tparam _Alloca_ The Allocator of the Strings inside the vector
@@ -472,6 +625,87 @@ namespace greaper::StringUtils
 	}
 
 	/**
+	 * @brief Joins a vector of string into a single string with a given separator
+	 *
+	 * @tparam T Type of char, auto deducted from vec and separator
+	 * @tparam _Alloca_ The Allocator of the Strings inside the vector
+	 * @tparam _VAlloca_ The Allocator of the Vector
+	 * @tparam _SAlloca_ The Allocator of the separator string
+	 * @param vec Vector of strings to compose into one
+	 * @param separator The string that will be between the strings
+	 * @return BasicString<T, _Alloca_> The string composed from all the strings in the vector
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>>
+	BasicString<T, _Alloc_> ComposeString(const std::vector<BasicString<T, _Alloc_>, _VAlloc_>& vec, BasicStringView<T> separator)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Trying to ComposeString and convert a string at the same time");
+
+		BasicString<T, _Alloc_> rtn;
+		for (sizet i = 0; i < vec.size(); ++i)
+		{
+			rtn += vec[i];
+			if (i != (vec.size() - 1))
+				rtn += separator;
+		}
+		return rtn;
+	}
+
+	/**
+	 * @brief Joins a vector of string into a single string with a given separator
+	 *
+	 * @tparam T Type of char, auto deducted from vec and separator
+	 * @tparam _Alloca_ The Allocator of the Strings inside the vector
+	 * @tparam _VAlloca_ The Allocator of the Vector
+	 * @tparam _SAlloca_ The Allocator of the separator string
+	 * @param vec Vector of strings to compose into one
+	 * @param separator The string that will be between the strings
+	 * @return BasicString<T, _Alloca_> The string composed from all the strings in the vector
+	 */
+	template<typename T, class _VAlloc_ = StdAlloc<BasicStringView<T>>, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> ComposeString(const std::vector<BasicStringView<T>, _VAlloc_>& vec,	const BasicString<T, _Alloc_>& separator)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Trying to ComposeString and convert a string at the same time");
+
+		BasicString<T, _Alloc_> rtn;
+		for (sizet i = 0; i < vec.size(); ++i)
+		{
+			rtn += vec[i];
+			if (i != (vec.size() - 1))
+				rtn += separator;
+		}
+		return rtn;
+	}
+
+	/**
+	 * @brief Joins a vector of string into a single string with a given separator
+	 *
+	 * @tparam T Type of char, auto deducted from vec and separator
+	 * @tparam _Alloca_ The Allocator of the Strings inside the vector
+	 * @tparam _VAlloca_ The Allocator of the Vector
+	 * @tparam _SAlloca_ The Allocator of the separator string
+	 * @param vec Vector of strings to compose into one
+	 * @param separator The string that will be between the strings
+	 * @return BasicString<T, _Alloca_> The string composed from all the strings in the vector
+	 */
+	template<typename T, class _VAlloc_ = StdAlloc<BasicStringView<T>>, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> ComposeString(const std::vector<BasicStringView<T>, _VAlloc_>& vec, BasicStringView<T> separator)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to ComposeString and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Trying to ComposeString and convert a string at the same time");
+
+		BasicString<T, _Alloc_> rtn;
+		for (sizet i = 0; i < vec.size(); ++i)
+		{
+			rtn += vec[i];
+			if (i != (vec.size() - 1))
+				rtn += separator;
+		}
+		return rtn;
+	}
+
+	/**
 	 * @brief Separates a string given a token character
 	 * 
 	 * @tparam T Type of char
@@ -487,6 +721,39 @@ namespace greaper::StringUtils
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to Tokenize and convert a string at the same time");
 		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Trying to Tokenize and convert a string at the same time");
 		
+		std::vector<BasicString<T, _Alloc_>, _VAlloc_> rtn;
+		if (str.empty())
+			return rtn;
+		auto lastToken = str.begin();
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			if ((*it) == token)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken), std::distance(lastToken, it)));
+				lastToken = it;
+				++lastToken;
+			}
+		}
+		rtn.push_back(BasicString<T, _Alloc_>(lastToken, str.end()));
+		return rtn;
+	}
+
+	/**
+	 * @brief Separates a string given a token character
+	 *
+	 * @tparam T Type of char
+	 * @tparam _Alloca_ The Allocator of the Strings inside the vector
+	 * @tparam _VAlloca_ The Allocator of the Vector
+	 * @param str The string that is going to be separated
+	 * @param token The character to find in order to split the string
+	 * @return std::vector<BasicString<T, _Alloca_>, _VAlloca_> The vector of splitted strings
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>>
+	std::vector<BasicString<T, _Alloc_>, _VAlloc_> Tokenize(BasicStringView<T> str, T token)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Trying to Tokenize and convert a string at the same time");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Trying to Tokenize and convert a string at the same time");
+
 		std::vector<BasicString<T, _Alloc_>, _VAlloc_> rtn;
 		if (str.empty())
 			return rtn;
@@ -557,6 +824,159 @@ namespace greaper::StringUtils
 	}
 
 	/**
+	 * @brief Splits a string given a token string
+	 *
+	 * @tparam T The type of char
+	 * @tparam _Alloca_ Allocator of the string to split
+	 * @tparam _VAlloca_ Allocator of the Vector
+	 * @tparam _TAlloca_ Allocator of the token
+	 * @param str The string to split
+	 * @param token The string to find
+	 * @return std::vector<BasicString<T, _Alloca_>, _VAlloca_> The Vector of strings from str
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>, class _TAlloc_ = StdAlloc<T>>
+	std::vector<BasicString<T, _Alloc_>, _VAlloc_> Tokenize(BasicStringView<T> str, const BasicString<T, _TAlloc_>& token)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Bad StringVec allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::allocator_type::value_type>, "Bad StringVec allocator type");
+
+		std::vector<BasicString<T, _Alloc_>, _VAlloc_> rtn;
+		if (str.empty())
+			return rtn;
+		auto lastToken = str.begin();
+		const size_t tokenSize = token.size();
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			if (static_cast<size_t>(std::distance(it, str.end())) < tokenSize)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken)));
+				break;
+			}
+			auto itt = it;
+			bool match = true;
+			for (auto ittt = token.begin(); ittt != token.end(); ++ittt)
+			{
+				if ((*itt) != (*ittt))
+				{
+					match = false;
+					break;
+				}
+				++itt;
+			}
+			if (match)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken), tokenSize));
+				it += tokenSize;
+			}
+		}
+		rtn.push_back(BasicString<T, _Alloc_>(lastToken, str.end()));
+		return rtn;
+	}
+
+	/**
+	 * @brief Splits a string given a token string
+	 *
+	 * @tparam T The type of char
+	 * @tparam _Alloca_ Allocator of the string to split
+	 * @tparam _VAlloca_ Allocator of the Vector
+	 * @tparam _TAlloca_ Allocator of the token
+	 * @param str The string to split
+	 * @param token The string to find
+	 * @return std::vector<BasicString<T, _Alloca_>, _VAlloca_> The Vector of strings from str
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>>
+	std::vector<BasicString<T, _Alloc_>, _VAlloc_> Tokenize(BasicStringView<T> str,	BasicStringView<T> token)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Bad StringVec allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::allocator_type::value_type>, "Bad StringVec allocator type");
+
+		std::vector<BasicString<T, _Alloc_>, _VAlloc_> rtn;
+		if (str.empty())
+			return rtn;
+		auto lastToken = str.begin();
+		const size_t tokenSize = token.size();
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			if (static_cast<size_t>(std::distance(it, str.end())) < tokenSize)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken)));
+				break;
+			}
+			auto itt = it;
+			bool match = true;
+			for (auto ittt = token.begin(); ittt != token.end(); ++ittt)
+			{
+				if ((*itt) != (*ittt))
+				{
+					match = false;
+					break;
+				}
+				++itt;
+			}
+			if (match)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken), tokenSize));
+				it += tokenSize;
+			}
+		}
+		rtn.push_back(BasicString<T, _Alloc_>(lastToken, str.end()));
+		return rtn;
+	}
+
+	/**
+	 * @brief Splits a string given a token string
+	 *
+	 * @tparam T The type of char
+	 * @tparam _Alloca_ Allocator of the string to split
+	 * @tparam _VAlloca_ Allocator of the Vector
+	 * @tparam _TAlloca_ Allocator of the token
+	 * @param str The string to split
+	 * @param token The string to find
+	 * @return std::vector<BasicString<T, _Alloca_>, _VAlloca_> The Vector of strings from str
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>, class _TAlloc_ = StdAlloc<T>>
+	std::vector<BasicString<T, _Alloc_>, _VAlloc_> Tokenize(const BasicString<T, _TAlloc_>& str, BasicStringView<T> token)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Bad StringVec allocator type");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::allocator_type::value_type>, "Bad StringVec allocator type");
+
+		std::vector<BasicString<T, _Alloc_>, _VAlloc_> rtn;
+		if (str.empty())
+			return rtn;
+		auto lastToken = str.begin();
+		const size_t tokenSize = token.size();
+		for (auto it = str.begin(); it != str.end(); ++it)
+		{
+			if (static_cast<size_t>(std::distance(it, str.end())) < tokenSize)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken)));
+				break;
+			}
+			auto itt = it;
+			bool match = true;
+			for (auto ittt = token.begin(); ittt != token.end(); ++ittt)
+			{
+				if ((*itt) != (*ittt))
+				{
+					match = false;
+					break;
+				}
+				++itt;
+			}
+			if (match)
+			{
+				rtn.emplace_back(str.substr(std::distance(str.begin(), lastToken), tokenSize));
+				it += tokenSize;
+			}
+		}
+		rtn.push_back(BasicString<T, _Alloc_>(lastToken, str.end()));
+		return rtn;
+	}
+
+	/**
 	 * @brief Splits a string by spaces
 	 * 
 	 * @tparam T The type of character
@@ -567,6 +987,25 @@ namespace greaper::StringUtils
 	 */
 	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>>
 	std::vector<BasicString<T, _Alloc_>, _VAlloc_> SeparateBySpace(const BasicString<T, _Alloc_>& str)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Bad StringVec allocator");
+		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::allocator_type::value_type>, "Bad StringVec allocator");
+
+		return Tokenize(str, T(' '));
+	}
+
+	/**
+	 * @brief Splits a string by spaces
+	 *
+	 * @tparam T The type of character
+	 * @tparam _Alloca_ The allocator of the string to split
+	 * @tparam _VAlloca_ The allocator of the returned vector
+	 * @param str The string to split
+	 * @return std::vector<BasicString<T, _Alloca_>, _VAlloca_> The vector of strings
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _VAlloc_ = StdAlloc<BasicString<T, _Alloc_>>>
+	std::vector<BasicString<T, _Alloc_>, _VAlloc_> SeparateBySpace(BasicStringView<T> str)
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator");
 		static_assert(std::is_same_v<T, typename _VAlloc_::value_type::value_type>, "Bad StringVec allocator");
@@ -594,10 +1033,41 @@ namespace greaper::StringUtils
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 		static_assert(std::is_same_v<T, typename _VAlloc_::value_type>, "Bad string alloator type");
 
+		bool keepSearching = false;
 		if (right)
-			str.erase(str.find_last_not_of(delims.data(), 0, delims.size()) + 1);
+		{
+			keepSearching = true;
+			while (keepSearching)
+			{
+				keepSearching = false;
+				for (const auto& d : delims)
+				{
+					if (str.back() == d)
+					{
+						str.erase(str.begin() + str.size() - 1);
+						keepSearching = true;
+						break;
+					}
+				}
+			}
+		}
 		if (left)
-			str.erase(str.find_first_not_of(delims.data(), 0, delims.size()));
+		{
+			keepSearching = true;
+			while (keepSearching)
+			{
+				keepSearching = false;
+				for (const auto& d : delims)
+				{
+					if (*str.begin() == d)
+					{
+						str.erase(str.begin());
+						keepSearching = true;
+						break;
+					}
+				}
+			}
+		}
 		return str;
 	}
 
@@ -641,7 +1111,7 @@ namespace greaper::StringUtils
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 
-		static constexpr Vector<T, _Alloc_> delims {T(' '), T('\t', T('\r'), T('\n'))};
+		static Vector<T, _Alloc_> delims { T(' '), T('\t'), T('\r'), T('\n') };
 		return TrimSelf(str, delims, left, right);
 	}
 
@@ -660,7 +1130,7 @@ namespace greaper::StringUtils
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 
-		static constexpr Vector<T, _Alloc_> delims {T(' '), T('\t', T('\r'), T('\n'))};
+		static Vector<T, _Alloc_> delims {T(' '), T('\t'), T('\r'), T('\n')};
 		return Trim(str, delims, left, right);
 	}
 
@@ -680,6 +1150,24 @@ namespace greaper::StringUtils
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 
 		return ComposeString(Tokenize(str, toReplace), replacement);
+	}
+
+	/**
+	 * @brief Replaces a given character to another from a string
+	 *
+	 * @tparam T The type of the character
+	 * @tparam _Alloca_ The allocator type of the string
+	 * @param str The string to replace the character
+	 * @param toReplace The character wanted to replace
+	 * @param replacement The character that subtitutes
+	 * @return BasicString<T, _Alloca_> The string with the characters replaced
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> Replace(BasicStringView<T> str, T toReplace, T replacement)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+
+		return ComposeString<T, _Alloc_>(Tokenize<T, _Alloc_>(str, toReplace), replacement);
 	}
 
 	/**
@@ -703,6 +1191,71 @@ namespace greaper::StringUtils
 		static_assert(std::is_same_v<T, typename _RAlloc_::value_type>, "Bad string allocator type");
 
 		return ComposeString(Tokenize(str, toReplace), replacement);
+	}
+
+	/**
+	 * @brief Replaces a given string to another from a string
+	 *
+	 * @tparam T The type of the character
+	 * @tparam _Alloca_ The allocator type of the string str
+	 * @tparam _TAlloca_ The allocator type of the string toReplace
+	 * @tparam _RAlloca_ The allocator type of the string replacement
+	 * @param str The string to find toReplace and change it for replacement
+	 * @param toReplace The string to find inside str
+	 * @param replacement The string to substitute
+	 * @return BasicString<T, _Alloca_> The resulting string
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> Replace(const BasicString<T, _Alloc_>& str,
+		BasicStringView<T> toReplace, BasicStringView<T> replacement)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+
+		return ComposeString(Tokenize(str, toReplace), replacement);
+	}
+
+	/**
+	 * @brief Replaces a given string to another from a string
+	 *
+	 * @tparam T The type of the character
+	 * @tparam _Alloca_ The allocator type of the string str
+	 * @tparam _TAlloca_ The allocator type of the string toReplace
+	 * @tparam _RAlloca_ The allocator type of the string replacement
+	 * @param str The string to find toReplace and change it for replacement
+	 * @param toReplace The string to find inside str
+	 * @param replacement The string to substitute
+	 * @return BasicString<T, _Alloca_> The resulting string
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>, class _TAlloc_ = StdAlloc<T>, class _RAlloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> Replace(BasicStringView<T> str,
+		const BasicString<T, _TAlloc_>& toReplace, const BasicString<T, _RAlloc_>& replacement)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _TAlloc_::value_type>, "Bad string allocator type");
+		static_assert(std::is_same_v<T, typename _RAlloc_::value_type>, "Bad string allocator type");
+
+		return ComposeString(Tokenize(str, toReplace), replacement);
+	}
+
+	/**
+	 * @brief Replaces a given string to another from a string
+	 *
+	 * @tparam T The type of the character
+	 * @tparam _Alloca_ The allocator type of the string str
+	 * @tparam _TAlloca_ The allocator type of the string toReplace
+	 * @tparam _RAlloca_ The allocator type of the string replacement
+	 * @param str The string to find toReplace and change it for replacement
+	 * @param toReplace The string to find inside str
+	 * @param replacement The string to substitute
+	 * @return BasicString<T, _Alloca_> The resulting string
+	 */
+	template<typename T, class _Alloc_ = StdAlloc<T>>
+	BasicString<T, _Alloc_> Replace(BasicStringView<T> str,
+		BasicStringView<T> toReplace, BasicStringView<T> replacement)
+	{
+		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
+
+		return ComposeString<T, _Alloc_>(Tokenize<T, _Alloc_>(str, toReplace), replacement);
 	}
 
 	/**
@@ -750,7 +1303,7 @@ namespace greaper::StringUtils
 	 * @return BasicString<T, _Alloca_> The string lowered
 	 */
 	template<typename T, class _Alloc_ = StdAlloc<T>>
-	BasicString<T, _Alloc_> ToLower(const BasicStringView<T>& str)
+	BasicString<T, _Alloc_> ToLower(BasicStringView<T> str)
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 
@@ -803,7 +1356,7 @@ namespace greaper::StringUtils
 	 * @return BasicString<T, _Alloca_> The string uppered
 	 */
 	template<typename T, class _Alloc_ = StdAlloc<T>>
-	BasicString<T, _Alloc_> ToUpper(const BasicStringView<T>& str)
+	BasicString<T, _Alloc_> ToUpper(BasicStringView<T> str)
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 
@@ -825,6 +1378,26 @@ namespace greaper::StringUtils
 	{
 		static_assert(std::is_same_v<T, typename _Alloc_::value_type>, "Bad string allocator type");
 		
+		for (const auto& chr : str)
+		{
+			if (!IsWithinInclusive(chr, T('0'), T('9')) && chr != T(',') && chr != T('.') && chr != T('+') && chr != T('-') && chr != T('e') && chr != T('E'))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * @brief Returns whether if the given string is only numbers or contains other information
+	 *
+	 * @tparam T The type of the characters
+	 * @tparam _Alloca_ The allocator of the string
+	 * @param str The string to check
+	 * @return true The string only contains numbers
+	 * @return false The string contains other characters
+	 */
+	template<typename T>
+	constexpr bool StringNumber(BasicStringView<T> str)
+	{
 		for (const auto& chr : str)
 		{
 			if (!IsWithinInclusive(chr, T('0'), T('9')) && chr != T(',') && chr != T('.') && chr != T('+') && chr != T('-') && chr != T('e') && chr != T('E'))

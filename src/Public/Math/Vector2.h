@@ -9,6 +9,7 @@
 #define MATH_VECTOR2_H 1
 
 #include "MathPrerequisites.h"
+#include "../Core/StringUtils.h"
 #include <array>
 
 namespace greaper::math
@@ -167,7 +168,21 @@ namespace greaper::math
 		}
 		INLINE constexpr Vector2Real GetSignVector()const noexcept
 		{
-			return { X >= T(0) ? T(1) : T(0), Y >= T(0) ? T(1) : T(0) }
+			return Vector2Real{ ::Sign(X), ::Sign(Y) };
+		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f", X, Y);
+			else
+				return Format("%lf, %lf", X, Y);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f", &X, &Y);
+			else
+				sscanf(str.data(), "%lf, %lf", &X, &Y);
 		}
 
 		static const Vector2Real ZERO;
@@ -281,7 +296,15 @@ namespace greaper::math
 		}
 		INLINE constexpr Vector2Signed GetSignVector()const noexcept
 		{
-			return { X >= T(0) ? T(1) : T(0), Y >= T(0) ? T(1) : T(0) }
+			return { ::Sign(X), ::Sign(Y) };
+		}
+		INLINE String ToString()const noexcept
+		{
+			return Format("%i, %i", X, Y);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			sscanf(str.data(), "%i, %i", &X, &Y);
 		}
 
 		static const Vector2Signed ZERO;
@@ -380,6 +403,14 @@ namespace greaper::math
 			X = Clamp(X, min.X, max.X);
 			Y = Clamp(Y, min.Y, max.Y);
 		}
+		INLINE String ToString()const noexcept
+		{
+			return Format("%u, %u", X, Y);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			sscanf(str.data(), "%u, %u", &X, &Y);
+		}
 
 		static const Vector2Unsigned ZERO;
 		static const Vector2Unsigned UNIT;
@@ -455,6 +486,27 @@ namespace greaper::math
 		INLINE constexpr bool AreComponentsEqual()const noexcept
 		{
 			return X == Y;
+		}
+		INLINE String ToString()const noexcept
+		{
+			auto x = X ? "true"sv : "false"sv;
+			auto y = Y ? "true"sv : "false"sv;
+			auto space = ", "sv;
+			return String(x).append(space).append(y);
+		}
+		INLINE bool FromString(StringView str)noexcept
+		{
+			auto split = StringUtils::Tokenize(str, ',');
+			if (split.size() != ComponentCount)
+				return false;
+
+			for (auto& r : split)
+				StringUtils::ToLowerSelf(StringUtils::TrimSelf(r));
+
+			X = split[0] == "true"sv ? true : false;
+			Y = split[1] == "true"sv ? true : false;
+
+			return true;
 		}
 
 		static const Vector2b ZERO;

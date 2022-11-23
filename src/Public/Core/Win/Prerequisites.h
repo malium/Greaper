@@ -31,7 +31,7 @@ typedef WinTypes PlatformTypes;
 
 /* Supported Windows version */
 #ifndef GREAPER_MIN_WINDOWS_SUPPORTED
-#define GREAPER_MIN_WINDOWS_SUPPORTED 0x0601 //! Windows 7
+#define GREAPER_MIN_WINDOWS_SUPPORTED 0x0602 //! Windows 8
 #endif
 #define _WIN32_WINNT GREAPER_MIN_WINDOWS_SUPPORTED
 

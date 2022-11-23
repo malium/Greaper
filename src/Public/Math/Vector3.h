@@ -176,10 +176,21 @@ namespace greaper::math
 		}
 		INLINE constexpr Vector3Real GetSignVector()const noexcept
 		{
-			return {
-				X >= T(0) ? T(1) : T(0),
-				Y >= T(0) ? T(1) : T(0),
-				Z >= T(0) ? T(1) : T(0) };
+			return Vector3Real{ ::Sign(X), ::Sign(Y), ::Sign(Z) };
+		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f, %f", X, Y, Z);
+			else
+				return Format("%lf, %lf, %lf", X, Y, Z);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f, %f", &X, &Y, &Z);
+			else
+				sscanf(str.data(), "%lf, %lf, %lf", &X, &Y, &Z);
 		}
 
 		static const Vector3Real ZERO;
@@ -314,10 +325,15 @@ namespace greaper::math
 		}
 		INLINE constexpr Vector3Signed GetSignVector()const noexcept
 		{
-			return {
-				X >= T(0) ? T(1) : T(0),
-				Y >= T(0) ? T(1) : T(0),
-				Z >= T(0) ? T(1) : T(0) };
+			return Vector3Signed{ ::Sign(X), ::Sign(Y), ::Sign(Z) };
+		}
+		INLINE String ToString()const noexcept
+		{
+			return Format("%i, %i, %i", X, Y, Z);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			sscanf(str.data(), "%i, %i, %i", &X, &Y, &Z);
 		}
 
 		static const Vector3Signed ZERO;
@@ -437,6 +453,14 @@ namespace greaper::math
 			Y = ::Clamp(Y, min.Y, max.Y);
 			Z = ::Clamp(Z, min.Z, max.Z);
 		}
+		INLINE String ToString()const noexcept
+		{
+			return Format("%u, %u, %u", X, Y, Z);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			sscanf(str.data(), "%u, %u, %u", &X, &Y, &Z);
+		}
 
 		static const Vector3Unsigned ZERO;
 		static const Vector3Unsigned UNIT;
@@ -479,7 +503,7 @@ namespace greaper::math
 		constexpr Vector3b()noexcept = default;
 		INLINE constexpr Vector3b(bool x, bool y, bool z)noexcept :X(x), Y(y), Z(z) {  }
 		INLINE constexpr explicit Vector3b(const std::array<bool, ComponentCount>& arr) : X(arr[0]), Y(arr[1]), Z(arr[2]) {  }
-		INLINE constexpr explicit Vector3b(const Vector2Real<bool>& v2, bool z)noexcept :X(v2.X), Y(v2.Y), Z(z) {  }
+		INLINE constexpr explicit Vector3b(const Vector2b& v2, bool z)noexcept :X(v2.X), Y(v2.Y), Z(z) {  }
 
 		INLINE constexpr bool& operator[](sizet index)noexcept
 		{
@@ -525,6 +549,29 @@ namespace greaper::math
 		INLINE constexpr bool AreComponentsEqual()const noexcept
 		{
 			return X == Y && X == Z;
+		}
+		INLINE String ToString()const noexcept
+		{
+			auto x = X ? "true"sv : "false"sv;
+			auto y = Y ? "true"sv : "false"sv;
+			auto z = Z ? "true"sv : "false"sv;
+			auto space = ", "sv;
+			return String(x).append(space).append(y).append(space).append(z);
+		}
+		INLINE bool FromString(StringView str)noexcept
+		{
+			auto split = StringUtils::Tokenize(str, ',');
+			if (split.size() != ComponentCount)
+				return false;
+
+			for (auto& r : split)
+				StringUtils::ToLowerSelf(StringUtils::TrimSelf(r));
+
+			X = split[0] == "true"sv ? true : false;
+			Y = split[1] == "true"sv ? true : false;
+			Z = split[2] == "true"sv ? true : false;
+			
+			return true;
 		}
 		
 		static const Vector3b ZERO;

@@ -1,10 +1,7 @@
-#include "WinPlatform.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
-
-//#include "WinPlatform.h"
 
 INLINE void greaper::WinOSPlatform::Sleep(uint32 millis) noexcept
 {
@@ -136,13 +133,68 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace()
 	return stackTrace;
 }
 
-INLINE void greaper::WinOSPlatform::PerThreadInit()
+INLINE void greaper::WinOSPlatform::_PerThreadInit()
 {
 	_set_se_translator(&WinOSPlatform::SETranslatorFn);
 }
 
-INLINE void greaper::WinOSPlatform::PerLibraryInit()
+INLINE void greaper::WinOSPlatform::_PerLibraryInit()
 {
+	DetectWindowsVersion();
+}
+
+INLINE void greaper::WinOSPlatform::DetectWindowsVersion() noexcept
+{
+	auto IsWinVerOrGreater = [](WORD majorVer, WORD minorVer, WORD servicePackMajor)
+	{
+		OSVERSIONINFOEXW osvi;
+		ClearMemory(osvi);
+		osvi.dwOSVersionInfoSize = sizeof(osvi);
+		const auto conditionMask = (DWORDLONG)VerSetConditionMask(
+			VerSetConditionMask(
+				VerSetConditionMask(0, VER_MAJORVERSION, VER_GREATER_EQUAL),
+				VER_MINORVERSION, VER_GREATER_EQUAL),
+			VER_SERVICEPACKMAJOR, VER_GREATER_EQUAL);
+
+		osvi.dwMajorVersion = majorVer;
+		osvi.dwMinorVersion = minorVer;
+		osvi.wServicePackMajor = servicePackMajor;
+
+		return VerifyVersionInfoW(&osvi, VER_MAJORVERSION | VER_MINORVERSION | VER_SERVICEPACKMAJOR, conditionMask) != FALSE;
+	};
+
+	if (IsWinVerOrGreater(HIBYTE(_WIN32_WINNT_WIN10), LOBYTE(_WIN32_WINNT_WIN10), 0))
+	{
+		WindowsVersion = WindowsVersion_t::Windows10;
+		return;
+	}
+	if (IsWinVerOrGreater(HIBYTE(_WIN32_WINNT_WINBLUE), LOBYTE(_WIN32_WINNT_WINBLUE), 0))
+	{
+		WindowsVersion = WindowsVersion_t::Windows81;
+		return;
+	}
+	if (IsWinVerOrGreater(HIBYTE(_WIN32_WINNT_WIN8), LOBYTE(_WIN32_WINNT_WIN8), 0))
+	{
+		WindowsVersion = WindowsVersion_t::Windows8;
+		return;
+	}
+	if (IsWinVerOrGreater(HIBYTE(_WIN32_WINNT_WIN7), LOBYTE(_WIN32_WINNT_WIN7), 0))
+	{
+		WindowsVersion = WindowsVersion_t::Windows7;
+		return;
+	}
+	WindowsVersion = WindowsVersion_t::Unknown;
+}
+
+INLINE uint64 greaper::WinOSPlatform::GetPhysicalRAMAmountKB()noexcept
+{
+	ULONGLONG amount;
+	const auto ret = GetPhysicallyInstalledSystemMemory(&amount);
+	if (ret == TRUE)
+		return amount;
+	const auto err = GetLastError();
+	DEBUG_OUTPUT(Format("Couldn't GetPhysicallyInstalledSystemMemory, error code: " I32_HEX_FMT, err).c_str());
+	return 0ull;
 }
 
 #define LoadProc(lib, name, var)\

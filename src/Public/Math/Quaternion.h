@@ -147,6 +147,20 @@ namespace greaper::math
 		{
 			return !IsImaginary(tolerance);
 		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f, %f, %f", W, X, Y, Z);
+			else
+				return Format("%lf, %lf, %lf, %lf", W, X, Y, Z);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f, %f, %f", &W, &X, &Y, &Z);
+			else
+				sscanf(str.data(), "%lf, %lf, %lf, %lf", &W, &X, &Y, &Z);
+		}
 
 		static const QuaternionReal ZERO;
 		static const QuaternionReal UNIT;

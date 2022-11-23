@@ -180,11 +180,21 @@ namespace greaper::math
 		}
 		INLINE constexpr Vector4Real GetSignVector()const noexcept
 		{
-			return {
-				X >= T(0) ? T(1) : T(0),
-				Y >= T(0) ? T(1) : T(0),
-				Z >= T(0) ? T(1) : T(0),
-				W >= T(0) ? T(1) : T(0)};
+			return Vector4Real{ ::Sign(X), ::Sign(Y), ::Sign(Z), ::Sign(W) };
+		}
+		INLINE String ToString()const noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				return Format("%f, %f, %f, %f", X, Y, Z, W);
+			else
+				return Format("%lf, %lf, %lf, %lf", X, Y, Z, W);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			if constexpr (std::is_same_v<T, float>)
+				sscanf(str.data(), "%f, %f, %f, %f", &X, &Y, &Z, &W);
+			else
+				sscanf(str.data(), "%lf, %lf, %lf, %lf", &X, &Y, &Z, &W);
 		}
 
 		static const Vector4Real ZERO;
@@ -200,7 +210,7 @@ namespace greaper::math
 	template<class T> INLINE Vector4Real<T>& operator-=(Vector4Real<T>& left, const Vector4Real<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; left.Z -= right.Z; left.W -= right.W; return left; }
 
 	template<class T> INLINE constexpr Vector4Real<T> operator*(const Vector4Real<T>& left, T right)noexcept { return Vector4Real<T>{ left.X * right, left.Y * right, left.Z * right, left.W * right }; }
-	template<class T> INLINE constexpr Vector4Real<T> operator/(const Vector4Real<T>& left, T right)noexcept { return Vector4Real<T>{ float invRight = T(1) / right; left.X * invRight, left.Y * invRight, left.Z * invRight, left.W * invRight }; }
+	template<class T> INLINE constexpr Vector4Real<T> operator/(const Vector4Real<T>& left, T right)noexcept { float invRight = T(1) / right; return Vector4Real<T>{ left.X * invRight, left.Y * invRight, left.Z * invRight, left.W * invRight }; }
 	template<class T> INLINE constexpr Vector4Real<T> operator*(T left, const Vector4Real<T>& right)noexcept { return Vector4Real<T>{ left * right.X, left * right.Y, left * right.Z, left * right.W }; }
 	template<class T> INLINE Vector4Real<T>& operator*=(Vector4Real<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; left.W *= right; return left; }
 	template<class T> INLINE Vector4Real<T>& operator/=(Vector4Real<T>& left, T right)noexcept { float invRight = T(1) / right; left.X *= invRight; left.Y *= invRight; left.Z *= invRight; left.W *= invRight; return left; }
@@ -314,11 +324,15 @@ namespace greaper::math
 		}
 		INLINE constexpr Vector4Signed GetSignVector()const noexcept
 		{
-			return {
-				X >= T(0) ? T(1) : T(0),
-				Y >= T(0) ? T(1) : T(0),
-				Z >= T(0) ? T(1) : T(0),
-				W >= T(0) ? T(1) : T(0) };
+			return Vector4Signed{ ::Sign(X), ::Sign(Y), ::Sign(Z), ::Sign(W) };
+		}
+		INLINE String ToString()const noexcept
+		{
+			return Format("%i, %i, %i, %i", X, Y, Z, W);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			sscanf(str.data(), "%i, %i, %i, %i", &X, &Y, &Z, &W);
 		}
 
 		static const Vector4Signed ZERO;
@@ -433,6 +447,14 @@ namespace greaper::math
 			Z = ::Clamp(Z, min.Z, max.Z);
 			W = ::Clamp(W, min.W, max.W);
 		}
+		INLINE String ToString()const noexcept
+		{
+			return Format("%u, %u, %u, %u", X, Y, Z, W);
+		}
+		INLINE void FromString(StringView str)noexcept
+		{
+			sscanf(str.data(), "%u, %u, %u, %u", &X, &Y, &Z, &W);
+		}
 
 		static const Vector4Unsigned ZERO;
 		static const Vector4Unsigned UNIT;
@@ -520,6 +542,31 @@ namespace greaper::math
 		INLINE constexpr bool AreComponentsEqual()const noexcept
 		{
 			return X == Y && X == Z && X == W;
+		}
+		INLINE String ToString()const noexcept
+		{
+			auto x = X ? "true"sv : "false"sv;
+			auto y = Y ? "true"sv : "false"sv;
+			auto z = Z ? "true"sv : "false"sv;
+			auto w = W ? "true"sv : "false"sv;
+			auto space = ", "sv;
+			return String(x).append(space).append(y).append(space).append(z).append(space).append(w);
+		}
+		INLINE bool FromString(StringView str)noexcept
+		{
+			auto split = StringUtils::Tokenize(str, ',');
+			if (split.size() != ComponentCount)
+				return false;
+
+			for (auto& r : split)
+				StringUtils::ToLowerSelf(StringUtils::TrimSelf(r));
+
+			X = split[0] == "true"sv ? true : false;
+			Y = split[1] == "true"sv ? true : false;
+			Z = split[2] == "true"sv ? true : false;
+			W = split[3] == "true"sv ? true : false;
+
+			return true;
 		}
 
 		static const Vector4b ZERO;

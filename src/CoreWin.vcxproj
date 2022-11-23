@@ -184,7 +184,8 @@
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
       <AssemblerOutput>NoListing</AssemblerOutput>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -216,7 +217,8 @@
       <PrecompiledHeaderOutputFile />
       <ShowIncludes>false</ShowIncludes>
       <AssemblerOutput>NoListing</AssemblerOutput>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -245,6 +247,7 @@
     <ClInclude Include="Public\Core\Base\BasicTypeInfo.h" />
     <ClInclude Include="Public\Core\Base\BasicTypes.h" />
     <ClInclude Include="Public\Core\Base\Config.h" />
+    <ClInclude Include="Public\Core\Base\CPUInfo.h" />
     <ClInclude Include="Public\Core\Base\DisplayAdapter.h" />
     <ClInclude Include="Public\Core\Base\ICommand.h" />
     <ClInclude Include="Public\Core\Base\IConsole.h" />
@@ -304,6 +307,7 @@
     <ClInclude Include="Public\Core\Win\Win32Base.h" />
     <ClInclude Include="Public\Core\Win\Prerequisites.h" />
     <ClInclude Include="Public\Core\Win\Win32PSAPI.h" />
+    <ClInclude Include="Public\Core\Win\Win32SysInfo.h" />
     <ClInclude Include="Public\Core\Win\Win32Uuid.h" />
     <ClInclude Include="Public\Core\Win\Win32Concurrency.h" />
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
@@ -324,6 +328,7 @@
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl" />
     <None Include="Public\Core\Base\MPMCTaskScheduler.inl" />
+    <None Include="Public\Core\Base\Platform.inl" />
     <None Include="Public\Core\Base\Stream.inl" />
     <None Include="Public\Core\Base\Uuid.inl" />
     <None Include="Public\Core\Lnx\LnxPlatform.inl" />

@@ -44,6 +44,7 @@ void* _Greaper()
 	if (gCoreLibrary == nullptr)
 	{
 		gCoreLibrary.reset(greaper::Construct<greaper::core::GreaperCoreLibrary>());
+		greaper::OSPlatform::PerLibraryInit();
 	}
 	return &gCoreLibrary;
 }

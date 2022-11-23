@@ -10,9 +10,9 @@
 
 #include <Core/CorePrerequisites.h>
 
-#define GLM_FORCE_SSE42
-#include "glm/glm.hpp"
-#include "glm/ext/quaternion_float.hpp"
+//#define GLM_FORCE_SSE42
+//#include "glm/glm.hpp"
+//#include "glm/ext/quaternion_float.hpp"
 
 namespace greaper::math
 {
@@ -86,7 +86,10 @@ namespace greaper::math
 	using QuaternionD = QuaternionReal<double>;
 
 	class QuaternionSSE;
+}
 
+namespace greaper
+{
 	enum MathReflectedTypeID : ReflectedTypeID_t
 	{
 		// Math 
@@ -130,7 +133,7 @@ namespace greaper::math
 
 		RTI_Matrix2f,
 		RTI_Matrix2d,
-		
+
 		RTI_Matrix3f,
 		RTI_Matrix3d,
 
@@ -143,11 +146,6 @@ namespace greaper::math
 		RTI_QuaternionD,
 		RTI_QuaternionSSE,
 	};
-
-	void a()
-	{
-		glm::quat q = glm::quat();
-	}
 }
 
 #include "Base/Utils.inl"

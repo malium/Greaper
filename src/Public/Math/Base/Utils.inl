@@ -279,7 +279,7 @@ namespace greaper::math
 	{
 		return std::atan2f(y, x);
 	}
-	INLINE float ATan2(double y, double x)noexcept
+	INLINE double ATan2(double y, double x)noexcept
 	{
 		return std::atan2(y, x);
 	}

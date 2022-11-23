@@ -6,7 +6,7 @@
 #pragma once
 
 #include "../IGreaperLibrary.h"
-#include "WinPlatform.h"
+#include "../Platform.h"
 
 namespace greaper
 {

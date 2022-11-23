@@ -11,6 +11,8 @@
 #include <Core/Base/LogWriterFile.h>
 #include <Core/IThreadManager.h>
 #include <Core/Platform.h>
+#include <Math/Vector4.h>
+#include <Math/Matrix4.h>
 #include <iostream>
 
 #if PLT_WINDOWS
@@ -167,6 +169,19 @@ static void GreaperCoreLibClose()
 	gCore.reset();
 }
 
+static void TestFunction()
+{
+	using namespace greaper;
+	using namespace math;
+
+	Matrix2f v{ 1, 2, 3, 4 };
+	auto vv = v.ToString();
+	Matrix2f vvv{};
+	vvv.FromString(vv);
+
+	VerifyEqual(v, vvv, "");
+}
+
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
@@ -179,6 +194,8 @@ int MainCode(void* hInstance, int argc, char** argv)
 		TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
 		GreaperCoreLibInit(hInstance, argc, argv);
+
+		TestFunction();
 
 		GreaperCoreLibClose();
 

@@ -8,7 +8,9 @@
 #ifndef CORE_WIN32_BASE_H
 #define CORE_WIN32_BASE_H 1
 
+#ifndef WIN32_USE_GREAPER_HEADERS
 #define WIN32_USE_GREAPER_HEADERS 1
+#endif
 
 #if WIN32_USE_GREAPER_HEADERS
 extern "C" {
@@ -132,6 +134,10 @@ typedef unsigned int uintptr_t;
 typedef DWORD near* PDWORD;
 typedef DWORD far* LPDWORD;
 
+typedef ULONG_PTR DWORD_PTR, * PDWORD_PTR;
+typedef LONGLONG* PLONGLONG;
+typedef ULONGLONG* PULONGLONG;
+
 typedef ULONG_PTR SIZE_T, * PSIZE_T;
 typedef LONG_PTR SSIZE_T, * PSSIZE_T;
 
@@ -142,6 +148,23 @@ typedef BYTE  BOOLEAN;
 typedef BOOLEAN *PBOOLEAN;
 
 typedef INT_PTR (FAR WINAPI *FARPROC)();
+
+#define _WIN32_WINNT_WIN7                   0x0601
+#define _WIN32_WINNT_WIN8                   0x0602
+#define _WIN32_WINNT_WINBLUE                0x0603
+#define _WIN32_WINNT_WIN10                  0x0A00
+
+#define NTDDI_WIN7                          0x06010000
+#define NTDDI_WIN8                          0x06020000
+#define NTDDI_WINBLUE                       0x06030000
+#define NTDDI_WIN10                         0x0A000000
+
+#define MAKEWORD(a, b)      ((WORD)(((BYTE)(((DWORD_PTR)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD_PTR)(b)) & 0xff))) << 8))
+#define MAKELONG(a, b)      ((LONG)(((WORD)(((DWORD_PTR)(a)) & 0xffff)) | ((DWORD)((WORD)(((DWORD_PTR)(b)) & 0xffff))) << 16))
+#define LOWORD(l)           ((WORD)(((DWORD_PTR)(l)) & 0xffff))
+#define HIWORD(l)           ((WORD)((((DWORD_PTR)(l)) >> 16) & 0xffff))
+#define LOBYTE(w)           ((BYTE)(((DWORD_PTR)(w)) & 0xff))
+#define HIBYTE(w)           ((BYTE)((((DWORD_PTR)(w)) >> 8) & 0xff))
 
 //#define DECLARE_HANDLE(name) struct name##__{int unused;}; typedef struct name##__ *name
 typedef PVOID HANDLE;
@@ -751,6 +774,22 @@ int           __cdecl _abnormal_termination(void);
 #define EXCEPTION_INVALID_HANDLE            STATUS_INVALID_HANDLE
 #define EXCEPTION_POSSIBLE_DEADLOCK         STATUS_POSSIBLE_DEADLOCK
 
+typedef struct _SYSTEMTIME {
+	WORD wYear;
+	WORD wMonth;
+	WORD wDayOfWeek;
+	WORD wDay;
+	WORD wHour;
+	WORD wMinute;
+	WORD wSecond;
+	WORD wMilliseconds;
+} SYSTEMTIME, * PSYSTEMTIME, * LPSYSTEMTIME;
+
+typedef struct _FILETIME {
+	DWORD dwLowDateTime;
+	DWORD dwHighDateTime;
+} FILETIME, * PFILETIME, * LPFILETIME;
+
 typedef struct _SECURITY_ATTRIBUTES {
 	DWORD nLength;
 	LPVOID lpSecurityDescriptor;
@@ -888,6 +927,68 @@ RtlCaptureContext(
 
 #define IMAGE_FILE_MACHINE_AMD64             0x8664  // AMD64 (K8)
 #define IMAGE_FILE_MACHINE_I386              0x014c  // Intel 386.
+
+#define VER_MINORVERSION                0x0000001
+#define VER_MAJORVERSION                0x0000002
+#define VER_BUILDNUMBER                 0x0000004
+#define VER_PLATFORMID                  0x0000008
+#define VER_SERVICEPACKMINOR            0x0000010
+#define VER_SERVICEPACKMAJOR            0x0000020
+#define VER_SUITENAME                   0x0000040
+#define VER_PRODUCT_TYPE                0x0000080
+
+#define VER_EQUAL                       1
+#define VER_GREATER                     2
+#define VER_GREATER_EQUAL               3
+#define VER_LESS                        4
+#define VER_LESS_EQUAL                  5
+#define VER_AND                         6
+#define VER_OR                          7
+
+typedef struct _OSVERSIONINFOEXA {
+	DWORD dwOSVersionInfoSize;
+	DWORD dwMajorVersion;
+	DWORD dwMinorVersion;
+	DWORD dwBuildNumber;
+	DWORD dwPlatformId;
+	CHAR   szCSDVersion[128];
+	WORD   wServicePackMajor;
+	WORD   wServicePackMinor;
+	WORD   wSuiteMask;
+	BYTE  wProductType;
+	BYTE  wReserved;
+} OSVERSIONINFOEXA, * POSVERSIONINFOEXA, * LPOSVERSIONINFOEXA;
+typedef struct _OSVERSIONINFOEXW {
+	DWORD dwOSVersionInfoSize;
+	DWORD dwMajorVersion;
+	DWORD dwMinorVersion;
+	DWORD dwBuildNumber;
+	DWORD dwPlatformId;
+	WCHAR  szCSDVersion[128];
+	WORD   wServicePackMajor;
+	WORD   wServicePackMinor;
+	WORD   wSuiteMask;
+	BYTE  wProductType;
+	BYTE  wReserved;
+} OSVERSIONINFOEXW, * POSVERSIONINFOEXW, * LPOSVERSIONINFOEXW, RTL_OSVERSIONINFOEXW, * PRTL_OSVERSIONINFOEXW;
+
+NTSYSAPI
+ULONGLONG
+NTAPI
+VerSetConditionMask(
+	ULONGLONG ConditionMask,
+	DWORD TypeMask,
+	BYTE  Condition
+);
+
+WINBASEAPI
+BOOL
+WINAPI
+VerifyVersionInfoW(
+	LPOSVERSIONINFOEXW lpVersionInformation,
+	DWORD dwTypeMask,
+	DWORDLONG dwlConditionMask
+);
 }
 
 #else
@@ -907,6 +1008,11 @@ RtlCaptureContext(
 #include <Windows.h>
 #include <shellapi.h>
 #include <fileapi.h>
+
+#ifndef STATUS_POSSIBLE_DEADLOCK
+#define STATUS_POSSIBLE_DEADLOCK ((DWORD   )0xC0000194L)
+#endif
+
 #endif
 
 #include <csetjmp>
