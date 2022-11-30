@@ -13,6 +13,7 @@
 #include <Core/Platform.h>
 #include <Math/Vector4.h>
 #include <Math/Matrix4.h>
+#include <random>
 #include <iostream>
 
 #if PLT_WINDOWS
@@ -62,10 +63,8 @@ INT WINAPI WinMain(HINSTANCE hInstance, UNUSED HINSTANCE hPrevInstance, LPSTR lp
 	auto argv = greaper::UPtr<LPSTR>(CommandLineToArgvA(lpCmdLine, &argc), &FreeArgvA);
 	if (argv == nullptr)
 		return EXIT_FAILURE;
-	int retVal = EXIT_FAILURE;
 
-	retVal = MainCode(hInstance, argc, argv.Get());
-	return retVal;
+	return MainCode(hInstance, argc, argv.Get());
 }
 #endif 
 #else /* !PLT_WINDOWS */
@@ -169,17 +168,181 @@ static void GreaperCoreLibClose()
 	gCore.reset();
 }
 
+template<class TResult>
+static void ReportTest(greaper::StringView testName, sizet sampleCount, const greaper::Vector<TResult>& resultNormal, const greaper::Vector<TResult>& resultOptim,
+	greaper::Clock_t::duration durationNormalNs, greaper::Clock_t::duration durationOptimNs)
+{
+	using namespace greaper;
+	using namespace math;
+
+	const achar* outputTxt = nullptr;
+	if constexpr (std::is_same_v<TResult, int32>)
+		outputTxt = "%s: Sample %lld was not verified normal:%d optim:%d.\n";
+	else if (std::is_same_v<TResult, int64>)
+		outputTxt = "%s: Sample %lld was not verified normal:%lld optim:%lld.\n";
+
+	for (sizet i = 0; i < sampleCount; ++i)
+	{
+		auto normal = resultNormal[i];
+		auto optim = resultOptim[i];
+		if (normal != optim)
+		{
+			DEBUG_OUTPUT(Format(outputTxt, testName.data(), i, normal, optim).c_str());
+		}
+	}
+
+	if (durationNormalNs.count() < durationOptimNs.count())
+	{
+		DEBUG_OUTPUT(Format("%s:\tNormal was %f times faster, NORM:%fns OPTM:%fns.\n", testName.data(), (float)durationOptimNs.count() / (float)durationNormalNs.count(), (float)durationNormalNs.count() / (float)sampleCount, (float)durationOptimNs.count() / (float)sampleCount).c_str());
+	}
+	else if (durationNormalNs.count() > durationOptimNs.count())
+	{
+		DEBUG_OUTPUT(Format("%s:\tOptim was %f times faster, NORM:%fns OPTM:%fns.\n", testName.data(), (float)durationNormalNs.count() / (float)durationOptimNs.count(), (float)durationNormalNs.count() / (float)sampleCount, (float)durationOptimNs.count() / (float)sampleCount).c_str());
+	}
+}
+
+static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> TruncIntFTest(sizet sampleCount, const greaper::Vector<float>& samples, greaper::Vector<int32>& resultNormal, greaper::Vector<int32>& resultOptim)
+{
+	using namespace greaper;
+	using namespace math;
+
+	Timepoint_t beginNormal = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+		resultNormal[i] = static_cast<int32>(std::truncf(samples[i]));
+	Timepoint_t endNormal = Clock_t::now();
+
+	auto durationNormalNs = endNormal - beginNormal;
+
+	Timepoint_t beginOptim = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+		resultOptim[i] = _mm_cvtt_ss2si(_mm_set_ss(samples[i]));
+	Timepoint_t endOptim = Clock_t::now();
+
+	auto durationOptimNs = endOptim - beginOptim;
+
+	return { durationNormalNs, durationOptimNs };
+}
+
+static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> FloorIntFTest(sizet sampleCount, const greaper::Vector<float>& samples, greaper::Vector<int32>& resultNormal, greaper::Vector<int32>& resultOptim)
+{
+	using namespace greaper;
+	using namespace math;
+
+	Timepoint_t beginNormal = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+		resultNormal[i] = static_cast<int32>(std::floorf(samples[i]));
+	Timepoint_t endNormal = Clock_t::now();
+
+	auto durationNormalNs = endNormal - beginNormal;
+
+	Timepoint_t beginOptim = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+	{
+		resultOptim[i] = _mm_cvt_ss2si(_mm_round_ss(_mm_setzero_ps(), _mm_set_ss(samples[i]), (_MM_FROUND_TO_NEG_INF | _MM_FROUND_NO_EXC)));
+	}
+	Timepoint_t endOptim = Clock_t::now();
+
+	auto durationOptimNs = endOptim - beginOptim;
+
+	return { durationNormalNs, durationOptimNs };
+}
+
+static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> RoundIntFTest(sizet sampleCount, const greaper::Vector<float>& samples, greaper::Vector<int32>& resultNormal, greaper::Vector<int32>& resultOptim)
+{
+	using namespace greaper;
+	using namespace math;
+
+	Timepoint_t beginNormal = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+		resultNormal[i] = static_cast<int32>(std::lroundf(samples[i]));
+	Timepoint_t endNormal = Clock_t::now();
+
+	auto durationNormalNs = endNormal - beginNormal;
+
+	Timepoint_t beginOptim = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+	{
+		resultOptim[i] = static_cast<int32>(std::floorf(samples[i] + 0.5f));
+	}
+	Timepoint_t endOptim = Clock_t::now();
+
+	auto durationOptimNs = endOptim - beginOptim;
+
+	return { durationNormalNs, durationOptimNs };
+}
+
+static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> CeilIntFTest(sizet sampleCount, const greaper::Vector<float>& samples, greaper::Vector<int32>& resultNormal, greaper::Vector<int32>& resultOptim)
+{
+	using namespace greaper;
+	using namespace math;
+
+	Timepoint_t beginNormal = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+		resultNormal[i] = static_cast<int32>(std::ceilf(samples[i]));
+	Timepoint_t endNormal = Clock_t::now();
+
+	auto durationNormalNs = endNormal - beginNormal;
+
+	Timepoint_t beginOptim = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; ++i)
+	{
+		//resultOptim[i] = -(_mm_cvt_ss2si(_mm_set_ss(-0.5f - (samples[i] + samples[i]))) >> 1);
+		resultOptim[i] = _mm_cvt_ss2si(_mm_round_ss(_mm_setzero_ps(), _mm_set_ss(samples[i]), (_MM_FROUND_CEIL | _MM_FROUND_NO_EXC)));
+	}
+	Timepoint_t endOptim = Clock_t::now();
+
+	auto durationOptimNs = endOptim - beginOptim;
+
+	return { durationNormalNs, durationOptimNs };
+}
+
 static void TestFunction()
 {
 	using namespace greaper;
 	using namespace math;
 
-	Matrix2f v{ 1, 2, 3, 4 };
-	auto vv = v.ToString();
-	Matrix2f vvv{};
-	vvv.FromString(vv);
+	constexpr sizet sampleCount = 1'000'000;
 
-	VerifyEqual(v, vvv, "");
+	Vector<float> samplesF, samplesF64;
+	samplesF.resize(sampleCount, 0.f);
+	samplesF64.resize(sampleCount, 0.f);
+	Vector<double> samplesD, samplesD64;
+	samplesD.resize(sampleCount, 0.0);
+	samplesD64.resize(sampleCount, 0.0);
+	Vector<int32> resultNormal, resultOptim;
+	resultNormal.resize(sampleCount, 0);
+	resultOptim.resize(sampleCount, 0);
+	Vector<int64> resultNormal64, resultOptim64;
+	resultNormal64.resize(sampleCount, 0);
+	resultOptim64.resize(sampleCount, 0);
+
+	std::mt19937_64 generator{ (unsigned long)Clock_t::now().time_since_epoch().count()};
+
+	std::uniform_real_distribution<float> distributionF((float)INT_MIN, (float)INT_MAX);
+	std::uniform_real_distribution<double> distributionD((double)INT_MIN, (double)INT_MAX);
+	std::uniform_real_distribution<float> distributionF64((float)INT64_MIN, (float)INT64_MAX);
+	std::uniform_real_distribution<double> distributionD64((double)INT64_MIN, (double)INT64_MAX);
+
+	for (sizet i = 0; i < sampleCount; ++i)
+	{
+		samplesF[i] = distributionF(generator);
+		samplesD[i] = distributionD(generator);
+		samplesF64[i] = distributionF64(generator);
+		samplesD64[i] = distributionD64(generator);
+	}
+
+	Clock_t::duration durNorm, durOpt;
+	std::tie(durNorm, durOpt) = TruncIntFTest(sampleCount, samplesF, resultNormal, resultOptim);
+	ReportTest("TruncIntF"sv, sampleCount, resultNormal, resultOptim, durNorm, durOpt);
+	
+	std::tie(durNorm, durOpt) = FloorIntFTest(sampleCount, samplesF, resultNormal, resultOptim);
+	ReportTest("FloorIntFTest"sv, sampleCount, resultNormal, resultOptim, durNorm, durOpt);
+
+	std::tie(durNorm, durOpt) = RoundIntFTest(sampleCount, samplesF, resultNormal, resultOptim);
+	ReportTest("RoundIntFTest"sv, sampleCount, resultNormal, resultOptim, durNorm, durOpt);
+
+	std::tie(durNorm, durOpt) = CeilIntFTest(sampleCount, samplesF, resultNormal, resultOptim);
+	ReportTest("CeilIntFTest"sv, sampleCount, resultNormal, resultOptim, durNorm, durOpt);
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
