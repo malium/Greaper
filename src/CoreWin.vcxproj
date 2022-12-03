@@ -314,6 +314,7 @@
     <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
     <ClInclude Include="Public\Math\Base\ReflectedConversions.h" />
+    <ClInclude Include="Public\Math\Base\SSE.inl" />
     <ClInclude Include="Public\Math\Base\Utils.inl" />
     <ClInclude Include="Public\Math\Base\VecRef.h" />
     <ClInclude Include="Public\Math\MathPrerequisites.h" />

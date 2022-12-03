@@ -149,6 +149,7 @@ namespace greaper
 }
 
 #include "Base/Utils.inl"
+#include "Base/SSE.inl"
 #include "Base/ReflectedConversions.h"
 
 #endif /* MATH_PREREQUISITES_H */

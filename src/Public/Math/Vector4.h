@@ -100,7 +100,7 @@ namespace greaper::math
 			}
 			return *this;
 		}
-		INLINE void Normalize(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		INLINE void Normalize(T tolerance = (T)MATH_TOLERANCE)noexcept
 		{
 			auto len = LengthSquared();
 			if (len > tolerance)

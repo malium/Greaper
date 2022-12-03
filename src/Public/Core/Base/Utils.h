@@ -105,11 +105,11 @@ INLINE constexpr T Clamp(const T a, const T min, const T max)
 	return Max(min, Min(max, a));
 }
 /** Computes the absolute value */
-template<class T>
-INLINE constexpr T Abs(const T a)
+template<class T> INLINE constexpr T Abs(T a)
 {
-	return (a >= (T)0) ? a : -a;
+	return (a >= T(0)) ? a : -a;
 }
+
 INLINE constexpr bool IsNearlyEqual(float a, float b, float tolerance = 0.0001f)
 {
 	return Abs(a - b) <= tolerance;

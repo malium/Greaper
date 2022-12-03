@@ -109,6 +109,12 @@ namespace greaper
 		//return malloc(byteSize);
 	}
 
+	template<class _Alloc_ = GenericAllocator>
+	INLINE void* AllocAligned(sizet byteSize, sizet alignment)
+	{
+		return MemoryAllocator<_Alloc_>::AllocateAligned(byteSize, alignment);
+	}
+
 	template<class T, class _Alloc_ = GenericAllocator>
 	INLINE T* AllocN(sizet N)
 	{
@@ -116,9 +122,21 @@ namespace greaper
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
+	INLINE T* AllocAlignedN(sizet N, sizet alignment)
+	{
+		return static_cast<T*>(AllocAligned<_Alloc_>(sizeof(T) * N, alignment));
+	}
+
+	template<class T, class _Alloc_ = GenericAllocator>
 	INLINE T* AllocT()
 	{
 		return AllocN<T, _Alloc_>(1);
+	}
+
+	template<class T, class _Alloc_ = GenericAllocator>
+	INLINE T* AllocAlignedT(sizet alignment)
+	{
+		return AllocN<T, _Alloc_>(1, alignment);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
@@ -131,9 +149,24 @@ namespace greaper
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
+	INLINE T* ConstructAlignedN(sizet count, sizet alignment, Args&&... args)
+	{
+		T* mem = AllocAlignedN<T, _Alloc_>(count, alignment);
+		for (sizet i = 0; i < count; ++i)
+			new (reinterpret_cast<void*>(&mem[i]))T(std::forward<Args>(args)...);
+		return mem;
+	}
+
+	template<class T, class _Alloc_ = GenericAllocator, class... Args>
 	INLINE T* Construct(Args&&... args)
 	{
 		return ConstructN<T, _Alloc_>(1, args...);
+	}
+
+	template<class T, class _Alloc_ = GenericAllocator, class... Args>
+	INLINE T* ConstructAligned(sizet alignment, Args&&... args)
+	{
+		return ConstructAlignedN<T, _Alloc_>(1, alignment, args...);
 	}
 	
 	template<class _Alloc_ = GenericAllocator>
@@ -143,12 +176,26 @@ namespace greaper
 		//free(mem);
 	}
 
+	template<class _Alloc_ = GenericAllocator>
+	INLINE void DeallocAligned(void* mem)
+	{
+		MemoryAllocator<_Alloc_>::DeallocateAligned(mem);
+	}
+
 	template<class T, class _Alloc_ = GenericAllocator>
 	INLINE void Destroy(T* ptr, sizet count = 1)
 	{
 		for (sizet i = 0; i < count; ++i)
 			ptr[i].~T();
 		Dealloc<_Alloc_>(ptr);
+	}
+
+	template<class T, class _Alloc_ = GenericAllocator>
+	INLINE void DestroyAligned(T* ptr, sizet count = 1)
+	{
+		for (sizet i = 0; i < count; ++i)
+			ptr[i].~T();
+		DeallocAligned<_Alloc_>(ptr);
 	}
 
 /**
@@ -233,6 +280,58 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		INLINE void construct(pointer p, Args&&... args)noexcept { new(p)T(std::forward<Args>(args)...); }
 	};
 
+	template<class T, sizet alignment, class _Alloc_ = GenericAllocator>
+	class StdAlignedAlloc
+	{
+	public:
+		using value_type = T;
+		using pointer = value_type*;
+		using const_pointer = const value_type*;
+		using reference = value_type&;
+		using const_reference = const value_type&;
+		using size_type = sizet;
+		using difference_type = ptrint;
+
+		StdAlignedAlloc()noexcept = default;
+		StdAlignedAlloc(StdAlignedAlloc&&)noexcept = default;
+		StdAlignedAlloc(const StdAlignedAlloc&)noexcept = default;
+
+		template<class U, sizet Align, class Alloc2> INLINE StdAlignedAlloc(const StdAlignedAlloc<U, Align, Alloc2>&) {  }
+		template<class U, sizet Align, class Alloc2> INLINE constexpr bool operator==(const StdAlignedAlloc<U, Align, Alloc2>&) const noexcept { return true; }
+		template<class U, sizet Align, class Alloc2> INLINE constexpr bool operator!=(const StdAlignedAlloc<U, Align, Alloc2>&) const noexcept { return false; }
+
+		template<class U> class rebind { public: using other = StdAlignedAlloc<U, alignment, _Alloc_>; };
+
+		INLINE static constexpr sizet Alignment()noexcept { return alignment; }
+		INLINE T* allocate(const size_t num)
+		{
+#if GREAPER_DEBUG_ALLOCATION
+			if (num == 0)
+				return nullptr;
+			if (num > max_size())
+				return nullptr;
+
+			void*const p = AllocAlignedN<T, _Alloc_>(num, alignment);
+			if (p == nullptr)
+				return nullptr;
+			return static_cast<T*>(p);
+#else
+			return reinterpret_cast<T*>(AllocAlignedN<T, _Alloc_>(num, alignment));
+#endif
+		}
+
+		INLINE void deallocate(pointer p, size_type)
+		{
+			DeallocAligned<_Alloc_>(p);
+		}
+
+		INLINE constexpr size_t max_size() { return std::numeric_limits<size_type>::max() / sizeof(T); }
+		INLINE void destroy(pointer p) { (p)->~T(); }
+
+		template<class... Args>
+		INLINE void construct(pointer p, Args&&... args)noexcept { new(p)T(std::forward<Args>(args)...); }
+	};
+
 	template<typename T, typename A = StdAlloc<T>>
 	using BasicString = std::basic_string<T, std::char_traits<T>, A>;
 	template<typename T>
@@ -260,6 +359,8 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 	template<typename T, typename A = StdAlloc<T>>
 	using Vector = std::vector<T, A>;
+	template<typename T, sizet Alignment, typename A = StdAlignedAlloc<T, Alignment>>
+	using VectorAligned = std::vector<T, A>;
 
 	using StringVec = Vector<String>;
 	using WStringVec = Vector<WString>;

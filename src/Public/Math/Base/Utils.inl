@@ -7,7 +7,13 @@
 
 #define MATH_USE_OPTIMIZATIONS 1
 
-#include <intrin.h>
+#if PLT_WINDOWS
+#include <nmmintrin.h>
+#include <ammintrin.h>
+#elif PLT_LINUX
+#include <x86intrin.h>
+#include <cmath>
+#endif
 
 namespace greaper::math
 {
@@ -50,7 +56,6 @@ namespace greaper::math
 			static constexpr T Value = T(0.57735026918962576450);
 		};
 	}
-
 	
 	template<class T> constexpr inline T PI = Impl::PI_t<T>::Value;
 	template<class T> constexpr inline T TWO_PI = T(2) * PI<T>;
@@ -143,7 +148,7 @@ namespace greaper::math
 //#if MATH_USE_OPTIMIZATIONS
 //		return _mm_cvt_ss2si(_mm_set_ss(f + f - 0.5f)) >> 1;
 //#else
-		return static_cast<int32>(std::floorf(f));
+		return static_cast<int32>(std::floor(f));
 //#endif
 	}
 	/* Converts a double to the nearest less or equal integer */
@@ -161,7 +166,7 @@ namespace greaper::math
 //#if MATH_USE_OPTIMIZATIONS
 //		return _mm_cvtss_si64(_mm_set_ss(f + f - 0.5f)) >> 1;
 //#else
-		return static_cast<int64>(std::floorf(f));
+		return static_cast<int64>(std::floor(f));
 //#endif
 	}
 	/* Converts a double to the nearest less or equal integer */
@@ -223,7 +228,7 @@ namespace greaper::math
 //#if MATH_USE_OPTIMIZATIONS
 //		return -(_mm_cvt_ss2si(_mm_set_ss(-0.5f - (f + f))) >> 1);
 //#else
-		return static_cast<int32>(std::ceilf(f));
+		return static_cast<int32>(std::ceil(f));
 //#endif
 	}
 	/* Converts a double to the nearest greater or equal integer */
@@ -234,7 +239,7 @@ namespace greaper::math
 	/* Converts a float to the nearest greater or equal integer */
 	INLINE int64 CeilInt64(float f)noexcept
 	{
-		return static_cast<int64>(std::ceilf(f));
+		return static_cast<int64>(std::ceil(f));
 	}
 	/* Converts a double to the nearest greater or equal integer */
 	INLINE int64 CeilInt64(double d)noexcept
@@ -324,7 +329,7 @@ namespace greaper::math
 	/* Returns e^val */
 	INLINE float Exp(float val)noexcept
 	{
-		return std::expf(val);
+		return std::exp(val);
 	}
 	/* Returns e^val */
 	INLINE double Exp(double val)noexcept
@@ -334,7 +339,7 @@ namespace greaper::math
 	/* Returns ln(val) */
 	INLINE float LogN(float val)noexcept
 	{
-		return std::logf(val);
+		return std::log(val);
 	}
 	/* Returns ln(val) */
 	INLINE double LogN(double val)noexcept
@@ -354,18 +359,28 @@ namespace greaper::math
 	/* Returns log2(val) */
 	INLINE float Log2(float val)noexcept
 	{
+#if !GREAPER_DEBUG
+		return std::log2f(val);
+#else
+		// Same speed as log2f in Release build but 2.5x faster in Debug build
 		static constexpr float ONEOVERLOG2 = 1.4426950408889634f;
 		return LogN(val) * ONEOVERLOG2;
+#endif
 	}
 	/* Returns log2(val) */
 	INLINE double Log2(double val)noexcept
 	{
+#if !GREAPER_DEBUG
+		return std::log2(val);
+#else
+		// Same speed as log2f in Release build but 2.5x faster in Debug build
 		static constexpr double ONEOVERLOG2 = 1.4426950408889634;
 		return LogN(val) * ONEOVERLOG2;
+#endif
 	}
 	INLINE float Sin(float val)noexcept
 	{
-		return std::sinf(val);
+		return std::sin(val);
 	}
 	INLINE double Sin(double val)noexcept
 	{
@@ -374,7 +389,7 @@ namespace greaper::math
 	INLINE float ASin(float val)noexcept
 	{
 		val = Clamp(val, -1.f, 1.f);
-		return std::asinf(val);
+		return std::asin(val);
 	}
 	INLINE double ASin(double val)noexcept
 	{
@@ -383,7 +398,7 @@ namespace greaper::math
 	}
 	INLINE float Sinh(float val)noexcept
 	{
-		return std::sinhf(val);
+		return std::sinh(val);
 	}
 	INLINE double Sinh(double val)noexcept
 	{
@@ -391,7 +406,7 @@ namespace greaper::math
 	}
 	INLINE float Cos(float val)noexcept
 	{
-		return std::cosf(val);
+		return std::cos(val);
 	}
 	INLINE double Cos(double val)noexcept
 	{
@@ -400,16 +415,24 @@ namespace greaper::math
 	INLINE float ACos(float val)noexcept
 	{
 		val = Clamp(val, -1.f, 1.f);
-		return std::acosf(val);
+		return std::acos(val);
 	}
 	INLINE double ACos(double val)noexcept
 	{
 		val = Clamp(val, -1.0, 1.0);
 		return std::acos(val);
 	}
+	INLINE float Cosh(float val)noexcept
+	{
+		return std::cosh(val);
+	}
+	INLINE double Cosh(double val)noexcept
+	{
+		return std::cosh(val);
+	}
 	INLINE float Tan(float val)noexcept
 	{
-		return std::tanf(val);
+		return std::tan(val);
 	}
 	INLINE double Tan(double val)noexcept
 	{
@@ -417,7 +440,7 @@ namespace greaper::math
 	}
 	INLINE float ATan(float val)noexcept
 	{
-		return std::atanf(val);
+		return std::atan(val);
 	}
 	INLINE double ATan(double val)noexcept
 	{
@@ -425,11 +448,19 @@ namespace greaper::math
 	}
 	INLINE float ATan2(float y, float x)noexcept
 	{
-		return std::atan2f(y, x);
+		return std::atan2(y, x);
 	}
 	INLINE double ATan2(double y, double x)noexcept
 	{
 		return std::atan2(y, x);
+	}
+	INLINE float Tanh(float val)noexcept
+	{
+		return std::tanh(val);
+	}
+	INLINE double Tanh(double val)noexcept
+	{
+		return std::tanh(val);
 	}
 	INLINE std::tuple<float, float> SinCos(float val)noexcept
 	{
@@ -441,7 +472,7 @@ namespace greaper::math
 	}
 	INLINE float Sqrt(float val)noexcept
 	{
-		return std::sqrtf(val);
+		return std::sqrt(val);
 	}
 	INLINE double Sqrt(double val)noexcept
 	{
@@ -449,7 +480,7 @@ namespace greaper::math
 	}
 	INLINE float Pow(float base, float power)noexcept
 	{
-		return std::powf(base, power);
+		return std::pow(base, power);
 	}
 	INLINE double Pow(double base, double power)noexcept
 	{
@@ -465,6 +496,16 @@ namespace greaper::math
 		}
 		return r;
 	}
+	INLINE constexpr int64 Pow(int64 base, int64 power)noexcept
+	{
+		int64 r = base;
+		while (power > 1)
+		{
+			r *= base;
+			--power;
+		}
+		return r;
+	}
 	INLINE float InvSqrt(float val)noexcept
 	{
 		return 1.f / Sqrt(val);
@@ -473,4 +514,34 @@ namespace greaper::math
 	{
 		return 1.0 / Sqrt(val);
 	}
+#if 0 // Currently 1 / sqrt is faster than Carmack 
+	INLINE float InvSqrtFast(float val)noexcept
+	{
+		float y = val;
+		float y2 = val * 0.5f;
+		int32 i = *reinterpret_cast<int32*>(&y);
+		i = 0x5f3759df - (i >> 1);
+		y = *reinterpret_cast<float*>(&i);
+		y = y * (1.5f - (y2 * y * y));
+
+#if 1
+		y = y * (1.5f - (y2 * y * y));
+#endif
+		return y;
+	}
+	INLINE double InvSqrtFast(double val)noexcept
+	{
+		double y = val;
+		double y2 = val * 0.5;
+		int64 i = *reinterpret_cast<int64*>(&y);
+		i = 0x5fe6eb50c7b537a9 - (i >> 1ull);
+		y = *reinterpret_cast<double*>(&i);
+		y = y * (1.5 - (y2 * y * y));
+
+#if 1
+		y = y * (1.5 - (y2 * y * y));
+#endif
+		return y;
+	}
+#endif
 }
