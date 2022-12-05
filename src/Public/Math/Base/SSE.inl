@@ -14,6 +14,43 @@
 
 namespace greaper::math::SSE
 {
+	/* Basic functions */
+	INLINE __m128 CreateV4f()noexcept
+	{
+		return _mm_setzero_ps();
+	}
+	INLINE __m128 CreateV4f(float a)noexcept
+	{
+		return _mm_set_ps1(a);
+	}
+	INLINE __m128 CreateV4f(float x, float y, float z, float w)noexcept
+	{
+		return _mm_set_ps(x, y, z, w);
+	}
+	INLINE __m128d CreateV2d()noexcept
+	{
+		return _mm_setzero_pd();
+	}
+	INLINE __m128d CreateV2d(double a)noexcept
+	{
+		return _mm_set_pd1(a);
+	}
+	INLINE __m128d CreateV2d(double x, double y)noexcept
+	{
+		return _mm_set_pd(x, y);
+	}
+	INLINE __m128i CreateV4i()noexcept
+	{
+		return _mm_setzero_si128();
+	}
+	INLINE __m128i CreateV4i(int32 a)noexcept
+	{
+		return _mm_set1_epi32(a);
+	}
+	INLINE __m128i CreateV4i(int32 x, int32 y, int32 z, int32 w)noexcept
+	{
+		return _mm_set_epi32(x, y, z, w);
+	}
 	/* Arithmetic */
 	INLINE __m128 Add(__m128 left, __m128 right)noexcept
 	{
@@ -162,9 +199,9 @@ namespace greaper::math::SSE
 #elif DOTPRODUCT_VER == 2 // Faster than other implementations
 		auto m0 = Mul(a, b);
 		auto m1 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(2, 3, 0, 1));
-		m0 = _mm_add_ps(m0, m1);
+		m0 = Add(m0, m1);
 		m1 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(0, 1, 2, 3));
-		m0 = _mm_add_ps(m0, m1);
+		m0 = Add(m0, m1);
 
 		return _mm_cvtss_f32(m0);
 #elif DOTPRODUCT_VER == 3 // A bit slower than Vector4 implementation
@@ -194,9 +231,9 @@ namespace greaper::math::SSE
 		return values[0] + values[1] + values[2] + values[3];
 #elif DISTANCE_VER == 1 // A bit faster than VER 0 & 2
 		auto m1 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(2, 3, 0, 1));
-		m0 = _mm_add_ps(m0, m1);
+		m0 = Add(m0, m1);
 		m1 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(0, 1, 2, 3));
-		m0 = _mm_add_ps(m0, m1);
+		m0 = Add(m0, m1);
 
 		return _mm_cvtss_f32(m0);
 #elif DISTANCE_VER == 2 // Same speed as VER 0
