@@ -186,10 +186,25 @@ namespace greaper::math::SSE
 	INLINE float DistanceSquared(__m128 a, __m128 b)noexcept
 	{
 		auto t = Sub(a, b);
-		auto m = Mul(t, t);
+		auto m0 = Mul(t, t);
+#define DISTANCE_VER 1
+#if DISTANCE_VER == 0 // Faster than Vector4 implementation
 		alignas(16) float values[4];
-		_mm_store_ps(values, m);
+		_mm_store_ps(values, m0);
 		return values[0] + values[1] + values[2] + values[3];
+#elif DISTANCE_VER == 1 // A bit faster than VER 0 & 2
+		auto m1 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(2, 3, 0, 1));
+		m0 = _mm_add_ps(m0, m1);
+		m1 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(0, 1, 2, 3));
+		m0 = _mm_add_ps(m0, m1);
+
+		return _mm_cvtss_f32(m0);
+#elif DISTANCE_VER == 2 // Same speed as VER 0
+		m0 = _mm_hadd_ps(m0, m0);
+		m0 = _mm_hadd_ps(m0, m0);
+		return _mm_cvtss_f32(m0);
+#endif
+#undef DISTANCE_VER
 	}
 	INLINE float Distance(__m128 a, __m128 b)noexcept
 	{

@@ -438,6 +438,40 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> NormV4
 	return { durationNormalNs, durationOptimNs };
 }
 
+static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4FTest(sizet sampleCount,
+	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128, 16>& samplesSSE,
+	greaper::Vector<float>& resultNormal, greaper::Vector<float>& resultOptim)
+{
+	using namespace greaper;
+	using namespace math;
+
+	Timepoint_t beginNormal = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; )
+	{
+		const auto& x = samplesV4[i++];
+		const auto& y = samplesV4[i++];
+		auto dist = x.Distance(y);
+		resultNormal[i - 1] = dist;
+		resultNormal[i] = dist;
+	}
+	Timepoint_t endNormal = Clock_t::now();
+
+	auto durationNormalNs = endNormal - beginNormal;
+
+	Timepoint_t beginOptim = Clock_t::now();
+	for (sizet i = 0; i < sampleCount; )
+	{
+		auto dist = SSE::Distance(samplesSSE[i++], samplesSSE[i++]);
+		resultOptim[i - 1] = dist;
+		resultOptim[i] = dist;
+	}
+	Timepoint_t endOptim = Clock_t::now();
+
+	auto durationOptimNs = endOptim - beginOptim;
+
+	return { durationNormalNs, durationOptimNs };
+}
+
 static void TestFunction()
 {
 	using namespace greaper;
@@ -543,6 +577,9 @@ static void TestFunction()
 
 	std::tie(durNorm, durOpt) = NormV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
 	ReportTest("NormV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
+
+	std::tie(durNorm, durOpt) = DistV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
+	ReportTest("DistV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
