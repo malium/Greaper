@@ -51,6 +51,28 @@ namespace greaper::math::SSE
 	{
 		return _mm_set_epi32(x, y, z, w);
 	}
+	INLINE std::tuple<float, float, float, float> Extract(__m128 v)noexcept
+	{
+		alignas(16) float values[4];
+		_mm_store_ps(values, v);
+		return { values[0], values[1], values[2], values[3] };
+	}
+	INLINE std::tuple<double, double> Extract(__m128d v)noexcept
+	{
+		alignas(16) double values[2];
+		_mm_store_pd(values, v);
+		return { values[0], values[1] };
+	}
+	INLINE std::tuple<int32, int32, int32, int32> Extract(__m128i v)noexcept
+	{
+		std::tuple<int32, int32, int32, int32> values;
+		
+		std::get<0>(values) = _mm_extract_epi32(v, 0);
+		std::get<1>(values) = _mm_extract_epi32(v, 1);
+		std::get<2>(values) = _mm_extract_epi32(v, 2);
+		std::get<3>(values) = _mm_extract_epi32(v, 3);
+		return values;
+	}
 	/* Arithmetic */
 	INLINE __m128 Add(__m128 left, __m128 right)noexcept
 	{
@@ -60,21 +82,9 @@ namespace greaper::math::SSE
 	{
 		return _mm_add_pd(left, right);
 	}
-	INLINE __m128i Add8(__m128i left, __m128i right)noexcept
-	{
-		return _mm_add_epi8(left, right);
-	}
-	INLINE __m128i Add16(__m128i left, __m128i right)noexcept
-	{
-		return _mm_add_epi16(left, right);
-	}
-	INLINE __m128i Add32(__m128i left, __m128i right)noexcept
+	INLINE __m128i Add(__m128i left, __m128i right)noexcept
 	{
 		return _mm_add_epi32(left, right);
-	}
-	INLINE __m128i Add64(__m128i left, __m128i right)noexcept
-	{
-		return _mm_add_epi64(left, right);
 	}
 	INLINE __m128 Sub(__m128 left, __m128 right)noexcept
 	{
@@ -84,21 +94,9 @@ namespace greaper::math::SSE
 	{
 		return _mm_sub_pd(left, right);
 	}
-	INLINE __m128i Sub8(__m128i left, __m128i right)noexcept
-	{
-		return _mm_sub_epi8(left, right);
-	}
-	INLINE __m128i Sub16(__m128i left, __m128i right)noexcept
-	{
-		return _mm_sub_epi16(left, right);
-	}
-	INLINE __m128i Sub32(__m128i left, __m128i right)noexcept
+	INLINE __m128i Sub(__m128i left, __m128i right)noexcept
 	{
 		return _mm_sub_epi32(left, right);
-	}
-	INLINE __m128i Sub64(__m128i left, __m128i right)noexcept
-	{
-		return _mm_sub_epi64(left, right);
 	}
 	INLINE __m128 Mul(__m128 left, __m128 right)noexcept
 	{
@@ -108,7 +106,7 @@ namespace greaper::math::SSE
 	{
 		return _mm_mul_pd(left, right);
 	}
-	INLINE __m128i Mul32(__m128i left, __m128i right)noexcept
+	INLINE __m128i Mul(__m128i left, __m128i right)noexcept
 	{
 		return _mm_mul_epi32(left, right);
 	}
@@ -120,7 +118,7 @@ namespace greaper::math::SSE
 	{
 		return _mm_mul_pd(_mm_set_pd1(left), right);
 	}
-	INLINE __m128i Mul32(int32 left, __m128i right)noexcept
+	INLINE __m128i Mul(int32 left, __m128i right)noexcept
 	{
 		return _mm_mul_epi32(_mm_set1_epi32(left), right);
 	}
@@ -132,7 +130,7 @@ namespace greaper::math::SSE
 	{
 		return _mm_mul_pd(left, _mm_set_pd1(right));
 	}
-	INLINE __m128i Mul32(__m128i left, int32 right)noexcept
+	INLINE __m128i Mul(__m128i left, int32 right)noexcept
 	{
 		return _mm_mul_epi32(left, _mm_set1_epi32(right));
 	}
@@ -144,6 +142,17 @@ namespace greaper::math::SSE
 	{
 		return _mm_div_pd(left, right);
 	}
+	INLINE __m128i Div(__m128i left, __m128i right)noexcept
+	{
+		auto l = Extract(left);
+		auto r = Extract(right);
+
+		auto i0 = std::get<0>(l) / std::get<0>(r);
+		auto i1 = std::get<1>(l) / std::get<1>(r);
+		auto i2 = std::get<2>(l) / std::get<2>(r);
+		auto i3 = std::get<3>(l) / std::get<3>(r);
+		return CreateV4i(i0, i1, i2, i3);
+	}
 	INLINE __m128 Div(float left, __m128 right)noexcept
 	{
 		return _mm_div_ps(_mm_set_ps1(left), right);
@@ -152,6 +161,16 @@ namespace greaper::math::SSE
 	{
 		return _mm_div_pd(_mm_set_pd1(left), right);
 	}
+	INLINE __m128i Div(int32 left, __m128i right)noexcept
+	{
+		auto r = Extract(right);
+
+		auto i0 = left / std::get<0>(r);
+		auto i1 = left / std::get<1>(r);
+		auto i2 = left / std::get<2>(r);
+		auto i3 = left / std::get<3>(r);
+		return CreateV4i(i0, i1, i2, i3);
+	}
 	INLINE __m128 Div(__m128 left, float right)noexcept
 	{
 		return Mul(left, 1.f / right);
@@ -159,6 +178,16 @@ namespace greaper::math::SSE
 	INLINE __m128d Div(__m128d left, double right)noexcept
 	{
 		return Mul(left, 1.0 / right);
+	}
+	INLINE __m128i Div(__m128i left, int32 right)noexcept
+	{
+		auto l = Extract(left);
+
+		auto i0 = std::get<0>(l) / right;
+		auto i1 = std::get<1>(l) / right;
+		auto i2 = std::get<2>(l) / right;
+		auto i3 = std::get<3>(l) / right;
+		return CreateV4i(i0, i1, i2, i3);
 	}
 
 	/* Comparision */
@@ -256,5 +285,29 @@ namespace greaper::math::SSE
 			return Mul(v, _mm_set_ps1(invScale));
 		}
 		return v;
+	}
+	INLINE __m128 Clamp(__m128 val, float min, float max)noexcept
+	{
+		/*
+		auto m0 = _mm_set_ps1(min);
+		auto m1 = _mm_set_ps1(max);
+		auto t0 = _mm_max_ps(val, m0);
+		auto t1 = _mm_min_ps(t0, m1);
+		return t1;
+		*/
+		return _mm_min_ps(_mm_max_ps(val, _mm_set_ps1(min)), _mm_set_ps1(max));
+	}
+	INLINE __m128 Clamp(__m128 val, __m128 min, __m128 max)noexcept
+	{
+		/*
+		auto t0 = _mm_max_ps(val, min);
+		auto t1 = _mm_min_ps(t0, max);
+		return t1;
+		*/
+		return _mm_min_ps(_mm_max_ps(val, min), max);
+	}
+	INLINE __m128 Sign(__m128 v)noexcept
+	{
+		return _mm_and_ps(v, _mm_set_ps1(-0.f));
 	}
 }

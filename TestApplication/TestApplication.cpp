@@ -258,7 +258,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> FloorI
 
 	Timepoint_t beginNormal = Clock_t::now();
 	for (sizet i = 0; i < sampleCount; ++i)
-		resultNormal[i] = static_cast<int32>(std::floorf(samples[i]));
+		resultNormal[i] = static_cast<int32>(std::floor(samples[i]));
 	Timepoint_t endNormal = Clock_t::now();
 
 	auto durationNormalNs = endNormal - beginNormal;
@@ -292,7 +292,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> RoundI
 	Timepoint_t beginOptim = Clock_t::now();
 	for (sizet i = 0; i < sampleCount; ++i)
 	{
-		resultOptim[i] = static_cast<int32>(std::floorf(samples[i] + 0.5f));
+		resultOptim[i] = static_cast<int32>(std::floor(samples[i] + 0.5f));
 	}
 	Timepoint_t endOptim = Clock_t::now();
 
@@ -310,7 +310,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> CeilIn
 
 	Timepoint_t beginNormal = Clock_t::now();
 	for (sizet i = 0; i < sampleCount; ++i)
-		resultNormal[i] = static_cast<int32>(std::ceilf(samples[i]));
+		resultNormal[i] = static_cast<int32>(std::ceil(samples[i]));
 	Timepoint_t endNormal = Clock_t::now();
 
 	auto durationNormalNs = endNormal - beginNormal;
@@ -451,8 +451,8 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4
 		const auto& x = samplesV4[i++];
 		const auto& y = samplesV4[i++];
 		auto dist = x.Distance(y);
+		resultNormal[i - 2] = dist;
 		resultNormal[i - 1] = dist;
-		resultNormal[i] = dist;
 	}
 	Timepoint_t endNormal = Clock_t::now();
 
@@ -462,8 +462,8 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4
 	for (sizet i = 0; i < sampleCount; )
 	{
 		auto dist = SSE::Distance(samplesSSE[i++], samplesSSE[i++]);
+		resultOptim[i - 2] = dist;
 		resultOptim[i - 1] = dist;
-		resultOptim[i] = dist;
 	}
 	Timepoint_t endOptim = Clock_t::now();
 
@@ -477,7 +477,7 @@ static void TestFunction()
 	using namespace greaper;
 	using namespace math;
 
-	constexpr sizet sampleCount = 10'000'000;
+	constexpr sizet sampleCount = 1'000'000;
 
 	Vector<float> samplesF, samplesF64;
 	samplesF.resize(sampleCount, 0.f);
@@ -511,18 +511,22 @@ static void TestFunction()
 	resultNormalD.resize(sampleCount, 0);
 	resultOptimD.resize(sampleCount, 0);
 
-	//std::mt19937_64 generator{ (unsigned long)Clock_t::now().time_since_epoch().count()};
 	std::random_device generator{};
 
-	std::uniform_real_distribution<float> distributionF((float)INT_MIN, (float)INT_MAX);
-	std::uniform_real_distribution<double> distributionD((double)INT_MIN, (double)INT_MAX);
-	std::uniform_real_distribution<float> distributionF64((float)INT64_MIN, (float)INT64_MAX);
-	std::uniform_real_distribution<double> distributionD64((double)INT64_MIN, (double)INT64_MAX);
+	constexpr auto int32Min = std::numeric_limits<int32>::min();
+	constexpr auto int32Max = std::numeric_limits<int32>::max();
+	constexpr auto int64Min = std::numeric_limits<int64>::min();
+	constexpr auto int64Max = std::numeric_limits<int64>::max();
 
-	std::uniform_real_distribution<float> distributionPF(0.f, (float)INT_MAX);
-	std::uniform_real_distribution<double> distributionPD(0.0, (double)INT_MAX);
-	std::uniform_real_distribution<float> distributionPF64(0.f, (float)INT64_MAX);
-	std::uniform_real_distribution<double> distributionPD64(0.0, (double)INT64_MAX);
+	std::uniform_real_distribution<float> distributionF((float)int32Min, (float)int32Max);
+	std::uniform_real_distribution<double> distributionD((double)int32Min, (double)int32Max);
+	std::uniform_real_distribution<float> distributionF64((float)int64Min, (float)int64Max);
+	std::uniform_real_distribution<double> distributionD64((double)int64Min, (double)int64Max);
+
+	std::uniform_real_distribution<float> distributionPF(0.f, (float)int32Max);
+	std::uniform_real_distribution<double> distributionPD(0.0, (double)int32Max);
+	std::uniform_real_distribution<float> distributionPF64(0.f, (float)int64Max);
+	std::uniform_real_distribution<double> distributionPD64(0.0, (double)int64Max);
 
 	std::uniform_real_distribution<float> distributionV4(-10.f, 10.f);
 
@@ -565,12 +569,6 @@ static void TestFunction()
 
 	std::tie(durNorm, durOpt) = InvSqrtFTest(sampleCount, samplesPF, resultNormalF, resultOptimF);
 	ReportTest("InvSqrtFTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
-
-
-	auto a = _mm_set_ps(1.1f, 1.2f, 1.3f, 1.4f);
-	auto b = _mm_set_ps(1.1001f, 1.20f, 1.30f, 1.40f);
-	auto equal = SSE::Equal(a, b);
-	auto nearly = SSE::NearlyEqual(a, b);
 
 	std::tie(durNorm, durOpt) = LenghtV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
 	ReportTest("LenghtV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
