@@ -13,6 +13,7 @@
 #include <Core/Platform.h>
 #include <Math/Vector4.h>
 #include <Math/Matrix4.h>
+#include <Math/Quaternion.h>
 #include <random>
 #include <iostream>
 
@@ -578,6 +579,41 @@ static void TestFunction()
 
 	std::tie(durNorm, durOpt) = DistV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
 	ReportTest("DistV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
+
+	using prec = float;
+	auto odeg = Vector3Real<prec>(90, -60, 15);
+	auto orad = odeg * DEG2RAD<prec>;
+	auto q = QuaternionReal<prec>::FromEuler(orad);
+	auto qn = q.Normalized();
+	auto erad = qn.ToEulerAngles();
+	auto edeg = erad * RAD2DEG<prec>;
+	auto eqdeg = edeg.IsNearlyEqual(odeg);
+	auto eqrad = erad.IsNearlyEqual(orad);
+	auto eqq = q.IsNearlyEqual(qn);
+
+	auto q0 = QuaternionReal<prec>::FromEuler(orad.X, 0, 0);
+	auto q1 = QuaternionReal<prec>::FromEuler(0, orad.Y, 0);
+	auto q2 = QuaternionReal<prec>::FromEuler(0, 0, orad.Z);
+	auto qf0 = q0 * q1 * q2;
+	auto qf1 = q0 * q2 * q1;
+	auto qf2 = q1 * q0 * q2;
+	auto qf3 = q1 * q2 * q0;
+	auto qf4 = q2 * q0 * q1;
+	auto qf5 = q2 * q1 * q0;
+
+	auto erad0 = qf0.ToEulerAngles();
+	auto erad1 = qf1.ToEulerAngles();
+	auto erad2 = qf2.ToEulerAngles();
+	auto erad3 = qf3.ToEulerAngles();
+	auto erad4 = qf4.ToEulerAngles();
+	auto erad5 = qf5.ToEulerAngles();
+
+	auto edeg0 = erad0 * RAD2DEG<prec>;
+	auto edeg1 = erad1 * RAD2DEG<prec>;
+	auto edeg2 = erad2 * RAD2DEG<prec>;
+	auto edeg3 = erad3 * RAD2DEG<prec>;
+	auto edeg4 = erad4 * RAD2DEG<prec>;
+	auto edeg5 = erad5 * RAD2DEG<prec>;
 }
 
 int MainCode(void* hInstance, int argc, char** argv)

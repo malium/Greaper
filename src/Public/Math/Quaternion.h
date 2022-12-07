@@ -32,7 +32,7 @@ namespace greaper::math
 		constexpr QuaternionReal()noexcept = default;
 		constexpr QuaternionReal(T w, T x, T y, T z)noexcept :W(w), X(x), Y(y), Z(z) {  }
 		constexpr explicit QuaternionReal(const std::array<T, ComponentCount>& arr)noexcept :W(arr[0]), X(arr[1]), Y(arr[2]), Z(arr[3]) {  }
-		INLINE constexpr QuaternionReal operator-()const noexcept { return { -W, -X, -Y, -Z }; }
+		INLINE constexpr QuaternionReal operator-()const noexcept { return { W, -X, -Y, -Z }; }
 
 		INLINE constexpr T& operator[](sizet index)noexcept
 		{
@@ -69,6 +69,75 @@ namespace greaper::math
 			Y = T(0);
 			Z = T(0);
 		}
+		INLINE static QuaternionReal<T> FromEuler(T x, T y, T z)noexcept
+		{
+			auto hx = x * T(0.5);
+			auto hy = y * T(0.5);
+			auto hz = z * T(0.5);
+
+			auto cosx = Cos(hx);
+			auto sinx = Sin(hx);
+			auto cosy = Cos(hy);
+			auto siny = Sin(hy);
+			auto cosz = Cos(hz);
+			auto sinz = Sin(hz);
+
+			return QuaternionReal<T> {
+					cosx * cosy * cosz + sinx * siny * sinz,
+					sinx * cosy * cosz - cosx * siny * sinz,
+					cosx * siny * cosz + sinx * cosy * sinz,
+					cosx * cosy * sinz - sinx * siny * cosz
+			};
+		}
+		INLINE static QuaternionReal<T> FromEuler(const Vector3Real<T>& v)noexcept
+		{
+			return FromEuler(v.X, v.Y, v.Z);
+		}
+		INLINE static QuaternionReal<T> FromEuler(const std::array<T, 3>& a)noexcept
+		{
+			return FromEuler(a[0], a[1], a[2]);
+		}
+		INLINE T GetXEuler()const noexcept
+		{
+			auto wx = W * X;
+			auto yz = Y * Z;
+			auto xx = X * X;
+			auto yy = Y * Y;
+
+			auto sinx = T(2) * (wx + yz);
+			auto cosx = T(1) - T(2) * (xx + yy);
+			return ATan2(sinx, cosx);
+		}
+		INLINE T GetYEuler()const noexcept
+		{
+			auto wy = W * Y;
+			auto zx = Z * X;
+
+			auto siny = T(2) * (wy - zx);
+
+			T y;
+			if (Abs(siny) >= T(1))
+				y = std::copysign(PI<T> * T(0.5), siny);
+			else
+				y = ASin(siny);
+
+			return y;
+		}
+		INLINE T GetZEuler()const noexcept
+		{
+			auto wz = W * Z;
+			auto xy = X * Y;
+			auto yy = Y * Y;
+			auto zz = Z * Z;
+
+			auto sinz = T(2) * (wz + xy);
+			auto cosz = T(1) - T(2) * (yy + zz);
+			return ATan2(sinz, cosz);
+		}
+		INLINE Vector3Real<T> ToEulerAngles()const noexcept
+		{
+			return Vector3Real<T>(GetXEuler(), GetYEuler(), GetZEuler());
+		}
 		INLINE constexpr QuaternionReal Conjugated()const noexcept
 		{
 			return { W, -X, -Y, -Z };
@@ -77,9 +146,26 @@ namespace greaper::math
 		{
 			*this = Conjugated();
 		}
+		INLINE constexpr T DotProduct(const QuaternionReal<T>& other)const noexcept
+		{
+			return W * other.W + X * other.X + Y * other.Y + Z * other.Z;
+		}
+		INLINE constexpr QuaternionReal<T> CrossProduct(const QuaternionReal<T>& other)const noexcept
+		{
+			return QuaternionReal<T> {
+					W * other.W - X * other.X - Y * other.Y - Z * other.Z,
+					W * other.X + X * other.W + Y * other.Z - Z * other.Y,
+					W * other.Y + Y * other.W + Z * other.X - X * other.Z,
+					W * other.Z + Z * other.W + X * other.Y - Y * other.X
+			};
+		}
+		INLINE constexpr QuaternionReal<T> Inverse()const noexcept
+		{
+			return Conjugated() / DotProduct(*this);
+		}
 		INLINE constexpr T LengthSquared()const noexcept
 		{
-			return W * W + X * X + Y * Y + Z * Z;
+			return DotProduct(*this);
 		}
 		INLINE T Length()const noexcept
 		{
@@ -182,10 +268,18 @@ namespace greaper::math
 	template<class T> INLINE constexpr QuaternionReal<T> operator*(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept
 	{
 		return {
+			
 			left.W * right.W - left.X * right.X - left.Y * right.Y - left.Z * right.Z,
-			left.W * right.X - left.X * right.W - left.Y * right.Z - left.Z * right.Y,
-			left.W * right.Y - left.X * right.Z - left.Y * right.W - left.Z * right.X,
-			left.W * right.Z - left.X * right.Y - left.Y * right.X - left.Z * right.W
+			left.W * right.X + left.X * right.W + left.Y * right.Z - left.Z * right.Y,
+			left.W * right.Y + left.Y * right.W + left.Z * right.X - left.X * right.Z,
+			left.W * right.Z + left.Z * right.W + left.X * right.Y - left.Y * right.X
+			
+			/*
+			left.W * right.W - left.X * right.X - left.Y * right.Y - left.Z * right.Z,
+			left.W * right.X + left.X * right.W + left.Y * right.Z - left.Z * right.Y,
+			left.W * right.Y - left.X * right.Z + left.Y * right.W + left.Z * right.X,
+			left.W * right.Z + left.X * right.Y - left.Y * right.X + left.Z * right.W
+			*/
 		};
 	}
 	template<class T> INLINE QuaternionReal<T>& operator*=(QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { left = (left * right); return left; }
