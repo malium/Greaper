@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -41,7 +41,7 @@ namespace greaper
 			logMgr->RemoveLogWriter(m_WriterID);
 		}
 
-		INLINE sizet GetWriterID()const noexcept { return m_WriterID; }
+		INLINE NODISCARD sizet GetWriterID()const noexcept { return m_WriterID; }
 	};
 }
 

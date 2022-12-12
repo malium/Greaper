@@ -32,9 +32,11 @@ extern "C" {
 #define CREATE_SUSPENDED                  0x00000004
 #define CONDITION_VARIABLE_LOCKMODE_SHARED RTL_CONDITION_VARIABLE_LOCKMODE_SHARED
 #define DECLSPEC_ALLOCATOR __declspec(allocator)
-#define DECLSPEC_ALIGN(x)   __declspec(align(x))
+#if COMPILER_MSVC
 #define DECLSPEC_NOINITALL __pragma(warning(push)) __pragma(warning(disable:4845)) __declspec(no_init_all) __pragma(warning(pop))
-
+#else
+#define DECLSPEC_NOINITALL
+#endif
 #if ARCHITECTURE_X64
 #define UNALIGNED __unaligned
 #define UNALIGNED64 __unaligned
@@ -530,12 +532,12 @@ RaiseException(
 	CONST ULONG_PTR* lpArguments
 );
 
-typedef struct DECLSPEC_ALIGN(16) _M128A {
+typedef struct alignas(16) _M128A {
 	ULONGLONG Low;
 	LONGLONG High;
 } M128A, * PM128A;
 
-typedef struct DECLSPEC_ALIGN(16) _XSAVE_FORMAT {
+typedef struct alignas(16) _XSAVE_FORMAT {
 	WORD   ControlWord;
 	WORD   StatusWord;
 	BYTE  TagWord;
@@ -564,9 +566,11 @@ typedef XSAVE_FORMAT XMM_SAVE_AREA32, * PXMM_SAVE_AREA32;
 
 #if ARCHITECTURE_X64
 
+#if COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4201)
-typedef struct DECLSPEC_ALIGN(16) DECLSPEC_NOINITALL _CONTEXT {
+#endif
+typedef struct alignas(16) DECLSPEC_NOINITALL _CONTEXT {
 
 	DWORD64 P1Home;
 	DWORD64 P2Home;
@@ -636,8 +640,10 @@ typedef struct DECLSPEC_ALIGN(16) DECLSPEC_NOINITALL _CONTEXT {
 	DWORD64 LastBranchFromRip;
 	DWORD64 LastExceptionToRip;
 	DWORD64 LastExceptionFromRip;
-} CONTEXT, * PCONTEXT;
+} CONTEXT, * PCONTEXT; 
+#if COMPILER_MSVC
 #pragma warning(pop)
+#endif
 #else
 #define SIZE_OF_80387_REGISTERS      80
 typedef struct _FLOATING_SAVE_AREA {

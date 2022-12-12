@@ -40,7 +40,7 @@ namespace greaper
 		Uuid& operator=(const StringView& view) noexcept;
 		Uuid& operator=(const String& str) noexcept;
 
-		[[nodiscard]] String ToString()const noexcept;
+		NODISCARD String ToString()const noexcept;
 		void FromString(const String& str) noexcept;
 
 		/**
@@ -48,7 +48,7 @@ namespace greaper
 		 * 
 		 * @return Uuid The new random Uuid 
 		 */
-		[[nodiscard]] static Uuid GenerateRandom() noexcept;
+		NODISCARD static Uuid GenerateRandom() noexcept;
 
 		constexpr bool IsEmpty()const noexcept;
 		constexpr const uint32* GetData()const noexcept;

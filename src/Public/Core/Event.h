@@ -175,9 +175,9 @@ namespace greaper
 		using HandlerType = EventHandler<void>;
 		using HandlerFunction = typename EventHandlerID<void>::HandlerFunction;
 
-		INLINE explicit Event(const StringView& eventName = "unnamed"sv) noexcept
+		INLINE explicit Event(StringView eventName = "unnamed"sv) noexcept
 			:m_Name(eventName)
-			, m_LastID(0)
+			,m_LastID(0)
 		{
 			m_This.reset(this, &Impl::EmptyDeleter<Event<void>>);
 		}

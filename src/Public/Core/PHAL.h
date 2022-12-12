@@ -280,6 +280,10 @@
 #ifndef UNUSED
 #define UNUSED [[maybe_unused]]
 #endif
+/* Ensure return value utilization */
+#ifndef NODISCARD
+#define NODISCARD [[nodiscard]]
+#endif
 /* Alignment */
 #ifndef ALIGN_BEGIN
 #if COMPILER_MSVC || (COMPILER_CLANG && PLT_WINDOWS)

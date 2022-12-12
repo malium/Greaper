@@ -22,11 +22,20 @@ struct WinTypes : BasicTypes
 typedef WinTypes PlatformTypes;
 
 /* Function type macros */
+#if COMPILER_MSVC
 #define INLINE __forceinline									/** Forces code to be inlined */
 #define NOINLINE __declspec(noinline)							/** Forces code to NOT be inlined */
 #define FUNCTION_NO_RETURN_START __declspec(noreturn)			/** Indicate that the function never returns. */
 #define FUNCTION_NO_RETURN_END
 #define FUNCTION_FULL __FUNCSIG__
+#else
+#define INLINE __attribute__((always_inline))
+#define NOINLINE __attribute__((noinline))
+#define FUNCTION_NO_RETURN_START
+#define FUNCTION_NO_RETURN_END __attribute__(noreturn)
+#define FUNCTION_FULL __PRETTY_FUNCTION__
+#endif
+
 #define GREAPER_DLLEXT ".dll"
 
 /* Supported Windows version */

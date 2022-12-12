@@ -21,6 +21,9 @@ namespace greaper
 	template<> struct ReflectedTypeToID<uint64> { static constexpr ReflectedTypeID_t ID = RTI_Uint64; };
 	template<> struct ReflectedTypeToID<float> { static constexpr ReflectedTypeID_t ID = RTI_Float; };
 	template<> struct ReflectedTypeToID<double> { static constexpr ReflectedTypeID_t ID = RTI_Double; };
+	template<> struct ReflectedTypeToID<RectF> { static constexpr ReflectedTypeID_t ID = RTI_RectF; };
+	template<> struct ReflectedTypeToID<RectI> { static constexpr ReflectedTypeID_t ID = RTI_RectI; };
+	template<> struct ReflectedTypeToID<RectU> { static constexpr ReflectedTypeID_t ID = RTI_RectU; };
 	template<typename F, typename S> struct ReflectedTypeToID<std::pair<F, S>> { static constexpr ReflectedTypeID_t ID = RTI_Pair; };
 	template<> struct ReflectedTypeToID<String> { static constexpr ReflectedTypeID_t ID = RTI_String; };
 	template<> struct ReflectedTypeToID<WString> { static constexpr ReflectedTypeID_t ID = RTI_WString; };

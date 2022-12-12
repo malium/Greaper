@@ -3,6 +3,8 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
+#pragma once
+
 //#include "../Stream.h"
 
 namespace greaper

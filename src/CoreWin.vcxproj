@@ -328,6 +328,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl" />
+    <None Include="Public\Core\Base\FileStream.inl" />
     <None Include="Public\Core\Base\MPMCTaskScheduler.inl" />
     <None Include="Public\Core\Base\Platform.inl" />
     <None Include="Public\Core\Base\Stream.inl" />

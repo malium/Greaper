@@ -48,7 +48,7 @@ namespace greaper
 	{
 	public:
 		inline static constexpr int32 ValidatorType = EPropertyValidatorType::None;
-		bool Validate(const T& value, T* validated)const noexcept override
+		NODISCARD bool Validate(const T& value, T* validated)const noexcept override
 		{
 			*validated = value;
 			return true;
@@ -68,7 +68,7 @@ namespace greaper
 		{
 
 		}
-		bool Validate(const T& value, T* validated)const noexcept override
+		NODISCARD bool Validate(const T& value, T* validated)const noexcept override
 		{
 			if (value >= m_Min)
 			{
@@ -102,7 +102,7 @@ namespace greaper
 
 		}
 
-		bool Validate(const T& value, T* validated)const noexcept override
+		NODISCARD bool Validate(const T& value, T* validated)const noexcept override
 		{
 			*validated = value;
 			for (const auto& valid : m_ValidValues)

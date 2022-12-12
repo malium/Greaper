@@ -67,14 +67,14 @@ namespace greaper
 
 			{
 				Library kernel32{ L"kernel32.dll"sv };
-				auto fnRes = kernel32.GetFunction("SetThreadDescription"sv);
+				TResult<FuncPtr> fnRes = kernel32.GetFunction("SetThreadDescription"sv);
 				if (fnRes.IsOk() && fnRes.GetValue() != nullptr)
 					SetThreadDescription = (SetThreadDescription_t)fnRes.GetValue();
 			}
 			if (SetThreadDescription == nullptr)
 			{
 				Library kernelBase{ L"KernelBase.dll"sv };
-				auto fnRes = kernelBase.GetFunction("SetThreadDescription"sv);
+				TResult<FuncPtr> fnRes = kernelBase.GetFunction("SetThreadDescription"sv);
 				if (fnRes.IsOk() && fnRes.GetValue() != nullptr)
 					SetThreadDescription = (SetThreadDescription_t)fnRes.GetValue();
 			}
@@ -101,7 +101,6 @@ namespace greaper
 #if COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4611)
-#endif
 			jmp_buf jmpbuf;
 			if (!setjmp(jmpbuf))
 			{
@@ -115,7 +114,6 @@ namespace greaper
 				}
 				longjmp(jmpbuf, 1);
 			}
-#if COMPILER_MSVC
 #pragma warning(pop)
 #endif
 		}

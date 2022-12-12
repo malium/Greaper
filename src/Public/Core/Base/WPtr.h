@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -110,7 +110,7 @@ namespace greaper
 				m_Control->DecWeakReference();
 		}
 
-		inline SharedPointer<T> lock()const noexcept
+		inline NODISCARD SharedPointer<T> lock()const noexcept
 		{
 			SharedPointer<T> shared;
 
@@ -123,7 +123,7 @@ namespace greaper
 
 			return shared;
 		}
-		INLINE bool expired()const noexcept
+		INLINE NODISCARD bool expired()const noexcept
 		{
 			return m_Control == nullptr || m_Control->SharedRefCount() <= 0;
 		}
@@ -142,13 +142,13 @@ namespace greaper
 				m_Control = nullptr;
 			}
 		}
-		INLINE uint32 SharedRefCount()const noexcept
+		INLINE NODISCARD uint32 SharedRefCount()const noexcept
 		{
 			if (m_Control != nullptr)
 				return m_Control->SharedRefCount();
 			return 0;
 		}
-		INLINE uint32 WeakRefCount()const noexcept
+		INLINE NODISCARD uint32 WeakRefCount()const noexcept
 		{
 			if (m_Control != nullptr)
 				return m_Control->WeakRefCount();

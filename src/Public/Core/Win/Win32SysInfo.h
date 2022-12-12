@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -13,9 +13,10 @@
 #if WIN32_USE_GREAPER_HEADERS
 
 extern "C" {
-
+#if COMPILER_MSVC
 #pragma warning(push)
 #pragma warning(disable : 4201)
+#endif
 typedef struct _SYSTEM_INFO {
     union {
         DWORD dwOemId;
@@ -34,7 +35,9 @@ typedef struct _SYSTEM_INFO {
     WORD wProcessorLevel;
     WORD wProcessorRevision;
 } SYSTEM_INFO, * LPSYSTEM_INFO;
+#if COMPILER_MSVC
 #pragma warning(pop)
+#endif
 
 typedef struct _MEMORYSTATUSEX {
     DWORD dwLength;

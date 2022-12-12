@@ -50,6 +50,11 @@ namespace greaper
 	template<class T> class TProperty; template<class T> using PProperty = SPtr<TProperty<T>>; template<class T> using WProperty = WPtr<TProperty<T>>;
 	template<class T> class TPropertyValidator;
 	template<class... Args> class Event;
+	template<class T> class RectT;
+	using RectF = RectT<float>;
+	using RectI = RectT<int32>;
+	using RectU = RectT<uint32>;
+	
 	class IStream;
 	class Uuid;
 	class Result;
@@ -88,7 +93,9 @@ namespace greaper
 		RTI_Double,
 		RTI_Half,
 		RTI_Enum,
-		RTI_Rect,
+		RTI_RectF,
+		RTI_RectI,
+		RTI_RectU,
 
 		// Base Containers
 		RTI_String = 25,

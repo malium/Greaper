@@ -8,7 +8,7 @@
 #ifndef CORE_CONCURRENCY_H
 #define CORE_CONCURRENCY_H 1
 
-#include "Memory.h"
+#include "CorePrerequisites.h"
 
 #if PLT_WINDOWS
 #include "Win/WinThreading.h"
@@ -47,6 +47,7 @@ namespace greaper
 		Mutex& operator=(const Mutex&) = delete;
 		INLINE Mutex(Mutex&& other) noexcept
 		{
+
 			DuplicateMemory(other.m_Handle, m_Handle);
 			Impl::MutexImpl::Invalidate(other.m_Handle);
 		}
@@ -86,11 +87,11 @@ namespace greaper
 			return Impl::MutexImpl::Unlock(m_Handle);
 		}
 
-		INLINE [[nodiscard]] const MutexHandle* GetHandle()const noexcept
+		INLINE NODISCARD const MutexHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
-		INLINE [[nodiscard]] MutexHandle* GetHandle() noexcept
+		INLINE NODISCARD MutexHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -157,12 +158,12 @@ namespace greaper
 			Impl::RecursiveMutexImpl::Unlock(m_Handle);
 		}
 
-		INLINE [[nodiscard]] const RecursiveMutexHandle* GetHandle()const noexcept
+		INLINE NODISCARD const RecursiveMutexHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
 
-		INLINE [[nodiscard]] RecursiveMutexHandle* GetHandle() noexcept
+		INLINE NODISCARD RecursiveMutexHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -247,12 +248,12 @@ namespace greaper
 			return Impl::RWMutexImpl::TryLockShared(m_Handle);
 		}
 
-		INLINE [[nodiscard]] const RWMutexHandle* GetHandle()const noexcept
+		INLINE NODISCARD const RWMutexHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
 
-		INLINE [[nodiscard]] RWMutexHandle* GetHandle() noexcept
+		INLINE NODISCARD RWMutexHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -334,7 +335,7 @@ namespace greaper
 			m_Mutex.unlock();
 		}
 
-		INLINE Mtx* mutex()noexcept { return &m_Mutex; }
+		INLINE NODISCARD Mtx* mutex()noexcept { return &m_Mutex; }
 
 		Lock(const Lock&) = delete;
 		Lock& operator=(const Lock&) = delete;
@@ -431,7 +432,7 @@ namespace greaper
 			std::swap(m_Owns, other.m_Owns);
 		}
 
-		INLINE Mtx* release()noexcept
+		INLINE NODISCARD Mtx* release()noexcept
 		{
 			auto* mtx = m_Mutex;
 			m_Mutex = nullptr;
@@ -443,7 +444,7 @@ namespace greaper
 
 		INLINE explicit operator bool()const noexcept { return m_Owns; }
 
-		INLINE Mtx* mutex()const noexcept { return m_Mutex; }
+		INLINE NODISCARD Mtx* mutex()const noexcept { return m_Mutex; }
 
 	private:
 		Mtx* m_Mutex = nullptr;
@@ -475,7 +476,7 @@ namespace greaper
 		SharedLock(SharedLock&&)noexcept = default;
 		SharedLock& operator=(SharedLock&&)noexcept = default;
 
-		INLINE RWMutex* mutex() noexcept
+		INLINE NODISCARD RWMutex* mutex() noexcept
 		{
 			return &m_Mutex;
 		}
@@ -692,12 +693,12 @@ namespace greaper
 			return true;
 		}
 
-		INLINE [[nodiscard]] const SignalHandle* GetHandle()const noexcept
+		INLINE NODISCARD const SignalHandle* GetHandle()const noexcept
 		{
 			return &m_Handle;
 		}
 
-		INLINE [[nodiscard]] SignalHandle* GetHandle() noexcept
+		INLINE NODISCARD SignalHandle* GetHandle() noexcept
 		{
 			return &m_Handle;
 		}
@@ -749,12 +750,12 @@ namespace greaper
 			return false;
 		}
 
-		[[nodiscard]] INLINE sizet GetMaxCount()const noexcept { return m_MaxCount; }
+		NODISCARD INLINE sizet GetMaxCount()const noexcept { return m_MaxCount; }
 
-		[[nodiscard]] INLINE const Signal& GetSignal()const noexcept { return m_Signal; }
-		[[nodiscard]] INLINE Signal& GetSignal() noexcept { return m_Signal; }
-		[[nodiscard]] INLINE const Mutex& GetMutex()const noexcept { return m_Mutex; }
-		[[nodiscard]] INLINE Mutex& GetMutex() noexcept { return m_Mutex; }
+		NODISCARD INLINE const Signal& GetSignal()const noexcept { return m_Signal; }
+		NODISCARD INLINE Signal& GetSignal() noexcept { return m_Signal; }
+		NODISCARD INLINE const Mutex& GetMutex()const noexcept { return m_Mutex; }
+		NODISCARD INLINE Mutex& GetMutex() noexcept { return m_Mutex; }
 	};
 
 	/*** Sets a place where the threads will wait until all of them have reached that place
@@ -793,12 +794,12 @@ namespace greaper
 			}
 		}
 
-		[[nodiscard]] INLINE sizet GetMaxCount()const noexcept { return m_MaxCount; }
+		NODISCARD INLINE sizet GetMaxCount()const noexcept { return m_MaxCount; }
 
-		[[nodiscard]] INLINE const Signal& GetSignal()const noexcept { return m_Signal; }
-		[[nodiscard]] INLINE Signal& GetSignal()noexcept { return m_Signal; }
-		[[nodiscard]] INLINE const Mutex& GetMutex()const noexcept { return m_Mutex; }
-		[[nodiscard]] INLINE Mutex& GetMutex()noexcept { return m_Mutex; }
+		NODISCARD INLINE const Signal& GetSignal()const noexcept { return m_Signal; }
+		NODISCARD INLINE Signal& GetSignal()noexcept { return m_Signal; }
+		NODISCARD INLINE const Mutex& GetMutex()const noexcept { return m_Mutex; }
+		NODISCARD INLINE Mutex& GetMutex()noexcept { return m_Mutex; }
 	};
 
 	struct AsyncOpSyncData
@@ -873,12 +874,12 @@ namespace greaper
 		}
 
 		template<typename T>
-		T GetReturnValue()const
+		NODISCARD T GetReturnValue()const
 		{
 			return std::any_cast<T>(GetGenericReturnValue());
 		}
 
-		std::any GetGenericReturnValue()const
+		NODISCARD std::any GetGenericReturnValue()const
 		{
 			CompleteCheck();
 
@@ -914,7 +915,7 @@ namespace greaper
 
 		}
 
-		RetType GetReturnValue()const
+		NODISCARD RetType GetReturnValue()const
 		{
 			this->CompleteCheck();
 
@@ -937,13 +938,13 @@ namespace greaper
 	};
 
 	template<class RetType>
-	bool operator==(const TAsyncOp<RetType>& left, std::nullptr_t right)
+	INLINE NODISCARD bool operator==(const TAsyncOp<RetType>& left, std::nullptr_t right)
 	{
 		return left.m_Data == nullptr;
 	}
 
 	template<class RetType>
-	bool operator!=(const TAsyncOp<RetType>& left, std::nullptr_t right)
+	INLINE NODISCARD bool operator!=(const TAsyncOp<RetType>& left, std::nullptr_t right)
 	{
 		return !(left == nullptr);
 	}

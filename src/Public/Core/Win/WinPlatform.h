@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -120,6 +120,7 @@ namespace greaper
 
 		static String GetStackTrace(CONTEXT context, uint32 skip = 0);
 
+#if COMPILER_MSVC
 		static void SETranslatorFn(unsigned int se, _EXCEPTION_POINTERS* exceptPointers);
 
 		class SEHException : public std::exception
@@ -145,6 +146,7 @@ namespace greaper
 			uint32 m_SE;
 			String m_Message;
 		};
+#endif
 	};
 }
 

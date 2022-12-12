@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -135,7 +135,9 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace()
 
 INLINE void greaper::WinOSPlatform::_PerThreadInit()
 {
+#if COMPILER_MSVC
 	_set_se_translator(&WinOSPlatform::SETranslatorFn);
+#endif
 }
 
 INLINE void greaper::WinOSPlatform::_PerLibraryInit()
@@ -426,7 +428,9 @@ INLINE greaper::String greaper::WinOSPlatform::GetStackTrace(CONTEXT context, ui
 	return output;
 }
 
+#if COMPILER_MSVC
 INLINE void greaper::WinOSPlatform::SETranslatorFn(unsigned int se, _EXCEPTION_POINTERS* exceptPointers)
 {
 	throw SEHException(se, exceptPointers);
 }
+#endif
