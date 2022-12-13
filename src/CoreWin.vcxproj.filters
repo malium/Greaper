@@ -293,6 +293,15 @@
     <ClInclude Include="Public\Math\Base\SSE.inl">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\BaseType.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\ContainerType.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\PlainType.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -320,6 +329,9 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Public\Core\Base\Platform.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Base\FileStream.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>

@@ -291,6 +291,9 @@
     <ClInclude Include="Public\Core\PHAL.h" />
     <ClInclude Include="Public\Core\Platform.h" />
     <ClInclude Include="Public\Core\Property.h" />
+    <ClInclude Include="Public\Core\Reflection\BaseType.h" />
+    <ClInclude Include="Public\Core\Reflection\ContainerType.h" />
+    <ClInclude Include="Public\Core\Reflection\PlainType.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedField.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedPlainContainer.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedPlainEnum.h" />

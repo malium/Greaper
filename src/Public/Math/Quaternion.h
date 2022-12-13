@@ -249,11 +249,11 @@ namespace greaper::math
 		}
 
 		static const QuaternionReal ZERO;
-		static const QuaternionReal UNIT;
+		static const QuaternionReal IDENTITY;
 	};
 
 	template<class T> const QuaternionReal<T> QuaternionReal<T>::ZERO{};
-	template<class T> const QuaternionReal<T> QuaternionReal<T>::UNIT{ T(1), T(0), T(0), T(0) };
+	template<class T> const QuaternionReal<T> QuaternionReal<T>::IDENTITY{ T(1), T(0), T(0), T(0) };
 
 	template<class T> INLINE constexpr QuaternionReal<T> operator+(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left.W + right.W, left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
 	template<class T> INLINE constexpr QuaternionReal<T> operator-(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left.W - right.W, left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }

@@ -29,25 +29,13 @@ namespace greaper::refl
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::COUNT;
 
-		static ssizet ToStreamHeader(UNUSED const T& data, UNUSED IStream& stream)
+		static ssizet ToStream(UNUSED const T& data, UNUSED IStream& stream)
 		{
 			Break("Trying to use the generic refl::BaseType!");
 			return -1ll;
 		}
 
-		static ssizet ToStreamData(UNUSED const T& data, UNUSED IStream& stream)
-		{
-			Break("Trying to use the generic refl::BaseType!");
-			return -1ll;
-		}
-
-		static ssizet FromStreamHeader(UNUSED T& data, UNUSED IStream& stream)
-		{
-			Break("Trying to use the generic refl::BaseType!");
-			return -1ll;
-		}
-
-		static ssizet FromStreamData(UNUSED T& data, UNUSED IStream& stream)
+		static ssizet FromStream(UNUSED T& data, UNUSED IStream& stream)
 		{
 			Break("Trying to use the generic refl::BaseType!");
 			return -1ll;

@@ -9,23 +9,22 @@
 #define CORE_REFLECTION_PLAINTYPE_H 1
 
 #include "BaseType.h"
+#include "../Uuid.h"
 
 #define CREATE_MEMCPY_PLAINTYPE(type, toString, fromString)\
 namespace greaper::refl { \
 	template<> struct PlainType<type> : public BaseType<type> {\
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Plain; \
-		static ssizet ToStreamHeader(UNUSED const type& data, UNUSED IStream& stream) { return 0ll; }\
-		static ssizet ToStreamData(const type& data, IStream& stream){ \
+		static ssizet ToStream(const type& data, IStream& stream){ \
 			return stream.Write(&data, sizeof(data)); \
 		}\
-		static ssizet FromStreamHeader(UNUSED type& data, UNUSED IStream& steram) { return 0ll; }\
-		static ssizet FromStreamData(type& data, IStream& stream){ \
+		static ssizet FromStream(type& data, IStream& stream){ \
 			return stream.Read(&data, sizeof(data));\
 		}\
 		NODISCARD static String ToString(const type& data){\
 			return toString ;\
 		}\
-		static bool FromString(StringView str, type& data){\
+		static bool FromString(const String& str, type& data){\
 			fromString ; \
 		}\
 		NODISCARD static ssizet GetDynamicSize(UNUSED const type& data){\
@@ -46,5 +45,6 @@ CREATE_MEMCPY_PLAINTYPE(int64,			String{ std::to_string(data).data() }, 	data = 
 CREATE_MEMCPY_PLAINTYPE(uint64,			String{ std::to_string(data).data() }, 	data = (uint16)std::strtoull(str.data(), nullptr, 10));
 CREATE_MEMCPY_PLAINTYPE(float,			String{ std::to_string(data).data() }, 	data = std::strtof(str.data(), nullptr));
 CREATE_MEMCPY_PLAINTYPE(double,			String{ std::to_string(data).data() }, 	data = std::strtod(str.data(), nullptr));
+CREATE_MEMCPY_PLAINTYPE(greaper::Uuid,	data.ToString(),						data.FromString(str));
 
 #endif /* CORE_REFLECTION_PLAINTYPE_H */

@@ -12,7 +12,17 @@
 
 //#define GLM_FORCE_SSE42
 //#include "glm/glm.hpp"
+//#include "glm/ext/quaternion_common.hpp"
 //#include "glm/ext/quaternion_float.hpp"
+//#include "glm/ext/quaternion_double.hpp"
+//#include "glm/ext/quaternion_exponential.hpp"
+//#include "glm/ext/quaternion_geometric.hpp"
+//#include "glm/ext/quaternion_relational.hpp"
+//#include "glm/ext/quaternion_transform.hpp"
+//#include "glm/ext/quaternion_trigonometric.hpp"
+//#include "glm/gtc/quaternion.hpp"
+//#include "glm/gtx/quaternion.hpp"
+//#include "glm/gtc/matrix_transform.hpp"
 
 namespace greaper::math
 {
@@ -67,14 +77,15 @@ namespace greaper::math
 	using Vector4u64 = Vector4Unsigned<uint64>;
 	class Vector4b;
 
-	class Vector4SSE;
-
 	template<class T> class Matrix2Real;
 	using Matrix2f = Matrix2Real<float>;
 	using Matrix2d = Matrix2Real<double>;
 	template<class T> class Matrix3Real;
 	using Matrix3f = Matrix3Real<float>;
 	using Matrix3d = Matrix3Real<double>;
+	template<class T> class Matrix43Real;
+	using Matrix43f = Matrix43Real<float>;
+	using Matrix43d = Matrix43Real<double>;
 	template<class T> class Matrix4Real;
 	using Matrix4f = Matrix4Real<float>;
 	using Matrix4d = Matrix4Real<double>;
@@ -84,8 +95,6 @@ namespace greaper::math
 	template<class T> class QuaternionReal;
 	using QuaternionF = QuaternionReal<float>;
 	using QuaternionD = QuaternionReal<double>;
-
-	class QuaternionSSE;
 }
 
 namespace greaper
@@ -129,8 +138,6 @@ namespace greaper
 		RTI_Vector4u64,
 		RTI_Vector4b,
 
-		RTI_Vector4SSE,
-
 		RTI_Matrix2f,
 		RTI_Matrix2d,
 
@@ -140,11 +147,8 @@ namespace greaper
 		RTI_Matrix4f,
 		RTI_Matrix4d,
 
-		RTI_Matrix4SSE,
-
 		RTI_QuaternionF,
 		RTI_QuaternionD,
-		RTI_QuaternionSSE,
 	};
 }
 

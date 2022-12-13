@@ -17,32 +17,26 @@ namespace greaper::refl
 	{
 		using Type = String;
 
-		static inline constexpr ssizet StaticSize = sizeof(ssizet);
+		static inline constexpr ssizet StaticSize = sizeof(sizet);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStreamHeader(const Type& data, IStream& stream)
+		static ssizet ToStream(const Type& data, IStream& stream)
 		{
-			const auto size = GetDynamicSize(data);
-			return stream.Write(&size, sizeof(size));
+			sizet elementCount = data.size();
+			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			size += stream.Write(data.data(), elementCount * sizeof(Type::value_type));
+			return size;
 		}
 
-		static ssizet FromStreamHeader(Type& data, IStream& stream)
+		static ssizet FromStream(Type& data, IStream& stream)
 		{
-			ssizet size;
-			auto ssize = stream.Read(&size, sizeof(size));
-			SetDynamicSize(data, size);
-			return ssize;
-		}
-
-		static ssizet ToStreamData(const Type& data, IStream& stream)
-		{
-			return stream.Write(data.data(), GetDynamicSize(data));
-		}
-
-		static ssizet FromStreamData(Type& data, IStream& stream)
-		{
-			return stream.Read(data.data(), GetDynamicSize(data));
+			sizet elementCount;
+			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			const auto dynSize = elementCount * sizeof(Type::value_type);
+			SetDynamicSize(data, dynSize);
+			size += stream.Read(data.data(), dynSize);
+			return size;
 		}
 
 		static String ToString(const Type& data)
@@ -63,7 +57,7 @@ namespace greaper::refl
 
 		static void SetDynamicSize(Type& data, ssizet size)
 		{
-			data.resize(size, Type::value_type(0));
+			data.resize(size / sizeof(Type::value_type), Type::value_type(0));
 		}
 	};
 
@@ -72,18 +66,26 @@ namespace greaper::refl
 	{
 		using Type = WString;
 
-		static inline constexpr ssizet StaticSize = sizeof(ssizet);
+		static inline constexpr ssizet StaticSize = sizeof(sizet);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
 		static ssizet ToStream(const Type& data, IStream& stream)
 		{
-			return stream.Write(data.data(), GetDynamicSize(data));
+			sizet elementCount = data.size();
+			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			size += stream.Write(data.data(), elementCount * sizeof(Type::value_type));
+			return size;
 		}
 
 		static ssizet FromStream(Type& data, IStream& stream)
 		{
-			return stream.Read(data.data(), GetDynamicSize(data));
+			sizet elementCount;
+			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			const auto dynSize = elementCount * sizeof(Type::value_type);
+			SetDynamicSize(data, dynSize);
+			size += stream.Read(data.data(), dynSize);
+			return size;
 		}
 
 		static String ToString(const Type& data)
@@ -104,8 +106,7 @@ namespace greaper::refl
 
 		static void SetDynamicSize(Type& data, ssizet size)
 		{
-			data.clear();
-			data.resize(size, Type::value_type(0));
+			data.resize(size / sizeof(Type::value_type), Type::value_type(0));
 		}
 	};
 
