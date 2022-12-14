@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -9,6 +9,8 @@
 #define CORE_PLATFORM_H 1
 
 #include "CorePrerequisites.h"
+#define CJSON_IMPORT_SYMBOLS
+#include <External/cJSON/cJSON.h>
 
 namespace greaper
 {

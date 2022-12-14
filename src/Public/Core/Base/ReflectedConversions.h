@@ -24,6 +24,10 @@ namespace greaper
 	template<> struct ReflectedTypeToID<RectF> { static constexpr ReflectedTypeID_t ID = RTI_RectF; };
 	template<> struct ReflectedTypeToID<RectI> { static constexpr ReflectedTypeID_t ID = RTI_RectI; };
 	template<> struct ReflectedTypeToID<RectU> { static constexpr ReflectedTypeID_t ID = RTI_RectU; };
+	template<> struct ReflectedTypeToID<Uuid> { static constexpr ReflectedTypeID_t ID = RTI_UUID; };
+	template<class T> struct ReflectedTypeToID<TEnum<T>> { static constexpr ReflectedTypeID_t ID = RTI_Enum; };
+	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
+	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 	template<typename F, typename S> struct ReflectedTypeToID<std::pair<F, S>> { static constexpr ReflectedTypeID_t ID = RTI_Pair; };
 	template<> struct ReflectedTypeToID<String> { static constexpr ReflectedTypeID_t ID = RTI_String; };
 	template<> struct ReflectedTypeToID<WString> { static constexpr ReflectedTypeID_t ID = RTI_WString; };

@@ -25,19 +25,19 @@ namespace greaper
 		public:
 			INLINE TResult()noexcept = default;
 
-			INLINE bool IsOk()const noexcept { return !m_Failure; }
+			NODISCARD INLINE bool IsOk()const noexcept { return !m_Failure; }
 
-			INLINE bool HasFailed()const noexcept { return m_Failure; }
+			NODISCARD INLINE bool HasFailed()const noexcept { return m_Failure; }
 
-			INLINE const String& GetFailMessage()const noexcept { return m_FailMessage; }
+			NODISCARD INLINE const String& GetFailMessage()const noexcept { return m_FailMessage; }
 
-			INLINE T& GetValue() noexcept
+			NODISCARD INLINE T& GetValue() noexcept
 			{
 				Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
 				return m_Value;
 			}
 
-			INLINE const T& GetValue()const noexcept
+			NODISCARD INLINE const T& GetValue()const noexcept
 			{
 				Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
 				return m_Value;
@@ -56,19 +56,19 @@ namespace greaper
 		public:
 			INLINE TResult()noexcept = default;
 
-			INLINE bool IsOk()const noexcept { return !m_Failure; }
+			NODISCARD INLINE bool IsOk()const noexcept { return !m_Failure; }
 
-			INLINE bool HasFailed()const noexcept { return m_Failure; }
+			NODISCARD INLINE bool HasFailed()const noexcept { return m_Failure; }
 
-			INLINE const String& GetFailMessage()const noexcept { return m_FailMessage; }
+			NODISCARD INLINE const String& GetFailMessage()const noexcept { return m_FailMessage; }
 
-			INLINE EmptyStruc& GetValue() noexcept
+			NODISCARD INLINE EmptyStruc& GetValue() noexcept
 			{
 				static_assert("should not reach here");
 				return gRtn;
 			}
 
-			INLINE const EmptyStruc& GetValue()const noexcept
+			NODISCARD INLINE const EmptyStruc& GetValue()const noexcept
 			{
 				static_assert("should not reach here");
 				return gRtn;
@@ -81,7 +81,7 @@ namespace greaper
 	{
 	public:
 		template<class T>
-		INLINE static TResult<T> CreateSuccess(T value) noexcept
+		NODISCARD INLINE static TResult<T> CreateSuccess(T value) noexcept
 		{
 			TResult<T> res;
 			res.m_Failure = false;
@@ -89,14 +89,14 @@ namespace greaper
 			return res;
 		}
 
-		INLINE static TResult<Impl::EmptyStruc> CreateSuccess() noexcept
+		NODISCARD INLINE static TResult<Impl::EmptyStruc> CreateSuccess() noexcept
 		{
 			TResult<Impl::EmptyStruc> res;
 			res.m_Failure = false;
 			return res;
 		}
 
-		INLINE static TResult<Impl::EmptyStruc> CreateFailure(String errorMessage) noexcept
+		NODISCARD INLINE static TResult<Impl::EmptyStruc> CreateFailure(String errorMessage) noexcept
 		{
 			TResult<Impl::EmptyStruc> res;
 			res.m_Failure = true;
@@ -104,7 +104,7 @@ namespace greaper
 			return res;
 		}
 
-		INLINE static TResult<Impl::EmptyStruc> CreateFailure(StringView errorMessage) noexcept
+		NODISCARD INLINE static TResult<Impl::EmptyStruc> CreateFailure(StringView errorMessage) noexcept
 		{
 			TResult<Impl::EmptyStruc> res;
 			res.m_Failure = true;
@@ -113,7 +113,7 @@ namespace greaper
 		}
 
 		template<class T>
-		INLINE static TResult<T> CreateFailure(String errorMessage) noexcept
+		NODISCARD INLINE static TResult<T> CreateFailure(String errorMessage) noexcept
 		{
 			TResult<T> res;
 			res.m_Failure = true;
@@ -122,7 +122,7 @@ namespace greaper
 		}
 
 		template<class T>
-		INLINE static TResult<T> CreateFailure(StringView errorMessage) noexcept
+		NODISCARD INLINE static TResult<T> CreateFailure(StringView errorMessage) noexcept
 		{
 			TResult<T> res;
 			res.m_Failure = true;
@@ -131,7 +131,7 @@ namespace greaper
 		}
 
 		template<class T, class T2>
-		INLINE static TResult<T> CopyFailure(const TResult<T2>& other)noexcept
+		NODISCARD INLINE static TResult<T> CopyFailure(const TResult<T2>& other)noexcept
 		{
 			TResult<T> res;
 			res.m_FailMessage.assign(other.GetFailMessage());
@@ -140,7 +140,7 @@ namespace greaper
 		}
 
 		template<class T>
-		INLINE static TResult<Impl::EmptyStruc> CopyFailure(const TResult<T>& other)noexcept
+		NODISCARD INLINE static TResult<Impl::EmptyStruc> CopyFailure(const TResult<T>& other)noexcept
 		{
 			TResult<Impl::EmptyStruc> res;
 			res.m_FailMessage.assign(other.GetFailMessage());

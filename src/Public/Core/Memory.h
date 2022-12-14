@@ -23,6 +23,7 @@
 #include <memory>
 #include <cstdarg>
 #include <functional>
+#include <inttypes.h>
 #if PLT_LINUX
 #include <iostream>
 #endif
@@ -380,14 +381,14 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 	template<typename T, typename A = StdAlloc<T>>
 	using Stack = std::stack<T, std::deque<T, A>>;
 
-	template<typename K, typename P = std::less<K>, typename A = StdAlloc<K>>
-	using Set = std::set<K, P, A>;
+	template<typename K, typename C = std::less<K>, typename A = StdAlloc<K>>
+	using Set = std::set<K, C, A>;
 
 	template<typename K, typename V, typename P = std::less<K>, typename A = StdAlloc<std::pair<const K, V>>>
 	using Map = std::map<K, V, P, A>;
 
-	template<typename K, typename P = std::less<K>, typename A = StdAlloc<K>>
-	using MultiSet = std::multiset<K, P, A>;
+	template<typename K, typename C = std::less<K>, typename A = StdAlloc<K>>
+	using MultiSet = std::multiset<K, C, A>;
 
 	template<typename K, typename V, typename P = std::less<K>, typename A = StdAlloc<std::pair<const K, V>>>
 	using MultiMap = std::multimap<K, V, P, A>;
@@ -473,10 +474,10 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		return str;
 	}
 
-#define I8_HEX_FMT "0x%02X"
-#define I16_HEX_FMT "0x%04X"
-#define I32_HEX_FMT "0x%08X"
-#define I64_HEX_FMT "0x%016I64X"
+#define I8_HEX_FMT "0x%02" PRIX8
+#define I16_HEX_FMT "0x%04" PRIX16
+#define I32_HEX_FMT "0x%08" PRIX32
+#define I64_HEX_FMT "0x%016" PRIX64
 
 #if ARCHITECTURE_X64
 #define PTR_HEX_FMT I64_HEX_FMT

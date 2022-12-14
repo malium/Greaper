@@ -13,6 +13,8 @@
 #include "../Stream.h"
 #include "../StringUtils.h"
 #include "../Enumeration.h"
+#define CJSON_IMPORT_SYMBOLS
+#include <External/cJSON/cJSON.h>
 
 ENUMERATION(TypeCategory, Plain, Container, Complex, Data);
 
@@ -41,6 +43,24 @@ namespace greaper::refl
 			return -1ll;
 		}
 
+		static cJSON* ToJSON(const T& data, StringView name)
+		{
+			cJSON* obj = cJSON_CreateObject();
+			return ToJSON(data, obj, name);
+		}
+
+		static cJSON* ToJSON(UNUSED const T& data, UNUSED cJSON* obj, UNUSED StringView name)
+		{
+			Break("Trying to use the generic refl::BaseType!");
+			return nullptr;
+		}
+		
+		static bool FromJSON(UNUSED T& data, UNUSED cJSON* json, UNUSED StringView name)
+		{
+			Break("Trying to use the generic refl::BaseType!");
+			return false;
+		}
+
 		NODISCARD static String ToString(UNUSED const T& data)
 		{
 			Break("Trying to use the generic refl::BaseType!");
@@ -53,13 +73,13 @@ namespace greaper::refl
 			return false;
 		}
 
-		NODISCARD static ssizet GetDynamicSize(UNUSED const T& data)
+		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)
 		{
 			Break("Trying to use the generic refl::BaseType!");
 			return 0ll;
 		}
 
-		static void SetDynamicSize(UNUSED T& data, UNUSED ssizet size)
+		static void SetDynamicSize(UNUSED T& data, UNUSED int64 size)
 		{
 			Break("Trying to use the generic refl::BaseType!");
 		}

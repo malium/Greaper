@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -8,6 +8,10 @@
 INLINE void greaper::OSPlatform::PerThreadInit()
 {
 	_PerThreadInit();
+	cJSON_Hooks hooks;
+	hooks.malloc_fn = &Alloc<GenericAllocator>;
+	hooks.free_fn = &Dealloc<GenericAllocator>;
+	cJSON_InitHooks(&hooks);
 }
 
 INLINE void greaper::OSPlatform::PerLibraryInit()

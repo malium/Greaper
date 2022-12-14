@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -287,5 +287,7 @@ namespace greaper::math
 	template<class T> INLINE constexpr bool operator==(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return left.W == right.W && left.X == right.X && left.Y == right.Y && left.Z == right.Z; }
 	template<class T> INLINE constexpr bool operator!=(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return !(left == right); }
 }
+
+#include "Reflection/Quaternion.h"
 
 #endif /* MATH_QUATERNION_H */

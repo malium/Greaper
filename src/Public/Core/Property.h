@@ -11,6 +11,8 @@
 #include <utility>
 #include "Memory.h"
 #include "Base/PropertyValidator.h"
+#include "Reflection/PlainType.h"
+#include "Reflection/ContainerType.h"
 //#include "Base/PropertyConverter.h"
 #include "Reflection/ReflectedPlainType.h"
 #include "Reflection/ReflectedPlainContainer.h"
@@ -75,6 +77,9 @@ namespace greaper
 		WGreaperLib m_Library;
 		mutable RWMutex m_Mutex;
 
+		using TCategory = refl::GetCategoryType<T>::Type;
+		static_assert(std::is_same_v<TCategory, void>, "Trying to instantiate a Property without a proper refl type.");
+
 		bool m_Static;		// Created at the start of the program cannot be saved
 		bool m_Constant;	// Cannot be modified
 
@@ -94,7 +99,8 @@ namespace greaper
 				m_PropertyValidator = Construct<PropertyValidatorNone<T>>();
 			}
 			m_PropertyValidator->Validate(m_Value, &m_Value);
-			m_StringValue = ReflectedPlainType<T>::ToString(m_Value);
+			m_StringValue = TCategory::ToString(m_Value);
+			//m_StringValue = ReflectedPlainType<T>::ToString(m_Value);
 			//m_StringValue = TPropertyConverter<T>::ToString(m_Value);
 		}
 
@@ -108,23 +114,23 @@ namespace greaper
 		TProperty(const TProperty&) = delete;
 		TProperty& operator=(const TProperty&) = delete;
 
-		[[nodiscard]] INLINE const String& GetPropertyName()const noexcept override
+		NODISCARD INLINE const String& GetPropertyName()const noexcept override
 		{
 			return m_PropertyName;
 		}
-		[[nodiscard]] INLINE const String& GetPropertyInfo()const noexcept override
+		NODISCARD INLINE const String& GetPropertyInfo()const noexcept override
 		{
 			return m_PropertyInfo;
 		}
-		[[nodiscard]] INLINE TPropertyValidator<T>* GetPropertyValidator()const noexcept
+		NODISCARD INLINE TPropertyValidator<T>* GetPropertyValidator()const noexcept
 		{
 			return m_PropertyValidator;
 		}
-		[[nodiscard]] INLINE bool IsConstant()const noexcept override
+		NODISCARD INLINE bool IsConstant()const noexcept override
 		{
 			return m_Constant;
 		}
-		[[nodiscard]] INLINE bool IsStatic()const noexcept override
+		NODISCARD INLINE bool IsStatic()const noexcept override
 		{
 			return m_Static;
 		}
@@ -132,7 +138,8 @@ namespace greaper
 		INLINE bool SetValueFromString(const String& value) noexcept override
 		{
 			T temp;
-			ReflectedPlainType<T>::FromString(temp, value);
+			TCategory::FromString(value, temp);
+			//ReflectedPlainType<T>::FromString(temp, value);
 			return SetValue(temp);
 		}
 		inline T GetValueCopy()const noexcept
@@ -155,8 +162,8 @@ namespace greaper
 			auto lck = SharedLock(m_Mutex);
 			accessFn(m_StringValue);
 		}
-		[[nodiscard]] INLINE ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
-		[[nodiscard]] INLINE const WGreaperLib& GetLibrary()const noexcept override { return m_Library; }
+		NODISCARD INLINE ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
+		NODISCARD INLINE const WGreaperLib& GetLibrary()const noexcept override { return m_Library; }
 	};
 
 	// Greaper Core specialization
@@ -165,10 +172,6 @@ namespace greaper
 	using PropertyFloat = TProperty<float>;
 	using PropertyString = TProperty<String>;
 	using PropertyStringVec = TProperty<StringVec>;
-
-	// A way to retrieve the RTI_ID from the type Property
-	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
-	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
 }
 
 #endif /* CORE_PROPERTY_H */

@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -578,7 +578,8 @@ namespace greaper::math
 
 	INLINE constexpr bool operator==(const Vector4b& left, const Vector4b& right)noexcept { return left.X == right.X && left.Y == right.Y && left.Z == right.Z && left.W == right.W; }
 	INLINE constexpr bool operator!=(const Vector4b& left, const Vector4b& right)noexcept { return !(left == right); }
-
 }
+
+#include "Reflection/Vector4.h"
 
 #endif /* MATH_VECTOR4_H */

@@ -10,6 +10,7 @@
 
 #include "CorePrerequisites.h"
 #include "Memory.h"
+#include "Reflection/PlainType.h"
 
 namespace greaper
 {
@@ -60,8 +61,6 @@ namespace greaper
 		
 		friend struct std::hash<greaper::Uuid>;
 	};
-
-	template<> struct ReflectedTypeToID<Uuid> { static constexpr ReflectedTypeID_t ID = RTI_UUID; };
 }
 
 #include "Base/Uuid.inl"

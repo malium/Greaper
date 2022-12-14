@@ -305,6 +305,58 @@ namespace greaper
 
 		return false; // Equal
 	}
+
+	namespace refl
+	{
+		template<> struct PlainType<Uuid> : public BaseType<Uuid> {
+		static inline constexpr TypeCategory_t Category = TypeCategory_t::Plain; 
+		static ssizet ToStream(const Uuid& data, IStream& stream)
+		{ 
+			return stream.Write(&data, sizeof(data)); 
+		}
+		static ssizet FromStream(Uuid& data, IStream& stream)
+		{ 
+			return stream.Read(&data, sizeof(data));
+		}
+		static cJSON* ToJSON(const Uuid& data, StringView name)
+		{
+			cJSON* obj = cJSON_CreateObject();
+			return ToJSON(data, obj, name);
+		}
+		static cJSON* ToJSON(const Uuid& data, cJSON* obj, StringView name)
+		{
+			auto str = data.ToString();
+			return cJSON_AddStringToObject(obj, name.data(), str.c_str());
+		}
+		static bool FromJSON(Uuid& data, cJSON* json, StringView name)
+		{
+			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(cJSON_IsString(item))
+			{
+				data = Uuid(cJSON_GetStringValue(item));
+				return true;
+			}
+			return false;
+		}
+		NODISCARD static String ToString(const Uuid& data)
+		{
+			return data.ToString();
+		}
+		static bool FromString(const String& str, Uuid& data)
+		{
+			data.FromString(str);
+			return true;
+		}
+		NODISCARD static int64 GetDynamicSize(UNUSED const Uuid& data)
+		{
+			return 0ll; 
+		}
+		static void SetDynamicSize(UNUSED Uuid& data, UNUSED int64 size)
+		{
+			/* No-op */
+		}
+	};
+	}
 }
 
 namespace std
