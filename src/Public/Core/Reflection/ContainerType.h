@@ -22,21 +22,27 @@ namespace greaper::refl
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			auto dynamicSize = GetDynamicSize(data);
-			auto size = stream.Write(&dynamicSize, sizeof(dynamicSize));
+			ssizet size = 0;
+			size += stream.Write(&dynamicSize, sizeof(dynamicSize));
 			size += stream.Write(data.data(), dynamicSize);
-			return size;
+			if(size == (dynamicSize + StaticSize))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 dynamicSize;
-			auto size = stream.Read(&dynamicSize, sizeof(dynamicSize));
+			ssizet size = 0;
+			size += stream.Read(&dynamicSize, sizeof(dynamicSize));
 			SetDynamicSize(data, dynamicSize);
 			size += stream.Read(data.data(), dynamicSize);
-			return size;
+			if(size == (dynamicSize + StaticSize))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -50,15 +56,17 @@ namespace greaper::refl
 			return cJSON_AddStringToObject(obj, name.data(), data.c_str());
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<WString>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(cJSON_IsString(item))
 			{
 				data.assign(cJSON_GetStringValue(item));
-				return true;
+				return Result::CreateSuccess();
 			}
-			return false;
+			return Result::CreateFailure("[refl::ContainerType<String>]::FromJSON Couldn't obtain the value from the json, expected: cJSON_IsString"sv);
 		}
 
 		static String ToString(const Type& data)
@@ -66,10 +74,10 @@ namespace greaper::refl
 			return data;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			data.assign(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
@@ -92,21 +100,27 @@ namespace greaper::refl
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 dynamicSize = GetDynamicSize(data);
-			auto size = stream.Write(&dynamicSize, sizeof(dynamicSize));
+			ssizet size = 0;
+			size += stream.Write(&dynamicSize, sizeof(dynamicSize));
 			size += stream.Write(data.data(), dynamicSize);
-			return size;
+			if(size == (dynamicSize + StaticSize))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 dynamicSize;
-			auto size = stream.Read(&dynamicSize, sizeof(dynamicSize));
+			ssizet size = 0;
+			size += stream.Read(&dynamicSize, sizeof(dynamicSize));
 			SetDynamicSize(data, dynamicSize);
 			size += stream.Read(data.data(), dynamicSize);
-			return size;
+			if(size == (dynamicSize + StaticSize))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -121,16 +135,18 @@ namespace greaper::refl
 			return cJSON_AddStringToObject(obj, name.data(), StringUtils::FromWIDE(data).c_str());
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<WString>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(cJSON_IsString(item))
 			{
 				// TODO: Convert from UTF8 instead of ANSI
 				data = StringUtils::ToWIDE(cJSON_GetStringValue(item));
-				return true;
+				return Result::CreateSuccess();
 			}
-			return false;
+			return Result::CreateFailure("[refl::ContainerType<WString>]::FromJSON Couldn't obtain the value from the json, expected: cJSON_IsString"sv);
 		}
 
 		static String ToString(const Type& data)
@@ -138,10 +154,10 @@ namespace greaper::refl
 			return StringUtils::FromWIDE(data);
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			data = StringUtils::ToWIDE(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
@@ -161,40 +177,58 @@ namespace greaper::refl
 		using Type = std::array<T, N>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::array>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = ValueCat::StaticSize * N;
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
+			ssizet size = 0;
+			ssizet dynmaicSize = GetDynamicSize(data);
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
-				return stream.Write(data.data(), StaticSize);
+				size += stream.Write(data.data(), StaticSize);
 			}
 			else
 			{
-				ssizet size = 0;
 				for(const T& elem : data)
-					size += ValueCat::ToStream(elem, stream);
-				return size;
+				{
+					TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+					if(res.HasFailed())
+						return res;
+
+					size += res.GetValue();
+				}
 			}
+			if(size == (StaticSize + dynmaicSize))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
+			ssizet size = 0;
+			ssizet dynmaicSize = GetDynamicSize(data);
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
-				return stream.Read(data.data(), StaticSize);
+				size += stream.Read(data.data(), StaticSize);
 			}
 			else
 			{
-				ssizet size = 0;
 				for(T& elem : data)
-					size += ValueCat::FromStream(elem, stream);
-				return size;
+				{
+					TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+					if(res.HasFailed())
+						return res;
+
+					size += res.GetValue();
+				}
 			}
+			if(size == (StaticSize + dynmaicSize))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -209,35 +243,39 @@ namespace greaper::refl
 			achar buff[128];
 			for(sizet i = 0; i < N; ++i)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
 				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
-			if(!cJSON_IsArray(arr) || cJSON_GetArraySize(arr) != N)
-				return false; 
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::array>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
+			if(!cJSON_IsArray(arr))
+				return Result::CreateFailure("[refl::ContainerType<std::array>]::FromJSON expected an Array."sv);
+			sizet arrSize = cJSON_GetArraySize(arr);
+			if(arrSize != N)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::array>]::FromJSON expected an Array with size '"PRIuPTR"' but obtained '"PRIuPTR"'.", N, arrSize));
 			
 			achar buff[128];
-			bool parseOK = true;
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				bool ok = ValueCat::FromJSON(data[i], item, StringView{buff});
-				if(!ok)
-					parseOK = false;
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "array"sv);
+			cJSON* json = ToJSON(data, "array"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -245,12 +283,12 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "array"sv);
+			auto res = FromJSON(data, json, "array"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
@@ -276,52 +314,62 @@ namespace greaper::refl
 		using Type = Vector<T, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::vector>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
 				size += stream.Write(data.data(), elementCount * sizeof(T));
-				return size;
 			}
 			else
 			{
 				for(const T& elem : data)
-					size += ValueCat::ToStream(elem, stream);
-				return size;
+				{
+					TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+					if(res.HasFailed())
+						return res;
+					
+					size += res.GetValue();
+				}
 			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
 			data.resize(elementCount);
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
 				size += stream.Read(&data.data(), elementCount * sizeof(T));
-				return size;
 			}
 			else
 			{
 				for(auto it = data.begin(); it != data.end(); ++it)
 				{
 					T elem;
-					size += ValueCat::FromStream(elem, stream);
+					TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+					if(res.HasFailed())
+						return res;
+					
 					(*it) = elem;
+					size += res.GetValue();
 				}
-				return size;
 			}
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -334,40 +382,43 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::vector>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::vector>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			data.resize(N);
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				bool ok = ValueCat::FromJSON(data[i], item, StringView{buff});
-				if(!ok)
-					parseOK = false;
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "vector"sv);
+			cJSON* json = ToJSON(data, "vector"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -375,12 +426,12 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "vector"sv);
+			EmptyResult res = FromJSON(data, json, "vector"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
@@ -407,52 +458,48 @@ namespace greaper::refl
 		using Type = List<T, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::list>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			for(const T& elem : data)
 			{
-				size += stream.Write(data.data(), elementCount * sizeof(T));
-				return size;
+				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
 			}
-			else
-			{
-				for(const T& elem : data)
-					size += ValueCat::ToStream(elem, stream);
-				return size;
-			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
 			data.resize(elementCount);
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			for(auto it = data.begin(); it != data.end(); ++it)
 			{
-				size += stream.Read(&data.data(), elementCount * sizeof(T));
-				return size;
+				T elem;
+				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				(*it) = elem;
+				size += res.GetValue();
 			}
-			else
-			{
-				for(auto it = data.begin(); it != data.end(); ++it)
-				{
-					T elem;
-					size += ValueCat::FromStream(elem, stream);
-					(*it) = elem;
-				}
-				return size;
-			}
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -465,40 +512,43 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::list>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::list>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			data.resize(N);
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				bool ok = ValueCat::FromJSON(data[i], item, StringView{buff});
-				if(!ok)
-					parseOK = false;
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "list"sv);
+			cJSON* json = ToJSON(data, "list"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -506,20 +556,16 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "list"sv);
+			EmptyResult res = FromJSON(data, json, "list"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
@@ -538,52 +584,48 @@ namespace greaper::refl
 		using Type = Deque<T, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::deque>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			for(const T& elem : data)
 			{
-				size += stream.Write(data.data(), elementCount * sizeof(T));
-				return size;
+				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
 			}
-			else
-			{
-				for(const T& elem : data)
-					size += ValueCat::ToStream(elem, stream);
-				return size;
-			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
 			data.resize(elementCount);
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			for(auto it = data.begin(); it != data.end(); ++it)
 			{
-				size += stream.Read(&data.data(), elementCount * sizeof(T));
-				return size;
+				T elem;
+				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				(*it) = elem;
+				size += res.GetValue();
 			}
-			else
-			{
-				for(auto it = data.begin(); it != data.end(); ++it)
-				{
-					T elem;
-					size += ValueCat::FromStream(elem, stream);
-					(*it) = elem;
-				}
-				return size;
-			}
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -596,40 +638,44 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::deque>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::deque>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			data.resize(N);
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				bool ok = ValueCat::FromJSON(data[i], item, StringView{buff});
-				if(!ok)
-					parseOK = false;
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "queue"sv);
+			cJSON* json = ToJSON(data, "queue"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -637,20 +683,16 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "queue"sv);
+			EmptyResult res = FromJSON(data, json, "queue"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
@@ -669,35 +711,47 @@ namespace greaper::refl
 		using Type = Set<T, C, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::set>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const T& elem : data)
-				size += ValueCat::ToStream(elem, stream);
-			return size;
+			{
+				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			for(decltype(elementCount) i = 0; i < elementCount; ++i)
+			for(decltype(elementCount) i = 0; i < size; ++i)
 			{
 				T elem;
-				size += ValueCat::FromStream(elem, stream);
+				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
+				size += res.GetValue();
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -710,41 +764,45 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::set>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::set>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
 				T elem;
-				bool ok = ValueCat::FromJSON(elem, item, StringView{buff});
+				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
-				if(!ok)
-					parseOK = false;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "set"sv);
+			cJSON* json = ToJSON(data, "set"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -752,20 +810,16 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "set"sv);
+			EmptyResult res = FromJSON(data, json, "set"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
@@ -784,35 +838,47 @@ namespace greaper::refl
 		using Type = MultiSet<T, C, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::multiset>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const T& elem : data)
-				size += ValueCat::ToStream(elem, stream);
-			return size;
+			{
+				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			for(decltype(elementCount) i = 0; i < elementCount; ++i)
+			for(decltype(elementCount) i = 0; i < size; ++i)
 			{
 				T elem;
-				size += ValueCat::FromStream(elem, stream);
+				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
+				size += res.GetValue();
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -825,41 +891,45 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::multiset>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::multiset>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
 				T elem;
-				bool ok = ValueCat::FromJSON(elem, item, StringView{buff});
+				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
-				if(!ok)
-					parseOK = false;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "multiset"sv);
+			cJSON* json = ToJSON(data, "multiset"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -867,20 +937,16 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "multiset"sv);
+			EmptyResult res = FromJSON(data, json, "multiset"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
@@ -899,35 +965,47 @@ namespace greaper::refl
 		using Type = UnorderedSet<T, H, C, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_set>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const T& elem : data)
-				size += ValueCat::ToStream(elem, stream);
-			return size;
+			{
+				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			for(decltype(elementCount) i = 0; i < elementCount; ++i)
+			for(decltype(elementCount) i = 0; i < size; ++i)
 			{
 				T elem;
-				size += ValueCat::FromStream(elem, stream);
+				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
+				size += res.GetValue();
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -940,41 +1018,45 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::unorderd_set>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::unordered_set>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
 				T elem;
-				bool ok = ValueCat::FromJSON(elem, item, StringView{buff});
+				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
-				if(!ok)
-					parseOK = false;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "unorderedset"sv);
+			cJSON* json = ToJSON(data, "unorderedset"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -982,20 +1064,16 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "unorderedset"sv);
+			EmptyResult res = FromJSON(data, json, "unorderedset"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
@@ -1014,35 +1092,47 @@ namespace greaper::refl
 		using Type = UnorderedMultiSet<T, H, C, A>;
 		using ValueCat = GetCategoryType<T>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_multiset>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const T& elem : data)
-				size += ValueCat::ToStream(elem, stream);
-			return size;
+			{
+				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			for(decltype(elementCount) i = 0; i < elementCount; ++i)
+			for(decltype(elementCount) i = 0; i < size; ++i)
 			{
 				T elem;
-				size += ValueCat::FromStream(elem, stream);
+				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
+				size += res.GetValue();
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1055,41 +1145,45 @@ namespace greaper::refl
 		{
 			cJSON* arr = cJSON_AddArrayToObject(json, name.data());
 			achar buff[128];
-			for(sizet i = 0; i < N; ++i)
+			sizet i = 0;
+			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
-				cJSON* obj = ValueCat::ToJSON(data[i], StringView{buff});
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				cJSON* obj = ValueCat::ToJSON(elem, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
+				++i;
 			}
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::unordered_multiset>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::unordered_multiset>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIu64, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
 				T elem;
-				bool ok = ValueCat::FromJSON(elem, item, StringView{buff});
+				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
+				if(res.HasFailed())
+					return res;
+				
 				data.emplace(elem);
-				if(!ok)
-					parseOK = false;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "unorderedmultiset"sv);
+			cJSON* json = ToJSON(data, "unorderedmultiset"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -1097,20 +1191,16 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "unorderedmultiset"sv);
+			EmptyResult res = FromJSON(data, json, "unorderedmultiset"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
@@ -1130,41 +1220,62 @@ namespace greaper::refl
 		using KeyCat = GetCategoryType<K>::Type;
 		using ValueCat = GetCategoryType<V>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::map>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const auto& [key, value] : data)
 			{
-				size += KeyCat::ToStream(key, stream);
-				size += ValueCat::ToStream(value, stream);
-			}
+				TResult<ssizet> res = KeyCat::ToStream(key, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
 
-			return size;
+				res = ValueCat::ToStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
+			
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
+				TResult<ssizet> res = KeyCat::FromStream(key, stream);
+				if(res.HasFailed())
+					return res;
+
+				size += res.GetValue();
+
 				V value;
-				size += KeyCat::FromStream(key, stream);
-				size += ValueCat::FromStream(value, stream);
+				res = ValueCat::FromStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+				
 				data.emplace(key, value);
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1186,33 +1297,35 @@ namespace greaper::refl
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::map>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::map>]::FromJSON expected an Array."sv);
 			
-			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				K key;
+				EmptyResult res = KeyCat::FromJSON(key, item, "key"sv);
+				if(res.HasFailed())
+					return res;
+				
 				V value;
-				bool keyOK = KeyCat::FromJSON(key, item, "key"sv);
-				bool valueOK = ValueCat::FromJSON(value, item, "value"sv);
-				data.emplace(key, value);
-				if(!keyOK || !valueOK)
-					parseOK = false;
+				res = ValueCat::FromJSON(value, item, "value"sv);
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "map"sv);
+			cJSON* json = ToJSON(data, "map"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -1220,23 +1333,19 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "map"sv);
+			EmptyResult res = FromJSON(data, json, "map"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
-			for(const auto& e : data)
-				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
+			for(const auto& [key, value] : data)
+				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
 		}
 
@@ -1253,41 +1362,62 @@ namespace greaper::refl
 		using KeyCat = GetCategoryType<K>::Type;
 		using ValueCat = GetCategoryType<V>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::multimap>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const auto& [key, value] : data)
 			{
-				size += KeyCat::ToStream(key, stream);
-				size += ValueCat::ToStream(value, stream);
-			}
+				TResult<ssizet> res = KeyCat::ToStream(key, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
 
-			return size;
+				res = ValueCat::ToStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
+			
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
+				TResult<ssizet> res = KeyCat::FromStream(key, stream);
+				if(res.HasFailed())
+					return res;
+
+				size += res.GetValue();
+
 				V value;
-				size += KeyCat::FromStream(key, stream);
-				size += ValueCat::FromStream(value, stream);
+				res = ValueCat::FromStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+				
 				data.emplace(key, value);
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1309,33 +1439,35 @@ namespace greaper::refl
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::multimap>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::multimap>]::FromJSON expected an Array."sv);
 			
-			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				K key;
+				EmptyResult res = KeyCat::FromJSON(key, item, "key"sv);
+				if(res.HasFailed())
+					return res;
+				
 				V value;
-				bool keyOK = KeyCat::FromJSON(key, item, "key"sv);
-				bool valueOK = ValueCat::FromJSON(value, item, "value"sv);
-				data.emplace(key, value);
-				if(!keyOK || !valueOK)
-					parseOK = false;
+				res = ValueCat::FromJSON(value, item, "value"sv);
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "multimap"sv);
+			cJSON* json = ToJSON(data, "multimap"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -1343,23 +1475,19 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "multimap"sv);
+			EmptyResult res = FromJSON(data, json, "multimap"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
-			for(const auto& e : data)
-				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
+			for(const auto& [key, value] : data)
+				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
 		}
 
@@ -1376,41 +1504,62 @@ namespace greaper::refl
 		using KeyCat = GetCategoryType<K>::Type;
 		using ValueCat = GetCategoryType<V>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_map>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const auto& [key, value] : data)
 			{
-				size += KeyCat::ToStream(key, stream);
-				size += ValueCat::ToStream(value, stream);
-			}
+				TResult<ssizet> res = KeyCat::ToStream(key, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
 
-			return size;
+				res = ValueCat::ToStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
+			
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
+				TResult<ssizet> res = KeyCat::FromStream(key, stream);
+				if(res.HasFailed())
+					return res;
+
+				size += res.GetValue();
+
 				V value;
-				size += KeyCat::FromStream(key, stream);
-				size += ValueCat::FromStream(value, stream);
+				res = ValueCat::FromStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+				
 				data.emplace(key, value);
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1432,33 +1581,35 @@ namespace greaper::refl
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::unordered_map>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::unordered_map>]::FromJSON expected an Array."sv);
 			
-			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				K key;
+				EmptyResult res = KeyCat::FromJSON(key, item, "key"sv);
+				if(res.HasFailed())
+					return res;
+				
 				V value;
-				bool keyOK = KeyCat::FromJSON(key, item, "key"sv);
-				bool valueOK = ValueCat::FromJSON(value, item, "value"sv);
-				data.emplace(key, value);
-				if(!keyOK || !valueOK)
-					parseOK = false;
+				res = ValueCat::FromJSON(value, item, "value"sv);
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "unorderedmap"sv);
+			cJSON* json = ToJSON(data, "unorderedmap"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -1466,23 +1617,19 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "unorderedmap"sv);
+			EmptyResult res = FromJSON(data, json, "unorderedmap"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
-			for(const auto& e : data)
-				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
+			for(const auto& [key, value] : data)
+				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
 		}
 
@@ -1499,41 +1646,62 @@ namespace greaper::refl
 		using KeyCat = GetCategoryType<K>::Type;
 		using ValueCat = GetCategoryType<V>::Type;
 
-		static_assert(!std::is_same_v<ValueCat, void>, "[refl] Trying to use a Container with not refl value_type!");
+		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_multimap>] Trying to use a Container with not refl value_type!");
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
 
-		static ssizet ToStream(const Type& data, IStream& stream)
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			int64 elementCount = data.size();
-			auto size = stream.Write(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Write(&elementCount, sizeof(elementCount));
 
 			for(const auto& [key, value] : data)
 			{
-				size += KeyCat::ToStream(key, stream);
-				size += ValueCat::ToStream(value, stream);
-			}
+				TResult<ssizet> res = KeyCat::ToStream(key, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
 
-			return size;
+				res = ValueCat::ToStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+			}
+			return Result::CreateSuccess(size);
 		}
 
-		static ssizet FromStream(Type& data, IStream& stream)
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			int64 elementCount;
-			auto size = stream.Read(&elementCount, sizeof(elementCount));
+			ssizet size = 0;
+			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
+			
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
+				TResult<ssizet> res = KeyCat::FromStream(key, stream);
+				if(res.HasFailed())
+					return res;
+
+				size += res.GetValue();
+
 				V value;
-				size += KeyCat::FromStream(key, stream);
-				size += ValueCat::FromStream(value, stream);
+				res = ValueCat::FromStream(value, stream);
+				if(res.HasFailed())
+					return res;
+				
+				size += res.GetValue();
+				
 				data.emplace(key, value);
 			}
-			return size;
+			return Result::CreateSuccess(size);
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1555,33 +1723,35 @@ namespace greaper::refl
 			return arr;
 		}
 		
-		static bool FromJSON(Type& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ContainerType<std::unordered_multimap>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(!cJSON_IsArray(arr))
-				return false; 
+				return Result::CreateFailure("[refl::ContainerType<std::unordered_multimap>]::FromJSON expected an Array."sv);
 			
-			achar buff[128];
-			bool parseOK = true;
 			sizet N = cJSON_GetArraySize(arr);
 			data.clear();
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				K key;
+				EmptyResult res = KeyCat::FromJSON(key, item, "key"sv);
+				if(res.HasFailed())
+					return res;
+				
 				V value;
-				bool keyOK = KeyCat::FromJSON(key, item, "key"sv);
-				bool valueOK = ValueCat::FromJSON(value, item, "value"sv);
-				data.emplace(key, value);
-				if(!keyOK || !valueOK)
-					parseOK = false;
+				res = ValueCat::FromJSON(value, item, "value"sv);
+				if(res.HasFailed())
+					return res;
 			}
-			return parseOK;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const Type& data)
 		{
-			cJSON* json = FromJSON(data, "unorderedmultimap"sv);
+			cJSON* json = ToJSON(data, "unorderedmultimap"sv);
 			char* jsonStr = cJSON_Print(json);
 			String str{jsonStr};
 			cJSON_Delete(json);
@@ -1589,23 +1759,19 @@ namespace greaper::refl
 			return str;
 		}
 
-		static bool FromString(const String& str, Type& data)
+		static EmptyResult FromString(const String& str, Type& data)
 		{
 			cJSON* json = cJSON_Parse(str.c_str());
-			bool ok = FromJSON(data, json, "unorderedmultimap"sv);
+			EmptyResult res = FromJSON(data, json, "unorderedmultimap"sv);
 			cJSON_Delete(json);
-			return ok;
+			return res;
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
-			{
-				return sizeof(T) * data.size();
-			}
 			int64 size = 0;
-			for(const auto& e : data)
-				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
+			for(const auto& [key, value] : data)
+				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
 		}
 

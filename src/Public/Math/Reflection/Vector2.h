@@ -15,14 +15,14 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		static ssizet ToStream(const math::Vector2Real<T>& data, IStream& stream)
+		static TResult<ssizet> ToStream(const math::Vector2Real<T>& data, IStream& stream)
 		{
-			return stream.Write(&data, sizeof(data));
+			return Result::CreateSucces(stream.Write(&data, sizeof(data)));
 		}
 
-		static ssizet FromStream(math::Vector2Real<T>& data, IStream& stream)
+		static TResult<ssizet> FromStream(math::Vector2Real<T>& data, IStream& stream)
 		{
-			return stream.Read(&data, sizeof(data));
+			return Result::CreateSucces(stream.Read(&data, sizeof(data)));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Real<T>& data, StringView name)
@@ -39,18 +39,20 @@ namespace greaper::refl
 			return obj;			
 		}
 		
-		static bool FromJSON(math::Vector2Real<T>& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(math::Vector2Real<T>& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure("[refl::ComplexType<Vector2Real>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data());
 			
 			cJSON* x = cJSON_GetObjectItemCaseSensitive(item, "x");
 			cJSON* y = cJSON_GetObjectItemCaseSensitive(item, "y");
 			if(!cJSON_IsNumber(x) || !cJSON_IsNumber(y))
-				return false;
+				return Result::CreateFailure("[refl::ComplexType<Vector2Real>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsNumber."sv);
 			
 			data.X = cJSON_GetNumberValue(x);
 			data.Y = cJSON_GetNumberValue(y);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const math::Vector2Real<T>& data)
@@ -58,10 +60,10 @@ namespace greaper::refl
 			return data.ToString();
 		}
 
-		static bool FromString(const String& str, math::Vector2Real<T>& data)
+		static EmptyResult FromString(const String& str, math::Vector2Real<T>& data)
 		{
 			data.FromString(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::Vector2Real<T>& data)
@@ -80,14 +82,14 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		static ssizet ToStream(const math::Vector2Signed<T>& data, IStream& stream)
+		static TResult<ssizet> ToStream(const math::Vector2Signed<T>& data, IStream& stream)
 		{
-			return stream.Write(&data, sizeof(data));
+			return Result::CreateSuccess(stream.Write(&data, sizeof(data)));
 		}
 
-		static ssizet FromStream(math::Vector2Signed<T>& data, IStream& stream)
+		static TResult<ssizet> FromStream(math::Vector2Signed<T>& data, IStream& stream)
 		{
-			return stream.Read(&data, sizeof(data));
+			return Result::CreateSuccess(stream.Read(&data, sizeof(data)));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Signed<T>& data, StringView name)

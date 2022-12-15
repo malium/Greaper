@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -64,7 +64,7 @@ namespace greaper
 			for (sizet i = m_TaskWorkers.size(); i < count; ++i)
 			{
 				ThreadConfig cfg;
-				auto name = Format("%s_%ld", m_Name.c_str(), i);
+				auto name = Format("%s_%"PRIuPTR"", m_Name.c_str(), i);
 				cfg.Name = name;
 				cfg.ThreadFN = [this, i]() { WorkerFn(*this, i); };
 				auto thRes = thManager->CreateThread(cfg);

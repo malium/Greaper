@@ -34,12 +34,12 @@ namespace greaper::math
 
 		INLINE constexpr T& operator[](sizet index)noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		INLINE constexpr const T& operator[](sizet index)const noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		DEF_SWIZZLE_VEC3();
@@ -248,12 +248,12 @@ namespace greaper::math
 
 		INLINE constexpr T& operator[](sizet index)noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		INLINE constexpr const T& operator[](sizet index)const noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		DEF_SWIZZLE_VEC3();
@@ -390,12 +390,12 @@ namespace greaper::math
 
 		INLINE constexpr T& operator[](sizet index)noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		INLINE constexpr const T& operator[](sizet index)const noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		DEF_SWIZZLE_VEC3();
@@ -507,12 +507,12 @@ namespace greaper::math
 
 		INLINE constexpr bool& operator[](sizet index)noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		INLINE constexpr const bool& operator[](sizet index)const noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Vector3, but the index %" PRIuPTR " was out of range.", index);
 			return (&X)[index];
 		}
 		DEF_SWIZZLE_VEC3();

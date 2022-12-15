@@ -36,12 +36,12 @@ namespace greaper::math
 
 		INLINE constexpr T& operator[](sizet index)noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Quaternion, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Quaternion, but the index %" PRIuPTR " was out of range.", index);
 			return (&W)[index];
 		}
 		INLINE constexpr const T& operator[](sizet index)const noexcept
 		{
-			VerifyLess(index, ComponentCount, "Trying to access a Quaternion, but the index %lld was out of range.", index);
+			VerifyLess(index, ComponentCount, "Trying to access a Quaternion, but the index %" PRIuPTR " was out of range.", index);
 			return (&W)[index];
 		}
 		INLINE constexpr std::array<T, ComponentCount> ToArray()const noexcept

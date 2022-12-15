@@ -384,11 +384,11 @@ namespace greaper
 	}
 
 	template<class T>
-	inline bool TProperty<T>::SetValue(const T& value, bool triggerEvent) noexcept
+	inline bool TProperty<T>::SetValue(const T& value, bool triggerEvent, bool ignoreConstness) noexcept
 	{
 		VerifyNot(m_Library.expired(), "Trying to set a value to a disconnected Property.");
 		auto lib = m_Library.lock();
-		if (m_Constant)
+		if (m_Constant && !ignoreConstness)
 		{
 			lib->LogWarning(Format("Trying to change a constant property, '%s'.", m_PropertyName.c_str()));
 			return false;
@@ -418,6 +418,41 @@ namespace greaper
 		if (triggerEvent)
 			m_OnModificationEvent.Trigger(this);
 		return true;
+	}
+
+	template<class T>
+	INLINE TResult<ssizet> TProperty<T>::_ValueToStream(IStream& stream) const noexcept
+	{
+		auto lck = SharedLock(m_Mutex);
+		return TCategory::ToStream(m_Value, stream);
+	}
+
+	template<class T>
+	INLINE TResult<ssizet> TProperty<T>::_ValueFromStream(IStream& stream) noexcept
+	{
+		auto lck = Lock(m_Mutex);
+		return TCategory::FromStream(m_Value, stream);
+	}
+
+	template<class T>
+	INLINE cJSON* TProperty<T>::_ValueToJSON(cJSON* json, StringView name) const noexcept
+	{
+		auto lck = SharedLock(m_Mutex);
+		return TCategory::ToJSON(m_Value, json, name);
+	}
+
+	template<class T>
+	INLINE EmptyResult TProperty<T>::_ValueFromJSON(cJSON* json, StringView name) noexcept
+	{
+		auto lck = Lock(m_Mutex);
+		return TCategory::FromJSON(m_Value, json, name);
+	}
+
+	template<class T>
+	INLINE int64 TProperty<T>::_GetDynamicSize() const noexcept
+	{
+		auto lck = SharedLock(m_Mutex);
+		return TCategory::GetDynamicSize(m_Value);
 	}
 
 	//// Interface methods to avoid circle dependency
@@ -484,5 +519,7 @@ namespace greaper
 		m_ActivationEvent.Trigger(false, this, newDefault);
 	}
 }
+
+#include "Reflection/Property.h"
 
 #endif /* CORE_GREAPER_LIBRARY_H */

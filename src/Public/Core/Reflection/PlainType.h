@@ -14,11 +14,17 @@
 namespace greaper::refl { \
 	template<> struct PlainType<type> : public BaseType<type> {\
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Plain; \
-		static ssizet ToStream(const type& data, IStream& stream){ \
-			return stream.Write(&data, sizeof(data)); \
+		static TResult<ssizet> ToStream(const type& data, IStream& stream){ \
+			ssizet size = stream.Write(&data, sizeof(data));\
+			if(size == sizeof(data))\
+				return Result::CreateSuccess(size); \
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));\
 		}\
-		static ssizet FromStream(type& data, IStream& stream){ \
-			return stream.Read(&data, sizeof(data));\
+		static TResult<ssizet> FromStream(type& data, IStream& stream){ \
+			ssizet size = stream.Read(&data, sizeof(data));\
+			if(size == sizeof(data))\
+				return Result::CreateSuccess(size);\
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));\
 		}\
 		static cJSON* ToJSON(const type& data, StringView name){ \
 			cJSON* obj = cJSON_CreateObject(); \
@@ -27,20 +33,22 @@ namespace greaper::refl { \
 		static cJSON* ToJSON(const type& data, cJSON* obj, StringView name){\
 			return jsonAddFn (obj, name.data(), data);\
 		}\
-		static bool FromJSON(type& data, cJSON* obj, StringView name){\
+		static EmptyResult FromJSON(type& data, cJSON* obj, StringView name){\
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(obj, name.data());\
+			if(item == nullptr)\
+				return Result::CreateFailure(Format("[refl::PlainType<"#type">]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));\
 			if(jsonIsFn (item)){\
 				data = jsonGetFn (item);\
-				return true;\
+				return Result::CreateSuccess();\
 			}\
-			return false;\
+			return Result::CreateFailure("[refl::PlainType<"#type">]::FromJSON Couldn't obtain the value from the json, expected: "#jsonIsFn"."sv);\
 		}\
 		NODISCARD static String ToString(const type& data){\
 			return toString ;\
 		}\
-		static bool FromString(const String& str, type& data){\
+		static EmptyResult FromString(const String& str, type& data){\
 			fromString ; \
-			return true; \
+			return Result::CreateSuccess(); \
 		}\
 		NODISCARD static int64 GetDynamicSize(UNUSED const type& data){\
 			return 0ll; \
@@ -55,7 +63,7 @@ namespace greaper::refl
 	template<class T>
 	struct BaseType<TEnum<T>>
 	{
-		static_assert(std::is_enum_v<T>, "refl::BaseType trying to instantiate a TEnum with a non enum type.");
+		static_assert(std::is_enum_v<T>, "[refl::BaseType<TEnum>] trying to instantiate a TEnum with a non enum type.");
 		
 		static inline constexpr uint64 ID = RTI_Enum;
 
@@ -63,16 +71,14 @@ namespace greaper::refl
 
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::COUNT;
 
-		static ssizet ToStream(UNUSED const T& data, UNUSED IStream& stream)
+		static TResult<ssizet> ToStream(UNUSED const T& data, UNUSED IStream& stream)
 		{
-			Break("Trying to use the generic refl::BaseType!");
-			return -1ll;
+			return Result::CreateFailure("[refl::BaseType<TEnum>]::ToStream Trying to use the generic refl::BaseType!"sv);
 		}
 
-		static ssizet FromStream(UNUSED T& data, UNUSED IStream& stream)
+		static TResult<ssizet> FromStream(UNUSED T& data, UNUSED IStream& stream)
 		{
-			Break("Trying to use the generic refl::BaseType!");
-			return -1ll;
+			return Result::CreateFailure("[refl::BaseType<TEnum>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
 		static cJSON* ToJSON(const T& data, StringView name)
@@ -83,37 +89,35 @@ namespace greaper::refl
 
 		static cJSON* ToJSON(UNUSED const T& data, UNUSED cJSON* obj, UNUSED StringView name)
 		{
-			Break("Trying to use the generic refl::BaseType!");
+			Break("[refl::BaseType<TEnum>]::ToJSON Trying to use the generic refl::BaseType!");
 			return nullptr;
 		}
 		
-		static bool FromJSON(UNUSED T& data, UNUSED cJSON* json, UNUSED StringView name)
+		static EmptyResult FromJSON(UNUSED T& data, UNUSED cJSON* json, UNUSED StringView name)
 		{
-			Break("Trying to use the generic refl::BaseType!");
-			return false;
+			return Result::CreateFailure("[refl::BaseType<TEnum>]::FromJSON Trying to use the generic refl::BaseType!"sv);
 		}
 
 		NODISCARD static String ToString(UNUSED const T& data)
 		{
-			Break("Trying to use the generic refl::BaseType!");
+			Break("[refl::BaseType<TEnum>]::ToString Trying to use the generic refl::BaseType!");
 			return String{};
 		}
 
-		static bool FromString(UNUSED const String& str, UNUSED T& data)
+		static EmptyResult FromString(UNUSED const String& str, UNUSED T& data)
 		{
-			Break("Trying to use the generic refl::BaseType!");
-			return false;
+			return Result::CreateFailure("[refl::BaseType<TEnum>]::FromString Trying to use the generic refl::BaseType!"sv);
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)
 		{
-			Break("Trying to use the generic refl::BaseType!");
+			Break("[refl::BaseType<TEnum>]::GetDyanmicSize Trying to use the generic refl::BaseType!");
 			return 0ll;
 		}
 
 		static void SetDynamicSize(UNUSED T& data, UNUSED int64 size)
 		{
-			Break("Trying to use the generic refl::BaseType!");
+			Break("[refl::BaseType<TEnum>]::SetDynamicSize Trying to use the generic refl::BaseType!");
 		}
 	};
 
@@ -121,13 +125,19 @@ namespace greaper::refl
 	struct PlainType<TEnum<T>> : public BaseType<TEnum<T>>
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Plain;
-		static ssizet ToStream(const T& data, IStream& stream)
+		static TResult<ssizet> ToStream(const T& data, IStream& stream)
 		{ 
-			return stream.Write(&data, sizeof(data)); 
+			ssizet size = stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
-		static ssizet FromStream(T& data, IStream& stream)
+		static TResult<ssizet> FromStream(T& data, IStream& stream)
 		{ 
-			return stream.Read(&data, sizeof(data));
+			ssizet size = stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 		static cJSON* ToJSON(const T& data, StringView name)
 		{
@@ -139,24 +149,26 @@ namespace greaper::refl
 			auto str = TEnum<T>::ToString(data);
 			return cJSON_AddStringToObject(obj, name.data(), str.data());
 		}
-		static bool FromJSON(T& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(T& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::PlainType<TEnum>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			if(cJSON_IsString(item))
 			{
 				data = TEnum<T>::FromString(cJSON_GetStringValue(item));
-				return true;
+				return Result::CreateSuccess();
 			}
-			return false;
+			return Result::CreateFailure("[refl::PlainType<TEnum>]::FromJSON Couldn't obtain the value, it wasn't ENUM."sv);
 		}
 		NODISCARD static String ToString(const T& data)
 		{
 			return TEnum<T>::ToString(data);
 		}
-		static bool FromString(const String& str, T& data)
+		static EmptyResult FromString(const String& str, T& data)
 		{
 			data = TEnum<T>::FromString(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)
 		{
@@ -169,16 +181,16 @@ namespace greaper::refl
 	};
 }
 
-CREATE_MEMCPY_PLAINTYPE(bool, 			data ? "true" : "false", 				data = StringUtils::ToLower(str) == "true", 				cJSON_AddBoolToObject, cJSON_IsBool, cJSON_IsTrue);
-CREATE_MEMCPY_PLAINTYPE(int8,			String{ std::to_string(data).c_str() }, 	data = (int8)std::strtol(str.c_str(), nullptr, 10),		cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(uint8,			String{ std::to_string(data).c_str() }, 	data = (uint8)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(int16,			String{ std::to_string(data).c_str() }, 	data = (int16)std::strtol(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(uint16,			String{ std::to_string(data).c_str() }, 	data = (uint16)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(int32,			String{ std::to_string(data).c_str() }, 	data = (int32)std::strtol(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(uint32,			String{ std::to_string(data).c_str() }, 	data = (uint32)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(int64,			String{ std::to_string(data).c_str() }, 	data = (int16)std::strtoll(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(uint64,			String{ std::to_string(data).c_str() }, 	data = (uint16)std::strtoull(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(float,			String{ std::to_string(data).c_str() }, 	data = std::strtof(str.c_str(), nullptr),				cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
-CREATE_MEMCPY_PLAINTYPE(double,			String{ std::to_string(data).c_str() }, 	data = std::strtod(str.c_str(), nullptr),				cJSON_AddNumberToObject, cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(bool, 			data ? "true" : "false", 					data = StringUtils::ToLower(str) == "true", 			cJSON_AddBoolToObject, 		cJSON_IsBool, 	cJSON_IsTrue);
+CREATE_MEMCPY_PLAINTYPE(int8,			String{ std::to_string(data).c_str() }, 	data = (int8)std::strtol(str.c_str(), nullptr, 10),		cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(uint8,			String{ std::to_string(data).c_str() }, 	data = (uint8)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(int16,			String{ std::to_string(data).c_str() }, 	data = (int16)std::strtol(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(uint16,			String{ std::to_string(data).c_str() }, 	data = (uint16)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(int32,			String{ std::to_string(data).c_str() }, 	data = (int32)std::strtol(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(uint32,			String{ std::to_string(data).c_str() }, 	data = (uint32)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(int64,			String{ std::to_string(data).c_str() }, 	data = (int16)std::strtoll(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(uint64,			String{ std::to_string(data).c_str() }, 	data = (uint16)std::strtoull(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(float,			String{ std::to_string(data).c_str() }, 	data = std::strtof(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(double,			String{ std::to_string(data).c_str() }, 	data = std::strtod(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 
 #endif /* CORE_REFLECTION_PLAINTYPE_H */

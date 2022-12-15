@@ -178,13 +178,13 @@ static void ReportTest(greaper::StringView testName, sizet sampleCount, const gr
 
 	const achar* outputTxt = nullptr;
 	if constexpr (std::is_same_v<TResult, int32>)
-		outputTxt = "%s: Sample %lld was not verified normal:%d optim:%d.\n";
+		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%"PRId32" optim:%"PRId32".\n";
 	else if constexpr (std::is_same_v<TResult, int64>)
-		outputTxt = "%s: Sample %lld was not verified normal:%lld optim:%lld.\n";
+		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%"PRId64" optim:%"PRId64".\n";
 	else if constexpr (std::is_same_v<TResult, float>)
-		outputTxt = "%s: Sample %lld was not verified normal:%f optim:%f.\n";
+		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%f optim:%f.\n";
 	else if constexpr (std::is_same_v<TResult, double>)
-		outputTxt = "%s: Sample %lld was not verified normal:%lf optim:%lf.\n";
+		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%lf optim:%lf.\n";
 
 	if constexpr (std::is_integral_v<TResult>)
 	{

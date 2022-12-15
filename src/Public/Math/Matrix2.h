@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -31,6 +31,17 @@ namespace greaper::math
 		INLINE constexpr explicit Matrix2Real(const std::array<T, ComponentCount>& arr)noexcept :R0(arr[0], arr[1]), R1(arr[2], arr[3]) {  }
 		INLINE constexpr Matrix2Real(const Vector2Real<T>& r0, const Vector2Real<T>& r1)noexcept :R0(r0), R1(r1) {  }
 		
+		INLINE T& operator[](sizet index)noexcept
+		{
+			VerifyLess(index, ComponentCount, "Trying to access a Matrix2, but the index %" PRIuPTR " was out of range.", index);
+			return ((float*)&R0)[index];
+		}
+		INLINE constexpr const T& operator[](sizet index)const noexcept
+		{
+			VerifyLess(index, ComponentCount, "Trying to access a Matrix2, but the index %" PRIuPTR " was out of range.", index);
+			return ((const float*)&R0)[index];
+		}
+
 		INLINE Impl::Vector2XYRef<T> C0()noexcept
 		{
 			return Impl::Vector2XYRef<T>{ (T&)R0.X, (T&)R1.X };

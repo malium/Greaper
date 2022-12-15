@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -33,6 +33,17 @@ namespace greaper::math
 			:R0(arr[0], arr[1], arr[2], arr[3]), R1(arr[4], arr[5], arr[6], arr[7]), R2(arr[8], arr[9], arr[10], arr[11]), R3(arr[12], arr[13], arr[14], arr[15]) {  }
 		INLINE constexpr Matrix4Real(const Vector4Real<T>& r0, const Vector4Real<T>& r1, const Vector4Real<T>& r2, const Vector4Real<T>& r3)noexcept :R0(r0), R1(r1), R2(r2), R3(r3) {  }
 		INLINE constexpr explicit Matrix4Real(const Matrix3Real<T>& m3)noexcept :R0(m3.R0, T(0)), R1(m3.R1, T(0)), R2(m3.R2, T(0)), R3(T(0), T(0), T(0), T(1)) {  }
+
+		INLINE T& operator[](sizet index)noexcept
+		{
+			VerifyLess(index, ComponentCount, "Trying to access a Matrix4, but the index %" PRIuPTR " was out of range.", index);
+			return ((float*)&R0)[index];
+		}
+		INLINE constexpr const T& operator[](sizet index)const noexcept
+		{
+			VerifyLess(index, ComponentCount, "Trying to access a Matrix4, but the index %" PRIuPTR " was out of range.", index);
+			return ((const float*)&R0)[index];
+		}
 
 		INLINE Impl::Vector4Ref<T> C0()noexcept
 		{
