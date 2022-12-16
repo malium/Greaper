@@ -15,14 +15,22 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		static ssizet ToStream(const math::Matrix4Real<T>& data, IStream& stream)
+		static TResult<ssizet> ToStream(const math::Matrix4Real<T>& data, IStream& stream)
 		{
-			return stream.Write(&data, sizeof(data));
+			ssizet size = 0;
+			size += stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Matrix4Real>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
-		static ssizet FromStream(math::Matrix4Real<T>& data, IStream& stream)
+		static TResult<ssizet> FromStream(math::Matrix4Real<T>& data, IStream& stream)
 		{
-			return stream.Read(&data, sizeof(data));
+			ssizet size = 0; 
+			size += stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Matrix4Real>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Matrix4Real<T>& data, StringView name)
@@ -43,25 +51,29 @@ namespace greaper::refl
 			return obj;			
 		}
 		
-		static bool FromJSON(math::Matrix4Real<T>& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(math::Matrix4Real<T>& data, cJSON* json, StringView name)
 		{
 			cJSON* arr = cJSON_GetObjectItemCaseSensitive(json, name.data());
-			if(!cJSON_IsArray(arr) || cJSON_GetArraySize(arr) != math::Matrix4Real<T>::ComponentCount)
-				return false;
+			if(arr == nullptr)
+				return Result::CreateFailure(Format("[refl::ComplexType<Matrix4Real>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
+
+			if(!cJSON_IsArray(arr))
+				return Result::CreateFailure("[refl::ComplexType<Matrix4Real>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsArray."sv);
 			
-			bool ok = true;
+			int32 arrSize = cJSON_GetArraySize(arr);
+			if(arrSize != math::Matrix4Real<T>::ComponentCount)
+				return Result::CreateFailure(Format("[refl::ComplexType<Matrix4Real>]::FromJSON Couldn't obtain the value, it had different size, expected:%"PRIuPTR", obtained:%"PRId32".", math::Matrix2Real<T>::ComponentCount, arr));
+			
 			for(decltype(math::Matrix4Real<T>::ComponentCount) i = 0; i < math::Matrix4Real<T>::ComponentCount; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				if(!cJSON_IsNumber(item))
-				{
-					ok = false;
-					continue;
-				}
+					return Result::CreateFailure("[refl::ComplexType<Matrix4Real>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsNumber."sv);
+
 				data[i] = static_cast<T>(cJSON_GetNumberValue(item));
 			}
 			
-			return ok;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const math::Matrix4Real<T>& data)
@@ -69,10 +81,10 @@ namespace greaper::refl
 			return data.ToString();
 		}
 
-		static bool FromString(const String& str, math::Matrix4Real<T>& data)
+		static EmptyResult FromString(const String& str, math::Matrix4Real<T>& data)
 		{
 			data.FromString(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::Matrix4Real<T>& data)

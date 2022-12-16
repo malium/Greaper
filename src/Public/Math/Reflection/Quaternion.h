@@ -15,14 +15,22 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		static ssizet ToStream(const math::QuaternionReal<T>& data, IStream& stream)
+		static TResult<ssizet> ToStream(const math::QuaternionReal<T>& data, IStream& stream)
 		{
-			return stream.Write(&data, sizeof(data));
+			ssizet size = 0;
+			size += stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
-		static ssizet FromStream(math::QuaternionReal<T>& data, IStream& stream)
+		static TResult<ssizet> FromStream(math::QuaternionReal<T>& data, IStream& stream)
 		{
-			return stream.Read(&data, sizeof(data));
+			ssizet size = 0; 
+			size += stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::QuaternionReal<T>& data, StringView name)
@@ -41,22 +49,24 @@ namespace greaper::refl
 			return obj;			
 		}
 		
-		static bool FromJSON(math::QuaternionReal<T>& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(math::QuaternionReal<T>& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::ComplexType<QuaternionReal>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			
-			cJSON* w = cJSON_GetObjectItemCaseSensitive(item, "w");
 			cJSON* x = cJSON_GetObjectItemCaseSensitive(item, "x");
 			cJSON* y = cJSON_GetObjectItemCaseSensitive(item, "y");
 			cJSON* z = cJSON_GetObjectItemCaseSensitive(item, "z");
+			cJSON* w = cJSON_GetObjectItemCaseSensitive(item, "w");
 			if(!cJSON_IsNumber(w) || !cJSON_IsNumber(x) || !cJSON_IsNumber(y) || !cJSON_IsNumber(z))
-				return false;
+				return Result::CreateFailure("[refl::ComplexType<QuaternionReal>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsNumber."sv);
 			
 			data.W = cJSON_GetNumberValue(w);
 			data.X = cJSON_GetNumberValue(x);
 			data.Y = cJSON_GetNumberValue(y);
 			data.Z = cJSON_GetNumberValue(z);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const math::QuaternionReal<T>& data)
@@ -64,10 +74,10 @@ namespace greaper::refl
 			return data.ToString();
 		}
 
-		static bool FromString(const String& str, math::QuaternionReal<T>& data)
+		static EmptyResult FromString(const String& str, math::QuaternionReal<T>& data)
 		{
 			data.FromString(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::QuaternionReal<T>& data)

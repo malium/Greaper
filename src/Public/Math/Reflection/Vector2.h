@@ -17,12 +17,20 @@ namespace greaper::refl
 
 		static TResult<ssizet> ToStream(const math::Vector2Real<T>& data, IStream& stream)
 		{
-			return Result::CreateSucces(stream.Write(&data, sizeof(data)));
+			ssizet size = 0;
+			size += stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Vector2Real<T>& data, IStream& stream)
 		{
-			return Result::CreateSucces(stream.Read(&data, sizeof(data)));
+			ssizet size = 0; 
+			size += stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Real<T>& data, StringView name)
@@ -43,7 +51,7 @@ namespace greaper::refl
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
 			if(item == nullptr)
-				return Result::CreateFailure("[refl::ComplexType<Vector2Real>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data());
+				return Result::CreateFailure(Format("[refl::ComplexType<Vector2Real>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			
 			cJSON* x = cJSON_GetObjectItemCaseSensitive(item, "x");
 			cJSON* y = cJSON_GetObjectItemCaseSensitive(item, "y");
@@ -84,12 +92,20 @@ namespace greaper::refl
 
 		static TResult<ssizet> ToStream(const math::Vector2Signed<T>& data, IStream& stream)
 		{
-			return Result::CreateSuccess(stream.Write(&data, sizeof(data)));
+			ssizet size = 0;
+			size += stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Vector2Signed<T>& data, IStream& stream)
 		{
-			return Result::CreateSuccess(stream.Read(&data, sizeof(data)));
+			ssizet size = 0; 
+			size += stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Signed<T>& data, StringView name)
@@ -106,18 +122,20 @@ namespace greaper::refl
 			return obj;			
 		}
 		
-		static bool FromJSON(math::Vector2Signed<T>& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(math::Vector2Signed<T>& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::ComplexType<Vector2Signed>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			
 			cJSON* x = cJSON_GetObjectItemCaseSensitive(item, "x");
 			cJSON* y = cJSON_GetObjectItemCaseSensitive(item, "y");
 			if(!cJSON_IsNumber(x) || !cJSON_IsNumber(y))
-				return false;
+				return Result::CreateFailure("[refl::ComplexType<Vector2Signed>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsNumber."sv);
 			
 			data.X = cJSON_GetNumberValue(x);
 			data.Y = cJSON_GetNumberValue(y);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const math::Vector2Signed<T>& data)
@@ -125,10 +143,10 @@ namespace greaper::refl
 			return data.ToString();
 		}
 
-		static bool FromString(const String& str, math::Vector2Signed<T>& data)
+		static EmptyResult FromString(const String& str, math::Vector2Signed<T>& data)
 		{
 			data.FromString(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::Vector2Signed<T>& data)
@@ -147,14 +165,22 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		static ssizet ToStream(const math::Vector2Unsigned<T>& data, IStream& stream)
+		static TResult<ssizet> ToStream(const math::Vector2Unsigned<T>& data, IStream& stream)
 		{
-			return stream.Write(&data, sizeof(data));
+			ssizet size = 0;
+			size += stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
-		static ssizet FromStream(math::Vector2Unsigned<T>& data, IStream& stream)
+		static TResult<ssizet> FromStream(math::Vector2Unsigned<T>& data, IStream& stream)
 		{
-			return stream.Read(&data, sizeof(data));
+			ssizet size = 0; 
+			size += stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Unsigned<T>& data, StringView name)
@@ -171,18 +197,20 @@ namespace greaper::refl
 			return obj;			
 		}
 		
-		static bool FromJSON(math::Vector2Unsigned<T>& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(math::Vector2Unsigned<T>& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::ComplexType<Vector2Unsigned>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			
 			cJSON* x = cJSON_GetObjectItemCaseSensitive(item, "x");
 			cJSON* y = cJSON_GetObjectItemCaseSensitive(item, "y");
 			if(!cJSON_IsNumber(x) || !cJSON_IsNumber(y))
-				return false;
+				return Result::CreateFailure("[refl::ComplexType<Vector2Unsigned>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsNumber."sv);
 			
 			data.X = cJSON_GetNumberValue(x);
 			data.Y = cJSON_GetNumberValue(y);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const math::Vector2Unsigned<T>& data)
@@ -190,10 +218,10 @@ namespace greaper::refl
 			return data.ToString();
 		}
 
-		static bool FromString(const String& str, math::Vector2Unsigned<T>& data)
+		static EmptyResult FromString(const String& str, math::Vector2Unsigned<T>& data)
 		{
 			data.FromString(str);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::Vector2Unsigned<T>& data)
@@ -212,14 +240,22 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		static ssizet ToStream(const math::Vector2b& data, IStream& stream)
+		static TResult<ssizet> ToStream(const math::Vector2b& data, IStream& stream)
 		{
-			return stream.Write(&data, sizeof(data));
+			ssizet size = 0;
+			size += stream.Write(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
-		static ssizet FromStream(math::Vector2b& data, IStream& stream)
+		static TResult<ssizet> FromStream(math::Vector2b& data, IStream& stream)
 		{
-			return stream.Read(&data, sizeof(data));
+			ssizet size = 0; 
+			size += stream.Read(&data, sizeof(data));
+			if(size == sizeof(data))
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2b& data, StringView name)
@@ -236,18 +272,20 @@ namespace greaper::refl
 			return obj;			
 		}
 		
-		static bool FromJSON(math::Vector2b& data, cJSON* json, StringView name)
+		static EmptyResult FromJSON(math::Vector2b& data, cJSON* json, StringView name)
 		{
 			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if(item == nullptr)
+				return Result::CreateFailure(Format("[refl::ComplexType<Vector2b>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
 			
 			cJSON* x = cJSON_GetObjectItemCaseSensitive(item, "x");
 			cJSON* y = cJSON_GetObjectItemCaseSensitive(item, "y");
-			if(!cJSON_IsBool(x) || !cJSON_IsBool(y))
-				return false;
+			if(!cJSON_IsNumber(x) || !cJSON_IsNumber(y))
+				return Result::CreateFailure("[refl::ComplexType<Vector2b>]::FromJSON Couldn't obtain the value, it wasn't cJSON_IsNumber."sv);
 			
 			data.X = cJSON_IsTrue(x);
 			data.Y = cJSON_IsTrue(y);
-			return true;
+			return Result::CreateSuccess();
 		}
 
 		static String ToString(const math::Vector2b& data)
@@ -255,10 +293,11 @@ namespace greaper::refl
 			return data.ToString();
 		}
 
-		static bool FromString(const String& str, math::Vector2b& data)
+		static EmptyResult FromString(const String& str, math::Vector2b& data)
 		{
-			data.FromString(str);
-			return true;
+			if(data.FromString(str))
+				return Result::CreateSuccess();
+			return Result::CreateFailure("[refl::ComplexType<Vector4b>]::FromString parsing error!"sv);
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::Vector2b& data)

@@ -24,25 +24,30 @@ namespace greaper::refl
 
 		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
-			auto dynamicSize = GetDynamicSize(data);
 			ssizet size = 0;
-			size += stream.Write(&dynamicSize, sizeof(dynamicSize));
+			int64 elementCount = data.size();
+			size += stream.Write(&elementCount, sizeof(elementCount));
+			int64 dynamicSize = GetDynamicSize(data);
 			size += stream.Write(data.data(), dynamicSize);
-			if(size == (dynamicSize + StaticSize))
+			auto expectedSize = dynamicSize + StaticSize;
+			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
-			int64 dynamicSize;
+			int64 elementCount;
 			ssizet size = 0;
-			size += stream.Read(&dynamicSize, sizeof(dynamicSize));
-			SetDynamicSize(data, dynamicSize);
+			size += stream.Read(&elementCount, sizeof(elementCount));
+			data.clear();
+			data.resize(elementCount);
+			int64 dynamicSize = GetDynamicSize(data);
 			size += stream.Read(data.data(), dynamicSize);
-			if(size == (dynamicSize + StaticSize))
+			auto expectedSize = dynamicSize + StaticSize;
+			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -85,9 +90,9 @@ namespace greaper::refl
 			return data.size() * sizeof(Type::value_type);
 		}
 
-		static void SetDynamicSize(Type& data, int64 size)
+		static void SetDynamicSize(UNUSED Type& data, UNUSED int64 size)
 		{
-			data.resize(size / sizeof(Type::value_type), Type::value_type(0));
+			/* No-op */
 		}
 	};
 
@@ -102,25 +107,30 @@ namespace greaper::refl
 
 		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
-			int64 dynamicSize = GetDynamicSize(data);
 			ssizet size = 0;
-			size += stream.Write(&dynamicSize, sizeof(dynamicSize));
+			int64 elementCount = data.size();
+			size += stream.Write(&elementCount, sizeof(elementCount));
+			int64 dynamicSize = GetDynamicSize(data);
 			size += stream.Write(data.data(), dynamicSize);
-			if(size == (dynamicSize + StaticSize))
+			auto expectedSize = dynamicSize + StaticSize;
+			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
-			int64 dynamicSize;
+			int64 elementCount;
 			ssizet size = 0;
-			size += stream.Read(&dynamicSize, sizeof(dynamicSize));
-			SetDynamicSize(data, dynamicSize);
+			size += stream.Read(&elementCount, sizeof(elementCount));
+			data.clear();
+			data.resize(elementCount);
+			int64 dynamicSize = GetDynamicSize(data);
 			size += stream.Read(data.data(), dynamicSize);
-			if(size == (dynamicSize + StaticSize))
+			auto expectedSize = dynamicSize + StaticSize;
+			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -167,7 +177,7 @@ namespace greaper::refl
 
 		static void SetDynamicSize(Type& data, int64 size)
 		{
-			data.resize(size / sizeof(Type::value_type), Type::value_type(0));
+			/* No-op */
 		}
 	};
 
@@ -186,7 +196,7 @@ namespace greaper::refl
 		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
 		{
 			ssizet size = 0;
-			ssizet dynmaicSize = GetDynamicSize(data);
+			ssizet dynamicSize = GetDynamicSize(data);
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
 				size += stream.Write(data.data(), StaticSize);
@@ -202,15 +212,16 @@ namespace greaper::refl
 					size += res.GetValue();
 				}
 			}
-			if(size == (StaticSize + dynmaicSize))
+			auto expectedSize = dynamicSize + StaticSize;
+			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			ssizet size = 0;
-			ssizet dynmaicSize = GetDynamicSize(data);
+			ssizet dynamicSize = GetDynamicSize(data);
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
 				size += stream.Read(data.data(), StaticSize);
@@ -226,9 +237,10 @@ namespace greaper::refl
 					size += res.GetValue();
 				}
 			}
-			if(size == (StaticSize + dynmaicSize))
+			auto expectedSize = dynamicSize + StaticSize;
+			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", dynamicSize + StaticSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -326,9 +338,11 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
-				size += stream.Write(data.data(), elementCount * sizeof(T));
+				size += stream.Write(data.data(), dynamicSize);
 			}
 			else
 			{
@@ -341,7 +355,10 @@ namespace greaper::refl
 					size += res.GetValue();
 				}
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = dynamicSize + StaticSize; 
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -352,9 +369,11 @@ namespace greaper::refl
 
 			data.clear();
 			data.resize(elementCount);
+			int64 dynamicSize = 0;
 			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
 			{
-				size += stream.Read(&data.data(), elementCount * sizeof(T));
+				dynamicSize = elementCount * sizeof(T);
+				size += stream.Read(&data.data(), dynamicSize);
 			}
 			else
 			{
@@ -366,10 +385,14 @@ namespace greaper::refl
 						return res;
 					
 					(*it) = elem;
+					dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 					size += res.GetValue();
 				}
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = dynamicSize + StaticSize; 
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -470,6 +493,8 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			for(const T& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
@@ -478,7 +503,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -487,6 +515,7 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
+			int64 dynamicSize = 0;
 			data.clear();
 			data.resize(elementCount);
 			for(auto it = data.begin(); it != data.end(); ++it)
@@ -497,9 +526,13 @@ namespace greaper::refl
 					return res;
 				
 				(*it) = elem;
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -596,6 +629,8 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			for(const T& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
@@ -604,7 +639,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -613,6 +651,7 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
+			int64 dynamicSize = 0;
 			data.clear();
 			data.resize(elementCount);
 			for(auto it = data.begin(); it != data.end(); ++it)
@@ -623,9 +662,13 @@ namespace greaper::refl
 					return res;
 				
 				(*it) = elem;
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -723,6 +766,8 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			for(const T& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
@@ -731,7 +776,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -740,8 +788,9 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
+			int64 dynamicSize = 0;
 			data.clear();
-			for(decltype(elementCount) i = 0; i < size; ++i)
+			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				T elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
@@ -749,9 +798,13 @@ namespace greaper::refl
 					return res;
 				
 				data.emplace(elem);
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -850,6 +903,8 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			for(const T& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
@@ -858,7 +913,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -867,8 +925,9 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
+			int64 dynamicSize = 0;
 			data.clear();
-			for(decltype(elementCount) i = 0; i < size; ++i)
+			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				T elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
@@ -876,9 +935,13 @@ namespace greaper::refl
 					return res;
 				
 				data.emplace(elem);
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -977,6 +1040,8 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			for(const T& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
@@ -985,7 +1050,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -994,8 +1062,9 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
+			int64 dynamicSize = 0;
 			data.clear();
-			for(decltype(elementCount) i = 0; i < size; ++i)
+			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				T elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
@@ -1003,9 +1072,13 @@ namespace greaper::refl
 					return res;
 				
 				data.emplace(elem);
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1104,6 +1177,8 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
+
 			for(const T& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
@@ -1112,7 +1187,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1121,8 +1199,9 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
+			int64 dynamicSize = 0;
 			data.clear();
-			for(decltype(elementCount) i = 0; i < size; ++i)
+			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				T elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
@@ -1130,9 +1209,13 @@ namespace greaper::refl
 					return res;
 				
 				data.emplace(elem);
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(elem);
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1232,6 +1315,7 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
 			for(const auto& [key, value] : data)
 			{
 				TResult<ssizet> res = KeyCat::ToStream(key, stream);
@@ -1246,7 +1330,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1256,7 +1343,7 @@ namespace greaper::refl
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			
+			int64 dynamicSize = 0;
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
@@ -1265,6 +1352,7 @@ namespace greaper::refl
 					return res;
 
 				size += res.GetValue();
+				dynamicSize += KeyCat::StaticSize + KeyCat::GetDynamicSize(key);
 
 				V value;
 				res = ValueCat::FromStream(value, stream);
@@ -1272,10 +1360,14 @@ namespace greaper::refl
 					return res;
 				
 				size += res.GetValue();
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(value);
 				
 				data.emplace(key, value);
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1374,6 +1466,7 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
 			for(const auto& [key, value] : data)
 			{
 				TResult<ssizet> res = KeyCat::ToStream(key, stream);
@@ -1388,7 +1481,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1398,7 +1494,7 @@ namespace greaper::refl
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			
+			int64 dynamicSize = 0;
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
@@ -1407,6 +1503,7 @@ namespace greaper::refl
 					return res;
 
 				size += res.GetValue();
+				dynamicSize += KeyCat::StaticSize + KeyCat::GetDynamicSize(key);
 
 				V value;
 				res = ValueCat::FromStream(value, stream);
@@ -1414,10 +1511,14 @@ namespace greaper::refl
 					return res;
 				
 				size += res.GetValue();
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(value);
 				
 				data.emplace(key, value);
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1516,6 +1617,7 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
 			for(const auto& [key, value] : data)
 			{
 				TResult<ssizet> res = KeyCat::ToStream(key, stream);
@@ -1530,7 +1632,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_map>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1540,7 +1645,7 @@ namespace greaper::refl
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			
+			int64 dynamicSize = 0;
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
@@ -1549,6 +1654,7 @@ namespace greaper::refl
 					return res;
 
 				size += res.GetValue();
+				dynamicSize += KeyCat::StaticSize + KeyCat::GetDynamicSize(key);
 
 				V value;
 				res = ValueCat::FromStream(value, stream);
@@ -1556,10 +1662,14 @@ namespace greaper::refl
 					return res;
 				
 				size += res.GetValue();
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(value);
 				
 				data.emplace(key, value);
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1658,6 +1768,7 @@ namespace greaper::refl
 			ssizet size = 0;
 			size += stream.Write(&elementCount, sizeof(elementCount));
 
+			auto dynamicSize = GetDynamicSize(data);
 			for(const auto& [key, value] : data)
 			{
 				TResult<ssizet> res = KeyCat::ToStream(key, stream);
@@ -1672,7 +1783,10 @@ namespace greaper::refl
 				
 				size += res.GetValue();
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1682,7 +1796,7 @@ namespace greaper::refl
 			size += stream.Read(&elementCount, sizeof(elementCount));
 
 			data.clear();
-			
+			int64 dynamicSize = 0;
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
 				K key;
@@ -1691,6 +1805,7 @@ namespace greaper::refl
 					return res;
 
 				size += res.GetValue();
+				dynamicSize += KeyCat::StaticSize + KeyCat::GetDynamicSize(key);
 
 				V value;
 				res = ValueCat::FromStream(value, stream);
@@ -1698,10 +1813,14 @@ namespace greaper::refl
 					return res;
 				
 				size += res.GetValue();
+				dynamicSize += ValueCat::StaticSize + ValueCat::GetDynamicSize(value);
 				
 				data.emplace(key, value);
 			}
-			return Result::CreateSuccess(size);
+			auto expectedSize = StaticSize + dynamicSize;
+			if(size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
