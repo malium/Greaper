@@ -88,26 +88,8 @@ namespace greaper
 		bool m_Static;		// Created at the start of the program cannot be saved
 		bool m_Constant;	// Cannot be modified
 
-		INLINE TProperty(WGreaperLib library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
-			bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr) noexcept
-			:m_Value(std::move(initialValue))
-			, m_PropertyName(propertyName)
-			, m_PropertyInfo(propertyInfo)
-			, m_OnModificationEvent("PropertyModified"sv)
-			, m_PropertyValidator(validator)
-			, m_Library(std::move(library))
-			, m_Static(isStatic)
-			, m_Constant(isConstant)
-		{
-			if (m_PropertyValidator == nullptr)
-			{
-				m_PropertyValidator = Construct<PropertyValidatorNone<T>>();
-			}
-			m_PropertyValidator->Validate(m_Value, &m_Value);
-			m_StringValue = TCategory::ToString(m_Value);
-			//m_StringValue = ReflectedPlainType<T>::ToString(m_Value);
-			//m_StringValue = TPropertyConverter<T>::ToString(m_Value);
-		}
+		TProperty(WGreaperLib library, const StringView& propertyName, T initialValue, const StringView& propertyInfo = StringView{},
+			bool isConstant = false, bool isStatic = false, TPropertyValidator<T>* validator = nullptr) noexcept;
 
 		template<class _T_, class _Alloc_>
 		friend TResult<PProperty<T>> CreateProperty(WGreaperLib library, StringView propertyName, _T_ initialValue, StringView propertyInfo,
@@ -119,61 +101,26 @@ namespace greaper
 		TProperty(const TProperty&) = delete;
 		TProperty& operator=(const TProperty&) = delete;
 
-		NODISCARD INLINE const String& GetPropertyName()const noexcept override
-		{
-			return m_PropertyName;
-		}
-		NODISCARD INLINE const String& GetPropertyInfo()const noexcept override
-		{
-			return m_PropertyInfo;
-		}
-		NODISCARD INLINE TPropertyValidator<T>* GetPropertyValidator()const noexcept
-		{
-			return m_PropertyValidator;
-		}
-		NODISCARD INLINE bool IsConstant()const noexcept override
-		{
-			return m_Constant;
-		}
-		NODISCARD INLINE bool IsStatic()const noexcept override
-		{
-			return m_Static;
-		}
+		const String& GetPropertyName()const noexcept override;
+		
+		const String& GetPropertyInfo()const noexcept override;
+
+		TPropertyValidator<T>* GetPropertyValidator()const noexcept;
+		bool IsConstant()const noexcept override;
+		bool IsStatic()const noexcept override;
 		bool SetValue(const T& value, bool triggerEvent = true, bool ignoreConstness = false) noexcept;
-		INLINE bool SetValueFromString(const String& value) noexcept override
-		{
-			T temp;
-			TCategory::FromString(value, temp);
-			//ReflectedPlainType<T>::FromString(temp, value);
-			return SetValue(temp);
-		}
-		inline T GetValueCopy()const noexcept
-		{
-			auto lck = SharedLock(m_Mutex);
-			return { m_Value };
-		}
-		INLINE void AccessValue(const std::function<void(const T&)>& accessFn)const noexcept
-		{
-			auto lck = SharedLock(m_Mutex);
-			accessFn(m_Value);
-		}
-		INLINE String GetStringValueCopy()const noexcept override
-		{
-			auto lck = SharedLock(m_Mutex);
-			return { m_StringValue };
-		}
-		INLINE void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept
-		{
-			auto lck = SharedLock(m_Mutex);
-			accessFn(m_StringValue);
-		}
+		bool SetValueFromString(const String& value) noexcept override;
+		T GetValueCopy()const noexcept;
+		void AccessValue(const std::function<void(const T&)>& accessFn)const noexcept;
+		String GetStringValueCopy()const noexcept override;
+		void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept;
 		TResult<ssizet> _ValueToStream(IStream& stream)const noexcept override;
 		TResult<ssizet> _ValueFromStream(IStream& stream)noexcept override;
 		cJSON* _ValueToJSON(cJSON* json, StringView name)const noexcept override;
 		EmptyResult _ValueFromJSON(cJSON* json, StringView name)noexcept override;
 		int64 _GetDynamicSize()const noexcept override;
-		NODISCARD INLINE ModificationEvent_t* GetOnModificationEvent()const noexcept override { return &m_OnModificationEvent; }
-		NODISCARD INLINE const WGreaperLib& GetLibrary()const noexcept override { return m_Library; }
+		ModificationEvent_t* GetOnModificationEvent()const noexcept override;
+		const WGreaperLib& GetLibrary()const noexcept override;
 	};
 
 	// Greaper Core specialization
