@@ -82,7 +82,7 @@ namespace greaper
 		WGreaperLib m_Library;
 		mutable RWMutex m_Mutex;
 
-		using TCategory = refl::GetCategoryType<T>::Type;
+		using TCategory = typename refl::GetCategoryType<T>::Type;
 		static_assert(std::is_same_v<TCategory, void>, "Trying to instantiate a Property without a proper refl type.");
 
 		bool m_Static;		// Created at the start of the program cannot be saved

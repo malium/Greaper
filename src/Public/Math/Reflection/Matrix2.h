@@ -21,7 +21,7 @@ namespace greaper::refl
 			size += stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Matrix2Real>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Matrix2Real>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Matrix2Real<T>& data, IStream& stream)
@@ -30,7 +30,7 @@ namespace greaper::refl
 			size += stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Matrix2Real>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Matrix2Real>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Matrix2Real<T>& data, StringView name)
@@ -62,7 +62,7 @@ namespace greaper::refl
 			
 			int32 arrSize = cJSON_GetArraySize(arr);
 			if(arrSize != math::Matrix2Real<T>::ComponentCount)
-				return Result::CreateFailure(Format("[refl::ComplexType<Matrix2Real>]::FromJSON Couldn't obtain the value, it had different size, expected:%"PRIuPTR", obtained:%"PRId32".", math::Matrix2Real<T>::ComponentCount, arr));
+				return Result::CreateFailure(Format("[refl::ComplexType<Matrix2Real>]::FromJSON Couldn't obtain the value, it had different size, expected:%" PRIuPTR ", obtained:%" PRId32 ".", math::Matrix2Real<T>::ComponentCount, arr));
 			
 			for(decltype(math::Matrix2Real<T>::ComponentCount) i = 0; i < math::Matrix2Real<T>::ComponentCount; ++i)
 			{

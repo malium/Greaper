@@ -21,7 +21,7 @@ namespace greaper::refl
 			size += stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Vector2Real<T>& data, IStream& stream)
@@ -30,7 +30,7 @@ namespace greaper::refl
 			size += stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Real<T>& data, StringView name)
@@ -96,7 +96,7 @@ namespace greaper::refl
 			size += stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Vector2Signed<T>& data, IStream& stream)
@@ -105,7 +105,7 @@ namespace greaper::refl
 			size += stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Signed<T>& data, StringView name)
@@ -171,7 +171,7 @@ namespace greaper::refl
 			size += stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Vector2Unsigned<T>& data, IStream& stream)
@@ -180,7 +180,7 @@ namespace greaper::refl
 			size += stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2Unsigned<T>& data, StringView name)
@@ -246,7 +246,7 @@ namespace greaper::refl
 			size += stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::Vector2b& data, IStream& stream)
@@ -255,7 +255,7 @@ namespace greaper::refl
 			size += stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::Vector2b& data, StringView name)

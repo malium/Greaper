@@ -11,23 +11,23 @@
 
 /** Checks if a value is within range [min,max) */
 template<typename T>
-INLINE NODISCARD constexpr bool IsWithin(const T& value, const T& min, const T& max)
+NODISCARD INLINE constexpr bool IsWithin(const T& value, const T& min, const T& max)
 {
 	return value >= min && value < max;
 }
 /** Checks if a value is within range (min,max) */
 template<typename T>
-INLINE NODISCARD constexpr bool IsWithinExclusive(const T& value, const T& min, const T& max)
+NODISCARD INLINE constexpr bool IsWithinExclusive(const T& value, const T& min, const T& max)
 {
 	return value > min && value < max;
 }
 /** Checks if a value is within range [min, max] */
 template<class T>
-INLINE NODISCARD constexpr bool IsWithinInclusive(const T& value, const T& min, const T& max)
+NODISCARD INLINE constexpr bool IsWithinInclusive(const T& value, const T& min, const T& max)
 {
 	return value >= min && value <= max;
 }
-INLINE NODISCARD constexpr uint32 BitsLog2(uint32 v)
+NODISCARD INLINE constexpr uint32 BitsLog2(uint32 v)
 {
 	switch(v)
 	{
@@ -42,13 +42,13 @@ INLINE NODISCARD constexpr uint32 BitsLog2(uint32 v)
 }
 /** Checks if a number is a power of two */
 template<typename T>
-INLINE NODISCARD constexpr bool IsPowerOfTwo(const T value)
+NODISCARD INLINE constexpr bool IsPowerOfTwo(const T value)
 {
 	return value != 0 && !(value & (value - 1));
 }
 /** Rounds number up/down to the next multiple, multiple must be power of two */
 template<typename T>
-INLINE NODISCARD constexpr T RoundUp(const T number, const T multiple)
+NODISCARD INLINE constexpr T RoundUp(const T number, const T multiple)
 {
 	static_assert(!IsPowerOfTwo(multiple), "Multiple must be power of two.");
 	const T result = (number + multiple - 1) & ~(multiple - 1);
@@ -57,13 +57,13 @@ INLINE NODISCARD constexpr T RoundUp(const T number, const T multiple)
 }
 /** Computes the factor that tells by how much is bigger/smaller */
 template<typename T>
-INLINE NODISCARD constexpr T DivideAndRoundUp(T n, T d) noexcept
+NODISCARD INLINE constexpr T DivideAndRoundUp(T n, T d) noexcept
 {
 	return (n + d - 1) / d;
 }
 /** Rounds the given number up to the next higher power of two */
 template<typename T>
-INLINE NODISCARD constexpr T RoundUpToPowerOf2(T val)
+NODISCARD INLINE constexpr T RoundUpToPowerOf2(T val)
 {
 	--val;
 	val |= val >> 1;
@@ -76,94 +76,94 @@ INLINE NODISCARD constexpr T RoundUpToPowerOf2(T val)
 }
 /** Returns the highest of 3 values */
 template<typename T>
-INLINE NODISCARD constexpr T Max3(const T a, const T b, const T c)
+NODISCARD INLINE constexpr T Max3(const T a, const T b, const T c)
 {
 	return (a > b) ? ((a > c) ? a : c) : ((b > c) ? b : c);
 }
 /** Returns the lowest of 3 values */
 template<typename T>
-INLINE NODISCARD constexpr T Min3(const T a, const T b, const T c)
+NODISCARD INLINE constexpr T Min3(const T a, const T b, const T c)
 {
 	return (a < b) ? ((a < c) ? a : c) : ((b < c) ? b : c);
 }
 /** Returns a higher value */
 template<class T>
-INLINE NODISCARD constexpr T Max(const T a, const T b)
+NODISCARD INLINE constexpr T Max(const T a, const T b)
 {
 	return (a >= b) ? a : b;
 }
 /** Returns the lower value */
 template<class T>
-INLINE NODISCARD constexpr T Min(const T a, const T b)
+NODISCARD INLINE constexpr T Min(const T a, const T b)
 {
 	return (a <= b) ? a : b;
 }
 /** Clamps the value between a minimum and a maximum */
 template<typename T>
-INLINE NODISCARD constexpr T Clamp(const T a, const T min, const T max)
+NODISCARD INLINE constexpr T Clamp(const T a, const T min, const T max)
 {
 	return Max(min, Min(max, a));
 }
 /** Computes the absolute value */
 template<class T> 
-INLINE NODISCARD constexpr T Abs(T a)
+NODISCARD INLINE constexpr T Abs(T a)
 {
 	return (a >= T(0)) ? a : -a;
 }
 
-INLINE NODISCARD constexpr bool IsNearlyEqual(float a, float b, float tolerance = 0.0001f)
+NODISCARD INLINE constexpr bool IsNearlyEqual(float a, float b, float tolerance = 0.0001f)
 {
 	return Abs(a - b) <= tolerance;
 }
-INLINE NODISCARD constexpr bool IsNearlyEqual(double a, double b, double tolerance = 0.0001)
+NODISCARD INLINE constexpr bool IsNearlyEqual(double a, double b, double tolerance = 0.0001)
 {
 	return Abs(a - b) <= tolerance;
 }
 /** Returns a * a */
 template<typename T>
-INLINE NODISCARD constexpr T Square(const T a)
+NODISCARD INLINE constexpr T Square(const T a)
 {
 	return a * a;
 }
 /** Returns a * a * a */
 template<typename T>
-INLINE NODISCARD constexpr T Cube(const T a)
+NODISCARD INLINE constexpr T Cube(const T a)
 {
 	return a * a * a;
 }
 /** Returns 1, 0 or -1 depending on relation of T to 0 */
 template<class T>
-INLINE NODISCARD constexpr T Sign(const T a)
+NODISCARD INLINE constexpr T Sign(const T a)
 {
 	return ((a > (T)0) ? (T)1 : ((a) < (T)0) ? (T)-1 : (T)0);
 }
 /** Clamps an int32 into the int8 range. */
-INLINE NODISCARD constexpr int8 ClampChar(const int32 i)
+NODISCARD INLINE constexpr int8 ClampChar(const int32 i)
 {
 	return static_cast<int8>(Clamp(i, -128, 127));
 }
 /** Clamps an int32 into the int16 range. */
-INLINE NODISCARD constexpr int16 ClampShort(const int32 i)
+NODISCARD INLINE constexpr int16 ClampShort(const int32 i)
 {
 	return static_cast<int16>(Clamp(i, -32768, 32767));
 }
 /** Retruns true if value is NaN */
-INLINE NODISCARD bool IsNaN(const float f) noexcept
+NODISCARD INLINE bool IsNaN(const float f) noexcept
 {
 	return (*reinterpret_cast<const uint32*>(&f) & 0x7FFFFFFF) > 0x7F800000;
 }
 /** Returns true if a value is finite */
-INLINE NODISCARD bool IsFinite(const float f)
+NODISCARD INLINE bool IsFinite(const float f)
 {
 	return (*reinterpret_cast<const uint32*>(&f) & 0x7F800000) != 0x7F800000;
 }
 /** Returns true if a value is infinite */
-INLINE NODISCARD bool IsInfinite(const float f)
+NODISCARD INLINE bool IsInfinite(const float f)
 {
 	return !IsFinite(f);
 }
 /** Get the boolean value from a flag */
-INLINE NODISCARD bool GetBitValue(const uint8* ptr, const uint32 index)noexcept
+NODISCARD INLINE bool GetBitValue(const uint8* ptr, const uint32 index)noexcept
 {
 	const auto* const bytePtr = ptr + index / 8;
 	const auto mask = static_cast<uint8>(1u << (index & 0x7u));
@@ -180,7 +180,7 @@ INLINE void SetBitValue(uint8* ptr, const uint32 index, const bool set)noexcept
 		*bytePtr &= (uint8)~mask;
 }
 /** Returns a tuple of each element of the version number */
-INLINE NODISCARD constexpr std::tuple<uint8, uint8, uint8, uint8> GetGreaperVersionValues(uint32 version)
+NODISCARD INLINE constexpr std::tuple<uint8, uint8, uint8, uint8> GetGreaperVersionValues(uint32 version)
 {
 	return { (uint8)VERSION_GET_MAJOR(version), (uint8)VERSION_GET_MINOR(version),
 		(uint8)VERSION_GET_PATCH(version), (uint8)VERSION_GET_REV(version) };
@@ -210,7 +210,7 @@ INLINE void HashCombine(sizet& seed, const FirstArgType& firstArg, const RestArg
 *	Computes the hash of the concatenated types.
 */
 template<typename... ArgsType>
-INLINE NODISCARD sizet ComputeHash(const ArgsType&... args)
+NODISCARD INLINE sizet ComputeHash(const ArgsType&... args)
 {
 	sizet seed = 0;
 	HashCombine(seed, args...);
@@ -244,7 +244,7 @@ INLINE void DuplicateMemory(const T& source, T& dst) noexcept
 	memcpy(&dst, &source, sizeof(T));
 }
 template<class T>
-INLINE NODISCARD bool IsMemoryCleared(const T& data) noexcept
+NODISCARD INLINE bool IsMemoryCleared(const T& data) noexcept
 {
 	static const uint8 zeros[sizeof(T)]  = {};
 	return ::memcmp(&data, &zeros, sizeof(T)) == 0;

@@ -90,7 +90,7 @@ namespace greaper::refl
 	template<class T>
 	struct GetCategoryType
 	{
-		using Type =
+		using Type = typename
 			std::conditional_t<std::is_base_of_v<BaseType<T>, PlainType<T>>, PlainType<T>, 
 			std::conditional_t<std::is_base_of_v<BaseType<T>, ContainerType<T>>, ContainerType<T>, 
 			std::conditional_t<std::is_base_of_v<BaseType<T>, ComplexType<T>>, ComplexType<T>,

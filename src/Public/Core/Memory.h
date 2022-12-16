@@ -104,44 +104,44 @@ namespace greaper
 	class GenericAllocator { };
 
 	template<class _Alloc_ = GenericAllocator>
-	INLINE NODISCARD void* Alloc(sizet byteSize)
+	NODISCARD INLINE void* Alloc(sizet byteSize)
 	{
 		return MemoryAllocator<_Alloc_>::Allocate(byteSize);
 		//return malloc(byteSize);
 	}
 
 	template<class _Alloc_ = GenericAllocator>
-	INLINE NODISCARD void* AllocAligned(sizet byteSize, sizet alignment)
+	NODISCARD INLINE void* AllocAligned(sizet byteSize, sizet alignment)
 	{
 		return MemoryAllocator<_Alloc_>::AllocateAligned(byteSize, alignment);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE NODISCARD T* AllocN(sizet N)
+	NODISCARD INLINE T* AllocN(sizet N)
 	{
 		return static_cast<T*>(Alloc<_Alloc_>(sizeof(T) * N));
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE NODISCARD T* AllocAlignedN(sizet N, sizet alignment)
+	NODISCARD INLINE T* AllocAlignedN(sizet N, sizet alignment)
 	{
 		return static_cast<T*>(AllocAligned<_Alloc_>(sizeof(T) * N, alignment));
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE NODISCARD T* AllocT()
+	NODISCARD INLINE T* AllocT()
 	{
 		return AllocN<T, _Alloc_>(1);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator>
-	INLINE NODISCARD T* AllocAlignedT(sizet alignment)
+	NODISCARD INLINE T* AllocAlignedT(sizet alignment)
 	{
 		return AllocN<T, _Alloc_>(1, alignment);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
-	INLINE NODISCARD T* ConstructN(sizet count, Args&&... args)
+	NODISCARD INLINE T* ConstructN(sizet count, Args&&... args)
 	{
 		T* mem = AllocN<T, _Alloc_>(count);
 		for (sizet i = 0; i < count; ++i)
@@ -150,7 +150,7 @@ namespace greaper
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
-	INLINE NODISCARD T* ConstructAlignedN(sizet count, sizet alignment, Args&&... args)
+	NODISCARD INLINE T* ConstructAlignedN(sizet count, sizet alignment, Args&&... args)
 	{
 		T* mem = AllocAlignedN<T, _Alloc_>(count, alignment);
 		for (sizet i = 0; i < count; ++i)
@@ -159,13 +159,13 @@ namespace greaper
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
-	INLINE NODISCARD T* Construct(Args&&... args)
+	NODISCARD INLINE T* Construct(Args&&... args)
 	{
 		return ConstructN<T, _Alloc_>(1, args...);
 	}
 
 	template<class T, class _Alloc_ = GenericAllocator, class... Args>
-	INLINE NODISCARD T* ConstructAligned(sizet alignment, Args&&... args)
+	NODISCARD INLINE T* ConstructAligned(sizet alignment, Args&&... args)
 	{
 		return ConstructAlignedN<T, _Alloc_>(1, alignment, args...);
 	}
@@ -252,7 +252,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 
 		template<class U> class rebind { public: using other = StdAlloc<U, _Alloc_>; };
 
-		INLINE NODISCARD T* allocate(const size_t num)
+		NODISCARD INLINE T* allocate(const size_t num)
 		{
 #if GREAPER_DEBUG_ALLOCATION
 			if (num == 0)
@@ -304,7 +304,7 @@ template<class _T_, class _Alloc_> friend void greaper::Destroy(_T_*, sizet)
 		template<class U> class rebind { public: using other = StdAlignedAlloc<U, alignment, _Alloc_>; };
 
 		INLINE static constexpr sizet Alignment()noexcept { return alignment; }
-		INLINE NODISCARD T* allocate(const size_t num)
+		NODISCARD INLINE T* allocate(const size_t num)
 		{
 #if GREAPER_DEBUG_ALLOCATION
 			if (num == 0)
@@ -638,7 +638,7 @@ namespace std
 	template<>
 	struct hash<greaper::String>
 	{
-		INLINE NODISCARD size_t operator()(const greaper::String& str)const noexcept
+		NODISCARD INLINE size_t operator()(const greaper::String& str)const noexcept
 		{
 #if COMPILER_MSVC
 			return std::_Hash_array_representation(str.data(), str.size());
@@ -651,7 +651,7 @@ namespace std
 	template<>
 	struct hash<greaper::WString>
 	{
-		INLINE NODISCARD size_t operator()(const greaper::WString& str)const noexcept
+		NODISCARD INLINE size_t operator()(const greaper::WString& str)const noexcept
 		{
 #if COMPILER_MSVC
 			return std::_Hash_array_representation(str.data(), str.size());
@@ -664,7 +664,7 @@ namespace std
 	template<class T>
 	struct hash<greaper::UPtr<T>>
 	{
-		INLINE NODISCARD size_t operator()(const greaper::UPtr<T>& ptr)const noexcept
+		NODISCARD INLINE size_t operator()(const greaper::UPtr<T>& ptr)const noexcept
 		{
 			return std::hash<T>()(ptr.Get());
 		}
@@ -673,7 +673,7 @@ namespace std
 	template<class T>
 	struct hash<greaper::SharedPointer<T>>
 	{
-		INLINE NODISCARD size_t operator()(const greaper::SharedPointer<T>& ptr)const noexcept
+		NODISCARD INLINE size_t operator()(const greaper::SharedPointer<T>& ptr)const noexcept
 		{
 			return std::hash<T>()(ptr.Get());
 		}
@@ -682,7 +682,7 @@ namespace std
 	template<class T>
 	struct hash<greaper::WeakPointer<T>>
 	{
-		INLINE NODISCARD size_t operator()(const greaper::WeakPointer<T>& ptr)const noexcept
+		NODISCARD INLINE size_t operator()(const greaper::WeakPointer<T>& ptr)const noexcept
 		{
 			if (!ptr.Expired())
 				return std::hash<greaper::SharedPointer<T>>()(ptr.Lock());
@@ -697,7 +697,7 @@ namespace std
 namespace greaper
 {
 	template<class T, class _Alloc_>
-	INLINE NODISCARD ssizet IndexOf(const Vector<T, _Alloc_>& container, const T& element) noexcept
+	NODISCARD INLINE ssizet IndexOf(const Vector<T, _Alloc_>& container, const T& element) noexcept
 	{
 		for (auto it = container.cbegin(); it != container.cend(); ++it)
 		{
@@ -712,7 +712,7 @@ namespace greaper
 		return -1;
 	}
 	template<class T, class _Alloc_>
-	INLINE NODISCARD ssizet IndexOf(const Deque<T, _Alloc_>& container, const T& element) noexcept
+	NODISCARD INLINE ssizet IndexOf(const Deque<T, _Alloc_>& container, const T& element) noexcept
 	{
 		for (auto it = container.cbegin(); it != container.cend(); ++it)
 		{
@@ -722,7 +722,7 @@ namespace greaper
 		return -1;
 	}
 	template<class T, std::size_t N>
-	INLINE NODISCARD ssizet IndexOf(T(&arr)[N], const T& element) noexcept
+	NODISCARD INLINE ssizet IndexOf(T(&arr)[N], const T& element) noexcept
 	{
 		for (std::size_t i = 0; i < N; ++i)
 		{
@@ -732,17 +732,17 @@ namespace greaper
 		return -1;
 	}
 	template<class T, class _Alloc_>
-	INLINE NODISCARD bool Contains(const Vector<T, _Alloc_>& container, const T& elem) noexcept
+	NODISCARD INLINE bool Contains(const Vector<T, _Alloc_>& container, const T& elem) noexcept
 	{
 		return IndexOf<T, _Alloc_>(container, elem) >= 0;
 	}
 	template<class T, class _Alloc_>
-	INLINE NODISCARD bool Contains(const Deque<T, _Alloc_>& container, const T& elem) noexcept
+	NODISCARD INLINE bool Contains(const Deque<T, _Alloc_>& container, const T& elem) noexcept
 	{
 		return IndexOf<T, _Alloc_>(container, elem) >= 0;
 	}
 	template<class T, std::size_t N>
-	INLINE NODISCARD bool Contains(T(&arr)[N], const T& elem) noexcept
+	NODISCARD INLINE bool Contains(T(&arr)[N], const T& elem) noexcept
 	{
 		return IndexOf<T, N>(arr, elem);
 	}

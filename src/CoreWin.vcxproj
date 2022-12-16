@@ -292,8 +292,11 @@
     <ClInclude Include="Public\Core\Platform.h" />
     <ClInclude Include="Public\Core\Property.h" />
     <ClInclude Include="Public\Core\Reflection\BaseType.h" />
+    <ClInclude Include="Public\Core\Reflection\ComplexType.h" />
     <ClInclude Include="Public\Core\Reflection\ContainerType.h" />
     <ClInclude Include="Public\Core\Reflection\PlainType.h" />
+    <ClInclude Include="Public\Core\Reflection\Property.h" />
+    <ClInclude Include="Public\Core\Reflection\Rect.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedField.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedPlainContainer.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedPlainEnum.h" />
@@ -325,15 +328,25 @@
     <ClInclude Include="Public\Math\Matrix3.h" />
     <ClInclude Include="Public\Math\Matrix4.h" />
     <ClInclude Include="Public\Math\Quaternion.h" />
+    <ClInclude Include="Public\Math\Reflection\Matrix2.h" />
+    <ClInclude Include="Public\Math\Reflection\Matrix3.h" />
+    <ClInclude Include="Public\Math\Reflection\Matrix4.h" />
+    <ClInclude Include="Public\Math\Reflection\Quaternion.h" />
+    <ClInclude Include="Public\Math\Reflection\Vector2.h" />
+    <ClInclude Include="Public\Math\Reflection\Vector3.h" />
+    <ClInclude Include="Public\Math\Reflection\Vector4.h" />
     <ClInclude Include="Public\Math\Vector2.h" />
     <ClInclude Include="Public\Math\Vector3.h" />
     <ClInclude Include="Public\Math\Vector4.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Public\Core\Base\IGreaperLibrary.inl" />
+    <None Include="Public\Core\Base\IInterface.inl" />
     <None Include="Public\Core\Base\MemoryStream.inl" />
     <None Include="Public\Core\Base\FileStream.inl" />
     <None Include="Public\Core\Base\MPMCTaskScheduler.inl" />
     <None Include="Public\Core\Base\Platform.inl" />
+    <None Include="Public\Core\Base\Property.inl" />
     <None Include="Public\Core\Base\Stream.inl" />
     <None Include="Public\Core\Base\Uuid.inl" />
     <None Include="Public\Core\Lnx\LnxPlatform.inl" />

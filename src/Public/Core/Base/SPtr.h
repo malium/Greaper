@@ -77,10 +77,10 @@ namespace greaper
 					PlatformDealloc(this);
 				}
 			}
-			INLINE NODISCARD uint32 SharedRefCount()const noexcept override { return m_SharedReferences; }
-			INLINE NODISCARD uint32 WeakRefCount()const noexcept override { return m_WeakReferences; }
-			INLINE NODISCARD void* GetValue()const noexcept override { return m_Value; }
-			INLINE NODISCARD SPtrType GetType()const noexcept override { return SPtrType::SingleThread; }
+			NODISCARD INLINE uint32 SharedRefCount()const noexcept override { return m_SharedReferences; }
+			NODISCARD INLINE uint32 WeakRefCount()const noexcept override { return m_WeakReferences; }
+			NODISCARD INLINE void* GetValue()const noexcept override { return m_Value; }
+			NODISCARD INLINE SPtrType GetType()const noexcept override { return SPtrType::SingleThread; }
 
 		private:
 			mutable T* m_Value;
@@ -131,10 +131,10 @@ namespace greaper
 					PlatformDealloc(this);
 				}
 			}
-			INLINE NODISCARD uint32 SharedRefCount()const noexcept override { return m_SharedReferences; }
-			INLINE NODISCARD uint32 WeakRefCount()const noexcept override { return m_WeakReferences; }
-			INLINE NODISCARD void* GetValue()const noexcept override { return m_Value; }
-			INLINE NODISCARD SPtrType GetType()const noexcept override { return SPtrType::MultiThread; }
+			NODISCARD INLINE uint32 SharedRefCount()const noexcept override { return m_SharedReferences; }
+			NODISCARD INLINE uint32 WeakRefCount()const noexcept override { return m_WeakReferences; }
+			NODISCARD INLINE void* GetValue()const noexcept override { return m_Value; }
+			NODISCARD INLINE SPtrType GetType()const noexcept override { return SPtrType::MultiThread; }
 
 		private:
 			mutable T* m_Value;
@@ -327,19 +327,19 @@ namespace greaper
 			other.m_Control = tempControl;
 			other.m_Value = tempValue;
 		}
-		INLINE NODISCARD uint32 RefCount()const noexcept
+		NODISCARD INLINE uint32 RefCount()const noexcept
 		{
 			if (m_Control != nullptr)
 				return m_Control->SharedRefCount();
 			return 0;
 		}
-		INLINE NODISCARD uint32 WeakRefCount()const noexcept
+		NODISCARD INLINE uint32 WeakRefCount()const noexcept
 		{
 			if (m_Control != nullptr)
 				return m_Control->WeakRefCount();
 			return 0;
 		}
-		INLINE NODISCARD T* get()const noexcept { return m_Value; }
+		NODISCARD INLINE T* get()const noexcept { return m_Value; }
 		INLINE T* operator->()const noexcept
 		{
 			VerifyNotNull(m_Value, "SPtr: Trying to access a nullptr.");
@@ -360,22 +360,22 @@ namespace greaper
 	};
 
 	template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-	INLINE NODISCARD bool operator==(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
+	NODISCARD INLINE bool operator==(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
 	{
 		return left.get() == right.get();
 	}
 	template<class T, class T2, typename std::enable_if<std::is_base_of_v<T, T2> || std::is_base_of_v<T2, T>, bool>::type = true>
-	INLINE NODISCARD bool operator!=(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
+	NODISCARD INLINE bool operator!=(const SharedPointer<T>& left, const SharedPointer<T2>& right)noexcept
 	{
 		return !(left == right);
 	}
 	template<class T>
-	INLINE NODISCARD bool operator==(const SharedPointer<T>& left, std::nullptr_t)
+	NODISCARD INLINE bool operator==(const SharedPointer<T>& left, std::nullptr_t)
 	{
 		return left.get() == nullptr;
 	}
 	template<class T>
-	INLINE NODISCARD bool operator!=(const SharedPointer<T>& left, std::nullptr_t)
+	NODISCARD INLINE bool operator!=(const SharedPointer<T>& left, std::nullptr_t)
 	{
 		return !(left == nullptr);
 	}

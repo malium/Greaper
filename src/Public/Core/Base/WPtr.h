@@ -123,7 +123,7 @@ namespace greaper
 
 			return shared;
 		}
-		INLINE NODISCARD bool expired()const noexcept
+		NODISCARD INLINE bool expired()const noexcept
 		{
 			return m_Control == nullptr || m_Control->SharedRefCount() <= 0;
 		}
@@ -142,13 +142,13 @@ namespace greaper
 				m_Control = nullptr;
 			}
 		}
-		INLINE NODISCARD uint32 SharedRefCount()const noexcept
+		NODISCARD INLINE uint32 SharedRefCount()const noexcept
 		{
 			if (m_Control != nullptr)
 				return m_Control->SharedRefCount();
 			return 0;
 		}
-		INLINE NODISCARD uint32 WeakRefCount()const noexcept
+		NODISCARD INLINE uint32 WeakRefCount()const noexcept
 		{
 			if (m_Control != nullptr)
 				return m_Control->WeakRefCount();

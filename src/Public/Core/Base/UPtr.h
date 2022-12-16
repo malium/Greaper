@@ -54,7 +54,7 @@ namespace greaper
 			other.m_Value = tempVal;
 			other.m_Deleter = std::move(tempDel);
 		}
-		INLINE NODISCARD T* Release() noexcept
+		NODISCARD INLINE T* Release() noexcept
 		{
 			T* temp = m_Value;
 			m_Value = nullptr;
@@ -70,7 +70,7 @@ namespace greaper
 			m_Value = value;
 			m_Deleter = std::move(deleteFn);
 		}
-		INLINE NODISCARD T* Get()const noexcept { return m_Value; }
+		NODISCARD INLINE T* Get()const noexcept { return m_Value; }
 		INLINE  T* operator->() const noexcept
 		{
 			VerifyNotNull(m_Value, "UPtr: Trying to access a nullptr.");

@@ -118,7 +118,7 @@ namespace greaper
 			return m_Handle != nullptr;
 		}
 
-		INLINE NODISCARD OSLibrary::LibraryHandle GetOSHandle()const noexcept
+		NODISCARD INLINE OSLibrary::LibraryHandle GetOSHandle()const noexcept
 		{
 			return m_Handle;
 		}

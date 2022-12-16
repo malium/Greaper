@@ -21,7 +21,7 @@ namespace greaper
 	public:
 		static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>, "RectT can only be instanced with an integer or a floating point type.");
 
-		using TCategory = refl::GetCategoryType<T>::Type;
+		using TCategory = typename refl::GetCategoryType<T>::Type;
 		
 		T Left = T(0);
 		T Top = T(0);
@@ -69,14 +69,14 @@ namespace greaper
 #endif
 	};
 
-	template<class T> INLINE NODISCARD constexpr bool operator==(const RectT<T>& left, const RectT<T>& right) noexcept
+	template<class T> NODISCARD INLINE constexpr bool operator==(const RectT<T>& left, const RectT<T>& right) noexcept
 	{
 		return left.Left == right.Left
 			&& left.Top == right.Top
 			&& left.Right == right.Right
 			&& left.Top == right.Top;
 	}
-	template<class T> INLINE NODISCARD constexpr bool operator!=(const RectT<T>& left, const RectT<T>& right) noexcept
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const RectT<T>& left, const RectT<T>& right) noexcept
 	{
 		return !(left == right);
 	}

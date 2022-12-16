@@ -21,7 +21,7 @@ namespace greaper::refl
 			size += stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static TResult<ssizet> FromStream(math::QuaternionReal<T>& data, IStream& stream)
@@ -30,7 +30,7 @@ namespace greaper::refl
 			size += stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
 		static cJSON* ToJSON(const math::QuaternionReal<T>& data, StringView name)

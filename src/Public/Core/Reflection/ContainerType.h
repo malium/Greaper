@@ -32,7 +32,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -47,7 +47,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -115,7 +115,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -130,7 +130,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -175,7 +175,7 @@ namespace greaper::refl
 			return data.size() * sizeof(Type::value_type);
 		}
 
-		static void SetDynamicSize(Type& data, int64 size)
+		static void SetDynamicSize(UNUSED Type& data, UNUSED int64 size)
 		{
 			/* No-op */
 		}
@@ -185,7 +185,7 @@ namespace greaper::refl
 	struct ContainerType<std::array<T, N>> : public BaseType<std::array<T, N>>
 	{
 		using Type = std::array<T, N>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::array>] Trying to use a Container with not refl value_type!");
 
@@ -197,7 +197,7 @@ namespace greaper::refl
 		{
 			ssizet size = 0;
 			ssizet dynamicSize = GetDynamicSize(data);
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
 			{
 				size += stream.Write(data.data(), StaticSize);
 			}
@@ -215,14 +215,14 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
 		{
 			ssizet size = 0;
 			ssizet dynamicSize = GetDynamicSize(data);
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
 			{
 				size += stream.Read(data.data(), StaticSize);
 			}
@@ -240,7 +240,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -271,7 +271,7 @@ namespace greaper::refl
 				return Result::CreateFailure("[refl::ContainerType<std::array>]::FromJSON expected an Array."sv);
 			sizet arrSize = cJSON_GetArraySize(arr);
 			if(arrSize != N)
-				return Result::CreateFailure(Format("[refl::ContainerType<std::array>]::FromJSON expected an Array with size '"PRIuPTR"' but obtained '"PRIuPTR"'.", N, arrSize));
+				return Result::CreateFailure(Format("[refl::ContainerType<std::array>]::FromJSON expected an Array with size '" PRIuPTR "' but obtained '" PRIuPTR "'.", N, arrSize));
 			
 			achar buff[128];
 			for(sizet i = 0; i < N; ++i)
@@ -305,7 +305,7 @@ namespace greaper::refl
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
+			if constexpr (std::is_same_v<ValueCat, PlainType<T>>)
 				return 0ll;
 			
 			int64 size = 0;
@@ -324,7 +324,7 @@ namespace greaper::refl
 	struct ContainerType<Vector<T, A>> : public BaseType<Vector<T, A>>
 	{
 		using Type = Vector<T, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::vector>] Trying to use a Container with not refl value_type!");
 
@@ -340,7 +340,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
 			{
 				size += stream.Write(data.data(), dynamicSize);
 			}
@@ -358,7 +358,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize; 
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -370,7 +370,7 @@ namespace greaper::refl
 			data.clear();
 			data.resize(elementCount);
 			int64 dynamicSize = 0;
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
 			{
 				dynamicSize = elementCount * sizeof(T);
 				size += stream.Read(&data.data(), dynamicSize);
@@ -392,7 +392,7 @@ namespace greaper::refl
 			auto expectedSize = dynamicSize + StaticSize; 
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -459,7 +459,7 @@ namespace greaper::refl
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>)
+			if constexpr (std::is_same_v<ValueCat, PlainType<T>>)
 			{
 				return sizeof(T) * data.size();
 			}
@@ -479,7 +479,7 @@ namespace greaper::refl
 	struct ContainerType<List<T, A>> : public BaseType<List<T, A>>
 	{
 		using Type = List<T, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::list>] Trying to use a Container with not refl value_type!");
 
@@ -506,7 +506,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -532,7 +532,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -615,7 +615,7 @@ namespace greaper::refl
 	struct ContainerType<Deque<T, A>> : public BaseType<Deque<T, A>>
 	{
 		using Type = Deque<T, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::deque>] Trying to use a Container with not refl value_type!");
 
@@ -642,7 +642,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -668,7 +668,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -752,7 +752,7 @@ namespace greaper::refl
 	struct ContainerType<Set<T, C, A>> : public BaseType<Set<T, C, A>>
 	{
 		using Type = Set<T, C, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::set>] Trying to use a Container with not refl value_type!");
 
@@ -779,7 +779,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -804,7 +804,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -886,10 +886,10 @@ namespace greaper::refl
 	};
 
 	template<class T, class C, class A>
-	struct ContainerType<MultiSet<T, C, A>> : public BaseType<Multiset<T, C, A>>
+	struct ContainerType<MultiSet<T, C, A>> : public BaseType<MultiSet<T, C, A>>
 	{
 		using Type = MultiSet<T, C, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::multiset>] Trying to use a Container with not refl value_type!");
 
@@ -916,7 +916,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -941,7 +941,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1026,7 +1026,7 @@ namespace greaper::refl
 	struct ContainerType<UnorderedSet<T, H, C, A>> : public BaseType<UnorderedSet<T, H, C, A>>
 	{
 		using Type = UnorderedSet<T, H, C, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_set>] Trying to use a Container with not refl value_type!");
 
@@ -1053,7 +1053,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1078,7 +1078,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1163,7 +1163,7 @@ namespace greaper::refl
 	struct ContainerType<UnorderedMultiSet<T, H, C, A>> : public BaseType<UnorderedSet<T, H, C, A>>
 	{
 		using Type = UnorderedMultiSet<T, H, C, A>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_multiset>] Trying to use a Container with not refl value_type!");
 
@@ -1190,7 +1190,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1215,7 +1215,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1300,8 +1300,8 @@ namespace greaper::refl
 	struct ContainerType<Map<K, V, P, A>> : public BaseType<Map<K, V, P, A>>
 	{
 		using Type = Map<K, V, P, A>;
-		using KeyCat = GetCategoryType<K>::Type;
-		using ValueCat = GetCategoryType<V>::Type;
+		using KeyCat = typename GetCategoryType<K>::Type;
+		using ValueCat = typename GetCategoryType<V>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::map>] Trying to use a Container with not refl value_type!");
 
@@ -1333,7 +1333,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1367,7 +1367,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1451,8 +1451,8 @@ namespace greaper::refl
 	struct ContainerType<MultiMap<K, V, P, A>> : public BaseType<MultiMap<K, V, P, A>>
 	{
 		using Type = MultiMap<K, V, P, A>;
-		using KeyCat = GetCategoryType<K>::Type;
-		using ValueCat = GetCategoryType<V>::Type;
+		using KeyCat = typename GetCategoryType<K>::Type;
+		using ValueCat = typename GetCategoryType<V>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::multimap>] Trying to use a Container with not refl value_type!");
 
@@ -1484,7 +1484,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1518,7 +1518,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1602,8 +1602,8 @@ namespace greaper::refl
 	struct ContainerType<UnorderedMap<K, V, H, C, A>> : public BaseType<UnorderedMap<K, V, H, C, A>>
 	{
 		using Type = UnorderedMap<K, V, H, C, A>;
-		using KeyCat = GetCategoryType<K>::Type;
-		using ValueCat = GetCategoryType<V>::Type;
+		using KeyCat = typename GetCategoryType<K>::Type;
+		using ValueCat = typename GetCategoryType<V>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_map>] Trying to use a Container with not refl value_type!");
 
@@ -1635,7 +1635,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_map>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_map>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1669,7 +1669,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)
@@ -1753,8 +1753,8 @@ namespace greaper::refl
 	struct ContainerType<UnorderedMultiMap<K, V, H, C, A>> : public BaseType<UnorderedMultiMap<K, V, H, C, A>>
 	{
 		using Type = UnorderedMultiMap<K, V, H, C, A>;
-		using KeyCat = GetCategoryType<K>::Type;
-		using ValueCat = GetCategoryType<V>::Type;
+		using KeyCat = typename GetCategoryType<K>::Type;
+		using ValueCat = typename GetCategoryType<V>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_multimap>] Trying to use a Container with not refl value_type!");
 
@@ -1786,7 +1786,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1820,7 +1820,7 @@ namespace greaper::refl
 			auto expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
 		static cJSON* ToJSON(const Type& data, StringView name)

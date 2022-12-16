@@ -17,7 +17,7 @@ namespace greaper::refl
 
 		using StringCat = ContainerType<String>;
 		using ValueIDCat = PlainType<ReflectedTypeID_t>;
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = typename GetCategoryType<T>::Type;
 
 		static inline constexpr ssizet StaticSize = StringCat::StaticSize + ValueIDCat::StaticSize + ValueCat::StaticSize;
 
@@ -70,7 +70,7 @@ namespace greaper::refl
 
 			if(ReflectedTypeToID<T>::ID != typeID)
 			{
-				return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<TProperty]>]::FromStream the property typeID read from stream was not matching! Wanted:'%"PRId64"' Obtained:'%"PRId64"'.",
+				return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<TProperty]>]::FromStream the property typeID read from stream was not matching! Wanted:'%" PRId64 "' Obtained:'%" PRId64 "'.",
 					ReflectedTypeToID<T>::ID, typeID));
 			}
 			size += res.GetValue();
@@ -119,7 +119,7 @@ namespace greaper::refl
 			ReflectedTypeID_t typeID = cJSON_GetNumberValue(typeIDObj);
 			if(typeID != ReflectedTypeToID<T>::ID)
 			{
-				return Result::CreateFailure(Format("[refl::ComplexType<TProperty>]::FromJSON Couldn't obtain the value from json, the property had different typeID, expected:%"PRId64" obtained:%"PRId64".",
+				return Result::CreateFailure(Format("[refl::ComplexType<TProperty>]::FromJSON Couldn't obtain the value from json, the property had different typeID, expected:%" PRId64 " obtained:%" PRId64 ".",
 					ReflectedTypeToID<T>::ID, typeID));
 			}
 

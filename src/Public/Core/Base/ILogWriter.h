@@ -41,7 +41,7 @@ namespace greaper
 			logMgr->RemoveLogWriter(m_WriterID);
 		}
 
-		INLINE NODISCARD sizet GetWriterID()const noexcept { return m_WriterID; }
+		NODISCARD INLINE sizet GetWriterID()const noexcept { return m_WriterID; }
 	};
 }
 

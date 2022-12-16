@@ -302,6 +302,36 @@
     <ClInclude Include="Public\Core\Reflection\PlainType.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\ComplexType.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\Property.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\Rect.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Matrix2.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Matrix3.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Matrix4.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Quaternion.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Vector2.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Vector3.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Vector4.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -332,6 +362,15 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Public\Core\Base\FileStream.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Base\IGreaperLibrary.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Base\IInterface.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Core\Base\Property.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>

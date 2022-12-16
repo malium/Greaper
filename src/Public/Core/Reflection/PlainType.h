@@ -18,13 +18,13 @@ namespace greaper::refl { \
 			ssizet size = stream.Write(&data, sizeof(data));\
 			if(size == sizeof(data))\
 				return Result::CreateSuccess(size); \
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));\
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));\
 		}\
 		static TResult<ssizet> FromStream(type& data, IStream& stream){ \
 			ssizet size = stream.Read(&data, sizeof(data));\
 			if(size == sizeof(data))\
 				return Result::CreateSuccess(size);\
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));\
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));\
 		}\
 		static cJSON* ToJSON(const type& data, StringView name){ \
 			cJSON* obj = cJSON_CreateObject(); \
@@ -38,7 +38,7 @@ namespace greaper::refl { \
 			if(item == nullptr)\
 				return Result::CreateFailure(Format("[refl::PlainType<"#type">]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));\
 			if(jsonIsFn (item)){\
-				data = jsonGetFn (item);\
+				data = static_cast<type>( jsonGetFn (item) );\
 				return Result::CreateSuccess();\
 			}\
 			return Result::CreateFailure("[refl::PlainType<"#type">]::FromJSON Couldn't obtain the value from the json, expected: "#jsonIsFn"."sv);\
@@ -130,14 +130,14 @@ namespace greaper::refl
 			ssizet size = stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::ToStream Failure while writing to stream, not all data was written, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 		static TResult<ssizet> FromStream(T& data, IStream& stream)
 		{ 
 			ssizet size = stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%"PRIuPTR" obtained:%"PRIdPTR".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 		static cJSON* ToJSON(const T& data, StringView name)
 		{
