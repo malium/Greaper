@@ -105,7 +105,7 @@ namespace greaper
 		T newValue;
 		if (!m_PropertyValidator->Validate(value, &newValue))
 		{
-			const String nValueStr = ReflectedPlainType<T>::ToString(m_Value);
+			const String nValueStr = TCategory::ToString(m_Value);
 			lib->LogWarning(Format("Couldn't validate the new value of Property '%s', oldValue '%s', newValue '%s'.",
 				m_PropertyName.c_str(), m_StringValue.c_str(), nValueStr.c_str()));
 			return false;
@@ -113,13 +113,13 @@ namespace greaper
 		m_Value = newValue;
 		if (old == m_Value)
 		{
-			const String nValueStr = ReflectedPlainType<T>::ToString(m_Value);
+			const String nValueStr = TCategory::ToString(m_Value);
 			lib->LogVerbose(Format("Property '%s', has mantain the same value, current '%s', tried '%s'.",
 				m_PropertyName.c_str(), m_StringValue.c_str(), nValueStr.c_str()));
 			return false; // Property has not changed;
 		}
 		const auto oldStringValue = String{ m_StringValue };
-		m_StringValue = ReflectedPlainType<T>::ToString(m_Value);
+		m_StringValue = TCategory::ToString(m_Value);
 		lib->LogVerbose(Format("Property '%s', has changed from '%s' to '%s'.",
 			m_PropertyName.c_str(), oldStringValue.c_str(), m_StringValue.c_str()));
 		if (triggerEvent)

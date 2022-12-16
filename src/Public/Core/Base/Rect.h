@@ -9,7 +9,8 @@
 #define CORE_RECT_H 1
 
 #include "../Memory.h"
-#include "../Reflection/ReflectedPlainType.h"
+//#include "../Reflection/ReflectedPlainType.h"
+#include "../Reflection/PlainType.h"
 #include "../StringUtils.h"
 
 namespace greaper
@@ -19,6 +20,8 @@ namespace greaper
 	{
 	public:
 		static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>, "RectT can only be instanced with an integer or a floating point type.");
+
+		using TCategory = refl::GetCategoryType<T>::Type;
 		
 		T Left = T(0);
 		T Top = T(0);
@@ -150,10 +153,10 @@ namespace greaper
 	template<class T>
 	INLINE String RectT<T>::ToString()const noexcept
 	{ 
-		String left = ReflectedToString(Left);
-		String top = ReflectedToString(Top);
-		String width = ReflectedToString(GetWidth());
-		String height = ReflectedToString(GetHeight());
+		String left = TCategory::ToString(Left);
+		String top = TCategory::ToString(Top);
+		String width = TCategory::ToString(GetWidth());
+		String height = TCategory::ToString(GetHeight());
 		return String{'[' + left + ", " + top + "](" + width + ", " + height + ')'};
 	}
 
@@ -180,13 +183,17 @@ namespace greaper
 		{
 			return false; // Wrong split size
 		}
-
-		ReflectedFromString(Left, ltSplit[0]);
-		ReflectedFromString(Top, ltSplit[1]);
+		
+		if(TCategory::FromString(Left, ltSplit[0]).HasFailed()) 
+			return false;
+		if(TCategory::FromString(Top, ltSplit[1]).HasFailed())
+			return false;
 
 		T width = T(-1), height = T(-1);
-		ReflectedFromString(width, whSplit[0]);
-		ReflectedFromString(height, whSplit[1]);
+		if(TCategory::FromString(width, whSplit[0]).HasFailed())
+			return false;
+		if(TCategory::FromString(height, whSplit[1]).HasFailed())
+			return false;
 
 		if(width == T(-1) || height == T(-1))
 		{
@@ -197,8 +204,10 @@ namespace greaper
 	}
 }
 
-ALLOW_MEMCPY_SERIALIZATION(greaper::RectF, data.ToString(), data.FromString(str));
-ALLOW_MEMCPY_SERIALIZATION(greaper::RectI, data.ToString(), data.FromString(str));
-ALLOW_MEMCPY_SERIALIZATION(greaper::RectU, data.ToString(), data.FromString(str));
+#include "../Reflection/Rect.h"
+
+//ALLOW_MEMCPY_SERIALIZATION(greaper::RectF, data.ToString(), data.FromString(str));
+//ALLOW_MEMCPY_SERIALIZATION(greaper::RectI, data.ToString(), data.FromString(str));
+//ALLOW_MEMCPY_SERIALIZATION(greaper::RectU, data.ToString(), data.FromString(str));
 
 #endif /* CORE_RECT_H */

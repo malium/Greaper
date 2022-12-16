@@ -5,6 +5,10 @@
 
 #pragma once
 
+#ifndef _XCR_XFEATURE_ENABLED_MASK
+#define _XCR_XFEATURE_ENABLED_MASK 0
+#endif
+
 INLINE void greaper::OSPlatform::PerThreadInit()
 {
 	_PerThreadInit();

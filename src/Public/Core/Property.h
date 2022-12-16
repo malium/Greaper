@@ -14,8 +14,8 @@
 #include "Reflection/PlainType.h"
 #include "Reflection/ContainerType.h"
 //#include "Base/PropertyConverter.h"
-#include "Reflection/ReflectedPlainType.h"
-#include "Reflection/ReflectedPlainContainer.h"
+//#include "Reflection/ReflectedPlainType.h"
+//#include "Reflection/ReflectedPlainContainer.h"
 #include "Event.h"
 #include "Concurrency.h"
 

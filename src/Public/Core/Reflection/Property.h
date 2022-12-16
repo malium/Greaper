@@ -136,9 +136,10 @@ namespace greaper::refl
 		{
 			return data.GetStringValueCopy();
 		}
-		static bool FromString(const String& str, TProperty<T>& data)
+		static EmptyResult FromString(const String& str, TProperty<T>& data)
 		{
-			return data.SetValueFromString(str);
+			data.SetValueFromString(str);
+			return Result::CreateSuccess();
 		}
 		NODISCARD static int64 GetDynamicSize(const TProperty<T>& data)
 		{

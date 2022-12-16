@@ -8,7 +8,7 @@
 #ifndef CORE_I_THREAD_POOL_H
 #define CORE_I_THREAD_POOL_H 1
 
-#include "Task.h"
+//#include "Task.h"
 
 namespace greaper
 {
