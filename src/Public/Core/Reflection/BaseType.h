@@ -87,16 +87,7 @@ namespace greaper::refl
 	template<class T> class ComplexType;
 	template<class T> class DataType;
 
-	template<class T>
-	struct GetCategoryType
-	{
-		using Type = typename
-			std::conditional_t<std::is_base_of_v<BaseType<T>, PlainType<T>>, PlainType<T>, 
-			std::conditional_t<std::is_base_of_v<BaseType<T>, ContainerType<T>>, ContainerType<T>, 
-			std::conditional_t<std::is_base_of_v<BaseType<T>, ComplexType<T>>, ComplexType<T>,
-			std::conditional_t<std::is_base_of_v<BaseType<T>, DataType<T>>, DataType<T>, 
-			void>>>>;
-	};
+	template<class T> class GetCategoryType;
 }
 
 #endif /* CORE_REFLECTION_BASETYPE_H */

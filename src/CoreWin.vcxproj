@@ -340,6 +340,7 @@
     <ClInclude Include="Public\Math\Vector4.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Public\Core\Base\GetCategoryType.inl" />
     <None Include="Public\Core\Base\IGreaperLibrary.inl" />
     <None Include="Public\Core\Base\IInterface.inl" />
     <None Include="Public\Core\Base\MemoryStream.inl" />

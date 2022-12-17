@@ -373,5 +373,8 @@
     <None Include="Public\Core\Base\Property.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
+    <None Include="Public\Core\Base\GetCategoryType.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
   </ItemGroup>
 </Project>
