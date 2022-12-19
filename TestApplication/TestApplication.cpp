@@ -102,9 +102,9 @@ static void SetProperties(void* hInstance, int32 argc, achar** argv)
 	if (propAppVersionRes.HasFailed())
 		gCore->LogError(propAppVersionRes.GetFailMessage());
 
-	auto propLogAsyncRes = CreateProperty<bool>((WGreaperLib)gCore, ILogManager::AsyncLogName, AsyncLog, ""sv, false, true, nullptr);
+	/*auto propLogAsyncRes = CreateProperty<bool>((WGreaperLib)gCore, ILogManager::AsyncLogName, AsyncLog, ""sv, false, true, nullptr);
 	if (propLogAsyncRes.HasFailed())
-		gCore->LogError(propLogAsyncRes.GetFailMessage());
+		gCore->LogError(propLogAsyncRes.GetFailMessage());*/
 }
 
 static void ActivateManagers()

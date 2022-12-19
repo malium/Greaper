@@ -199,7 +199,6 @@ namespace greaper
 	template<class T>
 	INLINE EmptyResult TProperty<T>::_ValueFromJSON(cJSON* json, StringView name) noexcept
 	{
-		auto lck = Lock(m_Mutex);
 		T value;
 		EmptyResult ret = refl::TypeInfo<T>::Type::FromJSON(value, json, name);
 		if(ret.HasFailed())

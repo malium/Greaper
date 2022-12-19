@@ -229,7 +229,7 @@ void LogManager::InitProperties()noexcept
 	}
 	else
 	{
-		auto asyncLogResult = CreateProperty<bool>(m_Library, AsyncLogName, false, ""sv, false, true, nullptr);
+		auto asyncLogResult = CreateProperty<bool>(m_Library, AsyncLogName, false, ""sv, false, false, nullptr);
 		Verify(asyncLogResult.IsOk(), "Couldn't create the property '%s' msg: %s", AsyncLogName.data(), asyncLogResult.GetFailMessage().c_str());
 		asyncLogPropW = (WPtr<AsyncLogProp_t>)asyncLogResult.GetValue();
 	}

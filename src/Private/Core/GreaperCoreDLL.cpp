@@ -8,6 +8,7 @@
 #include "LogManager.h"
 #include "ThreadManager.h"
 #include "CommandManager.h"
+#include <Core/FileStream.h>
 
 #if GREAPER_CORE_DLL
 
@@ -85,6 +86,21 @@ void greaper::core::GreaperCoreLibrary::InitProperties()noexcept
 	m_Application->InitProperties();
 	for (const auto& mgr : m_Managers)
 		mgr->InitProperties();
+
+	const auto dir = std::filesystem::current_path() / "Config";
+	std::filesystem::create_directories(dir);
+	const auto filePath = dir / "core.json";
+	auto stream = FileStream(dir / "core.json", FileStream::READ);
+	String fileTxt{};
+	fileTxt.resize(stream.Size());
+	stream.Read(fileTxt.data(), stream.Size());
+	auto json = SPtr<cJSON>(cJSON_Parse(fileTxt.c_str()), cJSON_Delete);
+	for (auto& prop : m_Properties)
+	{
+		if (prop->IsStatic())
+			continue;
+		refl::ComplexType<IProperty>::FromJSON(*prop, json.get(), prop->GetPropertyName().c_str());
+	}
 }
 
 void greaper::core::GreaperCoreLibrary::InitReflection()noexcept
@@ -104,6 +120,21 @@ void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
 
 	m_Application->DeinitProperties();
 
+	auto json = SPtr<cJSON>(cJSON_CreateObject(), cJSON_Delete);
+	for (const auto& prop : m_Properties)
+	{
+		if (prop->IsStatic())
+			continue;
+		refl::ComplexType<IProperty>::ToJSON(*prop, json.get(), prop->GetPropertyName());
+	}
+	const auto dir = std::filesystem::current_path() / "Config";
+	std::filesystem::create_directories(dir);
+	const auto filePath = dir / "core.json";
+	std::filesystem::remove(filePath);
+	auto stream = FileStream(dir / "core.json", FileStream::READ | FileStream::WRITE);
+	auto text = SPtr<char>(cJSON_Print(json.get()));
+	stream.Write(text.get(), strlen(text.get()));
+	
 	m_Properties.clear();
 	m_PropertyMap.clear();
 }
