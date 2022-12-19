@@ -11,6 +11,7 @@
 #include "PHAL.h"
 #include "Memory.h"
 #include <chrono>
+#include "Base/TypeTraits.h"
 
 #ifdef GREAPER_CORE_VERSION
 #undef GREAPER_CORE_VERSION
@@ -126,6 +127,7 @@ namespace greaper
 		template<class T> class ComplexType {  };
 
 		template<class T> struct TypeInfo { static constexpr ReflectedTypeID_t ID = RTI_Unknown; using Type = void; };
+		template<class T> using TypeInfo_t = TypeInfo<RemoveEverything_t<T>>;
 	}
 }
 #include "Base/ReflectedConversions.h"

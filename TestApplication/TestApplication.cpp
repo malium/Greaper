@@ -621,7 +621,7 @@ static void TestFunction()
 	auto quatArray = Vector<std::pair<QuaternionReal<prec>, Vector3Real<prec>>>{ {qf0,edeg0}, {qf1, edeg1}, {qf2, edeg2}, {qf3, edeg3}, {qf4, edeg4}, {qf5, edeg5} };
 	decltype(quatArray) testArray, testArray2{};
 
-	using typeInfo = refl::TypeInfo<decltype(quatArray)>::Type;
+	using typeInfo = refl::TypeInfo_t<decltype(quatArray)>::Type;
 
 	auto json = typeInfo::ToJSON(quatArray, "quatMap"sv);
 	auto text = SPtr<char>(cJSON_Print(json.get()));
@@ -654,9 +654,9 @@ static void TestFunction()
 		const auto& test1 = *test1It;
 		const auto& test2 = *test2It;
 
-		using origTypeInfo = refl::TypeInfo<std::remove_const_t<std::remove_reference_t<decltype(orig)>>>::Type;
-		using test1TypeInfo = refl::TypeInfo<std::remove_const_t<std::remove_reference_t<decltype(test1)>>>::Type;
-		using test2TypeInfo = refl::TypeInfo<std::remove_const_t<std::remove_reference_t<decltype(test2)>>>::Type;
+		using origTypeInfo = refl::TypeInfo_t<decltype(orig)>::Type;
+		using test1TypeInfo = refl::TypeInfo_t<decltype(test1)>::Type;
+		using test2TypeInfo = refl::TypeInfo_t<decltype(test2)>::Type;
 
 		if (orig != test1)
 			std::cout << Format("Badly JSON stream quaternion, expected: '%s' obtained: '%s'.", origTypeInfo::ToString(orig).c_str(), test1TypeInfo::ToString(test1).c_str()) << std::endl;
@@ -667,6 +667,16 @@ static void TestFunction()
 	}
 
 	auto props = gCore->GetProperties();
+	sizet propIdx = 0;
+	achar buffer[128];
+	for(const auto& prop : props)
+	{
+		snprintf(buffer, ArraySize(buffer), "Elem_%" PRIuPTR, propIdx++);
+		using propTypeInfo = refl::TypeInfo<IProperty>::Type;
+		auto propJSON = propTypeInfo::ToJSON(*prop, StringView{buffer});
+		auto text = SPtr<char>(cJSON_Print(propJSON.get()));
+		std::cout << text.get() << std::endl;
+	}
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
