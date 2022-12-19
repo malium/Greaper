@@ -11,18 +11,18 @@
 #include <Core/CorePrerequisites.h>
 
 //#define GLM_FORCE_SSE42
-//#include "glm/glm.hpp"
-//#include "glm/ext/quaternion_common.hpp"
-//#include "glm/ext/quaternion_float.hpp"
-//#include "glm/ext/quaternion_double.hpp"
-//#include "glm/ext/quaternion_exponential.hpp"
-//#include "glm/ext/quaternion_geometric.hpp"
-//#include "glm/ext/quaternion_relational.hpp"
-//#include "glm/ext/quaternion_transform.hpp"
-//#include "glm/ext/quaternion_trigonometric.hpp"
-//#include "glm/gtc/quaternion.hpp"
-//#include "glm/gtx/quaternion.hpp"
-//#include "glm/gtc/matrix_transform.hpp"
+//#include <External/glm/glm.hpp>
+//#include <External/glm/ext/quaternion_common.hpp>
+//#include <External/glm/ext/quaternion_float.hpp>
+//#include <External/glm/ext/quaternion_double.hpp>
+//#include <External/glm/ext/quaternion_exponential.hpp>
+//#include <External/glm/ext/quaternion_geometric.hpp>
+//#include <External/glm/ext/quaternion_relational.hpp>
+//#include <External/glm/ext/quaternion_transform.hpp>
+//#include <External/glm/ext/quaternion_trigonometric.hpp>
+//#include <External/glm/gtc/quaternion.hpp>
+//#include <External/glm/gtx/quaternion.hpp>
+//#include <External/glm/gtc/matrix_transform.hpp>
 
 namespace greaper::math
 {
@@ -97,7 +97,7 @@ namespace greaper::math
 	using QuaternionD = QuaternionReal<double>;
 }
 
-namespace greaper
+namespace greaper::refl
 {
 	enum MathReflectedTypeID : ReflectedTypeID_t
 	{

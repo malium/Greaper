@@ -21,7 +21,7 @@ namespace greaper
 	public:
 		static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>, "RectT can only be instanced with an integer or a floating point type.");
 
-		using TCategory = typename refl::GetCategoryType<T>::Type;
+		using TCategory = typename refl::TypeInfo<T>::Type;
 		
 		T Left = T(0);
 		T Top = T(0);

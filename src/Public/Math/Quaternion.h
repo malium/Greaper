@@ -17,6 +17,16 @@ namespace greaper::math
 	{
 		static_assert(std::is_floating_point_v<T>, "QuaternionReal can only work with float, double or long double types");
 
+		template<class U> struct Print {  };
+		template<> struct Print<float> { static constexpr auto fmt = "%f, %f, %f, %f"; };
+		template<> struct Print<double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf"; };
+		template<> struct Print<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf"; };
+
+		template<class U> struct Scan {  };
+		template<> struct Scan<float> { static constexpr auto fmt = "%f, %f, %f, %f"; };
+		template<> struct Scan<double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf"; };
+		template<> struct Scan<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf"; };
+
 	public:
 		static constexpr sizet ComponentCount = 4;
 		using Type_t = T;
@@ -235,17 +245,11 @@ namespace greaper::math
 		}
 		INLINE String ToString()const noexcept
 		{
-			if constexpr (std::is_same_v<T, float>)
-				return Format("%f, %f, %f, %f", W, X, Y, Z);
-			else
-				return Format("%lf, %lf, %lf, %lf", W, X, Y, Z);
+			return Format(Print<T>::fmt, W, X, Y, Z);
 		}
 		INLINE void FromString(StringView str)noexcept
 		{
-			if constexpr (std::is_same_v<T, float>)
-				sscanf(str.data(), "%f, %f, %f, %f", &W, &X, &Y, &Z);
-			else
-				sscanf(str.data(), "%lf, %lf, %lf, %lf", &W, &X, &Y, &Z);
+			sscanf(str.data(), Scan<T>::fmt, &W, &X, &Y, &Z);
 		}
 
 		static const QuaternionReal ZERO;

@@ -36,7 +36,8 @@ namespace greaper::refl
 		static cJSON* ToJSON(const math::Matrix2Real<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return obj;
 		}
 
 		static cJSON* ToJSON(const math::Matrix2Real<T>& data, cJSON* json, StringView name)

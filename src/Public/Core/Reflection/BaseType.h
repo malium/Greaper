@@ -9,7 +9,6 @@
 #define CORE_REFLECTION_BASETYPE_H 1
 
 #include "../CorePrerequisites.h"
-#include <type_traits>
 #include "../Stream.h"
 #include "../StringUtils.h"
 #include "../Enumeration.h"
@@ -17,16 +16,17 @@
 #define CJSON_IMPORT_SYMBOLS
 #include <External/cJSON/cJSON.h>
 
-ENUMERATION(TypeCategory, Plain, Container, Complex, Data);
+ENUMERATION(TypeCategory, Plain, Container, Complex);
 
 namespace greaper::refl
 {
 	template<class T>
 	struct BaseType
 	{
-		static_assert(ReflectedTypeToID<T>::ID != RTI_Unknown, "[refl::BaseType<T>] instantiated with an Unknown TypeID.");
+		static_assert(TypeInfo<T>::ID != RTI_Unknown, "[refl::BaseType<T>] instantiated with an Unknown TypeID.");
+		static_assert(!std::is_same_v<TypeInfo<T>::Type, void>, "[refl::BaseType<T>] instantiated with a void type.");
 
-		static inline constexpr uint64 ID = ReflectedTypeToID<T>::ID;
+		static inline constexpr uint64 ID = TypeInfo<T>::ID;
 		
 		static inline constexpr ssizet StaticSize = sizeof(T);
 
@@ -42,10 +42,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>("[refl::BaseType<T>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
-		static cJSON* ToJSON(const T& data, StringView name)
+		static SPtr<cJSON> ToJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(UNUSED const T& data, UNUSED cJSON* obj, UNUSED StringView name)
@@ -81,13 +82,6 @@ namespace greaper::refl
 			Break("[refl::BaseType<T>]::SetDynamicSize Trying to use the generic refl::BaseType!");
 		}
 	};
-
-	template<class T> class PlainType;
-	template<class T> class ContainerType;
-	template<class T> class ComplexType;
-	template<class T> class DataType;
-
-	template<class T> class GetCategoryType;
 }
 
 #endif /* CORE_REFLECTION_BASETYPE_H */

@@ -3,43 +3,49 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
+#ifndef CORE_REFL_CONVERSIONS_H
+#define CORE_REFL_CONVERSIONS_H 1
+
 #pragma once
 
-#include <utility>
+#define CREATE_TYPEINFO(type, RTIType, categoryType)\
+template<> struct greaper::refl::TypeInfo<type> { static constexpr ReflectedTypeID_t ID = RTIType; using Type = greaper::refl:: categoryType<type>; }
 
-namespace greaper
+CREATE_TYPEINFO(bool, greaper::refl::RTI_Bool, PlainType);
+CREATE_TYPEINFO(int8, greaper::refl::RTI_Int8, PlainType);
+CREATE_TYPEINFO(uint8, greaper::refl::RTI_Uint8, PlainType);
+CREATE_TYPEINFO(int16, greaper::refl::RTI_Int16, PlainType);
+CREATE_TYPEINFO(uint16, greaper::refl::RTI_Uint16, PlainType);
+CREATE_TYPEINFO(int32, greaper::refl::RTI_Int32, PlainType);
+CREATE_TYPEINFO(uint32, greaper::refl::RTI_Uint32, PlainType);
+CREATE_TYPEINFO(int64, greaper::refl::RTI_Int64, PlainType);
+CREATE_TYPEINFO(uint64, greaper::refl::RTI_Uint64, PlainType);
+CREATE_TYPEINFO(float, greaper::refl::RTI_Float, PlainType);
+CREATE_TYPEINFO(double, greaper::refl::RTI_Double, PlainType);
+CREATE_TYPEINFO(greaper::RectF, greaper::refl::RTI_RectF, ComplexType);
+CREATE_TYPEINFO(greaper::RectI, greaper::refl::RTI_RectI, ComplexType);
+CREATE_TYPEINFO(greaper::RectU, greaper::refl::RTI_RectU, ComplexType);
+CREATE_TYPEINFO(greaper::Uuid, greaper::refl::RTI_UUID, PlainType);
+
+namespace greaper::refl
 {
-	template<class T> struct ReflectedTypeToID { static constexpr ReflectedTypeID_t ID = RTI_Unknown; };
-	template<> struct ReflectedTypeToID<bool> { static constexpr ReflectedTypeID_t ID = RTI_Bool; };
-	template<> struct ReflectedTypeToID<int8> { static constexpr ReflectedTypeID_t ID = RTI_Int8; };
-	template<> struct ReflectedTypeToID<uint8> { static constexpr ReflectedTypeID_t ID = RTI_Uint8; };
-	template<> struct ReflectedTypeToID<int16> { static constexpr ReflectedTypeID_t ID = RTI_Int16; };
-	template<> struct ReflectedTypeToID<uint16> { static constexpr ReflectedTypeID_t ID = RTI_Uint16; };
-	template<> struct ReflectedTypeToID<int32> { static constexpr ReflectedTypeID_t ID = RTI_Int32; };
-	template<> struct ReflectedTypeToID<uint32> { static constexpr ReflectedTypeID_t ID = RTI_Uint32; };
-	template<> struct ReflectedTypeToID<int64> { static constexpr ReflectedTypeID_t ID = RTI_Int64; };
-	template<> struct ReflectedTypeToID<uint64> { static constexpr ReflectedTypeID_t ID = RTI_Uint64; };
-	template<> struct ReflectedTypeToID<float> { static constexpr ReflectedTypeID_t ID = RTI_Float; };
-	template<> struct ReflectedTypeToID<double> { static constexpr ReflectedTypeID_t ID = RTI_Double; };
-	template<> struct ReflectedTypeToID<RectF> { static constexpr ReflectedTypeID_t ID = RTI_RectF; };
-	template<> struct ReflectedTypeToID<RectI> { static constexpr ReflectedTypeID_t ID = RTI_RectI; };
-	template<> struct ReflectedTypeToID<RectU> { static constexpr ReflectedTypeID_t ID = RTI_RectU; };
-	template<> struct ReflectedTypeToID<Uuid> { static constexpr ReflectedTypeID_t ID = RTI_UUID; };
-	template<class T> struct ReflectedTypeToID<TEnum<T>> { static constexpr ReflectedTypeID_t ID = RTI_Enum; };
-	template<> struct ReflectedTypeToID<IProperty> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
-	template<typename T> struct ReflectedTypeToID<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; };
-	template<typename F, typename S> struct ReflectedTypeToID<std::pair<F, S>> { static constexpr ReflectedTypeID_t ID = RTI_Pair; };
-	template<> struct ReflectedTypeToID<String> { static constexpr ReflectedTypeID_t ID = RTI_String; };
-	template<> struct ReflectedTypeToID<WString> { static constexpr ReflectedTypeID_t ID = RTI_WString; };
-	template<typename T, sizet N> struct ReflectedTypeToID<std::array<T, N>> { static constexpr ReflectedTypeID_t ID = RTI_Array; };
-	template<typename T, typename A> struct ReflectedTypeToID<Vector<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_Vector; };
-	template<typename T, typename A> struct ReflectedTypeToID<List<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_List; };
-	template<typename K, typename P, typename A> struct ReflectedTypeToID<Set<K, P, A>> { static constexpr ReflectedTypeID_t ID = RTI_Set; };
-	template<typename K, typename V, typename P, typename A> struct ReflectedTypeToID<Map<K, V, P, A>> { static constexpr ReflectedTypeID_t ID = RTI_Map; };
-	template<typename K, typename P, typename A> struct ReflectedTypeToID<MultiSet<K, P, A>> { static constexpr ReflectedTypeID_t ID = RTI_MultiSet; };
-	template<typename K, typename V, typename P, typename A> struct ReflectedTypeToID<MultiMap<K, V, P, A>> { static constexpr ReflectedTypeID_t ID = RTI_MultiMap; };
-	template<typename T, typename H, typename C, typename A> struct ReflectedTypeToID<UnorderedSet<T, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedSet; };
-	template<typename K, typename V, typename H, typename C, typename A> struct ReflectedTypeToID<UnorderedMap<K, V, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMap; };
-	template<typename K, typename V, typename H, typename C, typename A> struct ReflectedTypeToID<UnorderedMultiMap<K, V, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMultiMap; };
-	template<typename T, typename H, typename C, typename A> struct ReflectedTypeToID<UnorderedMultiSet<T, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMultiSet; };
+	template<class T> struct TypeInfo<TEnum<T>> { static constexpr ReflectedTypeID_t ID = RTI_Enum; using Type = PlainType<TEnum<T>>; };
+	template<typename T> struct TypeInfo<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; using Type = ComplexType<TProperty<T>>; };
+	template<> struct TypeInfo<String> { static constexpr ReflectedTypeID_t ID = RTI_String; using Type = ContainerType<String>; };
+	template<> struct TypeInfo<WString> { static constexpr ReflectedTypeID_t ID = RTI_WString; using Type = ContainerType<WString>; };
+	template<typename F, typename S> struct TypeInfo<std::pair<F, S>> { static constexpr ReflectedTypeID_t ID = RTI_Pair; using Type = ContainerType<std::pair<F, S>>; };
+	template<typename T, sizet N> struct TypeInfo<std::array<T, N>> { static constexpr ReflectedTypeID_t ID = RTI_Array; using Type = ContainerType<std::array<T, N>>; };
+	template<typename T, typename A> struct TypeInfo<Vector<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_Vector; using Type = ContainerType<Vector<T, A>>; };
+	template<typename T, typename A> struct TypeInfo<Deque<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_Deque; using Type = ContainerType<Deque<T, A>>; };
+	template<typename T, typename A> struct TypeInfo<List<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_List; using Type = ContainerType<List<T, A>>; };
+	template<typename K, typename C, typename A> struct TypeInfo<Set<K, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_Set; using Type = ContainerType<Set<K, C, A>>; };
+	template<typename K, typename V, typename C, typename A> struct TypeInfo<Map<K, V, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_Map; using Type = ContainerType<Map<K, V, C, A>>; };
+	template<typename K, typename C, typename A> struct TypeInfo<MultiSet<K, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_MultiSet; using Type = ContainerType<MultiSet<K, C, A>>; };
+	template<typename K, typename V, typename C, typename A> struct TypeInfo<MultiMap<K, V, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_MultiMap; using Type = ContainerType<MultiMap<K, V, C, A>>; };
+	template<typename T, typename H, typename C, typename A> struct TypeInfo<UnorderedSet<T, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedSet; using Type = ContainerType<UnorderedSet<T, H, C, A>>; };
+	template<typename K, typename V, typename H, typename C, typename A> struct TypeInfo<UnorderedMap<K, V, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMap; using Type = ContainerType<UnorderedMap<K, V, H, C, A>>; };
+	template<typename K, typename V, typename H, typename C, typename A> struct TypeInfo<UnorderedMultiMap<K, V, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMultiMap; using Type = ContainerType<UnorderedMultiMap<K, V, H, C, A>>; };
+	template<typename T, typename H, typename C, typename A> struct TypeInfo<UnorderedMultiSet<T, H, C, A>> { static constexpr ReflectedTypeID_t ID = RTI_UnorderedMultiSet; using Type = ContainerType<UnorderedMultiSet<T, H, C, A>>; };
 }
+
+#endif

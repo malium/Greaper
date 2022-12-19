@@ -9,7 +9,7 @@ namespace greaper
 {
 	INLINE void MemoryStream::Realloc(const sizet bytes)noexcept
 	{
-		if (bytes == m_Size)
+		if ((ssizet)bytes == m_Size)
 			return;
 
 		VerifyGreater(bytes, m_Size, "Realloc should always increase the size of the MemoryStream.");
@@ -30,7 +30,7 @@ namespace greaper
 		}
 
 		m_Data = buffer;
-		m_Size = bytes;
+		m_Size = (ssizet)bytes;
 	}
 	
 	INLINE MemoryStream::MemoryStream()noexcept

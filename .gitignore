@@ -50,5 +50,5 @@ cmake-build-release/**
 obj/**
 bin/**
 build/**
-src/Public/Math/glm/**
 src/Public/External/cJSON/**
+src/Public/External/glm/**

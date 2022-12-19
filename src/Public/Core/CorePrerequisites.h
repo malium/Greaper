@@ -74,50 +74,59 @@ namespace greaper
 	using ReflectedSize_t = int64;
 
 	// Reflection ID
-	enum CoreReflectedTypeID : ReflectedTypeID_t
+	namespace refl
 	{
-		RTI_Unknown = 0,
+		enum CoreReflectedTypeID : ReflectedTypeID_t
+		{
+			RTI_Unknown = 0,
 
-		// Base types
-		RTI_Bool = 1,
-		RTI_Int8,
-		RTI_Uint8,
-		RTI_Int16,
-		RTI_Uint16,
-		RTI_Int32,
-		RTI_Uint32,
-		RTI_Int64,
-		RTI_Uint64,
-		RTI_Float,
-		RTI_Double,
-		RTI_Half,
-		RTI_Enum,
-		RTI_RectF,
-		RTI_RectI,
-		RTI_RectU,
+			// Base types
+			RTI_Bool = 1,
+			RTI_Int8,
+			RTI_Uint8,
+			RTI_Int16,
+			RTI_Uint16,
+			RTI_Int32,
+			RTI_Uint32,
+			RTI_Int64,
+			RTI_Uint64,
+			RTI_Float,
+			RTI_Double,
+			RTI_Half,
+			RTI_Enum,
+			RTI_RectF,
+			RTI_RectI,
+			RTI_RectU,
 
-		// Base Containers
-		RTI_String = 25,
-		RTI_WString,
-		RTI_Array,
-		RTI_Vector,
-		RTI_List,
-		RTI_Deque,
-		RTI_Map,
-		RTI_UnorderedMap,
-		RTI_MultiMap,
-		RTI_UnorderedMultiMap,
-		RTI_Pair,
-		RTI_Set,
-		RTI_UnorderedSet,
-		RTI_MultiSet,
-		RTI_UnorderedMultiSet,
+			// Base Containers
+			RTI_String = 25,
+			RTI_WString,
+			RTI_Array,
+			RTI_Vector,
+			RTI_List,
+			RTI_Deque,
+			RTI_Map,
+			RTI_UnorderedMap,
+			RTI_MultiMap,
+			RTI_UnorderedMultiMap,
+			RTI_Pair,
+			RTI_Set,
+			RTI_UnorderedSet,
+			RTI_MultiSet,
+			RTI_UnorderedMultiSet,
 
-		// Classes
-		RTI_UUID = 100,
-		RTI_Property,
+			// Classes
+			RTI_UUID = 100,
+			RTI_Property,
 
-	};
+		};
+
+		template<class T> class PlainType {  };
+		template<class T> class ContainerType {  };
+		template<class T> class ComplexType {  };
+
+		template<class T> struct TypeInfo { static constexpr ReflectedTypeID_t ID = RTI_Unknown; using Type = void; };
+	}
 }
 #include "Base/ReflectedConversions.h"
 

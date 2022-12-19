@@ -26,9 +26,10 @@ namespace greaper::refl { \
 				return Result::CreateSuccess(size);\
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));\
 		}\
-		static cJSON* ToJSON(const type& data, StringView name){ \
+		static SPtr<cJSON> ToJSON(const type& data, StringView name){ \
 			cJSON* obj = cJSON_CreateObject(); \
-			return ToJSON(data, obj, name); \
+			ToJSON(data, obj, name); \
+			return SPtr<cJSON>(obj, cJSON_Delete); \
 		} \
 		static cJSON* ToJSON(const type& data, cJSON* obj, StringView name){\
 			return jsonAddFn (obj, name.data(), data);\
@@ -81,10 +82,11 @@ namespace greaper::refl
 			return Result::CreateFailure("[refl::BaseType<TEnum>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
-		static cJSON* ToJSON(const T& data, StringView name)
+		static SPtr<cJSON> ToJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(UNUSED const T& data, UNUSED cJSON* obj, UNUSED StringView name)
@@ -139,10 +141,11 @@ namespace greaper::refl
 				return Result::CreateSuccess(size);
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
-		static cJSON* ToJSON(const T& data, StringView name)
+		static SPtr<cJSON> ToJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 		static cJSON* ToJSON(const T& data, cJSON* obj, StringView name)
 		{

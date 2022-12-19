@@ -17,7 +17,7 @@ namespace greaper::refl
 
 		using StringCat = ContainerType<String>;
 		using ValueIDCat = PlainType<ReflectedTypeID_t>;
-		using ValueCat = typename GetCategoryType<T>::Type;
+		using ValueCat = typename TypeInfo<T>::Type;
 
 		static inline constexpr ssizet StaticSize = StringCat::StaticSize + ValueIDCat::StaticSize + ValueCat::StaticSize;
 
@@ -30,7 +30,7 @@ namespace greaper::refl
 
 			size += res.GetValue();
 			
-			res = ValueIDCat::ToStream(ReflectedTypeToID<T>::ID, stream);
+			res = ValueIDCat::ToStream(TypeInfo<T>::ID, stream);
 			if(res.HasFailed())
 				return res;
 
@@ -68,10 +68,10 @@ namespace greaper::refl
 			if(res.HasFailed())
 				return res;
 
-			if(ReflectedTypeToID<T>::ID != typeID)
+			if(TypeInfo<T>::ID != typeID)
 			{
 				return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<TProperty]>]::FromStream the property typeID read from stream was not matching! Wanted:'%" PRId64 "' Obtained:'%" PRId64 "'.",
-					ReflectedTypeToID<T>::ID, typeID));
+					TypeInfo<T>::ID, typeID));
 			}
 			size += res.GetValue();
 
@@ -87,16 +87,17 @@ namespace greaper::refl
 			return size;
 		}
 
-		static cJSON* ToJSON(const TProperty<T>& data, StringView name)
+		static SPtr<cJSON> ToJSON(const TProperty<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 		static cJSON* ToJSON(const TProperty<T>& data, cJSON* json, StringView name)
 		{
 			cJSON* obj = cJSON_AddObjectToObject(json, name.data());
 			cJSON_AddStringToObject(obj, "name", data.GetPropertyName().c_str());
-			cJSON_AddNumberToObject(obj, "typeID", ReflectedTypeToID<T>::ID);
+			cJSON_AddNumberToObject(obj, "typeID", TypeInfo<T>::ID);
 			//auto accessFn = [obj](const T& value) { ValueCat::ToJSON(value, obj, "value"); };
 			//data.AccessValue(accessFn);
 			data._ValueToJSON(obj, "value"sv);
@@ -117,10 +118,10 @@ namespace greaper::refl
 			}
 			cJSON* typeIDObj = cJSON_GetObjectItemCaseSensitive(item, "typeID");
 			ReflectedTypeID_t typeID = cJSON_GetNumberValue(typeIDObj);
-			if(typeID != ReflectedTypeToID<T>::ID)
+			if(typeID != TypeInfo<T>::ID)
 			{
 				return Result::CreateFailure(Format("[refl::ComplexType<TProperty>]::FromJSON Couldn't obtain the value from json, the property had different typeID, expected:%" PRId64 " obtained:%" PRId64 ".",
-					ReflectedTypeToID<T>::ID, typeID));
+					TypeInfo<T>::ID, typeID));
 			}
 
 			//T value;
@@ -143,7 +144,7 @@ namespace greaper::refl
 		}
 		NODISCARD static int64 GetDynamicSize(const TProperty<T>& data)
 		{
-			return StringCat::GetDynamicSize(data.GetPropertyName()) + ValueIDCat::GetDynamicSize(ReflectedTypeToID<T>::ID)
+			return StringCat::GetDynamicSize(data.GetPropertyName()) + ValueIDCat::GetDynamicSize(TypeInfo<T>::ID)
 				+ data._GetDynamicSize();
 		}
 		static void SetDynamicSize(UNUSED TProperty<T>& data, UNUSED int64 size)

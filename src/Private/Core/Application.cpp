@@ -5,8 +5,6 @@
 
 #include "Application.h"
 #include <Core/Platform.h>
-#include <Core/IGreaperLibrary.h>
-#include <Core/Property.h>
 
 using namespace greaper;
 using namespace greaper::core;

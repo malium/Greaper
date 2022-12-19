@@ -33,10 +33,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector3Real>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static cJSON* ToJSON(const math::Vector3Real<T>& data, StringView name)
+		static SPtr<cJSON> ToJSON(const math::Vector3Real<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(const math::Vector3Real<T>& data, cJSON* json, StringView name)
@@ -111,10 +112,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector3Signed>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static cJSON* ToJSON(const math::Vector3Signed<T>& data, StringView name)
+		static SPtr<cJSON> ToJSON(const math::Vector3Signed<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(const math::Vector3Signed<T>& data, cJSON* json, StringView name)
@@ -189,10 +191,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector3Unsigned>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static cJSON* ToJSON(const math::Vector3Unsigned<T>& data, StringView name)
+		static SPtr<cJSON> ToJSON(const math::Vector3Unsigned<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(const math::Vector3Unsigned<T>& data, cJSON* json, StringView name)
@@ -267,10 +270,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector3b>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static cJSON* ToJSON(const math::Vector3b& data, StringView name)
+		static SPtr<cJSON> ToJSON(const math::Vector3b& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(const math::Vector3b& data, cJSON* json, StringView name)

@@ -318,10 +318,11 @@ namespace greaper
 		{ 
 			return Result::CreateSuccess(stream.Read(&data, sizeof(data)));
 		}
-		static cJSON* ToJSON(const Uuid& data, StringView name)
+		static SPtr<cJSON> ToJSON(const Uuid& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 		static cJSON* ToJSON(const Uuid& data, cJSON* obj, StringView name)
 		{

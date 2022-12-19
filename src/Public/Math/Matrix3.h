@@ -17,6 +17,17 @@ namespace greaper::math
 	class Matrix3Real
 	{
 		static_assert(std::is_floating_point_v<T>, "Matrix3Real can only work with float, double or long double types");
+
+		template<class U> struct Print {  };
+		template<> struct Print<float> { static constexpr auto fmt = "%f, %f, %f, %f, %f, %f, %f, %f, %f"; };
+		template<> struct Print<double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
+		template<> struct Print<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
+
+		template<class U> struct Scan {  };
+		template<> struct Scan<float> { static constexpr auto fmt = "%f, %f, %f, %f, %f, %f, %f, %f, %f"; };
+		template<> struct Scan<double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
+		template<> struct Scan<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
+
 	public:
 		using Type_t = T;
 
@@ -203,17 +214,11 @@ namespace greaper::math
 		}
 		INLINE String ToString()const noexcept
 		{
-			if constexpr (std::is_same_v<T, float>)
-				return Format("%f, %f, %f, %f, %f, %f, %f, %f, %f", R0.X, R0.Y, R0.Z, R1.X, R1.Y, R1.Z, R2.X, R2.Y, R2.Z);
-			else
-				return Format("%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf", R0.X, R0.Y, R0.Z, R1.X, R1.Y, R1.Z, R2.X, R2.Y, R2.Z);
+			return Format(Print<T>::fmt, R0.X, R0.Y, R0.Z, R1.X, R1.Y, R1.Z, R2.X, R2.Y, R2.Z);
 		}
 		INLINE void FromString(StringView str)noexcept
 		{
-			if constexpr (std::is_same_v<T, float>)
-				sscanf(str.data(), "%f, %f, %f, %f, %f, %f, %f, %f, %f", &R0.X, &R0.Y, &R0.Z, &R1.X, &R1.Y, &R1.Z, &R2.X, &R2.Y, &R2.Z);
-			else
-				sscanf(str.data(), "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf", &R0.X, &R0.Y, &R0.Z, &R1.X, &R1.Y, &R1.Z, &R2.X, &R2.Y, &R2.Z);
+			sscanf(str.data(), Print<T>::fmt, &R0.X, &R0.Y, &R0.Z, &R1.X, &R1.Y, &R1.Z, &R2.X, &R2.Y, &R2.Z);
 		}
 
 		static const Matrix3Real IDENTITY;

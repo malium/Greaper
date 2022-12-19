@@ -15,6 +15,7 @@
 #include <Math/Vector4.h>
 #include <Math/Matrix4.h>
 #include <Math/Quaternion.h>
+#include <Core/MemoryStream.h>
 #include <random>
 #include <iostream>
 
@@ -179,13 +180,13 @@ static void ReportTest(greaper::StringView testName, sizet sampleCount, const gr
 
 	const achar* outputTxt = nullptr;
 	if constexpr (std::is_same_v<TResult, int32>)
-		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%"PRId32" optim:%"PRId32".\n";
+		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%" PRId32 " optim:%" PRId32 ".\n";
 	else if constexpr (std::is_same_v<TResult, int64>)
-		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%"PRId64" optim:%"PRId64".\n";
+		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%" PRId64 " optim:%" PRId64 ".\n";
 	else if constexpr (std::is_same_v<TResult, float>)
-		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%f optim:%f.\n";
+		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%f optim:%f.\n";
 	else if constexpr (std::is_same_v<TResult, double>)
-		outputTxt = "%s: Sample %"PRIuPTR" was not verified normal:%lf optim:%lf.\n";
+		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%lf optim:%lf.\n";
 
 	if constexpr (std::is_integral_v<TResult>)
 	{
@@ -615,6 +616,57 @@ static void TestFunction()
 	auto edeg3 = erad3 * RAD2DEG<prec>;
 	auto edeg4 = erad4 * RAD2DEG<prec>;
 	auto edeg5 = erad5 * RAD2DEG<prec>;
+
+
+	auto quatArray = Vector<std::pair<QuaternionReal<prec>, Vector3Real<prec>>>{ {qf0,edeg0}, {qf1, edeg1}, {qf2, edeg2}, {qf3, edeg3}, {qf4, edeg4}, {qf5, edeg5} };
+	decltype(quatArray) testArray, testArray2{};
+
+	using typeInfo = refl::TypeInfo<decltype(quatArray)>::Type;
+
+	auto json = typeInfo::ToJSON(quatArray, "quatMap"sv);
+	auto text = SPtr<char>(cJSON_Print(json.get()));
+	std::cout << text.get() << std::endl;
+	auto parsed = SPtr<cJSON>(cJSON_Parse(text.get()), cJSON_Delete);
+	auto parseRes = typeInfo::FromJSON(testArray, parsed.get(), "quatMap"sv);
+
+	if (parseRes.HasFailed())
+		std::cout << parseRes.GetFailMessage() << std::endl;
+
+	MemoryStream ms{ (uint64)typeInfo::StaticSize + (uint64)typeInfo::GetDynamicSize(quatArray) };
+	
+	auto res = typeInfo::ToStream(quatArray, ms);
+	if (res.HasFailed())
+		std::cout << res.GetFailMessage() << std::endl;
+
+	ms.Seek(0);
+
+	res = typeInfo::FromStream(testArray2, ms);
+	if (res.HasFailed())
+		std::cout << res.GetFailMessage() << std::endl;
+
+	auto origIt = quatArray.begin();
+	auto test1It = testArray.begin();
+	auto test2It = testArray2.begin();
+
+	for (decltype(quatArray)::size_type i = 0; i < quatArray.size(); ++i)
+	{
+		const auto& orig = *origIt;
+		const auto& test1 = *test1It;
+		const auto& test2 = *test2It;
+
+		using origTypeInfo = refl::TypeInfo<std::remove_const_t<std::remove_reference_t<decltype(orig)>>>::Type;
+		using test1TypeInfo = refl::TypeInfo<std::remove_const_t<std::remove_reference_t<decltype(test1)>>>::Type;
+		using test2TypeInfo = refl::TypeInfo<std::remove_const_t<std::remove_reference_t<decltype(test2)>>>::Type;
+
+		if (orig != test1)
+			std::cout << Format("Badly JSON stream quaternion, expected: '%s' obtained: '%s'.", origTypeInfo::ToString(orig).c_str(), test1TypeInfo::ToString(test1).c_str()) << std::endl;
+		if (orig != test2)
+			std::cout << Format("Badly Memory stream quaternion, expected: '%s' obtained: '%s'.", origTypeInfo::ToString(orig).c_str(), test2TypeInfo::ToString(test2).c_str()) << std::endl;
+
+		++origIt; ++test1It; ++test2It;
+	}
+
+	auto props = gCore->GetProperties();
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
@@ -622,7 +674,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 	using namespace greaper;
 
 	OSPlatform::PerThreadInit();
-
+	
 	try
 	{
 		gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));

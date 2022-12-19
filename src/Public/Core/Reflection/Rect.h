@@ -15,7 +15,7 @@ namespace greaper::refl
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
-		using ValueCat = GetCategoryType<T>::Type;
+		using ValueCat = TypeInfo<T>::Type;
 
 		static TResult<ssizet> ToStream(const RectT<T>& data, IStream& stream)
 		{
@@ -35,10 +35,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<RectT>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static cJSON* ToJSON(const RectT<T>& data, StringView name)
+		static SPtr<cJSON> ToJSON(const RectT<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(const RectT<T>& data, cJSON* json, StringView name)

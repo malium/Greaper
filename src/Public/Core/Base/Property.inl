@@ -53,11 +53,11 @@ namespace greaper
 		,m_Constant(isConstant)
 	{
 		if (m_PropertyValidator == nullptr)
-			{
-				m_PropertyValidator = Construct<PropertyValidatorNone<T>>();
-			}
-			m_PropertyValidator->Validate(m_Value, &m_Value);
-			m_StringValue = TCategory::ToString(m_Value);
+		{
+			m_PropertyValidator = Construct<PropertyValidatorNone<T>>();
+		}
+		m_PropertyValidator->Validate(m_Value, &m_Value);
+		m_StringValue = refl::TypeInfo<T>::Type::ToString(m_Value);
 	}
 
 	template<class T>
@@ -105,7 +105,7 @@ namespace greaper
 		T newValue;
 		if (!m_PropertyValidator->Validate(value, &newValue))
 		{
-			const String nValueStr = TCategory::ToString(m_Value);
+			const String nValueStr = refl::TypeInfo<T>::Type::ToString(m_Value);
 			lib->LogWarning(Format("Couldn't validate the new value of Property '%s', oldValue '%s', newValue '%s'.",
 				m_PropertyName.c_str(), m_StringValue.c_str(), nValueStr.c_str()));
 			return false;
@@ -113,13 +113,13 @@ namespace greaper
 		m_Value = newValue;
 		if (old == m_Value)
 		{
-			const String nValueStr = TCategory::ToString(m_Value);
+			const String nValueStr = refl::TypeInfo<T>::Type::ToString(m_Value);
 			lib->LogVerbose(Format("Property '%s', has mantain the same value, current '%s', tried '%s'.",
 				m_PropertyName.c_str(), m_StringValue.c_str(), nValueStr.c_str()));
 			return false; // Property has not changed;
 		}
 		const auto oldStringValue = String{ m_StringValue };
-		m_StringValue = TCategory::ToString(m_Value);
+		m_StringValue = refl::TypeInfo<T>::Type::ToString(m_Value);
 		lib->LogVerbose(Format("Property '%s', has changed from '%s' to '%s'.",
 			m_PropertyName.c_str(), oldStringValue.c_str(), m_StringValue.c_str()));
 		if (triggerEvent)
@@ -131,7 +131,7 @@ namespace greaper
 	INLINE bool TProperty<T>::SetValueFromString(const String& value) noexcept
 	{
 		T temp;
-		TCategory::FromString(value, temp);
+		refl::TypeInfo<T>::Type::FromString(value, temp);
 		//ReflectedPlainType<T>::FromString(temp, value);
 		return SetValue(temp);
 	}
@@ -168,35 +168,35 @@ namespace greaper
 	INLINE TResult<ssizet> TProperty<T>::_ValueToStream(IStream& stream) const noexcept
 	{
 		auto lck = SharedLock(m_Mutex);
-		return TCategory::ToStream(m_Value, stream);
+		return refl::TypeInfo<T>::Type::ToStream(m_Value, stream);
 	}
 
 	template<class T>
 	INLINE TResult<ssizet> TProperty<T>::_ValueFromStream(IStream& stream) noexcept
 	{
 		auto lck = Lock(m_Mutex);
-		return TCategory::FromStream(m_Value, stream);
+		return refl::TypeInfo<T>::Type::FromStream(m_Value, stream);
 	}
 
 	template<class T>
 	INLINE cJSON* TProperty<T>::_ValueToJSON(cJSON* json, StringView name) const noexcept
 	{
 		auto lck = SharedLock(m_Mutex);
-		return TCategory::ToJSON(m_Value, json, name);
+		return refl::TypeInfo<T>::Type::ToJSON(m_Value, json, name);
 	}
 
 	template<class T>
 	INLINE EmptyResult TProperty<T>::_ValueFromJSON(cJSON* json, StringView name) noexcept
 	{
 		auto lck = Lock(m_Mutex);
-		return TCategory::FromJSON(m_Value, json, name);
+		return refl::TypeInfo<T>::Type::FromJSON(m_Value, json, name);
 	}
 
 	template<class T>
 	INLINE int64 TProperty<T>::_GetDynamicSize() const noexcept
 	{
 		auto lck = SharedLock(m_Mutex);
-		return TCategory::GetDynamicSize(m_Value);
+		return refl::TypeInfo<T>::Type::GetDynamicSize(m_Value);
 	}
 
 	template<class T>

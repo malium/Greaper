@@ -33,10 +33,11 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static cJSON* ToJSON(const math::QuaternionReal<T>& data, StringView name)
+		static SPtr<cJSON> ToJSON(const math::QuaternionReal<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
-			return ToJSON(data, obj, name);
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
 		}
 
 		static cJSON* ToJSON(const math::QuaternionReal<T>& data, cJSON* json, StringView name)

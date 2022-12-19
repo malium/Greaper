@@ -124,6 +124,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -159,6 +160,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -189,6 +191,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -224,6 +227,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>

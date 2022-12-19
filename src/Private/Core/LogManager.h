@@ -9,6 +9,8 @@
 #define CORE_LOG_MANAGER_H 1
 
 #include "ImplPrerequisites.h"
+#include <Core/Reflection/PlainType.h>
+#include <Core/Reflection/Property.h>
 #include <Core/ILogManager.h>
 #include <Core/Property.h>
 #include <Core/Concurrency.h>

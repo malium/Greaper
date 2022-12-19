@@ -19,6 +19,16 @@ namespace greaper::math
 	{
 		static_assert(std::is_floating_point_v<T>, "Vector2Real can only work with float, double or long double types");
 
+		template<class U> struct Print {  };
+		template<> struct Print<float> { static constexpr auto fmt = "%f, %f"; };
+		template<> struct Print<double> { static constexpr auto fmt = "%lf, %lf"; };
+		template<> struct Print<long double> { static constexpr auto fmt = "%lf, %lf"; };
+
+		template<class U> struct Scan {  };
+		template<> struct Scan<float> { static constexpr auto fmt = "%f, %f"; };
+		template<> struct Scan<double> { static constexpr auto fmt = "%lf, %lf"; };
+		template<> struct Scan<long double> { static constexpr auto fmt = "%lf, %lf"; };
+
 	public:
 		static constexpr sizet ComponentCount = 2;
 		using Type_t = T;
@@ -172,23 +182,17 @@ namespace greaper::math
 		}
 		INLINE String ToString()const noexcept
 		{
-			if constexpr (std::is_same_v<T, float>)
-				return Format("%f, %f", X, Y);
-			else
-				return Format("%lf, %lf", X, Y);
+			return Format(Print<T>::fmt, X, Y);
 		}
 		INLINE void FromString(StringView str)noexcept
 		{
-			if constexpr (std::is_same_v<T, float>)
-				sscanf(str.data(), "%f, %f", &X, &Y);
-			else
-				sscanf(str.data(), "%lf, %lf", &X, &Y);
+			sscanf(str.data(), Scan<T>::fmt, &X, &Y);
 		}
 
 		static const Vector2Real ZERO;
 		static const Vector2Real UNIT;
 	};
-
+	
 	template<class T> const Vector2Real<T> Vector2Real<T>::ZERO = Vector2Real<T>{};
 	template<class T> const Vector2Real<T> Vector2Real<T>::UNIT = Vector2Real<T>((T)1, (T)1);
 
@@ -210,6 +214,18 @@ namespace greaper::math
 	class Vector2Signed
 	{
 		static_assert(std::is_integral_v<T> && !std::is_unsigned_v<T>, "Vector2Signed can only work with signed intXX types");
+
+		template<class U> struct Print {  };
+		template<> struct Print<int8> { static constexpr auto fmt = "%" PRIi8 ", %" PRIi8; };
+		template<> struct Print<int16> { static constexpr auto fmt = "%" PRIi16 ", %" PRIi16; };
+		template<> struct Print<int32> { static constexpr auto fmt = "%" PRIi32 ", %" PRIi32; };
+		template<> struct Print<int64> { static constexpr auto fmt = "%" PRIi64 ", %" PRIi64; };
+
+		template<class U> struct Scan {  };
+		template<> struct Scan<int8> { static constexpr auto fmt = "%" SCNi8 ", %" SCNi8; };
+		template<> struct Scan<int16> { static constexpr auto fmt = "%" SCNi16 ", %" SCNi16; };
+		template<> struct Scan<int32> { static constexpr auto fmt = "%" SCNi32 ", %" SCNi32; };
+		template<> struct Scan<int64> { static constexpr auto fmt = "%" SCNi64 ", %" SCNi64; };
 
 	public:
 		static constexpr sizet ComponentCount = 2;
@@ -300,11 +316,11 @@ namespace greaper::math
 		}
 		INLINE String ToString()const noexcept
 		{
-			return Format("%i, %i", X, Y);
+			return Format(Print<T>::fmt, X, Y);
 		}
 		INLINE void FromString(StringView str)noexcept
 		{
-			sscanf(str.data(), "%i, %i", &X, &Y);
+			sscanf(str.data(), Scan<T>::fmt, &X, &Y);
 		}
 
 		static const Vector2Signed ZERO;
@@ -332,6 +348,18 @@ namespace greaper::math
 	class Vector2Unsigned
 	{
 		static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>, "Vector2Unsigned can only work with unsigned intXX types");
+
+		template<class U> struct Print {  };
+		template<> struct Print<uint8> { static constexpr auto fmt = "%" PRIu8 ", %" PRIu8; };
+		template<> struct Print<uint16> { static constexpr auto fmt = "%" PRIu16 ", %" PRIu16; };
+		template<> struct Print<uint32> { static constexpr auto fmt = "%" PRIu32 ", %" PRIu32; };
+		template<> struct Print<uint64> { static constexpr auto fmt = "%" PRIu64 ", %" PRIu64; };
+
+		template<class U> struct Scan {  };
+		template<> struct Scan<uint8> { static constexpr auto fmt = "%" SCNu8 ", %" SCNu8; };
+		template<> struct Scan<uint16> { static constexpr auto fmt = "%" SCNu16 ", %" SCNu16; };
+		template<> struct Scan<uint32> { static constexpr auto fmt = "%" SCNu32 ", %" SCNu32; };
+		template<> struct Scan<uint64> { static constexpr auto fmt = "%" SCNu64 ", %" SCNu64; };
 
 	public:
 		static constexpr sizet ComponentCount = 2;
@@ -405,11 +433,11 @@ namespace greaper::math
 		}
 		INLINE String ToString()const noexcept
 		{
-			return Format("%u, %u", X, Y);
+			return Format(Print<T>::fmt, X, Y);
 		}
 		INLINE void FromString(StringView str)noexcept
 		{
-			sscanf(str.data(), "%u, %u", &X, &Y);
+			sscanf(str.data(), Scan<T>::fmt, &X, &Y);
 		}
 
 		static const Vector2Unsigned ZERO;

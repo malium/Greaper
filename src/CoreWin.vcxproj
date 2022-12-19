@@ -126,6 +126,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -160,6 +161,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -190,6 +192,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -225,6 +228,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin_$(PlatformArchitecture)$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -340,7 +344,6 @@
     <ClInclude Include="Public\Math\Vector4.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Public\Core\Base\GetCategoryType.inl" />
     <None Include="Public\Core\Base\IGreaperLibrary.inl" />
     <None Include="Public\Core\Base\IInterface.inl" />
     <None Include="Public\Core\Base\MemoryStream.inl" />
