@@ -40,6 +40,9 @@ BEGIN_C
 DLLEXPORT void* _Greaper();
 END_C
 
+const auto configPath = std::filesystem::current_path() / "Config";
+const auto configFilePath = configPath / "GreaperCore.json";
+
 void* _Greaper()
 {
 	if (gCoreLibrary == nullptr)
@@ -87,10 +90,8 @@ void greaper::core::GreaperCoreLibrary::InitProperties()noexcept
 	for (const auto& mgr : m_Managers)
 		mgr->InitProperties();
 
-	const auto dir = std::filesystem::current_path() / "Config";
-	std::filesystem::create_directories(dir);
-	const auto filePath = dir / "core.json";
-	auto stream = FileStream(dir / "core.json", FileStream::READ);
+	std::filesystem::create_directories(configPath);
+	auto stream = FileStream(configFilePath, FileStream::READ);
 	String fileTxt{};
 	fileTxt.resize(stream.Size());
 	stream.Read(fileTxt.data(), stream.Size());
@@ -127,11 +128,9 @@ void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
 			continue;
 		refl::ComplexType<IProperty>::ToJSON(*prop, json.get(), prop->GetPropertyName());
 	}
-	const auto dir = std::filesystem::current_path() / "Config";
-	std::filesystem::create_directories(dir);
-	const auto filePath = dir / "core.json";
-	std::filesystem::remove(filePath);
-	auto stream = FileStream(dir / "core.json", FileStream::READ | FileStream::WRITE);
+	std::filesystem::create_directories(configPath);
+	std::filesystem::remove(configFilePath);
+	auto stream = FileStream(configFilePath, FileStream::READ | FileStream::WRITE);
 	auto text = SPtr<char>(cJSON_Print(json.get()));
 	stream.Write(text.get(), strlen(text.get()));
 	
