@@ -43,11 +43,13 @@ namespace greaper
 		virtual void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept = 0;
 		virtual ModificationEvent_t* GetOnModificationEvent()const noexcept = 0;
 		virtual const WGreaperLib& GetLibrary()const noexcept = 0;
+		virtual ReflectedTypeID_t _ValueTypeID()const noexcept = 0;
 		virtual TResult<ssizet> _ValueToStream(IStream& stream)const noexcept = 0;
 		virtual TResult<ssizet> _ValueFromStream(IStream& stream)noexcept = 0;
 		virtual cJSON* _ValueToJSON(cJSON* json, StringView name)const noexcept = 0;
 		virtual EmptyResult _ValueFromJSON(cJSON* json, StringView name)noexcept = 0;
 		virtual int64 _GetDynamicSize()const noexcept = 0;
+		virtual int64 _GetStaticSize()const noexcept = 0;
 	};
 
 	template<class T, class _Alloc_ = GenericAllocator>
@@ -111,11 +113,13 @@ namespace greaper
 		void AccessValue(const std::function<void(const T&)>& accessFn)const noexcept;
 		String GetStringValueCopy()const noexcept override;
 		void AccessStringValue(const std::function<void(const String&)>& accessFn)const noexcept;
+		ReflectedTypeID_t _ValueTypeID()const noexcept override;
 		TResult<ssizet> _ValueToStream(IStream& stream)const noexcept override;
 		TResult<ssizet> _ValueFromStream(IStream& stream)noexcept override;
 		cJSON* _ValueToJSON(cJSON* json, StringView name)const noexcept override;
 		EmptyResult _ValueFromJSON(cJSON* json, StringView name)noexcept override;
 		int64 _GetDynamicSize()const noexcept override;
+		int64 _GetStaticSize()const noexcept override;
 		ModificationEvent_t* GetOnModificationEvent()const noexcept override;
 		const WGreaperLib& GetLibrary()const noexcept override;
 	};

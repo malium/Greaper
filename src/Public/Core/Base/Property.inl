@@ -163,6 +163,12 @@ namespace greaper
 		auto lck = SharedLock(m_Mutex);
 		accessFn(m_StringValue);
 	}
+	
+	template<class T>
+	NODISCARD INLINE ReflectedTypeID_t TProperty<T>::_ValueTypeID()const noexcept
+	{
+		return refl::TypeInfo<T>::ID;
+	}
 
 	template<class T>
 	INLINE TResult<ssizet> TProperty<T>::_ValueToStream(IStream& stream) const noexcept
@@ -175,7 +181,12 @@ namespace greaper
 	INLINE TResult<ssizet> TProperty<T>::_ValueFromStream(IStream& stream) noexcept
 	{
 		auto lck = Lock(m_Mutex);
-		return refl::TypeInfo<T>::Type::FromStream(m_Value, stream);
+		T value;
+		TResult<ssizet> ret = refl::TypeInfo<T>::Type::FromStream(value, stream);
+		if(ret.HasFailed())
+			return ret;
+		SetValue(value, false, true);
+		return ret;
 	}
 
 	template<class T>
@@ -189,14 +200,25 @@ namespace greaper
 	INLINE EmptyResult TProperty<T>::_ValueFromJSON(cJSON* json, StringView name) noexcept
 	{
 		auto lck = Lock(m_Mutex);
-		return refl::TypeInfo<T>::Type::FromJSON(m_Value, json, name);
+		T value;
+		EmptyResult ret = refl::TypeInfo<T>::Type::FromJSON(value, json, stream);
+		if(ret.HasFailed())
+			return ret;
+		SetValue(value, false, true);
+		return ret;
 	}
 
 	template<class T>
-	INLINE int64 TProperty<T>::_GetDynamicSize() const noexcept
+	NODISCARD INLINE int64 TProperty<T>::_GetDynamicSize() const noexcept
 	{
 		auto lck = SharedLock(m_Mutex);
 		return refl::TypeInfo<T>::Type::GetDynamicSize(m_Value);
+	}
+
+	template<class T>
+	NODISCARD INLINE int64 TProperty<T>::_GetStaticSize() const noexcept
+	{
+		return refl::TypeInfo<T>::Type::StaticSize;
 	}
 
 	template<class T>

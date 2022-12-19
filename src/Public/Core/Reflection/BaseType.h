@@ -76,11 +76,6 @@ namespace greaper::refl
 			Break("[refl::BaseType<T>]::GetDynamicSize Trying to use the generic refl::BaseType!");
 			return 0ll;
 		}
-
-		static void SetDynamicSize(UNUSED T& data, UNUSED int64 size)
-		{
-			Break("[refl::BaseType<T>]::SetDynamicSize Trying to use the generic refl::BaseType!");
-		}
 	};
 }
 

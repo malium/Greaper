@@ -90,11 +90,6 @@ namespace greaper::refl
 		{
 			return data.size() * sizeof(Type::value_type);
 		}
-
-		static void SetDynamicSize(UNUSED Type& data, UNUSED int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<>
@@ -175,11 +170,6 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
 			return data.size() * sizeof(Type::value_type);
-		}
-
-		static void SetDynamicSize(UNUSED Type& data, UNUSED int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -313,11 +303,6 @@ namespace greaper::refl
 			for(const auto& e : data)
 				size += ValueCat::GetDynamicSize(e);
 			return size;
-		}
-
-		static void SetDynamicSize(UNUSED Type& data, UNUSED int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -465,11 +450,6 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<class First, class Second>
@@ -578,11 +558,6 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
 			return FirstCat::GetDynamicSize(data.first) + SecondCat::GetDynamicSize(data.second);
-		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -714,11 +689,6 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<class T, class A>
@@ -845,11 +815,6 @@ namespace greaper::refl
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
-		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -979,11 +944,6 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<class T, class C, class A>
@@ -1111,11 +1071,6 @@ namespace greaper::refl
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
-		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -1245,11 +1200,6 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<class T, class H, class C, class A>
@@ -1377,11 +1327,6 @@ namespace greaper::refl
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
-		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -1527,11 +1472,6 @@ namespace greaper::refl
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
 		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<class K, class V, class P, class A>
@@ -1675,11 +1615,6 @@ namespace greaper::refl
 			for(const auto& [key, value] : data)
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
-		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
 		}
 	};
 
@@ -1825,11 +1760,6 @@ namespace greaper::refl
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
 		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
-		}
 	};
 
 	template<class K, class V, class H, class C, class A>
@@ -1973,11 +1903,6 @@ namespace greaper::refl
 			for(const auto& [key, value] : data)
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
-		}
-
-		static void SetDynamicSize(Type& data, int64 size)
-		{
-			/* No-op */
 		}
 	};
 }

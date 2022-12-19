@@ -26,6 +26,7 @@ CREATE_TYPEINFO(greaper::RectF, greaper::refl::RTI_RectF, ComplexType);
 CREATE_TYPEINFO(greaper::RectI, greaper::refl::RTI_RectI, ComplexType);
 CREATE_TYPEINFO(greaper::RectU, greaper::refl::RTI_RectU, ComplexType);
 CREATE_TYPEINFO(greaper::Uuid, greaper::refl::RTI_UUID, PlainType);
+CREATE_TYPEINFO(greaper::IProperty, greaper::refl::RTI_Property, ComplexType);
 
 namespace greaper::refl
 {

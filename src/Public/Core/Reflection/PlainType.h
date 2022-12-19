@@ -54,7 +54,6 @@ namespace greaper::refl { \
 		NODISCARD static int64 GetDynamicSize(UNUSED const type& data){\
 			return 0ll; \
 		}\
-		static void SetDynamicSize(UNUSED type& data, UNUSED int64 size){}\
 	};\
 }
 
@@ -116,11 +115,6 @@ namespace greaper::refl
 			Break("[refl::BaseType<TEnum>]::GetDyanmicSize Trying to use the generic refl::BaseType!");
 			return 0ll;
 		}
-
-		static void SetDynamicSize(UNUSED T& data, UNUSED int64 size)
-		{
-			Break("[refl::BaseType<TEnum>]::SetDynamicSize Trying to use the generic refl::BaseType!");
-		}
 	};
 
 	template<class T>
@@ -176,10 +170,6 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)
 		{
 			return 0ll; 
-		}
-		static void SetDynamicSize(UNUSED T& data, UNUSED int64 size)
-		{
-			/* No-op */
 		}
 	};
 }
