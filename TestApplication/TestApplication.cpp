@@ -6,7 +6,6 @@
 #include <Core/CorePrerequisites.h>
 #include <Core/IGreaperLibrary.h>
 #include <Core/IApplication.h>
-//#include <Core/Reflection/ReflectedPlainContainer.h>
 #include <Core/Reflection/ContainerType.h>
 #include <Core/Property.h>
 #include <Core/Base/LogWriterFile.h>
@@ -16,6 +15,7 @@
 #include <Math/Matrix4.h>
 #include <Math/Quaternion.h>
 #include <Core/MemoryStream.h>
+#include <Core/Reflection/Property.h>
 #include <random>
 #include <iostream>
 

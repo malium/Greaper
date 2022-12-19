@@ -5,8 +5,8 @@
 
 #pragma once
 
+#include "../Property.h"
 #include "ComplexType.h"
-//#include "../Property.h"
 
 namespace greaper::refl
 {

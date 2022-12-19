@@ -266,6 +266,7 @@
     <ClInclude Include="Public\Core\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Core\Base\Span.h" />
     <ClInclude Include="Public\Core\Base\SPtr.h" />
+    <ClInclude Include="Public\Core\Base\TypeTraits.h" />
     <ClInclude Include="Public\Core\Base\UPtr.h" />
     <ClInclude Include="Public\Core\Base\Utils.h" />
     <ClInclude Include="Public\Core\Base\VideoMode.h" />

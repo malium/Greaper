@@ -130,6 +130,5 @@ namespace greaper
 #include "Base/Property.inl"
 //// Interface methods to avoid circle dependency
 #include "Base/IInterface.inl"
-#include "Reflection/Property.h"
 
 #endif /* CORE_GREAPER_LIBRARY_H */

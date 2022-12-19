@@ -201,7 +201,7 @@ namespace greaper
 	{
 		auto lck = Lock(m_Mutex);
 		T value;
-		EmptyResult ret = refl::TypeInfo<T>::Type::FromJSON(value, json, stream);
+		EmptyResult ret = refl::TypeInfo<T>::Type::FromJSON(value, json, name);
 		if(ret.HasFailed())
 			return ret;
 		SetValue(value, false, true);
