@@ -219,7 +219,7 @@ namespace greaper::math
 	template<class T> INLINE Matrix2Real<T> operator*=(Matrix2Real<T>& left, T right)noexcept { left.R0 *= right; left.R1 *= right; return left; }
 	template<class T> INLINE constexpr Matrix2Real<T> operator*(T left, const Matrix2Real<T>& right)noexcept { return { right.R0 * left, right.R1 * left }; }
 
-	template<class T> INLINE constexpr bool operator==(const Matrix2Real<T>& left, const Matrix2Real<T>& right)noexcept { return left.IsEqual(right); }
+	template<class T> INLINE constexpr bool operator==(const Matrix2Real<T>& left, const Matrix2Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
 	template<class T> INLINE constexpr bool operator!=(const Matrix2Real<T>& left, const Matrix2Real<T>& right)noexcept { return !(left == right); }
 }
 

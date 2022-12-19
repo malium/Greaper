@@ -288,7 +288,7 @@ namespace greaper::math
 	}
 	template<class T> INLINE QuaternionReal<T>& operator*=(QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { left = (left * right); return left; }
 
-	template<class T> INLINE constexpr bool operator==(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return left.W == right.W && left.X == right.X && left.Y == right.Y && left.Z == right.Z; }
+	template<class T> INLINE constexpr bool operator==(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return left.IsNearlyEqual(right); }
 	template<class T> INLINE constexpr bool operator!=(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return !(left == right); }
 }
 

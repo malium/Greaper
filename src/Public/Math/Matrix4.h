@@ -303,7 +303,7 @@ namespace greaper::math
 	template<class T> INLINE Matrix4Real<T> operator*=(Matrix4Real<T>& left, T right)noexcept { left.R0 *= right; left.R1 *= right; left.R2 *= right; left.R3 *= right; return left; }
 	template<class T> INLINE constexpr Matrix4Real<T> operator*(T left, const Matrix4Real<T>& right)noexcept { return { right.R0 * left, right.R1 * left, right.R2 * left, right.R3 * left }; }
 
-	template<class T> INLINE constexpr bool operator==(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return left.IsEqual(right); }
+	template<class T> INLINE constexpr bool operator==(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
 	template<class T> INLINE constexpr bool operator!=(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return !(left == right); }
 }
 

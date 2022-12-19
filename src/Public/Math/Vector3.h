@@ -228,7 +228,7 @@ namespace greaper::math
 	template<class T> INLINE Vector3Real<T>& operator*=(Vector3Real<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; return left; }
 	template<class T> INLINE Vector3Real<T>& operator/=(Vector3Real<T>& left, T right)noexcept { float invRight = T(1) / right; left.X *= invRight; left.Y *= invRight; left.Z *= invRight; return left; }
 
-	template<class T> INLINE constexpr bool operator==(const Vector3Real<T>& left, const Vector3Real<T>& right)noexcept { return left.X == right.X && left.Y == right.Y && left.Z == right.Z; }
+	template<class T> INLINE constexpr bool operator==(const Vector3Real<T>& left, const Vector3Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
 	template<class T> INLINE constexpr bool operator!=(const Vector3Real<T>& left, const Vector3Real<T>& right)noexcept { return !(left == right); }
 
 	template<class T>

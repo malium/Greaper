@@ -582,7 +582,7 @@ static void TestFunction()
 	std::tie(durNorm, durOpt) = DistV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
 	ReportTest("DistV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
 
-	using prec = float;
+	using prec = double;
 	auto odeg = Vector3Real<prec>(90, -60, 15);
 	auto orad = odeg * DEG2RAD<prec>;
 	auto q = QuaternionReal<prec>::FromEuler(orad);
