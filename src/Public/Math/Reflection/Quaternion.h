@@ -33,7 +33,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<QuaternionReal>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static SPtr<cJSON> ToJSON(const math::QuaternionReal<T>& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const math::QuaternionReal<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -86,9 +86,27 @@ namespace greaper::refl
 			return 0ll;
 		}
 
-		static void SetDynamicSize(UNUSED math::QuaternionReal<T>& data, UNUSED int64 size)
+		NODISCARD static sizet GetArraySize(UNUSED const math::QuaternionReal<T>& data)
 		{
-			/* No-op */
+			Break("[refl::ComplexType<QuaternionReal>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED math::QuaternionReal<T>& data, UNUSED sizet size)
+		{
+			Break("[refl::ComplexType<QuaternionReal>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const math::QuaternionReal<T>& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::ComplexType<QuaternionReal>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED math::QuaternionReal<T>& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::ComplexType<QuaternionReal>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
 }

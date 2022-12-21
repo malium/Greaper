@@ -9,6 +9,7 @@
 #define CORE_REFLECTION_I_FIELD_H 1
 
 #include "../CorePrerequisites.h"
+#include "PlainType.h"
 
 struct cJSON;
 
@@ -22,6 +23,8 @@ namespace greaper::refl
 		bool m_IsArray = false;
 
 	public:
+		constexpr IField()noexcept = default;
+
 		virtual TResult<ssizet> ToStream(const void* value, IStream& stream)const = 0;
 		virtual TResult<ssizet> FromStream(void* value, IStream& stream)const = 0;
 		virtual SPtr<cJSON> CreateJSON(const void* value)const = 0;
@@ -34,16 +37,16 @@ namespace greaper::refl
 
 		virtual sizet GetArraySize(const void* arr)const = 0;
 		virtual void SetArraySize(void* arr, sizet size)const = 0;
-		virtual void* GetArrayValue(void* arr, sizet index)const = 0;
+		virtual const void* GetArrayValue(const void* arr, sizet index)const = 0;
 		virtual void SetArrayValue(void* arr, const void* value, sizet index)const = 0;
 
-		NODISCARD INLINE bool IsArray()const noexcept { return m_IsArray; }
-		NODISCARD INLINE ReflectedTypeID_t GetTypeID()const noexcept { return m_FieldID; }
-		NODISCARD INLINE StringView GetFieldName()const noexcept { return m_FieldName; }
+		NODISCARD INLINE constexpr bool IsArray()const noexcept { return m_IsArray; }
+		NODISCARD INLINE constexpr ReflectedTypeID_t GetTypeID()const noexcept { return m_FieldID; }
+		NODISCARD INLINE constexpr StringView GetFieldName()const noexcept { return m_FieldName; }
 	};
 
 	template<class T>
-	class TField : public IField
+	class TField final : public IField
 	{
 	protected:
 		using Type = RemoveEverything_t<T>;
@@ -98,21 +101,28 @@ namespace greaper::refl
 		}
 		NODISCARD INLINE sizet GetArraySize(const void* arr)const override
 		{
-			
+			return tInfo::Type::GetArraySize((const Type&)*((const Type*)arr));
 		}
 		INLINE void SetArraySize(void* arr, sizet size)const override
 		{
-
+			tInfo::Type::SetArraySize((Type&)*((Type*)arr), size);
 		}
-		INLINE void* GetArrayValue(void* arr, sizet index)const override
+		INLINE const void* GetArrayValue(const void* arr, sizet index)const override
 		{
-
+			return (const void*)&(tInfo::Type::GetArrayValue((const Type&)*((const Type*)arr), index));
 		}
 		INLINE void SetArrayValue(void* arr, const void* value, sizet index)const override
 		{
-			
+			tInfo::Type::SetArrayValue((Type&)*((Type*)arr), (const Type::value_type&)*((const Type::value_type*)value), index);
 		}
 	};
+
+#if 0
+	constexpr TField<int32> test{ "test"sv };
+	constexpr ReflectedTypeID_t fieldTypeID = test.GetTypeID();
+	constexpr StringView fieldName = test.GetFieldName();
+	constexpr bool fieldIsArray = test.IsArray();
+#endif
 }
 
 #endif /* CORE_REFLECTION_I_FIELD_H */

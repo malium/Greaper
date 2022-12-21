@@ -305,60 +305,6 @@ namespace greaper
 
 		return false; // Equal
 	}
-
-	namespace refl
-	{
-		template<> struct PlainType<Uuid> : public BaseType<Uuid> {
-		static inline constexpr TypeCategory_t Category = TypeCategory_t::Plain; 
-		static TResult<ssizet> ToStream(const Uuid& data, IStream& stream)
-		{ 
-			return Result::CreateSuccess(stream.Write(&data, sizeof(data))); 
-		}
-		static TResult<ssizet> FromStream(Uuid& data, IStream& stream)
-		{ 
-			return Result::CreateSuccess(stream.Read(&data, sizeof(data)));
-		}
-		static SPtr<cJSON> ToJSON(const Uuid& data, StringView name)
-		{
-			cJSON* obj = cJSON_CreateObject();
-			ToJSON(data, obj, name);
-			return SPtr<cJSON>(obj, cJSON_Delete);
-		}
-		static cJSON* ToJSON(const Uuid& data, cJSON* obj, StringView name)
-		{
-			auto str = data.ToString();
-			return cJSON_AddStringToObject(obj, name.data(), str.c_str());
-		}
-		static EmptyResult FromJSON(Uuid& data, cJSON* json, StringView name)
-		{
-			cJSON* item = cJSON_GetObjectItemCaseSensitive(json, name.data());
-			if(item == nullptr)
-				return Result::CreateFailure(Format("[refl::PlainType<Uuid>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));			if(cJSON_IsString(item))
-			{
-				data = Uuid(cJSON_GetStringValue(item));
-				return Result::CreateSuccess();
-			}
-			return Result::CreateFailure("[refl::PlainType<Uuid>]::FromJSON Couldn't obtain the value from the json, expected: cJSON_IsString."sv);
-		}
-		NODISCARD static String ToString(const Uuid& data)
-		{
-			return data.ToString();
-		}
-		static EmptyResult FromString(const String& str, Uuid& data)
-		{
-			data.FromString(str);
-			return Result::CreateSuccess();
-		}
-		NODISCARD static int64 GetDynamicSize(UNUSED const Uuid& data)
-		{
-			return 0ll; 
-		}
-		static void SetDynamicSize(UNUSED Uuid& data, UNUSED int64 size)
-		{
-			/* No-op */
-		}
-	};
-	}
 }
 
 namespace std

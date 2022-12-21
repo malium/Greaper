@@ -42,7 +42,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>("[refl::BaseType<T>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
-		static SPtr<cJSON> ToJSON(const T& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -75,6 +75,29 @@ namespace greaper::refl
 		{
 			Break("[refl::BaseType<T>]::GetDynamicSize Trying to use the generic refl::BaseType!");
 			return 0ll;
+		}
+
+		NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		{
+			Break("[refl::BaseType<T>]::GetArraySize Trying to use the generic refl::BaseType!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED T& data, UNUSED sizet size)
+		{
+			Break("[refl::BaseType<T>]::SetArraySize Trying to use the generic refl::BaseType!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::BaseType<T>]::GetArrayValue Trying to use the generic refl::BaseType!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED T& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::BaseType<T>]::SetArrayValue Trying to use the generic refl::BaseType!");
 		}
 	};
 }

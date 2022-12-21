@@ -26,7 +26,7 @@ namespace greaper::refl { \
 				return Result::CreateSuccess(size);\
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));\
 		}\
-		static SPtr<cJSON> ToJSON(const type& data, StringView name){ \
+		static SPtr<cJSON> CreateJSON(const type& data, StringView name){ \
 			cJSON* obj = cJSON_CreateObject(); \
 			ToJSON(data, obj, name); \
 			return SPtr<cJSON>(obj, cJSON_Delete); \
@@ -53,6 +53,21 @@ namespace greaper::refl { \
 		}\
 		NODISCARD static int64 GetDynamicSize(UNUSED const type& data){\
 			return 0ll; \
+		}\
+		NODISCARD static sizet GetArraySize(UNUSED const type& data){\
+			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
+			return 0ll;\
+		}\
+		static void SetArraySize(UNUSED type& data, UNUSED sizet size){\
+			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
+		}\
+		NODISCARD static const int32& GetArrayValue(UNUSED const type& data, UNUSED sizet index){\
+			static constexpr int32 dummy = 0;\
+			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
+			return dummy;\
+		}\
+		static void SetArrayValue(UNUSED type& data, UNUSED const int32& value, UNUSED sizet index){\
+			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
 		}\
 	};\
 }
@@ -81,7 +96,7 @@ namespace greaper::refl
 			return Result::CreateFailure("[refl::BaseType<TEnum>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
-		static SPtr<cJSON> ToJSON(const T& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -115,6 +130,29 @@ namespace greaper::refl
 			Break("[refl::BaseType<TEnum>]::GetDyanmicSize Trying to use the generic refl::BaseType!");
 			return 0ll;
 		}
+
+		NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		{
+			Break("[refl::BaseType<TEnum>]::GetArraySize Trying to use the generic refl::BaseType!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED T& data, UNUSED sizet size)
+		{
+			Break("[refl::BaseType<TEnum>]::SetArraySize Trying to use the generic refl::BaseType!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::BaseType<TEnum>]::GetArrayValue Trying to use the generic refl::BaseType!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED T& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::BaseType<TEnum>]::SetArrayValue Trying to use the generic refl::BaseType!");
+		}
 	};
 
 	template<class T>
@@ -135,7 +173,7 @@ namespace greaper::refl
 				return Result::CreateSuccess(size);
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
-		static SPtr<cJSON> ToJSON(const T& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -170,6 +208,161 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)
 		{
 			return 0ll; 
+		}
+
+		NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		{
+			Break("[refl::PlainType<TEnum>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED T& data, UNUSED sizet size)
+		{
+			Break("[refl::PlainType<TEnum>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::PlainType<TEnum>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED T& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::PlainType<TEnum>]::SetArrayValue Trying to use a PlainType for array operations!");
+		}
+	};
+
+	template<class First, class Second>
+	struct PlainType<std::pair<First, Second>> : public BaseType<std::pair<First, Second>>
+	{
+		using Type = std::pair<First, Second>;
+		using FirstCat = typename TypeInfo<First>::Type;
+		using SecondCat = typename TypeInfo<Second>::Type;
+
+		static_assert(!std::is_same_v<FirstCat, void> && !std::is_same_v<SecondCat, void>, "[refl::PlainType<std::pair>] Trying to use a Container with not refl value_type!");
+
+		static inline constexpr ssizet StaticSize = FirstCat::StaticSize + SecondCat::StaticSize;
+
+		static inline constexpr TypeCategory_t Category = TypeCategory_t::Plain;
+
+		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
+		{
+			auto dynamicSize = GetDynamicSize(data);
+
+			ssizet size = 0;
+			TResult<ssizet> res = FirstCat::ToStream(data.first, stream);
+			if (res.HasFailed())
+				return res;
+			size += res.GetValue();
+
+			res = SecondCat::ToStream(data.second, stream);
+			if (res.HasFailed())
+				return res;
+			size += res.GetValue();
+
+			ssizet expectedSize = StaticSize + dynamicSize;
+			if (size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+		}
+
+		static TResult<ssizet> FromStream(Type& data, IStream& stream)
+		{
+			ssizet size = 0;
+			int64 dynamicSize = 0;
+			TResult<ssizet> res = FirstCat::FromStream(data.first, stream);
+			if (res.HasFailed())
+				return res;
+			size += res.GetValue();
+			dynamicSize += FirstCat::GetDynamicSize(data.first);
+
+			res = SecondCat::FromStream(data.second, stream);
+			if (res.HasFailed())
+				return res;
+			size += res.GetValue();
+			dynamicSize += SecondCat::GetDynamicSize(data.second);
+
+			ssizet expectedSize = dynamicSize + StaticSize;
+			if (size == expectedSize)
+				return Result::CreateSuccess(size);
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+		}
+
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
+		{
+			cJSON* obj = cJSON_CreateObject();
+			ToJSON(data, obj, name);
+			return SPtr<cJSON>(obj, cJSON_Delete);
+		}
+
+		static cJSON* ToJSON(const Type& data, cJSON* json, StringView name)
+		{
+			cJSON* obj = cJSON_AddObjectToObject(json, name.data());
+			
+			FirstCat::ToJSON(data.first, obj, "first"sv);
+			SecondCat::ToJSON(data.second, obj, "second"sv);
+			
+			return obj;
+		}
+
+		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
+		{
+			cJSON* obj = cJSON_GetObjectItemCaseSensitive(json, name.data());
+			if (obj == nullptr)
+				return Result::CreateFailure(Format("[refl::PlainType<std::pair>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
+
+			EmptyResult res = FirstCat::FromJSON(data.first, obj, "first"sv);
+			if (res.HasFailed())
+				return res;
+			
+			res = SecondCat::FromJSON(data.second, obj, "second"sv);
+			if (res.HasFailed())
+				return res;
+			
+			return Result::CreateSuccess();
+		}
+
+		static String ToString(const Type& data)
+		{
+			SPtr<cJSON> json = ToJSON(data, "pair"sv);
+			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
+			return String{ jsonStr.get() };
+		}
+
+		static EmptyResult FromString(const String& str, Type& data)
+		{
+			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
+			return FromJSON(data, json.get(), "pair"sv);
+		}
+
+		NODISCARD static int64 GetDynamicSize(const Type& data)
+		{
+			return FirstCat::GetDynamicSize(data.first) + SecondCat::GetDynamicSize(data.second);
+		}
+
+		NODISCARD static sizet GetArraySize(UNUSED const Type& data)
+		{
+			Break("[refl::PlainType<std::pair>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED Type& data, UNUSED sizet size)
+		{
+			Break("[refl::PlainType<std::pair>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const Type& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::PlainType<std::pair>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED Type& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::PlainType<std::pair>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
 }

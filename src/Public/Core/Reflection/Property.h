@@ -90,7 +90,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<IProperty>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const IProperty& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const IProperty& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -150,6 +150,29 @@ namespace greaper::refl
 			return StringCat::GetDynamicSize(data.GetPropertyName()) + ValueIDCat::GetDynamicSize(data._ValueTypeID())
 				+ data._GetStaticSize() + data._GetDynamicSize();
 		}
+
+		NODISCARD static sizet GetArraySize(UNUSED const IProperty& data)
+		{
+			Break("[refl::ComplexType<IProperty>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED IProperty& data, UNUSED sizet size)
+		{
+			Break("[refl::ComplexType<IProperty>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const IProperty& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::ComplexType<IProperty>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED IProperty& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::ComplexType<IProperty>]::SetArrayValue Trying to use a PlainType for array operations!");
+		}
 	};
 
 	template<class T> 
@@ -172,9 +195,9 @@ namespace greaper::refl
 			return ComplexType<IProperty>::FromStream(data, stream);
 		}
 
-		static SPtr<cJSON> ToJSON(const TProperty<T>& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const TProperty<T>& data, StringView name)
 		{
-			return ComplexType<IProperty>::ToJSON(data, name);
+			return ComplexType<IProperty>::CreateJSON(data, name);
 		}
 
 		static cJSON* ToJSON(const TProperty<T>& data, cJSON* json, StringView name)
@@ -200,6 +223,26 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(const TProperty<T>& data)
 		{
 			return ComplexType<IProperty>::GetDynamicSize(data);
+		}
+
+		NODISCARD static sizet GetArraySize(const TProperty<T>& data)
+		{
+			return ComplexType<IProperty>::GetArraySize(data);
+		}
+
+		static void SetArraySize(TProperty<T>& data, sizet size)
+		{
+			ComplexType<IProperty>::SetArraySize(data, size);
+		}
+
+		NODISCARD static const int32& GetArrayValue(const TProperty<T>& data, sizet index)
+		{
+			return ComplexType<IProperty>::GetArrayValue(data, index);
+		}
+
+		static void SetArrayValue(TProperty<T>& data, const int32& value, sizet index)
+		{
+			ComplexType<IProperty>::SetArrayValue(data, value, index);
 		}
 	};
 }

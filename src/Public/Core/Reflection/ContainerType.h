@@ -50,7 +50,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -89,6 +89,29 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
 			return data.size() * sizeof(Type::value_type);
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			data.resize(size);
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+				return data[index];
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+				data[index] = value;
 		}
 	};
 
@@ -129,7 +152,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -170,6 +193,34 @@ namespace greaper::refl
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
 			return data.size() * sizeof(Type::value_type);
+		}
+
+		NODISCARD static int64 GetDynamicSize(const Type& data)
+		{
+			return data.size() * sizeof(Type::value_type);
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			data.resize(size);
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+				return data[index];
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+				data[index] = value;
 		}
 	};
 
@@ -236,7 +287,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -303,6 +354,29 @@ namespace greaper::refl
 			for(const auto& e : data)
 				size += ValueCat::GetDynamicSize(e);
 			return size;
+		}
+
+		NODISCARD static sizet GetArraySize(UNUSED const Type& data)
+		{
+			return N;
+		}
+
+		static void SetArraySize(UNUSED Type& data, UNUSED sizet size)
+		{
+			/* No-op */
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+				return data[index];
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+				data[index] = value;
 		}
 	};
 
@@ -381,7 +455,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -450,114 +524,28 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
-	};
 
-	template<class First, class Second>
-	struct ContainerType<std::pair<First, Second>> : public BaseType<std::pair<First, Second>>
-	{
-		using Type = std::pair<First, Second>;
-		using FirstCat = typename TypeInfo<First>::Type;
-		using SecondCat = typename TypeInfo<Second>::Type;
-
-		static_assert(!std::is_same_v<FirstCat, void> && !std::is_same_v<SecondCat, void>, "[refl::ContainerType<std::pair>] Trying to use a Container with not refl value_type!");
-
-		static inline constexpr ssizet StaticSize = FirstCat::StaticSize + SecondCat::StaticSize;
-
-		static inline constexpr TypeCategory_t Category = TypeCategory_t::Container;
-
-		static TResult<ssizet> ToStream(const Type& data, IStream& stream)
+		NODISCARD static sizet GetArraySize(const Type& data)
 		{
-			auto dynamicSize = GetDynamicSize(data);
-
-			ssizet size = 0;
-			TResult<ssizet> res = FirstCat::ToStream(data.first, stream);
-			if (res.HasFailed())
-				return res;
-			size += res.GetValue();
-
-			res = SecondCat::ToStream(data.second, stream);
-			if (res.HasFailed())
-				return res;
-			size += res.GetValue();
-
-			ssizet expectedSize = StaticSize + dynamicSize;
-			if (size == expectedSize)
-				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::pair>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return data.size();
 		}
 
-		static TResult<ssizet> FromStream(Type& data, IStream& stream)
+		static void SetArraySize(Type& data, sizet size)
 		{
-			ssizet size = 0;
-			int64 dynamicSize = 0;
-			TResult<ssizet> res = FirstCat::FromStream(data.first, stream);
-			if (res.HasFailed())
-				return res;
-			size += res.GetValue();
-			dynamicSize += FirstCat::GetDynamicSize(data.first);
-
-			res = SecondCat::FromStream(data.second, stream);
-			if (res.HasFailed())
-				return res;
-			size += res.GetValue();
-			dynamicSize += SecondCat::GetDynamicSize(data.second);
-
-			ssizet expectedSize = dynamicSize + StaticSize;
-			if (size == expectedSize)
-				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::pair>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			data.resize(size);
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
 		{
-			cJSON* obj = cJSON_CreateObject();
-			ToJSON(data, obj, name);
-			return SPtr<cJSON>(obj, cJSON_Delete);
+			if(index < GetArraySize(data))
+				return data[index];
+			return Type::value_type{};
 		}
 
-		static cJSON* ToJSON(const Type& data, cJSON* json, StringView name)
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
 		{
-			cJSON* obj = cJSON_AddObjectToObject(json, name.data());
-			
-			FirstCat::ToJSON(data.first, obj, "first"sv);
-			SecondCat::ToJSON(data.second, obj, "second"sv);
-			
-			return obj;
-		}
-
-		static EmptyResult FromJSON(Type& data, cJSON* json, StringView name)
-		{
-			cJSON* obj = cJSON_GetObjectItemCaseSensitive(json, name.data());
-			if (obj == nullptr)
-				return Result::CreateFailure(Format("[refl::ContainerType<std::pair>]::FromJSON Couldn't obtain the value from json, the item with name '%s' was not found.", name.data()));
-
-			EmptyResult res = FirstCat::FromJSON(data.first, obj, "first"sv);
-			if (res.HasFailed())
-				return res;
-			
-			res = SecondCat::FromJSON(data.second, obj, "second"sv);
-			if (res.HasFailed())
-				return res;
-			
-			return Result::CreateSuccess();
-		}
-
-		static String ToString(const Type& data)
-		{
-			SPtr<cJSON> json = ToJSON(data, "pair"sv);
-			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
-			return String{ jsonStr.get() };
-		}
-
-		static EmptyResult FromString(const String& str, Type& data)
-		{
-			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "pair"sv);
-		}
-
-		NODISCARD static int64 GetDynamicSize(const Type& data)
-		{
-			return FirstCat::GetDynamicSize(data.first) + SecondCat::GetDynamicSize(data.second);
+			if(index < GetArraySize(data))
+				data[index] = value;
 		}
 	};
 
@@ -621,7 +609,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -689,6 +677,43 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+		static void SetArraySize(Type& data, sizet size)
+		{
+			data.resize(size);
+		}
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data)) 
+			{
+				sizet i = 0;
+				for(auto it = data.begin(); it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = data.begin(); it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						(*it) = value;
+						break;
+					}
+				}	
+			}
+		}
 	};
 
 	template<class T, class A>
@@ -751,7 +776,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -816,6 +841,29 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			data.resize(size);
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+				return data[index];
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+				data[index] = value;
+		}
 	};
 
 	template<class T, class C, class A>
@@ -877,7 +925,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -944,6 +992,49 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			while(data.size() < size)
+				data.emplace(Type::value_type{});
+			while(data.size() > size)
+				data.erase(data.end());
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
+		}
 	};
 
 	template<class T, class C, class A>
@@ -1005,7 +1096,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1072,6 +1163,49 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			while(data.size() < size)
+				data.emplace(Type::value_type{});
+			while(data.size() > size)
+				data.erase(data.end());
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
+		}
 	};
 
 	template<class T, class H, class C, class A>
@@ -1133,7 +1267,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1200,6 +1334,49 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			while(data.size() < size)
+				data.emplace(Type::value_type{});
+			while(data.size() > size)
+				data.erase(data.end());
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
+		}
 	};
 
 	template<class T, class H, class C, class A>
@@ -1261,7 +1438,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1327,6 +1504,49 @@ namespace greaper::refl
 			for(const auto& e : data)
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(Type& data, sizet size)
+		{
+			while(data.size() < size)
+				data.emplace(Type::value_type{});
+			while(data.size() > size)
+				data.erase(data.end());
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
 		}
 	};
 
@@ -1404,7 +1624,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1471,6 +1691,46 @@ namespace greaper::refl
 			for(const auto& [key, value] : data)
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(UNUSED Type& data, UNUSED sizet size)
+		{
+			/* No-op */
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
 		}
 	};
 
@@ -1548,7 +1808,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1615,6 +1875,46 @@ namespace greaper::refl
 			for(const auto& [key, value] : data)
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(UNUSED Type& data, UNUSED sizet size)
+		{
+			/* No-op */
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
 		}
 	};
 
@@ -1692,7 +1992,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1759,6 +2059,46 @@ namespace greaper::refl
 			for(const auto& [key, value] : data)
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(UNUSED Type& data, UNUSED sizet size)
+		{
+			/* No-op */
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
 		}
 	};
 
@@ -1836,7 +2176,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
-		static SPtr<cJSON> ToJSON(const Type& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -1903,6 +2243,46 @@ namespace greaper::refl
 			for(const auto& [key, value] : data)
 				size += KeyCat::StaticSize + ValueCat::StaticSize + KeyCat::GetDynamicSize(key) + ValueCat::GetDynamicSize(value);
 			return size;
+		}
+
+		NODISCARD static sizet GetArraySize(const Type& data)
+		{
+			return data.size();
+		}
+
+		static void SetArraySize(UNUSED Type& data, UNUSED sizet size)
+		{
+			/* No-op */
+		}
+
+		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+						return *it;
+				}
+			}
+			return Type::value_type{};
+		}
+
+		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		{
+			if(index < GetArraySize(data))
+			{
+				sizet i = 0;
+				for(auto it = 0; it != data.end(); ++it, ++i)
+				{
+					if(i == index)
+					{
+						*it = value;
+						break;
+					}
+				}
+			}
 		}
 	};
 }

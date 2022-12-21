@@ -33,7 +33,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Real>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static SPtr<cJSON> ToJSON(const math::Vector2Real<T>& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const math::Vector2Real<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -80,9 +80,27 @@ namespace greaper::refl
 			return 0ll;
 		}
 
-		static void SetDynamicSize(UNUSED math::Vector2Real<T>& data, UNUSED int64 size)
+		NODISCARD static sizet GetArraySize(UNUSED const math::Vector2Real<T>& data)
 		{
-			/* No-op */
+			Break("[refl::ComplexType<Vector2Real>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED math::Vector2Real<T>& data, UNUSED sizet size)
+		{
+			Break("[refl::ComplexType<Vector2Real>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const math::Vector2Real<T>& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::ComplexType<Vector2Real>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED math::Vector2Real<T>& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::ComplexType<Vector2Real>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
 
@@ -109,7 +127,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Signed>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static SPtr<cJSON> ToJSON(const math::Vector2Signed<T>& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const math::Vector2Signed<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -156,9 +174,27 @@ namespace greaper::refl
 			return 0ll;
 		}
 
-		static void SetDynamicSize(UNUSED math::Vector2Signed<T>& data, UNUSED int64 size)
+		NODISCARD static sizet GetArraySize(UNUSED const math::Vector2Signed<T>& data)
 		{
-			/* No-op */
+			Break("[refl::ComplexType<Vector2Signed>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED math::Vector2Real<T>& data, UNUSED sizet size)
+		{
+			Break("[refl::ComplexType<Vector2Signed>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const math::Vector2Signed<T>& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::ComplexType<Vector2Signed>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED math::Vector2Signed<T>& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::ComplexType<Vector2Signed>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
 
@@ -185,7 +221,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2Unsigned>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR" obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static SPtr<cJSON> ToJSON(const math::Vector2Unsigned<T>& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const math::Vector2Unsigned<T>& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -232,9 +268,27 @@ namespace greaper::refl
 			return 0ll;
 		}
 
-		static void SetDynamicSize(UNUSED math::Vector2Unsigned<T>& data, UNUSED int64 size)
+		NODISCARD static sizet GetArraySize(UNUSED const math::Vector2Unsigned<T>& data)
 		{
-			/* No-op */
+			Break("[refl::ComplexType<Vector2Unsigned>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED math::Vector2Unsigned<T>& data, UNUSED sizet size)
+		{
+			Break("[refl::ComplexType<Vector2Unsigned>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const math::Vector2Unsigned<T>& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::ComplexType<Vector2Unsigned>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED math::Vector2Unsigned<T>& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::ComplexType<Vector2Unsigned>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
 
@@ -261,7 +315,7 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<Vector2b>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
 
-		static SPtr<cJSON> ToJSON(const math::Vector2b& data, StringView name)
+		static SPtr<cJSON> CreateJSON(const math::Vector2b& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
 			ToJSON(data, obj, name);
@@ -301,17 +355,35 @@ namespace greaper::refl
 		{
 			if(data.FromString(str))
 				return Result::CreateSuccess();
-			return Result::CreateFailure("[refl::ComplexType<Vector4b>]::FromString parsing error!"sv);
+			return Result::CreateFailure("[refl::ComplexType<Vector2b>]::FromString parsing error!"sv);
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const math::Vector2b& data)
 		{
 			return 0ll;
 		}
-
-		static void SetDynamicSize(UNUSED math::Vector2b& data, UNUSED int64 size)
+		
+		NODISCARD static sizet GetArraySize(UNUSED const math::Vector2b& data)
 		{
-			/* No-op */
+			Break("[refl::ComplexType<Vector2b>]::GetArraySize Trying to use a PlainType for array operations!");
+			return 0ll;
+		}
+
+		static void SetArraySize(UNUSED math::Vector2b& data, UNUSED sizet size)
+		{
+			Break("[refl::ComplexType<Vector2b>]::SetArraySize Trying to use a PlainType for array operations!");
+		}
+
+		NODISCARD static const int32& GetArrayValue(UNUSED const math::Vector2b& data, UNUSED sizet index)
+		{
+			static constexpr int32 dummy = 0;
+			Break("[refl::ComplexType<Vector2b>]::GetArrayValue Trying to use a PlainType for array operations!");
+			return dummy;
+		}
+
+		static void SetArrayValue(UNUSED math::Vector2b& data, UNUSED const int32& value, UNUSED sizet index)
+		{
+			Break("[refl::ComplexType<Vector2b>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
 }
