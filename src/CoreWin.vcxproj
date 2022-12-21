@@ -299,6 +299,7 @@
     <ClInclude Include="Public\Core\Reflection\BaseType.h" />
     <ClInclude Include="Public\Core\Reflection\ComplexType.h" />
     <ClInclude Include="Public\Core\Reflection\ContainerType.h" />
+    <ClInclude Include="Public\Core\Reflection\IField.h" />
     <ClInclude Include="Public\Core\Reflection\PlainType.h" />
     <ClInclude Include="Public\Core\Reflection\Property.h" />
     <ClInclude Include="Public\Core\Reflection\Rect.h" />
@@ -310,6 +311,7 @@
     <ClInclude Include="Public\Core\Reflection\ReflectedProperty.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedReflField.h" />
     <ClInclude Include="Public\Core\Reflection\ReflectedTypeInfo.h" />
+    <ClInclude Include="Public\Core\Reflection\Uuid.h" />
     <ClInclude Include="Public\Core\Result.h" />
     <ClInclude Include="Public\Core\Stream.h" />
     <ClInclude Include="Public\Core\StringUtils.h" />

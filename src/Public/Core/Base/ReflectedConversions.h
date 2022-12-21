@@ -34,7 +34,7 @@ namespace greaper::refl
 	template<typename T> struct TypeInfo<TProperty<T>> { static constexpr ReflectedTypeID_t ID = RTI_Property; using Type = ComplexType<TProperty<T>>; };
 	template<> struct TypeInfo<String> { static constexpr ReflectedTypeID_t ID = RTI_String; using Type = ContainerType<String>; };
 	template<> struct TypeInfo<WString> { static constexpr ReflectedTypeID_t ID = RTI_WString; using Type = ContainerType<WString>; };
-	template<typename F, typename S> struct TypeInfo<std::pair<F, S>> { static constexpr ReflectedTypeID_t ID = RTI_Pair; using Type = ContainerType<std::pair<F, S>>; };
+	template<typename F, typename S> struct TypeInfo<std::pair<F, S>> { static constexpr ReflectedTypeID_t ID = RTI_Pair; using Type = PlainType<std::pair<F, S>>; };
 	template<typename T, sizet N> struct TypeInfo<std::array<T, N>> { static constexpr ReflectedTypeID_t ID = RTI_Array; using Type = ContainerType<std::array<T, N>>; };
 	template<typename T, typename A> struct TypeInfo<Vector<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_Vector; using Type = ContainerType<Vector<T, A>>; };
 	template<typename T, typename A> struct TypeInfo<Deque<T, A>> { static constexpr ReflectedTypeID_t ID = RTI_Deque; using Type = ContainerType<Deque<T, A>>; };

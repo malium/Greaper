@@ -335,6 +335,12 @@
     <ClInclude Include="Public\Core\Base\TypeTraits.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\IField.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Core\Reflection\Uuid.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">

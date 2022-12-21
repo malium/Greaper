@@ -326,7 +326,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "pair"sv);
+			SPtr<cJSON> json = CreateJSON(data, "pair"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}

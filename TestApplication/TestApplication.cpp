@@ -623,7 +623,7 @@ static void TestFunction()
 
 	using typeInfo = refl::TypeInfo_t<decltype(quatArray)>::Type;
 
-	auto json = typeInfo::ToJSON(quatArray, "quatMap"sv);
+	auto json = typeInfo::CreateJSON(quatArray, "quatMap"sv);
 	auto text = SPtr<char>(cJSON_Print(json.get()));
 	std::cout << text.get() << std::endl;
 	auto parsed = SPtr<cJSON>(cJSON_Parse(text.get()), cJSON_Delete);
@@ -673,7 +673,7 @@ static void TestFunction()
 	{
 		snprintf(buffer, ArraySize(buffer), "Elem_%" PRIuPTR, propIdx++);
 		using propTypeInfo = refl::TypeInfo<IProperty>::Type;
-		auto propJSON = propTypeInfo::ToJSON(*prop, StringView{buffer});
+		auto propJSON = propTypeInfo::CreateJSON(*prop, StringView{buffer});
 		auto text = SPtr<char>(cJSON_Print(propJSON.get()));
 		std::cout << text.get() << std::endl;
 	}

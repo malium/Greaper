@@ -17,6 +17,7 @@ namespace greaper::refl
 	struct ContainerType<String> : public BaseType<String>
 	{
 		using Type = String;
+		using ArrayValueType = typename Type::value_type;
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
@@ -88,7 +89,7 @@ namespace greaper::refl
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			return data.size() * sizeof(Type::value_type);
+			return data.size() * sizeof(ArrayValueType);
 		}
 
 		NODISCARD static sizet GetArraySize(const Type& data)
@@ -101,14 +102,14 @@ namespace greaper::refl
 			data.resize(size);
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 				return data[index];
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 				data[index] = value;
@@ -119,6 +120,7 @@ namespace greaper::refl
 	struct ContainerType<WString> : public BaseType<WString>
 	{
 		using Type = WString;
+		using ArrayValueType = typename Type::value_type;
 
 		static inline constexpr ssizet StaticSize = sizeof(int64);
 
@@ -192,12 +194,7 @@ namespace greaper::refl
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			return data.size() * sizeof(Type::value_type);
-		}
-
-		NODISCARD static int64 GetDynamicSize(const Type& data)
-		{
-			return data.size() * sizeof(Type::value_type);
+			return data.size() * sizeof(ArrayValueType);
 		}
 
 		NODISCARD static sizet GetArraySize(const Type& data)
@@ -210,14 +207,14 @@ namespace greaper::refl
 			data.resize(size);
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 				return data[index];
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 				data[index] = value;
@@ -228,7 +225,8 @@ namespace greaper::refl
 	struct ContainerType<std::array<T, N>> : public BaseType<std::array<T, N>>
 	{
 		using Type = std::array<T, N>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::array>] Trying to use a Container with not refl value_type!");
 
@@ -240,13 +238,13 @@ namespace greaper::refl
 		{
 			ssizet size = 0;
 			ssizet dynamicSize = GetDynamicSize(data);
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
 			{
 				size += stream.Write(data.data(), StaticSize);
 			}
 			else
 			{
-				for(const T& elem : data)
+				for(const ArrayValueType& elem : data)
 				{
 					TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 					if(res.HasFailed())
@@ -265,13 +263,13 @@ namespace greaper::refl
 		{
 			ssizet size = 0;
 			ssizet dynamicSize = 0;
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
 			{
 				size += stream.Read(data.data(), StaticSize);
 			}
 			else
 			{
-				for(T& elem : data)
+				for(ArrayValueType& elem : data)
 				{
 					TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 					if(res.HasFailed())
@@ -334,7 +332,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "array"sv);
+			SPtr<cJSON> json = CreateJSON(data, "array"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -347,7 +345,7 @@ namespace greaper::refl
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>>)
+			if constexpr (std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
 				return 0ll;
 			
 			int64 size = 0;
@@ -366,14 +364,14 @@ namespace greaper::refl
 			/* No-op */
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 				return data[index];
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 				data[index] = value;
@@ -384,7 +382,8 @@ namespace greaper::refl
 	struct ContainerType<Vector<T, A>> : public BaseType<Vector<T, A>>
 	{
 		using Type = Vector<T, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::vector>] Trying to use a Container with not refl value_type!");
 
@@ -400,13 +399,13 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
 			{
 				size += stream.Write(data.data(), dynamicSize);
 			}
 			else
 			{
-				for(const T& elem : data)
+				for(const ArrayValueType& elem : data)
 				{
 					TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 					if(res.HasFailed())
@@ -430,16 +429,16 @@ namespace greaper::refl
 			data.clear();
 			data.resize(elementCount);
 			int64 dynamicSize = 0;
-			if constexpr(std::is_same_v<ValueCat, PlainType<T>>)
+			if constexpr(std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
 			{
-				dynamicSize = elementCount * sizeof(T);
+				dynamicSize = elementCount * sizeof(ArrayValueType);
 				size += stream.Read(data.data(), dynamicSize);
 			}
 			else
 			{
 				for(auto it = data.begin(); it != data.end(); ++it)
 				{
-					T elem;
+					ArrayValueType elem;
 					TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 					if(res.HasFailed())
 						return res;
@@ -502,7 +501,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "vector"sv);
+			SPtr<cJSON> json = CreateJSON(data, "vector"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -515,9 +514,9 @@ namespace greaper::refl
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
-			if constexpr (std::is_same_v<ValueCat, PlainType<T>>)
+			if constexpr (std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
 			{
-				return sizeof(T) * data.size();
+				return sizeof(ArrayValueType) * data.size();
 			}
 			int64 size = 0;
 			for(const auto& e : data)
@@ -535,14 +534,14 @@ namespace greaper::refl
 			data.resize(size);
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 				return data[index];
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 				data[index] = value;
@@ -553,7 +552,8 @@ namespace greaper::refl
 	struct ContainerType<List<T, A>> : public BaseType<List<T, A>>
 	{
 		using Type = List<T, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::list>] Trying to use a Container with not refl value_type!");
 
@@ -569,7 +569,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			for(const T& elem : data)
+			for(const ArrayValueType& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 				if(res.HasFailed())
@@ -594,7 +594,7 @@ namespace greaper::refl
 			data.resize(elementCount);
 			for(auto it = data.begin(); it != data.end(); ++it)
 			{
-				T elem;
+				ArrayValueType elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 				if(res.HasFailed())
 					return res;
@@ -659,7 +659,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "list"sv);
+			SPtr<cJSON> json = CreateJSON(data, "list"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -686,7 +686,7 @@ namespace greaper::refl
 		{
 			data.resize(size);
 		}
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data)) 
 			{
@@ -697,9 +697,9 @@ namespace greaper::refl
 						return *it;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 			{
@@ -720,7 +720,8 @@ namespace greaper::refl
 	struct ContainerType<Deque<T, A>> : public BaseType<Deque<T, A>>
 	{
 		using Type = Deque<T, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::deque>] Trying to use a Container with not refl value_type!");
 
@@ -736,7 +737,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			for(const T& elem : data)
+			for(const ArrayValueType& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 				if(res.HasFailed())
@@ -761,7 +762,7 @@ namespace greaper::refl
 			data.resize(elementCount);
 			for(auto it = data.begin(); it != data.end(); ++it)
 			{
-				T elem;
+				ArrayValueType elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 				if(res.HasFailed())
 					return res;
@@ -823,7 +824,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "queue"sv);
+			SPtr<cJSON> json = CreateJSON(data, "queue"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -852,14 +853,14 @@ namespace greaper::refl
 			data.resize(size);
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 				return data[index];
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 				data[index] = value;
@@ -870,7 +871,8 @@ namespace greaper::refl
 	struct ContainerType<Set<T, C, A>> : public BaseType<Set<T, C, A>>
 	{
 		using Type = Set<T, C, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::set>] Trying to use a Container with not refl value_type!");
 
@@ -886,7 +888,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			for(const T& elem : data)
+			for(const ArrayValueType& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 				if(res.HasFailed())
@@ -910,7 +912,7 @@ namespace greaper::refl
 			data.clear();
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
-				T elem;
+				ArrayValueType elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 				if(res.HasFailed())
 					return res;
@@ -962,7 +964,7 @@ namespace greaper::refl
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
-				T elem;
+				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -974,7 +976,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "set"sv);
+			SPtr<cJSON> json = CreateJSON(data, "set"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -1001,38 +1003,32 @@ namespace greaper::refl
 		static void SetArraySize(Type& data, sizet size)
 		{
 			while(data.size() < size)
-				data.emplace(Type::value_type{});
+				data.emplace(ArrayValueType{});
 			while(data.size() > size)
 				data.erase(data.end());
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index));
+				data.emplace(value);
 			}
 		}
 	};
@@ -1041,7 +1037,8 @@ namespace greaper::refl
 	struct ContainerType<MultiSet<T, C, A>> : public BaseType<MultiSet<T, C, A>>
 	{
 		using Type = MultiSet<T, C, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::multiset>] Trying to use a Container with not refl value_type!");
 
@@ -1057,7 +1054,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			for(const T& elem : data)
+			for(const ArrayValueType& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 				if(res.HasFailed())
@@ -1081,7 +1078,7 @@ namespace greaper::refl
 			data.clear();
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
-				T elem;
+				ArrayValueType elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 				if(res.HasFailed())
 					return res;
@@ -1133,7 +1130,7 @@ namespace greaper::refl
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
-				T elem;
+				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -1145,7 +1142,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "multiset"sv);
+			SPtr<cJSON> json = CreateJSON(data, "multiset"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -1172,38 +1169,32 @@ namespace greaper::refl
 		static void SetArraySize(Type& data, sizet size)
 		{
 			while(data.size() < size)
-				data.emplace(Type::value_type{});
+				data.emplace(ArrayValueType{});
 			while(data.size() > size)
 				data.erase(data.end());
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index));
+				data.emplace(value);
 			}
 		}
 	};
@@ -1212,7 +1203,8 @@ namespace greaper::refl
 	struct ContainerType<UnorderedSet<T, H, C, A>> : public BaseType<UnorderedSet<T, H, C, A>>
 	{
 		using Type = UnorderedSet<T, H, C, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_set>] Trying to use a Container with not refl value_type!");
 
@@ -1228,7 +1220,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			for(const T& elem : data)
+			for(const ArrayValueType& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 				if(res.HasFailed())
@@ -1252,7 +1244,7 @@ namespace greaper::refl
 			data.clear();
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
-				T elem;
+				ArrayValueType elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 				if(res.HasFailed())
 					return res;
@@ -1304,7 +1296,7 @@ namespace greaper::refl
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
-				T elem;
+				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -1316,7 +1308,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "unorderedset"sv);
+			SPtr<cJSON> json = CreateJSON(data, "unorderedset"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String {jsonStr.get() };
 		}
@@ -1343,38 +1335,32 @@ namespace greaper::refl
 		static void SetArraySize(Type& data, sizet size)
 		{
 			while(data.size() < size)
-				data.emplace(Type::value_type{});
+				data.emplace(ArrayValueType{});
 			while(data.size() > size)
 				data.erase(data.end());
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index));
+				data.emplace(value);
 			}
 		}
 	};
@@ -1383,7 +1369,8 @@ namespace greaper::refl
 	struct ContainerType<UnorderedMultiSet<T, H, C, A>> : public BaseType<UnorderedSet<T, H, C, A>>
 	{
 		using Type = UnorderedMultiSet<T, H, C, A>;
-		using ValueCat = typename TypeInfo<T>::Type;
+		using ArrayValueType = typename Type::value_type;
+		using ValueCat = typename TypeInfo<ArrayValueType>::Type;
 
 		static_assert(!std::is_same_v<ValueCat, void>, "[refl::ContainerType<std::unordered_multiset>] Trying to use a Container with not refl value_type!");
 
@@ -1399,7 +1386,7 @@ namespace greaper::refl
 
 			auto dynamicSize = GetDynamicSize(data);
 
-			for(const T& elem : data)
+			for(const ArrayValueType& elem : data)
 			{
 				TResult<ssizet> res = ValueCat::ToStream(elem, stream);
 				if(res.HasFailed())
@@ -1423,7 +1410,7 @@ namespace greaper::refl
 			data.clear();
 			for(decltype(elementCount) i = 0; i < elementCount; ++i)
 			{
-				T elem;
+				ArrayValueType elem;
 				TResult<ssizet> res = ValueCat::FromStream(elem, stream);
 				if(res.HasFailed())
 					return res;
@@ -1475,7 +1462,7 @@ namespace greaper::refl
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
 				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
-				T elem;
+				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -1487,7 +1474,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "unorderedmultiset"sv);
+			SPtr<cJSON> json = CreateJSON(data, "unorderedmultiset"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{jsonStr.get()};
 		}
@@ -1514,38 +1501,32 @@ namespace greaper::refl
 		static void SetArraySize(Type& data, sizet size)
 		{
 			while(data.size() < size)
-				data.emplace(Type::value_type{});
+				data.emplace(ArrayValueType{});
 			while(data.size() > size)
 				data.erase(data.end());
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index));
+				data.emplace(value);
 			}
 		}
 	};
@@ -1554,6 +1535,7 @@ namespace greaper::refl
 	struct ContainerType<Map<K, V, P, A>> : public BaseType<Map<K, V, P, A>>
 	{
 		using Type = Map<K, V, P, A>;
+		using ArrayValueType = typename Type::value_type;
 		using KeyCat = typename TypeInfo<K>::Type;
 		using ValueCat = typename TypeInfo<V>::Type;
 
@@ -1674,7 +1656,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "map"sv);
+			SPtr<cJSON> json = CreateJSON(data, "map"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String {jsonStr.get()};
 		}
@@ -1703,33 +1685,27 @@ namespace greaper::refl
 			/* No-op */
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
 			if(index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
 			if(index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index).first);
+				data.emplace(value);
 			}
 		}
 	};
@@ -1738,6 +1714,7 @@ namespace greaper::refl
 	struct ContainerType<MultiMap<K, V, P, A>> : public BaseType<MultiMap<K, V, P, A>>
 	{
 		using Type = MultiMap<K, V, P, A>;
+		using ArrayValueType = typename Type::value_type;
 		using KeyCat = typename TypeInfo<K>::Type;
 		using ValueCat = typename TypeInfo<V>::Type;
 
@@ -1858,7 +1835,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "multimap"sv);
+			SPtr<cJSON> json = CreateJSON(data, "multimap"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -1887,33 +1864,27 @@ namespace greaper::refl
 			/* No-op */
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index).first);
+				data.emplace(value);
 			}
 		}
 	};
@@ -1922,6 +1893,7 @@ namespace greaper::refl
 	struct ContainerType<UnorderedMap<K, V, H, C, A>> : public BaseType<UnorderedMap<K, V, H, C, A>>
 	{
 		using Type = UnorderedMap<K, V, H, C, A>;
+		using ArrayValueType = typename Type::value_type;
 		using KeyCat = typename TypeInfo<K>::Type;
 		using ValueCat = typename TypeInfo<V>::Type;
 
@@ -2042,7 +2014,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "unorderedmap"sv);
+			SPtr<cJSON> json = CreateJSON(data, "unorderedmap"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -2071,33 +2043,27 @@ namespace greaper::refl
 			/* No-op */
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index).first);
+				data.emplace(value);
 			}
 		}
 	};
@@ -2106,6 +2072,7 @@ namespace greaper::refl
 	struct ContainerType<UnorderedMultiMap<K, V, H, C, A>> : public BaseType<UnorderedMultiMap<K, V, H, C, A>>
 	{
 		using Type = UnorderedMultiMap<K, V, H, C, A>;
+		using ArrayValueType = typename Type::value_type;
 		using KeyCat = typename TypeInfo<K>::Type;
 		using ValueCat = typename TypeInfo<V>::Type;
 
@@ -2226,7 +2193,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = ToJSON(data, "unorderedmultimap"sv);
+			SPtr<cJSON> json = CreateJSON(data, "unorderedmultimap"sv);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -2255,33 +2222,27 @@ namespace greaper::refl
 			/* No-op */
 		}
 
-		NODISCARD static const Type::value_type& GetArrayValue(const Type& data, sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
+				for (const auto& elem : data)
 				{
-					if(i == index)
-						return *it;
+					if (i == index)
+						return elem;
+					++i;
 				}
 			}
-			return Type::value_type{};
+			return ArrayValueType{};
 		}
 
-		static void SetArrayValue(Type& data, const Type::value_type& value, sizet index)
+		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
-			if(index < GetArraySize(data))
+			if (index < GetArraySize(data))
 			{
-				sizet i = 0;
-				for(auto it = 0; it != data.end(); ++it, ++i)
-				{
-					if(i == index)
-					{
-						*it = value;
-						break;
-					}
-				}
+				data.erase(GetArrayValue(data, index).first);
+				data.emplace(value);
 			}
 		}
 	};

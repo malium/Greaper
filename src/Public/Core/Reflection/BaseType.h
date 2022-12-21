@@ -26,6 +26,8 @@ namespace greaper::refl
 		static_assert(TypeInfo<T>::ID != RTI_Unknown, "[refl::BaseType<T>] instantiated with an Unknown TypeID.");
 		static_assert(!std::is_same_v<TypeInfo<T>::Type, void>, "[refl::BaseType<T>] instantiated with a void type.");
 
+		using ArrayValueType = int32;
+
 		static inline constexpr uint64 ID = TypeInfo<T>::ID;
 		
 		static inline constexpr ssizet StaticSize = sizeof(T);
@@ -88,14 +90,14 @@ namespace greaper::refl
 			Break("[refl::BaseType<T>]::SetArraySize Trying to use the generic refl::BaseType!");
 		}
 
-		NODISCARD static const int32& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
+		NODISCARD static const ArrayValueType& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
 		{
-			static constexpr int32 dummy = 0;
+			static constexpr ArrayValueType dummy = 0;
 			Break("[refl::BaseType<T>]::GetArrayValue Trying to use the generic refl::BaseType!");
 			return dummy;
 		}
 
-		static void SetArrayValue(UNUSED T& data, UNUSED const int32& value, UNUSED sizet index)
+		static void SetArrayValue(UNUSED T& data, UNUSED const ArrayValueType& value, UNUSED sizet index)
 		{
 			Break("[refl::BaseType<T>]::SetArrayValue Trying to use the generic refl::BaseType!");
 		}

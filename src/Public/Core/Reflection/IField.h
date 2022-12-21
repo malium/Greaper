@@ -18,12 +18,23 @@ namespace greaper::refl
 	class IField
 	{
 	protected:
-		StringView m_FieldName = "unnamed"sv;
-		ReflectedTypeID_t m_FieldID = RTI_Unknown;
-		bool m_IsArray = false;
+		StringView m_FieldName;
+		ReflectedTypeID_t m_FieldTypeID;
+		bool m_IsArray;
+		std::function<void* (void*)> m_GetValueFn;
+		std::function<void(void*, void*)> m_SetValueFn;
 
 	public:
-		constexpr IField()noexcept = default;
+		IField(StringView fieldName = "unnamed"sv, ReflectedTypeID_t fieldTypeID = RTI_Unknown, bool isArray = false,
+			std::function<void*(void*)> getValueFn = nullptr, std::function<void(void*, void*)> setValueFn = nullptr)noexcept
+			:m_FieldName(std::move(fieldName))
+			,m_FieldTypeID(fieldTypeID)
+			,m_IsArray(isArray)
+			,m_GetValueFn(getValueFn)
+			,m_SetValueFn(setValueFn)
+		{
+
+		}
 
 		virtual TResult<ssizet> ToStream(const void* value, IStream& stream)const = 0;
 		virtual TResult<ssizet> FromStream(void* value, IStream& stream)const = 0;
@@ -40,8 +51,11 @@ namespace greaper::refl
 		virtual const void* GetArrayValue(const void* arr, sizet index)const = 0;
 		virtual void SetArrayValue(void* arr, const void* value, sizet index)const = 0;
 
+
+		NODISCARD INLINE void* GetValue(void* obj)const noexcept { return m_GetValueFn != nullptr ? m_GetValueFn(obj) : nullptr; }
+		INLINE void SetValue(void* obj, void* value)const noexcept { if (m_SetValueFn != nullptr) m_SetValueFn(obj, value); }
 		NODISCARD INLINE constexpr bool IsArray()const noexcept { return m_IsArray; }
-		NODISCARD INLINE constexpr ReflectedTypeID_t GetTypeID()const noexcept { return m_FieldID; }
+		NODISCARD INLINE constexpr ReflectedTypeID_t GetTypeID()const noexcept { return m_FieldTypeID; }
 		NODISCARD INLINE constexpr StringView GetFieldName()const noexcept { return m_FieldName; }
 	};
 
@@ -51,16 +65,15 @@ namespace greaper::refl
 	protected:
 		using Type = RemoveEverything_t<T>;
 		using tInfo = TypeInfo<Type>;
-		static_assert(std::is_same_v<tInfo::Type, void>, "[refl::TField<T>] instantiated with an Unknown TypeID.");
+		static_assert(!std::is_same_v<tInfo::Type, void>, "[refl::TField<T>] instantiated with an Unknown TypeID.");
 
-		bool m_IsArray = std::is_same_v<tInfo, Container<Type>>;
-		ReflectedFieldID_t m_FieldID = tInfo::ID;
+		using ArrayValueType = tInfo::Type::ArrayValueType;
 
 	public:
-		INLINE constexpr TField(StringView fieldName)noexcept
-			:m_FieldName(fieldName)
+		INLINE TField(StringView fieldName, std::function<const void*(const void*)> getValueFn, std::function<void(void*, void*)> setValueFn)noexcept
+			:IField(std::move(fieldName), tInfo::ID, std::is_same_v<tInfo::Type, ContainerType<Type>>)
 		{
-			
+
 		}
 
 		INLINE TResult<ssizet> ToStream(const void* value, IStream& stream)const override
@@ -113,16 +126,33 @@ namespace greaper::refl
 		}
 		INLINE void SetArrayValue(void* arr, const void* value, sizet index)const override
 		{
-			tInfo::Type::SetArrayValue((Type&)*((Type*)arr), (const Type::value_type&)*((const Type::value_type*)value), index);
+			tInfo::Type::SetArrayValue((Type&)*((Type*)arr), (const ArrayValueType&)*((const ArrayValueType*)value), index);
 		}
 	};
 
-#if 0
-	constexpr TField<int32> test{ "test"sv };
-	constexpr ReflectedTypeID_t fieldTypeID = test.GetTypeID();
-	constexpr StringView fieldName = test.GetFieldName();
-	constexpr bool fieldIsArray = test.IsArray();
-#endif
+	struct TestObj
+	{
+		int32 A;
+		float B;
+	};
+	TField<int32> TestA("A"sv, [](const void* obj) -> const void* { return &((const TestObj*)obj)->A; }, [](void* obj, void* value) { ((TestObj*)obj)->A = *((int32*)value); });
+	class TestClass
+	{
+		int32 A;
+	public:
+		void SetA(int32 a)noexcept { A = a; }
+		const int32& GetA()const noexcept { return A; }
+	};
+	TField<int32> testClass("A"sv,
+		[](const void* obj) -> const void* { return &(((const TestClass*)obj)->GetA()); },
+		[](void* obj, void* value) { ((TestClass*)obj)->SetA(*((int32*)value)); });
+
+	void a()
+	{
+		TestObj obj;
+		auto a = TestA.GetValue(&obj);
+		auto json = TestA.CreateJSON(a);
+	}
 }
 
 #endif /* CORE_REFLECTION_I_FIELD_H */
