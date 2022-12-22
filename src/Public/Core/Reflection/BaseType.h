@@ -46,6 +46,15 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>("[refl::BaseType<T>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
+		static TResult<std::pair<T, ssizet>> CreateFromStream(IStream& stream)
+		{
+			T elem;
+			TResult<ssizet> res = FromStream(elem, stream);
+			if (res.HasFailed())
+				return Result::CopyFailure<std::pair<T, ssizet>, ssizet>(res);
+			return Result::CreateSuccess(std::make_pair(elem, res.GetValue()));
+		}
+
 		static SPtr<cJSON> CreateJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
@@ -64,6 +73,15 @@ namespace greaper::refl
 			return Result::CreateFailure("[refl::BaseType<T>]::FromJSON Trying to use the generic refl::BaseType!"sv);
 		}
 
+		static TResult<T> CreateFromJSON(cJSON* json, StringView name)
+		{
+			T elem;
+			EmptyResult res = FromJSON(elem, json, name);
+			if (res.HasFailed())
+				return Result::CopyFailure<T>(res);
+			return Result::CreateSuccess(elem);
+		}
+
 		NODISCARD static String ToString(UNUSED const T& data)
 		{
 			Break("[refl::BaseType<T>]::ToString Trying to use the generic refl::BaseType!");
@@ -73,6 +91,15 @@ namespace greaper::refl
 		static EmptyResult FromString(UNUSED const String& str, UNUSED T& data)
 		{
 			return Result::CreateFailure("[refl::BaseType<T>]::FromString Trying to use the generic refl::BaseType!"sv);
+		}
+
+		static TResult<T> CreateFromString(const String& str)
+		{
+			T elem;
+			EmptyResult res = FromString(str, elem);
+			if (res.HasFailed())
+				return Result::CopyFailure<T>(res);
+			return Result::CreateSuccess(elem);
 		}
 
 		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)

@@ -26,6 +26,13 @@ namespace greaper::refl { \
 				return Result::CreateSuccess(size);\
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<"#type">]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));\
 		}\
+		static TResult<std::pair<type, ssizet>> CreateFromStream(IStream& stream){\
+			type elem;\
+			TResult<ssizet> res = FromStream(elem, stream);\
+			if (res.HasFailed())\
+				return Result::CopyFailure<std::pair<type, ssizet>, ssizet>(res);\
+			return Result::CreateSuccess(std::make_pair(elem, res.GetValue()));\
+		}\
 		static SPtr<cJSON> CreateJSON(const type& data, StringView name){ \
 			cJSON* obj = cJSON_CreateObject(); \
 			ToJSON(data, obj, name); \
@@ -44,12 +51,26 @@ namespace greaper::refl { \
 			}\
 			return Result::CreateFailure("[refl::PlainType<"#type">]::FromJSON Couldn't obtain the value from the json, expected: "#jsonIsFn"."sv);\
 		}\
+		static TResult<type> CreateFromJSON(cJSON* json, StringView name){\
+			type elem;\
+			EmptyResult res = FromJSON(elem, json, name);\
+			if (res.HasFailed())\
+				return Result::CopyFailure<type>(res);\
+			return Result::CreateSuccess(elem);\
+		}\
 		NODISCARD static String ToString(const type& data){\
 			return toString ;\
 		}\
 		static EmptyResult FromString(const String& str, type& data){\
 			fromString ; \
 			return Result::CreateSuccess(); \
+		}\
+		static TResult<type> CreateFromString(const String& str){\
+			type elem;\
+			EmptyResult res = FromString(str, elem);\
+			if (res.HasFailed())\
+				return Result::CopyFailure<type>(res);\
+			return Result::CreateSuccess(elem);\
 		}\
 		NODISCARD static int64 GetDynamicSize(UNUSED const type& data){\
 			return 0ll; \
@@ -173,6 +194,14 @@ namespace greaper::refl
 				return Result::CreateSuccess(size);
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
 		}
+		static TResult<std::pair<T, ssizet>> CreateFromStream(IStream& stream)
+		{
+			T elem;
+			TResult<ssizet> res = FromStream(elem, stream);
+			if (res.HasFailed())
+				return Result::CopyFailure<std::pair<T, ssizet>, ssizet>(res);
+			return Result::CreateSuccess(std::make_pair(elem, res.GetValue()));
+		}
 		static SPtr<cJSON> CreateJSON(const T& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
@@ -196,6 +225,14 @@ namespace greaper::refl
 			}
 			return Result::CreateFailure("[refl::PlainType<TEnum>]::FromJSON Couldn't obtain the value, it wasn't ENUM."sv);
 		}
+		static TResult<T> CreateFromJSON(cJSON* json, StringView name)
+		{
+			T elem;
+			EmptyResult res = FromJSON(elem, json, name);
+			if (res.HasFailed())
+				return Result::CopyFailure<T>(res);
+			return Result::CreateSuccess(elem);
+		}
 		NODISCARD static String ToString(const T& data)
 		{
 			return TEnum<T>::ToString(data);
@@ -204,6 +241,14 @@ namespace greaper::refl
 		{
 			data = TEnum<T>::FromString(str);
 			return Result::CreateSuccess();
+		}
+		static TResult<T> CreateFromString(const String& str)
+		{
+			T elem;
+			EmptyResult res = FromString(str, elem);
+			if (res.HasFailed())
+				return Result::CopyFailure<T>(res);
+			return Result::CreateSuccess(elem);
 		}
 		NODISCARD static int64 GetDynamicSize(UNUSED const T& data)
 		{
@@ -290,6 +335,15 @@ namespace greaper::refl
 			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
 		}
 
+		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
+		{
+			Type elem;
+			TResult<ssizet> res = FromStream(elem, stream);
+			if (res.HasFailed())
+				return Result::CopyFailure<std::pair<Type, ssizet>, ssizet>(res);
+			return Result::CreateSuccess(std::make_pair(elem, res.GetValue()));
+		}
+
 		static SPtr<cJSON> CreateJSON(const Type& data, StringView name)
 		{
 			cJSON* obj = cJSON_CreateObject();
@@ -324,6 +378,15 @@ namespace greaper::refl
 			return Result::CreateSuccess();
 		}
 
+		static TResult<Type> CreateFromJSON(cJSON* json, StringView name)
+		{
+			Type elem;
+			EmptyResult res = FromJSON(elem, json, name);
+			if (res.HasFailed())
+				return Result::CopyFailure<Type>(res);
+			return Result::CreateSuccess(elem);
+		}
+
 		static String ToString(const Type& data)
 		{
 			SPtr<cJSON> json = CreateJSON(data, "pair"sv);
@@ -335,6 +398,15 @@ namespace greaper::refl
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
 			return FromJSON(data, json.get(), "pair"sv);
+		}
+
+		static TResult<Type> CreateFromString(const String& str)
+		{
+			Type elem;
+			EmptyResult res = FromString(str, elem);
+			if (res.HasFailed())
+				return Result::CopyFailure<Type>(res);
+			return Result::CreateSuccess(elem);
 		}
 
 		NODISCARD static int64 GetDynamicSize(const Type& data)

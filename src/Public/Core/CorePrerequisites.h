@@ -124,9 +124,9 @@ namespace greaper
 
 		template<class T> class PlainType {  };
 		template<class T> class ContainerType {  };
-		template<class T> class ComplexType {  };
+		template<class T> class ComplexType;
 
-		template<class T> struct TypeInfo { static constexpr ReflectedTypeID_t ID = RTI_Unknown; using Type = void; };
+		template<class T> struct TypeInfo { static constexpr ReflectedTypeID_t ID = RTI_Unknown; using Type = void; static constexpr StringView Name = "Unknown"sv; };
 		template<class T> using TypeInfo_t = TypeInfo<RemoveEverything_t<T>>;
 	}
 }

@@ -5,12 +5,144 @@
 
 #pragma once
 
-#include "../../Core/Reflection/PlainType.h"
+#include "../../Core/Reflection/ComplexType.h"
 //#include "../Vector2.h"
 
 namespace greaper::refl
 {
-	template<class T> 
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2u8>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<float>>("X"sv, 
+			[](void* obj) -> void* { return &(((math::Vector2u8*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2u8*)obj)->X = *((float*)value); })),
+
+			SPtr<IField>(Construct<TField<float>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u8*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2u8*)obj)->Y = *((float*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2d>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<double>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2d*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2d*)obj)->X = *((double*)value); })),
+
+			SPtr<IField>(Construct<TField<double>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2d*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2d*)obj)->Y = *((double*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2i>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<int32>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2i*)obj)->X = *((int32*)value); })),
+
+			SPtr<IField>(Construct<TField<int32>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2i*)obj)->Y = *((int32*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2i8>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<int8>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i8*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2i8*)obj)->X = *((int8*)value); })),
+
+			SPtr<IField>(Construct<TField<int8>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i8*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2i8*)obj)->Y = *((int8*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2i16>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<int16>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i16*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2i16*)obj)->X = *((int16*)value); })),
+
+			SPtr<IField>(Construct<TField<int16>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i16*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2i16*)obj)->Y = *((int16*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2i64>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<int64>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i64*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2i64*)obj)->X = *((int64*)value); })),
+
+			SPtr<IField>(Construct<TField<int64>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2i64*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2i64*)obj)->Y = *((int64*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2u>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<uint32>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2u*)obj)->X = *((uint32*)value); })),
+
+			SPtr<IField>(Construct<TField<uint32>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2u*)obj)->Y = *((uint32*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2u8>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<uint8>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u8*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2u8*)obj)->X = *((uint8*)value); })),
+
+			SPtr<IField>(Construct<TField<uint8>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u8*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2u8*)obj)->Y = *((uint8*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2u16>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<uint16>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u16*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2u16*)obj)->X = *((uint16*)value); })),
+
+			SPtr<IField>(Construct<TField<uint16>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u16*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2u16*)obj)->Y = *((uint16*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2u64>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<uint64>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u64*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2u64*)obj)->X = *((uint64*)value); })),
+
+			SPtr<IField>(Construct<TField<uint64>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2u64*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2u64*)obj)->Y = *((uint64*)value); })),
+		});
+
+	template<>
+	const Vector<SPtr<IField>> ComplexType<math::Vector2b>::Fields = Vector<SPtr<IField>>(
+		{
+			SPtr<IField>(Construct<TField<bool>>("X"sv,
+			[](void* obj) -> void* { return &(((math::Vector2b*)obj)->X); },
+			[](void* obj, void* value) { ((math::Vector2b*)obj)->X = *((bool*)value); })),
+
+			SPtr<IField>(Construct<TField<bool>>("Y"sv,
+			[](void* obj) -> void* { return &(((math::Vector2b*)obj)->Y); },
+			[](void* obj, void* value) { ((math::Vector2b*)obj)->Y = *((bool*)value); })),
+		});
+
+	/*template<class T>
 	struct ComplexType<math::Vector2Real<T>> : public BaseType<math::Vector2Real<T>>
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
@@ -102,9 +234,9 @@ namespace greaper::refl
 		{
 			Break("[refl::ComplexType<Vector2Real>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
-	};
+	};*/
 
-	template<class T> 
+	/*template<class T> 
 	struct ComplexType<math::Vector2Signed<T>> : public BaseType<math::Vector2Signed<T>>
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
@@ -385,5 +517,5 @@ namespace greaper::refl
 		{
 			Break("[refl::ComplexType<Vector2b>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
-	};
+	};*/
 }

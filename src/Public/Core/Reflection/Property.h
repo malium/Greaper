@@ -11,6 +11,15 @@
 namespace greaper::refl
 {
 	template<>
+	const Vector<SPtr<IField>> ComplexType<PropertyInt>::Fields = Vector<SPtr<IField>>({
+		SPtr<IField>(Construct<TField<String>>("Name"sv,
+		[](const void* obj) -> const void* { return &(((PropertyInt*)obj)->GetPropertyName()); })),
+		SPtr<IField>(Construct<TField<ReflectedTypeID_t>>("TypeID"sv, 
+		[](UNUSED const void* obj) -> const void* { return &TypeInfo<PropertyInt::value_type>::ID; })),
+		SPtr<IField>(Construct<TField<PropertyInt::value_type>>("Value"sv,
+		[](void* obj) -> void* { return &(((PropertyInt*)obj)->GetValueCopy()); })
+		});
+	/*template<>
 	struct ComplexType<IProperty> : public BaseType<IProperty>
 	{
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
@@ -244,5 +253,5 @@ namespace greaper::refl
 		{
 			ComplexType<IProperty>::SetArrayValue(data, value, index);
 		}
-	};
+	};*/
 }

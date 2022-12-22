@@ -21,28 +21,31 @@ namespace greaper::refl
 		StringView m_FieldName;
 		ReflectedTypeID_t m_FieldTypeID;
 		bool m_IsArray;
-		std::function<void* (void*)> m_GetValueFn;
-		std::function<void(void*, void*)> m_SetValueFn;
+		std::function<const void* (const void*)> m_GetValueFn = nullptr;
+		std::function<void(void*, void*)> m_SetValueFn = nullptr;
 
 	public:
 		IField(StringView fieldName = "unnamed"sv, ReflectedTypeID_t fieldTypeID = RTI_Unknown, bool isArray = false,
-			std::function<void*(void*)> getValueFn = nullptr, std::function<void(void*, void*)> setValueFn = nullptr)noexcept
+			std::function<const void*(const void*)> getValueFn = nullptr, std::function<void(void*, void*)> setValueFn = nullptr)noexcept
 			:m_FieldName(std::move(fieldName))
 			,m_FieldTypeID(fieldTypeID)
 			,m_IsArray(isArray)
-			,m_GetValueFn(getValueFn)
-			,m_SetValueFn(setValueFn)
+			,m_GetValueFn(std::move(getValueFn))
+			,m_SetValueFn(std::move(setValueFn))
 		{
 
 		}
 
 		virtual TResult<ssizet> ToStream(const void* value, IStream& stream)const = 0;
 		virtual TResult<ssizet> FromStream(void* value, IStream& stream)const = 0;
+		virtual TResult<std::tuple<void*, ssizet, RecursiveMutex*>> CreateFromStream(IStream& stream)const = 0;
 		virtual SPtr<cJSON> CreateJSON(const void* value)const = 0;
 		virtual cJSON* ToJSON(const void* value, cJSON* json)const = 0;
 		virtual EmptyResult FromJSON(void* value, cJSON* json)const = 0;
+		virtual TResult<std::tuple<void*, RecursiveMutex*>> CreateFromJSON(cJSON* json)const = 0;
 		virtual String ToString(const void* value)const = 0;
 		virtual EmptyResult FromString(const String& str, void* value)const = 0;
+		virtual TResult<std::tuple<void*, RecursiveMutex*>> CreateFromString(const String& str)const = 0;
 		virtual int64 GetDynamicSize(const void* value)const = 0;
 		virtual int64 GetStaticSize()const = 0;
 
@@ -52,8 +55,17 @@ namespace greaper::refl
 		virtual void SetArrayValue(void* arr, const void* value, sizet index)const = 0;
 
 
-		NODISCARD INLINE void* GetValue(void* obj)const noexcept { return m_GetValueFn != nullptr ? m_GetValueFn(obj) : nullptr; }
-		INLINE void SetValue(void* obj, void* value)const noexcept { if (m_SetValueFn != nullptr) m_SetValueFn(obj, value); }
+		NODISCARD INLINE const void* GetValue(const void* obj)const noexcept
+		{
+			if (m_GetValueFn != nullptr)
+				return m_GetValueFn(obj);
+			return nullptr;
+		}
+		INLINE void SetValue(void* obj, void* value)const noexcept
+		{
+			if (m_SetValueFn != nullptr)
+				m_SetValueFn(obj, value);
+		}
 		NODISCARD INLINE constexpr bool IsArray()const noexcept { return m_IsArray; }
 		NODISCARD INLINE constexpr ReflectedTypeID_t GetTypeID()const noexcept { return m_FieldTypeID; }
 		NODISCARD INLINE constexpr StringView GetFieldName()const noexcept { return m_FieldName; }
@@ -69,9 +81,12 @@ namespace greaper::refl
 
 		using ArrayValueType = tInfo::Type::ArrayValueType;
 
+		mutable T m_TempValue;
+		mutable RecursiveMutex m_TempMutex;
+
 	public:
 		INLINE TField(StringView fieldName, std::function<const void*(const void*)> getValueFn, std::function<void(void*, void*)> setValueFn)noexcept
-			:IField(std::move(fieldName), tInfo::ID, std::is_same_v<tInfo::Type, ContainerType<Type>>)
+			:IField(std::move(fieldName), tInfo::ID, std::is_same_v<tInfo::Type, ContainerType<Type>>, std::move(getValueFn), std::move(setValueFn))
 		{
 
 		}
@@ -82,7 +97,20 @@ namespace greaper::refl
 		}
 		INLINE TResult<ssizet> FromStream(void* value, IStream& stream)const override
 		{
+			if (m_IsConstant)
+				return Result::CreateFailure<ssizet>("[refl::TField<T>]::FromStream constant data cannot be read."sv);
 			return tInfo::Type::FromStream((Type&)*((Type*)value), stream);
+		}
+		INLINE TResult<std::tuple<void*, ssizet, RecursiveMutex*>> CreateFromStream(IStream& stream)const override
+		{
+			m_TempMutex.lock();
+			TResult<ssizet> res = FromStream(&m_TempValue, stream);
+			if (res.HasFailed())
+			{
+				m_TempMutex.unlock();
+				return Result::CopyFailure<std::tuple<void*, ssizet, RecursiveMutex*>>(res);
+			}
+			return Result::CreateSuccess<std::tuple<void*, ssizet, RecursiveMutex*>>({(void*)&m_TempValue, res.GetValue(), &m_TempMutex});
 		}
 		INLINE SPtr<cJSON> CreateJSON(const void* value)const override
 		{
@@ -94,7 +122,20 @@ namespace greaper::refl
 		}
 		INLINE EmptyResult FromJSON(void* value, cJSON* json)const override
 		{
+			if (m_IsConstant)
+				return Result::CreateFailure("[refl::TField<T>]::FromJSON constant data cannot be read."sv);
 			return tInfo::Type::FromJSON((Type&)*((Type*)value), json, m_FieldName);
+		}
+		INLINE TResult<std::tuple<void*, RecursiveMutex*>> CreateFromJSON(cJSON* json)const override
+		{
+			m_TempMutex.lock();
+			EmptyResult res = FromJSON(&m_TempValue, json);
+			if (res.HasFailed())
+			{
+				m_TempMutex.unlock();
+				return Result::CopyFailure<std::tuple<void*, RecursiveMutex*>>(res);
+			}
+			return Result::CreateSuccess<std::tuple<void*, RecursiveMutex*>>({ (void*)&m_TempValue, &m_TempMutex });
 		}
 		NODISCARD INLINE String ToString(const void* value)const override
 		{
@@ -102,7 +143,20 @@ namespace greaper::refl
 		}
 		INLINE EmptyResult FromString(const String& str, void* value)const override
 		{
+			if (m_IsConstant)
+				return Result::CreateFailure("[refl::TField<T>]::FromString constant data cannot be read."sv);
 			return tInfo::Type::FromString(str, (Type&)*((Type*)value));
+		}
+		INLINE TResult<std::tuple<void*, RecursiveMutex*>> CreateFromString(const String& str)const override
+		{
+			m_TempMutex.lock();
+			EmptyResult res = FromString(str, &m_TempValue);
+			if (res.HasFailed())
+			{
+				m_TempMutex.unlock();
+				return Result::CopyFailure<std::tuple<void*, RecursiveMutex*>>(res);
+			}
+			return Result::CreateSuccess<std::tuple<void*, RecursiveMutex*>>({ (void*)&m_TempValue, &m_TempMutex });
 		}
 		NODISCARD INLINE int64 GetDynamicSize(const void* value)const override
 		{
