@@ -129,30 +129,6 @@ namespace greaper::refl
 			tInfo::Type::SetArrayValue((Type&)*((Type*)arr), (const ArrayValueType&)*((const ArrayValueType*)value), index);
 		}
 	};
-
-	struct TestObj
-	{
-		int32 A;
-		float B;
-	};
-	TField<int32> TestA("A"sv, [](const void* obj) -> const void* { return &((const TestObj*)obj)->A; }, [](void* obj, void* value) { ((TestObj*)obj)->A = *((int32*)value); });
-	class TestClass
-	{
-		int32 A;
-	public:
-		void SetA(int32 a)noexcept { A = a; }
-		const int32& GetA()const noexcept { return A; }
-	};
-	TField<int32> testClass("A"sv,
-		[](const void* obj) -> const void* { return &(((const TestClass*)obj)->GetA()); },
-		[](void* obj, void* value) { ((TestClass*)obj)->SetA(*((int32*)value)); });
-
-	void a()
-	{
-		TestObj obj;
-		auto a = TestA.GetValue(&obj);
-		auto json = TestA.CreateJSON(a);
-	}
 }
 
 #endif /* CORE_REFLECTION_I_FIELD_H */

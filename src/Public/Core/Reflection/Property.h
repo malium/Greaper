@@ -101,7 +101,7 @@ namespace greaper::refl
 		{
 			cJSON* obj = cJSON_AddObjectToObject(json, name.data());
 			cJSON_AddStringToObject(obj, "name", data.GetPropertyName().c_str());
-			cJSON_AddNumberToObject(obj, "typeID", data._ValueTypeID());
+			cJSON_AddNumberToObject(obj, "typeID", (double)data._ValueTypeID());
 			data._ValueToJSON(obj, "value"sv);
 			return obj;
 		}
@@ -120,7 +120,7 @@ namespace greaper::refl
 					data.GetPropertyName().c_str(), propName.data()));
 			}
 			cJSON* typeIDObj = cJSON_GetObjectItemCaseSensitive(item, "typeID");
-			ReflectedTypeID_t typeID = cJSON_GetNumberValue(typeIDObj);
+			auto typeID = (ReflectedTypeID_t)cJSON_GetNumberValue(typeIDObj);
 			if(typeID != data._ValueTypeID())
 			{
 				return Result::CreateFailure(Format("[refl::ComplexType<IProperty>]::FromJSON Couldn't obtain the value from json, the property had different typeID, expected:%" PRId64 " obtained:%" PRId64 ".",

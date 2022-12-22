@@ -343,6 +343,10 @@ namespace greaper::refl
 			return FromJSON(data, json.get(), "array"sv);
 		}
 
+#if COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4702)
+#endif
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
 			if constexpr (std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
@@ -353,6 +357,9 @@ namespace greaper::refl
 				size += ValueCat::GetDynamicSize(e);
 			return size;
 		}
+#if COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 		NODISCARD static sizet GetArraySize(UNUSED const Type& data)
 		{
@@ -485,13 +492,13 @@ namespace greaper::refl
 				return Result::CreateFailure("[refl::ContainerType<std::vector>]::FromJSON expected an Array."sv);
 			
 			achar buff[128];
-			sizet N = cJSON_GetArraySize(arr);
+			auto N = cJSON_GetArraySize(arr);
 			data.clear();
 			data.resize(N);
-			for(sizet i = 0; i < N; ++i)
+			for(decltype(N) i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIi32, i);
 				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -512,6 +519,10 @@ namespace greaper::refl
 			return FromJSON(data, json.get(), "vector"sv);
 		}
 
+#if COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4702)
+#endif
 		NODISCARD static int64 GetDynamicSize(const Type& data)
 		{
 			if constexpr (std::is_same_v<ValueCat, PlainType<ArrayValueType>>)
@@ -523,6 +534,9 @@ namespace greaper::refl
 				size += ValueCat::StaticSize + ValueCat::GetDynamicSize(e);
 			return size;
 		}
+#if COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 		NODISCARD static sizet GetArraySize(const Type& data)
 		{

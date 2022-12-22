@@ -71,24 +71,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>$(ProjectName)_$(PlatformArchitecture)$(Configuration)</TargetName>
+    <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>$(ProjectName)_$(PlatformArchitecture)$(Configuration)</TargetName>
+    <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>$(ProjectName)_$(PlatformArchitecture)$(Configuration)</TargetName>
+    <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>$(ProjectName)_$(PlatformArchitecture)$(Configuration)</TargetName>
+    <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -105,7 +105,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -129,7 +129,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -147,7 +147,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -171,7 +171,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\$(ProjectName)_$(PlatformArchitecture)$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>

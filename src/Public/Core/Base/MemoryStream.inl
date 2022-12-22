@@ -12,7 +12,7 @@ namespace greaper
 		if ((ssizet)bytes == m_Size)
 			return;
 
-		VerifyGreater(bytes, m_Size, "Realloc should always increase the size of the MemoryStream.");
+		VerifyGreater((ssizet)bytes, m_Size, "Realloc should always increase the size of the MemoryStream.");
 
 		auto* buffer = (uint8*)Alloc(bytes);
 		if (m_Data != nullptr)
@@ -118,9 +118,9 @@ namespace greaper
 		,m_End(std::exchange(other.m_End, nullptr))
 		,m_OwnsMemory(std::exchange(other.m_OwnsMemory, false))
 	{
-		m_Size = std::exchange(other.m_Size, 0);
+		m_Size = std::exchange(other.m_Size, (decltype(m_Size))0);
 		m_Name = std::move(other.m_Name);
-		m_Access = std::exchange(other.m_Access, 0);
+		m_Access = std::exchange(other.m_Access, (decltype(m_Access))0);
 	}
 	
 	INLINE MemoryStream& MemoryStream::operator=(MemoryStream&& other)noexcept
@@ -131,8 +131,8 @@ namespace greaper
 				Dealloc(m_Data);
 
 			m_Name = std::move(other.m_Name);
-			m_Size = std::exchange(other.m_Size, 0);
-			m_Access = std::exchange(other.m_Access, 0);
+			m_Size = std::exchange(other.m_Size, (decltype(m_Size))0);
+			m_Access = std::exchange(other.m_Access, (decltype(m_Access))0);
 			m_Data = std::exchange(other.m_Data, nullptr);
 			m_Cursor = std::exchange(other.m_Cursor, nullptr);
 			m_End = std::exchange(other.m_End, nullptr);

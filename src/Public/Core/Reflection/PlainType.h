@@ -88,12 +88,12 @@ namespace greaper::refl
 
 		static TResult<ssizet> ToStream(UNUSED const T& data, UNUSED IStream& stream)
 		{
-			return Result::CreateFailure("[refl::BaseType<TEnum>]::ToStream Trying to use the generic refl::BaseType!"sv);
+			return Result::CreateFailure<ssizet>("[refl::BaseType<TEnum>]::ToStream Trying to use the generic refl::BaseType!"sv);
 		}
 
 		static TResult<ssizet> FromStream(UNUSED T& data, UNUSED IStream& stream)
 		{
-			return Result::CreateFailure("[refl::BaseType<TEnum>]::FromStream Trying to use the generic refl::BaseType!"sv);
+			return Result::CreateFailure<ssizet>("[refl::BaseType<TEnum>]::FromStream Trying to use the generic refl::BaseType!"sv);
 		}
 
 		static SPtr<cJSON> CreateJSON(const T& data, StringView name)
@@ -367,6 +367,11 @@ namespace greaper::refl
 	};
 }
 
+#if COMPILER_MSVC
+#pragma warning(push)
+#pragma warning(disable:4244)
+#endif
+
 CREATE_MEMCPY_PLAINTYPE(bool, 			data ? "true" : "false", 					data = StringUtils::ToLower(str) == "true", 			cJSON_AddBoolToObject, 		cJSON_IsBool, 	cJSON_IsTrue);
 CREATE_MEMCPY_PLAINTYPE(int8,			String{ std::to_string(data).c_str() }, 	data = (int8)std::strtol(str.c_str(), nullptr, 10),		cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 CREATE_MEMCPY_PLAINTYPE(uint8,			String{ std::to_string(data).c_str() }, 	data = (uint8)std::strtoul(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
@@ -378,5 +383,9 @@ CREATE_MEMCPY_PLAINTYPE(int64,			String{ std::to_string(data).c_str() }, 	data =
 CREATE_MEMCPY_PLAINTYPE(uint64,			String{ std::to_string(data).c_str() }, 	data = (uint16)std::strtoull(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 CREATE_MEMCPY_PLAINTYPE(float,			String{ std::to_string(data).c_str() }, 	data = std::strtof(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 CREATE_MEMCPY_PLAINTYPE(double,			String{ std::to_string(data).c_str() }, 	data = std::strtod(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+
+#if COMPILER_MSVC
+#pragma warning(pop)
+#endif
 
 #endif /* CORE_REFLECTION_PLAINTYPE_H */

@@ -14,7 +14,9 @@
 #include "../Enumeration.h"
 #include "../Result.h"
 #define CJSON_IMPORT_SYMBOLS
-#include <External/cJSON/cJSON.h>
+#define CJSON_API_VISIBILITY
+#include "../../External/cJSON/cJSON.h"
+//#include <External/cJSON/cJSON.h>
 
 ENUMERATION(TypeCategory, Plain, Container, Complex);
 
@@ -24,7 +26,7 @@ namespace greaper::refl
 	struct BaseType
 	{
 		static_assert(TypeInfo<T>::ID != RTI_Unknown, "[refl::BaseType<T>] instantiated with an Unknown TypeID.");
-		static_assert(!std::is_same_v<TypeInfo<T>::Type, void>, "[refl::BaseType<T>] instantiated with a void type.");
+		static_assert(!std::is_same_v<typename TypeInfo<T>::Type, void>, "[refl::BaseType<T>] instantiated with a void type.");
 
 		using ArrayValueType = int32;
 

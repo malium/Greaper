@@ -576,7 +576,7 @@ void* greaper::MemoryAllocator<T>::Allocate(sizet byteSize)
 
 	void* mem = PlatformAlloc(byteSize);
 
-	VerifyNotNull(mem, "Nullptr detected after asking to OS for %"PRIuPTR" bytes.", byteSize);
+	VerifyNotNull(mem, "Nullptr detected after asking to OS for %" PRIuPTR " bytes.", byteSize);
 	return mem;
 #else
 	return PlatformAlloc(byteSize);
@@ -593,7 +593,7 @@ void* greaper::MemoryAllocator<T>::AllocateAligned(sizet byteSize, sizet alignme
 		return Allocate(byteSize);
 
 	void* mem = PlatformAlignedAlloc(byteSize, alignment);
-	VerifyNotNull(mem, "Nullptr detected after asking to OS for %"PRIuPTR" bytes aligned %"PRIuPTR".", byteSize, alignment);
+	VerifyNotNull(mem, "Nullptr detected after asking to OS for %" PRIuPTR " bytes aligned %" PRIuPTR ".", byteSize, alignment);
 
 	return mem;
 #else

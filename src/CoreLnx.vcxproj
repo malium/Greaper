@@ -58,25 +58,49 @@
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)src/Public/;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\</IncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>
+    </ProjectPublicIncludePath>
+    <RemoteCopySourceMethod>rsync</RemoteCopySourceMethod>
+    <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
+    <LibraryPath>$(SolutionDir)bin\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)src/Public/;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\</IncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>
+    </ProjectPublicIncludePath>
+    <RemoteCopySourceMethod>rsync</RemoteCopySourceMethod>
+    <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
+    <LibraryPath>$(SolutionDir)bin\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)src/Public/;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\</IncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>
+    </ProjectPublicIncludePath>
+    <RemoteCopySourceMethod>rsync</RemoteCopySourceMethod>
+    <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
+    <LibraryPath>$(SolutionDir)bin\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
     <TargetName>Core$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
-    <IncludePath>$(SolutionDir)src/Public/;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)src\Public\</IncludePath>
+    <AdditionalSourcesToCopyMapping>$(SolutionDir)src/Public/%(RecursiveDir):=$(RemoteProjectDir)/%(RecursiveDir);$(AdditionalSourcesToCopyMapping)</AdditionalSourcesToCopyMapping>
+    <ProjectPublicIncludePath>
+    </ProjectPublicIncludePath>
+    <RemoteCopySourceMethod>rsync</RemoteCopySourceMethod>
+    <RemoteDeployDir>$(RemoteRootDir)/bin/</RemoteDeployDir>
+    <LibraryPath>$(SolutionDir)bin\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="Private\Core\Application.cpp" />
@@ -110,6 +134,7 @@
     <ClInclude Include="Public\Core\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Core\Base\Span.h" />
     <ClInclude Include="Public\Core\Base\SPtr.h" />
+    <ClInclude Include="Public\Core\Base\TypeTraits.h" />
     <ClInclude Include="Public\Core\Base\UPtr.h" />
     <ClInclude Include="Public\Core\Base\Utils.h" />
     <ClInclude Include="Public\Core\Base\VideoMode.h" />
@@ -139,14 +164,14 @@
     <ClInclude Include="Public\Core\PHAL.h" />
     <ClInclude Include="Public\Core\Platform.h" />
     <ClInclude Include="Public\Core\Property.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedField.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedPlainContainer.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedPlainEnum.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedPlainField.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedPlainType.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedProperty.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedReflField.h" />
-    <ClInclude Include="Public\Core\Reflection\ReflectedTypeInfo.h" />
+    <ClInclude Include="Public\Core\Reflection\BaseType.h" />
+    <ClInclude Include="Public\Core\Reflection\ComplexType.h" />
+    <ClInclude Include="Public\Core\Reflection\ContainerType.h" />
+    <ClInclude Include="Public\Core\Reflection\IField.h" />
+    <ClInclude Include="Public\Core\Reflection\PlainType.h" />
+    <ClInclude Include="Public\Core\Reflection\Property.h" />
+    <ClInclude Include="Public\Core\Reflection\Rect.h" />
+    <ClInclude Include="Public\Core\Reflection\Uuid.h" />
     <ClInclude Include="Public\Core\Result.h" />
     <ClInclude Include="Public\Core\Stream.h" />
     <ClInclude Include="Public\Core\StringUtils.h" />
@@ -161,6 +186,8 @@
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
     <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
+    <ClInclude Include="Public\External\cJSON\cJSON.h" />
+    <ClInclude Include="Public\External\cJSON\cJSON_Utils.h" />
     <ClInclude Include="Public\Math\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Math\Base\VecRef.h" />
     <ClInclude Include="Public\Math\MathPrerequisites.h" />
@@ -168,20 +195,32 @@
     <ClInclude Include="Public\Math\Matrix3.h" />
     <ClInclude Include="Public\Math\Matrix4.h" />
     <ClInclude Include="Public\Math\Quaternion.h" />
+    <ClInclude Include="Public\Math\Reflection\Matrix2.h" />
+    <ClInclude Include="Public\Math\Reflection\Matrix3.h" />
+    <ClInclude Include="Public\Math\Reflection\Matrix4.h" />
+    <ClInclude Include="Public\Math\Reflection\Quaternion.h" />
+    <ClInclude Include="Public\Math\Reflection\Vector2.h" />
+    <ClInclude Include="Public\Math\Reflection\Vector3.h" />
+    <ClInclude Include="Public\Math\Reflection\Vector4.h" />
     <ClInclude Include="Public\Math\Vector2.h" />
     <ClInclude Include="Public\Math\Vector3.h" />
     <ClInclude Include="Public\Math\Vector4.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Public\Core\Base\FileStream.inl" />
+    <None Include="Public\Core\Base\IGreaperLibrary.inl" />
+    <None Include="Public\Core\Base\IInterface.inl" />
     <None Include="Public\Core\Base\MemoryStream.inl" />
     <None Include="Public\Core\Base\MPMCTaskScheduler.inl" />
     <None Include="Public\Core\Base\Platform.inl" />
+    <None Include="Public\Core\Base\Property.inl" />
     <None Include="Public\Core\Base\Stream.inl" />
     <None Include="Public\Core\Base\Uuid.inl" />
     <None Include="Public\Core\Lnx\LnxPlatform.inl" />
     <None Include="Public\Core\Lnx\LnxThreadImpl.inl" />
     <None Include="Public\Core\Win\WinPlatform.inl" />
     <None Include="Public\Core\Win\WinThreadImpl.inl" />
+    <None Include="Public\Math\Base\SSE.inl" />
     <None Include="Public\Math\Base\Utils.inl" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -192,9 +231,15 @@
       <CppLanguageStandard>c++17</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <PreprocessorDefinitions>GREAPER_CORE_DLL;DEBUG;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lpthread;-lcJSONLinux$(PlatformArchitecture)_$(Configuration).so;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>-L/projects/bin/ -lcJSONLinux_$(PlatformArchitecture)$(Configuration).so %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/bin/</AdditionalLibraryDirectories>
     </Link>
     <RemotePostBuildEvent>
       <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
@@ -208,9 +253,17 @@
       <CppLanguageStandard>c++17</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <PreprocessorDefinitions>GREAPER_CORE_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UnrollLoops>true</UnrollLoops>
+      <RelaxIEEE>true</RelaxIEEE>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lpthread;-lcJSONLinux$(PlatformArchitecture)_$(Configuration).so;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/bin/</AdditionalLibraryDirectories>
+      <AdditionalOptions>-L/projects/bin/ -lcJSONLinux_$(PlatformArchitecture)$(Configuration).so %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <RemotePostBuildEvent>
       <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
@@ -224,9 +277,15 @@
       <CppLanguageStandard>c++17</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <PreprocessorDefinitions>GREAPER_CORE_DLL;DEBUG;</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lpthread;-lcJSONLinux$(PlatformArchitecture)_$(Configuration).so;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>-L/projects/bin/ -lcJSONLinux_$(PlatformArchitecture)$(Configuration).so %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/bin/</AdditionalLibraryDirectories>
     </Link>
     <RemotePostBuildEvent>
       <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>
@@ -240,9 +299,17 @@
       <CppLanguageStandard>c++17</CppLanguageStandard>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
       <PreprocessorDefinitions>GREAPER_CORE_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <UnrollLoops>true</UnrollLoops>
+      <RelaxIEEE>true</RelaxIEEE>
+      <AdditionalIncludeDirectories>
+      </AdditionalIncludeDirectories>
+      <AdditionalOptions>
+      </AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>-ldl;-lpthread;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>-ldl;-lpthread;-lcJSONLinux$(PlatformArchitecture)_$(Configuration).so;$(StlAdditionalDependencies);%(Link.AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>-L/projects/bin/ -lcJSONLinux_$(PlatformArchitecture)$(Configuration).so %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalLibraryDirectories>$(RemoteRootDir)/bin/</AdditionalLibraryDirectories>
     </Link>
     <RemotePostBuildEvent>
       <Command>cp $(RemoteTargetPath) $(RemoteRootDir)/bin/</Command>

@@ -111,7 +111,7 @@ namespace greaper
 
 	inline CSpan<PInterface> IGreaperLibrary::GetManagers() const noexcept { return CreateSpan(m_Managers); }
 
-	INLINE CSpan<PIProperty> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
+	inline CSpan<PIProperty> IGreaperLibrary::GetProperties() const noexcept { return CreateSpan(m_Properties); }
 
 	inline TResult<WIProperty> IGreaperLibrary::GetProperty(const StringView& name) const noexcept
 	{

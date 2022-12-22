@@ -585,13 +585,6 @@ static void TestFunction()
 	using prec = double;
 	auto odeg = Vector3Real<prec>(90, -60, 15);
 	auto orad = odeg * DEG2RAD<prec>;
-	auto q = QuaternionReal<prec>::FromEuler(orad);
-	auto qn = q.Normalized();
-	auto erad = qn.ToEulerAngles();
-	auto edeg = erad * RAD2DEG<prec>;
-	auto eqdeg = edeg.IsNearlyEqual(odeg);
-	auto eqrad = erad.IsNearlyEqual(orad);
-	auto eqq = q.IsNearlyEqual(qn);
 
 	auto q0 = QuaternionReal<prec>::FromEuler(orad.X, 0, 0);
 	auto q1 = QuaternionReal<prec>::FromEuler(0, orad.Y, 0);
@@ -616,7 +609,6 @@ static void TestFunction()
 	auto edeg3 = erad3 * RAD2DEG<prec>;
 	auto edeg4 = erad4 * RAD2DEG<prec>;
 	auto edeg5 = erad5 * RAD2DEG<prec>;
-
 
 	auto quatArray = Vector<std::pair<QuaternionReal<prec>, Vector3Real<prec>>>{ {qf0,edeg0}, {qf1, edeg1}, {qf2, edeg2}, {qf3, edeg3}, {qf4, edeg4}, {qf5, edeg5} };
 	decltype(quatArray) testArray, testArray2{};
@@ -674,8 +666,8 @@ static void TestFunction()
 		snprintf(buffer, ArraySize(buffer), "Elem_%" PRIuPTR, propIdx++);
 		using propTypeInfo = refl::TypeInfo<IProperty>::Type;
 		auto propJSON = propTypeInfo::CreateJSON(*prop, StringView{buffer});
-		auto text = SPtr<char>(cJSON_Print(propJSON.get()));
-		std::cout << text.get() << std::endl;
+		auto propText = SPtr<char>(cJSON_Print(propJSON.get()));
+		std::cout << propText.get() << std::endl;
 	}
 }
 

@@ -10,6 +10,7 @@
 
 #include "CorePrerequisites.h"
 #define CJSON_IMPORT_SYMBOLS
+#define CJSON_API_VISIBILITY
 #include <External/cJSON/cJSON.h>
 
 namespace greaper
