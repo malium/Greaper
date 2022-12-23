@@ -29,7 +29,7 @@ namespace greaper::math
 
 	public:
 		static constexpr sizet ComponentCount = 4;
-		using Type_t = T;
+		using value_type = T;
 
 		// Scalar part
 		T W{ 0 };
@@ -292,6 +292,16 @@ namespace greaper::math
 	template<class T> INLINE constexpr bool operator!=(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return !(left == right); }
 }
 
-#include "Reflection/Quaternion.h"
+namespace std
+{
+	template<class T>
+	struct hash<greaper::math::QuaternionReal<T>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::math::QuaternionReal<T>& q)const noexcept
+		{
+			return ComputeHash(q.W, q.X, q.Y, q.Z);
+		}
+	};
+}
 
 #endif /* MATH_QUATERNION_H */

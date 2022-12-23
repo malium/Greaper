@@ -53,6 +53,7 @@ namespace greaper
 	template<class... Args> class Event;
 	template<class T> class RectT;
 	using RectF = RectT<float>;
+	using RectD = RectT<double>;
 	using RectI = RectT<int32>;
 	using RectU = RectT<uint32>;
 	
@@ -66,6 +67,17 @@ namespace greaper
 	}
 	template<class T> using TResult = Impl::TResult<T>;
 	using EmptyResult = Impl::TResult<Impl::EmptyStruc>;
+
+	// Greaper Core specialization
+	using PropertyBool = TProperty<bool>;
+	using PropertyInt = TProperty<int32>;
+	using PropertyFloat = TProperty<float>;
+	using PropertyDouble = TProperty<double>;
+	using PropertyString = TProperty<String>;
+	using PropertyRectF = TProperty<RectF>;
+	using PropertyRectI = TProperty<RectI>;
+	using PropertyRectU = TProperty<RectU>;
+	using PropertyStringVec = TProperty<StringVec>;
 
 	// types
 	using half = int16;
@@ -96,6 +108,7 @@ namespace greaper
 			RTI_Half,
 			RTI_Enum,
 			RTI_RectF,
+			RTI_RectD,
 			RTI_RectI,
 			RTI_RectU,
 

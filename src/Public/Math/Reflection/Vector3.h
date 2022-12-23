@@ -5,10 +5,43 @@
 
 #pragma once
 
-#include "../../Core/Reflection/PlainType.h"
-//#include "../Vector3.h"
+#ifndef MATH_REFL_VECTOR3_H
+#define MATH_REFL_VECTOR3_H 1
 
-namespace greaper::refl
+#include "../../Core/Reflection/ComplexType.h"
+#include "../Vector3.h"
+
+#define CreateVec3Refl(vectype)\
+namespace greaper::refl{\
+	template<>\
+	const Vector<SPtr<IField>> ComplexType<vectype>::Fields = Vector<SPtr<IField>>({\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("X"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->X); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->X = *((const vectype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("Y"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->Y); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->Y = *((const vectype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("Z"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->Z); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->Z = *((const vectype::value_type*)value); })),\
+		});\
+}
+
+CreateVec3Refl(greaper::math::Vector3f);
+CreateVec3Refl(greaper::math::Vector3d);
+CreateVec3Refl(greaper::math::Vector3i);
+CreateVec3Refl(greaper::math::Vector3i8);
+CreateVec3Refl(greaper::math::Vector3i16);
+CreateVec3Refl(greaper::math::Vector3i64);
+CreateVec3Refl(greaper::math::Vector3u);
+CreateVec3Refl(greaper::math::Vector3u8);
+CreateVec3Refl(greaper::math::Vector3u16);
+CreateVec3Refl(greaper::math::Vector3u64);
+CreateVec3Refl(greaper::math::Vector3b);
+
+#undef CreateVec3Refl
+
+/*namespace greaper::refl
 {
 	template<class T> 
 	struct ComplexType<math::Vector3Real<T>> : public BaseType<math::Vector3Real<T>>
@@ -398,4 +431,6 @@ namespace greaper::refl
 			Break("[refl::ComplexType<Vector3b>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
-}
+}*/
+
+#endif /* MATH_REFL_VECTOR3_H */

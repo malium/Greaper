@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -12,8 +12,9 @@
 #include <ammintrin.h>
 #elif PLT_LINUX
 #include <x86intrin.h>
-#include <cmath>
 #endif
+#include <cmath>
+
 
 namespace greaper::math
 {

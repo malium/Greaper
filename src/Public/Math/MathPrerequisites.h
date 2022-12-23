@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -95,6 +95,21 @@ namespace greaper::math
 	template<class T> class QuaternionReal;
 	using QuaternionF = QuaternionReal<float>;
 	using QuaternionD = QuaternionReal<double>;
+}
+
+namespace greaper
+{
+	using PropertyVector2f = TProperty<math::Vector2f>;
+	using PropertyVector2i = TProperty<math::Vector2i>;
+	using PropertyVector2u = TProperty<math::Vector2u>;
+
+	using PropertyVector3f = TProperty<math::Vector3f>;
+	using PropertyVector3i = TProperty<math::Vector3i>;
+	using PropertyVector3u = TProperty<math::Vector3u>;
+
+	using PropertyVector4f = TProperty<math::Vector4f>;
+	using PropertyVector4i = TProperty<math::Vector4i>;
+	using PropertyVector4u = TProperty<math::Vector4u>;
 }
 
 namespace greaper::refl

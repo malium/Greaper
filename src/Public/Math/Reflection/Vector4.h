@@ -5,10 +5,46 @@
 
 #pragma once
 
-#include "../../Core/Reflection/PlainType.h"
-//#include "../Vector4.h"
+#ifndef MATH_REFL_VECTOR4_H
+#define MATH_REFL_VECTOR4_H 1
 
-namespace greaper::refl
+#include "../../Core/Reflection/ComplexType.h"
+#include "../Vector4.h"
+
+#define CreateVec4Refl(vectype)\
+namespace greaper::refl{\
+	template<>\
+	const Vector<SPtr<IField>> ComplexType<vectype>::Fields = Vector<SPtr<IField>>({\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("X"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->X); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->X = *((const vectype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("Y"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->Y); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->Y = *((const vectype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("Z"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->Z); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->Z = *((const vectype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<vectype::value_type>>("W"sv, \
+			[](const void* obj) -> const void* { return &(((const vectype*)obj)->W); },\
+			[](void* obj, const void* value) { ((vectype*)obj)->W = *((const vectype::value_type*)value); })),\
+		});\
+}
+
+CreateVec4Refl(greaper::math::Vector4f);
+CreateVec4Refl(greaper::math::Vector4d);
+CreateVec4Refl(greaper::math::Vector4i);
+CreateVec4Refl(greaper::math::Vector4i8);
+CreateVec4Refl(greaper::math::Vector4i16);
+CreateVec4Refl(greaper::math::Vector4i64);
+CreateVec4Refl(greaper::math::Vector4u);
+CreateVec4Refl(greaper::math::Vector4u8);
+CreateVec4Refl(greaper::math::Vector4u16);
+CreateVec4Refl(greaper::math::Vector4u64);
+CreateVec4Refl(greaper::math::Vector4b);
+
+#undef CreateVec4Refl
+
+/*namespace greaper::refl
 {
 	template<class T> 
 	struct ComplexType<math::Vector4Real<T>> : public BaseType<math::Vector4Real<T>>
@@ -410,4 +446,6 @@ namespace greaper::refl
 			Break("[refl::ComplexType<Vector4b>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
-}
+}*/
+
+#endif /* MATH_REFL_VECTOR4_H */

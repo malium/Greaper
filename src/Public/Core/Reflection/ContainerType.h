@@ -33,7 +33,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -48,7 +48,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<String>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -127,9 +127,10 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 				return data[index];
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -159,7 +160,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -174,7 +175,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<WString>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -255,9 +256,10 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 				return data[index];
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -302,7 +304,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -328,7 +330,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::array>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -354,7 +356,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for (const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{ buff });
 				cJSON_AddItemToArray(arr, obj);
@@ -371,13 +373,13 @@ namespace greaper::refl
 				return Result::CreateFailure("[refl::ContainerType<std::array>]::FromJSON expected an Array."sv);
 			sizet arrSize = cJSON_GetArraySize(arr);
 			if(arrSize != N)
-				return Result::CreateFailure(Format("[refl::ContainerType<std::array>]::FromJSON expected an Array with size '" PRIuPTR "' but obtained '" PRIuPTR "'.", N, arrSize));
+				return Result::CreateFailure(Format("[refl::ContainerType<std::array>]::FromJSON expected an Array with size '" PRIiPTR "' but obtained '" PRIiPTR "'.", N, arrSize));
 			
 			achar buff[128];
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -396,7 +398,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "array"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -404,7 +406,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "array"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -446,9 +448,10 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 				return data[index];
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -497,7 +500,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize; 
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -531,7 +534,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize; 
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::vector>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -557,7 +560,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{ buff });
 				cJSON_AddItemToArray(arr, obj);
@@ -599,7 +602,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "vector"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -607,7 +610,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "vector"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -650,9 +653,10 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 				return data[index];
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -694,7 +698,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -720,7 +724,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::list>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -746,7 +750,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
@@ -770,7 +774,7 @@ namespace greaper::refl
 			for (auto& elem : data)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -791,7 +795,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "list"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -799,7 +803,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "list"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -829,6 +833,7 @@ namespace greaper::refl
 		}
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data)) 
 			{
 				sizet i = 0;
@@ -838,7 +843,7 @@ namespace greaper::refl
 						return *it;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
 		{
@@ -889,7 +894,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -915,7 +920,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::deque>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -941,7 +946,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
@@ -964,7 +969,7 @@ namespace greaper::refl
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				EmptyResult res = ValueCat::FromJSON(data[i], item, StringView{buff});
 				if(res.HasFailed())
 					return res;
@@ -983,7 +988,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "queue"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -991,7 +996,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "queue"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -1023,9 +1028,10 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 				return data[index];
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -1067,7 +1073,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1092,7 +1098,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -1118,7 +1124,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
@@ -1140,7 +1146,7 @@ namespace greaper::refl
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
@@ -1162,7 +1168,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "set"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -1170,7 +1176,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "set"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -1205,6 +1211,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -1215,7 +1222,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -1260,7 +1267,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1285,7 +1292,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -1311,7 +1318,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
@@ -1333,7 +1340,7 @@ namespace greaper::refl
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
@@ -1355,7 +1362,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "multiset"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -1363,7 +1370,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "multiset"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -1398,6 +1405,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -1408,7 +1416,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -1453,7 +1461,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1478,7 +1486,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_set>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -1504,7 +1512,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
@@ -1526,7 +1534,7 @@ namespace greaper::refl
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
@@ -1548,7 +1556,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "unorderedset"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String {jsonStr.get() };
 		}
@@ -1556,7 +1564,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "unorderedset"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -1591,6 +1599,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -1601,7 +1610,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -1646,7 +1655,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1671,7 +1680,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multiset>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -1697,7 +1706,7 @@ namespace greaper::refl
 			sizet i = 0;
 			for(const auto& elem : data)
 			{
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i++);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i++);
 				cJSON* obj = cJSON_CreateObject();
 				ValueCat::ToJSON(elem, obj, StringView{buff});
 				cJSON_AddItemToArray(arr, obj);
@@ -1719,7 +1728,7 @@ namespace greaper::refl
 			for(sizet i = 0; i < N; ++i)
 			{
 				cJSON* item = cJSON_GetArrayItem(arr, i);
-				snprintf(buff, ArraySize(buff), "Elem_%" PRIuPTR, i);
+				snprintf(buff, ArraySize(buff), "Elem_%" PRIiPTR, i);
 				ArrayValueType elem;
 				EmptyResult res = ValueCat::FromJSON(elem, item, StringView{buff});
 				if(res.HasFailed())
@@ -1741,7 +1750,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "unorderedmultiset"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{jsonStr.get()};
 		}
@@ -1749,7 +1758,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "unorderedmultiset"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -1784,6 +1793,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -1794,7 +1804,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -1845,7 +1855,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -1879,7 +1889,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -1950,7 +1960,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "map"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String {jsonStr.get()};
 		}
@@ -1958,7 +1968,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "map"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -1990,6 +2000,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if(index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -2000,7 +2011,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -2051,7 +2062,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -2085,7 +2096,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -2156,7 +2167,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "multimap"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -2164,7 +2175,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "multimap"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -2196,6 +2207,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -2206,7 +2218,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -2257,7 +2269,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_map>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_map>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -2291,7 +2303,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -2362,7 +2374,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "unorderedmap"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -2370,7 +2382,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "unorderedmap"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -2402,6 +2414,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -2412,7 +2425,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)
@@ -2463,7 +2476,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::unordered_multimap>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -2497,7 +2510,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if(size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::ContainerType<std::map>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -2568,7 +2581,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "unorderedmultimap"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -2576,7 +2589,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "unorderedmultimap"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -2608,6 +2621,7 @@ namespace greaper::refl
 
 		NODISCARD static const ArrayValueType& GetArrayValue(const Type& data, sizet index)
 		{
+			static ArrayValueType tmp;
 			if (index < GetArraySize(data))
 			{
 				sizet i = 0;
@@ -2618,7 +2632,7 @@ namespace greaper::refl
 					++i;
 				}
 			}
-			return ArrayValueType{};
+			return tmp;
 		}
 
 		static void SetArrayValue(Type& data, const ArrayValueType& value, sizet index)

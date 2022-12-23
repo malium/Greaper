@@ -75,7 +75,9 @@ namespace greaper::refl { \
 		NODISCARD static int64 GetDynamicSize(UNUSED const type& data){\
 			return 0ll; \
 		}\
-		NODISCARD static sizet GetArraySize(UNUSED const type& data){\
+	};\
+}
+		/*NODISCARD static sizet GetArraySize(UNUSED const type& data){\
 			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
 			return 0ll;\
 		}\
@@ -91,7 +93,7 @@ namespace greaper::refl { \
 			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
 		}\
 	};\
-}
+}*/
 
 namespace greaper::refl
 {
@@ -185,14 +187,14 @@ namespace greaper::refl
 			ssizet size = stream.Write(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIiPTR ".", sizeof(data), size));
 		}
 		static TResult<ssizet> FromStream(T& data, IStream& stream)
 		{ 
 			ssizet size = stream.Read(&data, sizeof(data));
 			if(size == sizeof(data))
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", sizeof(data), size));
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<TEnum>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIiPTR ".", sizeof(data), size));
 		}
 		static TResult<std::pair<T, ssizet>> CreateFromStream(IStream& stream)
 		{
@@ -255,7 +257,7 @@ namespace greaper::refl
 			return 0ll; 
 		}
 
-		NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		/*NODISCARD static sizet GetArraySize(UNUSED const T& data)
 		{
 			Break("[refl::PlainType<TEnum>]::GetArraySize Trying to use a PlainType for array operations!");
 			return 0ll;
@@ -276,7 +278,7 @@ namespace greaper::refl
 		static void SetArrayValue(UNUSED T& data, UNUSED const int32& value, UNUSED sizet index)
 		{
 			Break("[refl::PlainType<TEnum>]::SetArrayValue Trying to use a PlainType for array operations!");
-		}
+		}*/
 	};
 
 	template<class First, class Second>
@@ -310,7 +312,7 @@ namespace greaper::refl
 			ssizet expectedSize = StaticSize + dynamicSize;
 			if (size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<ssizet> FromStream(Type& data, IStream& stream)
@@ -332,7 +334,7 @@ namespace greaper::refl
 			ssizet expectedSize = dynamicSize + StaticSize;
 			if (size == expectedSize)
 				return Result::CreateSuccess(size);
-			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIuPTR " obtained:%" PRIdPTR ".", expectedSize, size));
+			return Result::CreateFailure<ssizet>(Format("[refl::PlainType<std::pair>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR " obtained:%" PRIiPTR ".", expectedSize, size));
 		}
 
 		static TResult<std::pair<Type, ssizet>> CreateFromStream(IStream& stream)
@@ -389,7 +391,7 @@ namespace greaper::refl
 
 		static String ToString(const Type& data)
 		{
-			SPtr<cJSON> json = CreateJSON(data, "pair"sv);
+			SPtr<cJSON> json = CreateJSON(data, TypeInfo<Type>::Name);
 			SPtr<char> jsonStr = SPtr<char>(cJSON_Print(json.get()));
 			return String{ jsonStr.get() };
 		}
@@ -397,7 +399,7 @@ namespace greaper::refl
 		static EmptyResult FromString(const String& str, Type& data)
 		{
 			SPtr<cJSON> json = SPtr<cJSON>(cJSON_Parse(str.c_str()), cJSON_Delete);
-			return FromJSON(data, json.get(), "pair"sv);
+			return FromJSON(data, json.get(), TypeInfo<Type>::Name);
 		}
 
 		static TResult<Type> CreateFromString(const String& str)
@@ -414,7 +416,7 @@ namespace greaper::refl
 			return FirstCat::GetDynamicSize(data.first) + SecondCat::GetDynamicSize(data.second);
 		}
 
-		NODISCARD static sizet GetArraySize(UNUSED const Type& data)
+		/*NODISCARD static sizet GetArraySize(UNUSED const Type& data)
 		{
 			Break("[refl::PlainType<std::pair>]::GetArraySize Trying to use a PlainType for array operations!");
 			return 0ll;
@@ -435,7 +437,7 @@ namespace greaper::refl
 		static void SetArrayValue(UNUSED Type& data, UNUSED const int32& value, UNUSED sizet index)
 		{
 			Break("[refl::PlainType<std::pair>]::SetArrayValue Trying to use a PlainType for array operations!");
-		}
+		}*/
 	};
 }
 

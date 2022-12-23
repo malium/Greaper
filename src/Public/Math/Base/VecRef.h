@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -23,44 +23,44 @@ namespace greaper::math::Impl
 	template<class T> struct Vector4Ref { T& X; T& Y; T& Z; T& W; };	template<class T> struct Vector4CRef { const T X; const T Y; const T Z; const T W; };
 
 #define DEF_SWIZZLE_XY() \
-INLINE Impl::Vector2XYRef<Type_t> XY()noexcept { return Impl::Vector2XYRef<Type_t>{ (Type_t&)X, (Type_t&)Y }; } \
-INLINE Impl::Vector2XYCRef<Type_t> XY()const noexcept { return Impl::Vector2XYCRef<Type_t>{ X, Y }; } 
+INLINE Impl::Vector2XYRef<value_type> XY()noexcept { return Impl::Vector2XYRef<value_type>{ (value_type&)X, (value_type&)Y }; } \
+INLINE Impl::Vector2XYCRef<value_type> XY()const noexcept { return Impl::Vector2XYCRef<value_type>{ X, Y }; } 
 
 #define DEF_SWIZZLE_XZ() \
-INLINE Impl::Vector2XZRef<Type_t> XZ()noexcept { return Impl::Vector2XZRef<Type_t>{ (Type_t&)X, (Type_t&)Z }; } \
-INLINE Impl::Vector2XZCRef<Type_t> XZ()const noexcept { return Impl::Vector2XZCRef<Type_t>{ X, Z }; } 
+INLINE Impl::Vector2XZRef<value_type> XZ()noexcept { return Impl::Vector2XZRef<value_type>{ (value_type&)X, (value_type&)Z }; } \
+INLINE Impl::Vector2XZCRef<value_type> XZ()const noexcept { return Impl::Vector2XZCRef<value_type>{ X, Z }; } 
 
 #define DEF_SWIZZLE_XW() \
-INLINE Impl::Vector2XWRef<Type_t> XW()noexcept { return Impl::Vector2XWRef<Type_t>{ (Type_t&)X, (Type_t&)W }; } \
-INLINE Impl::Vector2XWCRef<Type_t> XW()const noexcept { return Impl::Vector2XWCRef<Type_t>{ X, W }; } 
+INLINE Impl::Vector2XWRef<value_type> XW()noexcept { return Impl::Vector2XWRef<value_type>{ (value_type&)X, (value_type&)W }; } \
+INLINE Impl::Vector2XWCRef<value_type> XW()const noexcept { return Impl::Vector2XWCRef<value_type>{ X, W }; } 
 
 #define DEF_SWIZZLE_YZ() \
-INLINE Impl::Vector2YZRef<Type_t> YZ()noexcept { return Impl::Vector2YZRef<Type_t>{ (Type_t&)Y, (Type_t&)Z }; } \
-INLINE Impl::Vector2YZCRef<Type_t> YZ()const noexcept { return Impl::Vector2YZCRef<Type_t>{ Y, Z }; } 
+INLINE Impl::Vector2YZRef<value_type> YZ()noexcept { return Impl::Vector2YZRef<value_type>{ (value_type&)Y, (value_type&)Z }; } \
+INLINE Impl::Vector2YZCRef<value_type> YZ()const noexcept { return Impl::Vector2YZCRef<value_type>{ Y, Z }; } 
 
 #define DEF_SWIZZLE_YW() \
-INLINE Impl::Vector2YWRef<Type_t> YW()noexcept { return Impl::Vector2YWRef<Type_t>{ (Type_t&)Y, (Type_t&)W }; } \
-INLINE Impl::Vector2YWCRef<Type_t> YW()const noexcept { return Impl::Vector2YWCRef<Type_t>{ Y, W }; } 
+INLINE Impl::Vector2YWRef<value_type> YW()noexcept { return Impl::Vector2YWRef<value_type>{ (value_type&)Y, (value_type&)W }; } \
+INLINE Impl::Vector2YWCRef<value_type> YW()const noexcept { return Impl::Vector2YWCRef<value_type>{ Y, W }; } 
 
 #define DEF_SWIZZLE_ZW() \
-INLINE Impl::Vector2ZWRef<Type_t> ZW()noexcept { return Impl::Vector2ZWRef<Type_t>{ (Type_t&)Z, (Type_t&)W }; } \
-INLINE Impl::Vector2ZWCRef<Type_t> ZW()const noexcept { return Impl::Vector2ZWCRef<Type_t>{ Z, W }; } 
+INLINE Impl::Vector2ZWRef<value_type> ZW()noexcept { return Impl::Vector2ZWRef<value_type>{ (value_type&)Z, (value_type&)W }; } \
+INLINE Impl::Vector2ZWCRef<value_type> ZW()const noexcept { return Impl::Vector2ZWCRef<value_type>{ Z, W }; } 
 
 #define DEF_SWIZZLE_XYZ() \
-INLINE Impl::Vector3XYZRef<Type_t> XYZ()noexcept { return Impl::Vector3XYZRef<Type_t>{ (Type_t&)X, (Type_t&)Y, (Type_t&)Z }; } \
-INLINE Impl::Vector3XYZCRef<Type_t> XYZ()const noexcept { return Impl::Vector3XYZCRef<Type_t>{ X, Y, Z }; } 
+INLINE Impl::Vector3XYZRef<value_type> XYZ()noexcept { return Impl::Vector3XYZRef<value_type>{ (value_type&)X, (value_type&)Y, (value_type&)Z }; } \
+INLINE Impl::Vector3XYZCRef<value_type> XYZ()const noexcept { return Impl::Vector3XYZCRef<value_type>{ X, Y, Z }; } 
 
 #define DEF_SWIZZLE_XYW() \
-INLINE Impl::Vector3XYWRef<Type_t> XYW()noexcept { return Impl::Vector3XYWRef<Type_t>{ (Type_t&)X, (Type_t&)Y, (Type_t&)W }; } \
-INLINE Impl::Vector3XYWCRef<Type_t> XYW()const noexcept { return Impl::Vector3XYWCRef<Type_t>{ X, Y, W }; }
+INLINE Impl::Vector3XYWRef<value_type> XYW()noexcept { return Impl::Vector3XYWRef<value_type>{ (value_type&)X, (value_type&)Y, (value_type&)W }; } \
+INLINE Impl::Vector3XYWCRef<value_type> XYW()const noexcept { return Impl::Vector3XYWCRef<value_type>{ X, Y, W }; }
 
 #define DEF_SWIZZLE_XZW() \
-INLINE Impl::Vector3XZWRef<Type_t> XZW()noexcept { return Impl::Vector3XZWRef<Type_t>{ (Type_t&)X, (Type_t&)Z, (Type_t&)W }; } \
-INLINE Impl::Vector3XZWCRef<Type_t> XZW()const noexcept { return Impl::Vector3XZWCRef<Type_t>{ X, Z, W }; }
+INLINE Impl::Vector3XZWRef<value_type> XZW()noexcept { return Impl::Vector3XZWRef<value_type>{ (value_type&)X, (value_type&)Z, (value_type&)W }; } \
+INLINE Impl::Vector3XZWCRef<value_type> XZW()const noexcept { return Impl::Vector3XZWCRef<value_type>{ X, Z, W }; }
 
 #define DEF_SWIZZLE_YZW() \
-INLINE Impl::Vector3YZWRef<Type_t> YZW()noexcept { return Impl::Vector3YZWRef<Type_t>{ (Type_t&)Y, (Type_t&)Z, (Type_t&)W }; } \
-INLINE Impl::Vector3YZWCRef<Type_t> YZW()const noexcept { return Impl::Vector3YZWCRef<Type_t>{ Y, Z, W }; }
+INLINE Impl::Vector3YZWRef<value_type> YZW()noexcept { return Impl::Vector3YZWRef<value_type>{ (value_type&)Y, (value_type&)Z, (value_type&)W }; } \
+INLINE Impl::Vector3YZWCRef<value_type> YZW()const noexcept { return Impl::Vector3YZWCRef<value_type>{ Y, Z, W }; }
 
 #define DEF_SWIZZLE_VEC3()\
 DEF_SWIZZLE_XY()\

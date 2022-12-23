@@ -18,8 +18,6 @@ namespace greaper::refl
 	{
 		static const Vector<SPtr<IField>> Fields;
 
-		using ArrayValueType = int32;
-
 		static inline constexpr TypeCategory_t Category = TypeCategory_t::Complex;
 
 		static inline constexpr ssizet StaticSize = 0;
@@ -29,16 +27,11 @@ namespace greaper::refl
 			ssizet totalSize = 0;
 			for (const auto& field : Fields)
 			{
-				auto val = field->GetValue(&data);
-				auto res = field->ToStream(val, stream);
+				auto res = field->ToStream(&data, stream);
 				if (res.HasFailed())
 					return res;
-
-				ssizet size = res.GetValue();
-				ssizet expectedSize = field->GetStaticSize() + field->GetDynamicSize(val);
-				totalSize += size;
-				if (size != expectedSize)
-					return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<T>]::ToStream Failure while writing to stream, not all data was written, expected:%" PRIiPTR" obtained:%" PRIiPTR ".", expectedSize, size));
+				
+				totalSize += res.GetValue();
 			}
 			return Result::CreateSuccess(totalSize);
 		}
@@ -48,19 +41,11 @@ namespace greaper::refl
 			ssizet totalSize = 0;
 			for (const auto& field : Fields)
 			{
-				auto res = field->CreateFromStream(stream);
+				auto res = field->FromStream(&data, stream);
 				if (res.HasFailed())
 					return res;
 
-				auto lck = Lock<RecursiveMutex>(*std::get<2>(res.GetValue()), AdoptLock{});
-
-				ssizet size = std::get<1>(res.GetValue());
-				ssizet expectedSize = field->GetStaticSize() + field->GetDynamicSize(val);
-				totalSize += size;
-				if (size != expectedSize)
-					return Result::CreateFailure<ssizet>(Format("[refl::ComplexType<T>]::FromStream Failure while reading from stream, not all data was read, expected:%" PRIiPTR" obtained:%" PRIiPTR ".", expectedSize, size));
-				
-				field->SetValue(&data, std::get<0>(res.GetValue()));
+				totalSize += res.GetValue();
 			}
 			return Result::CreateSuccess(totalSize);
 		}
@@ -77,8 +62,7 @@ namespace greaper::refl
 			cJSON* obj = cJSON_AddObjectToObject(json, name.data());
 			for (const auto& field : Fields)
 			{
-				auto value = field->GetValue(&data);
-				field->ToJSON(value, json);
+				field->ToJSON(&data, json);
 			}
 			return obj;
 		}
@@ -91,12 +75,9 @@ namespace greaper::refl
 
 			for (const auto& field : Fields)
 			{
-				auto res = field->CreateFromJSON(json);
+				auto res = field->FromJSON(&data, item);
 				if (res.HasFailed())
 					return res;
-
-				field->SetValue(&data, std::get<0>(res.GetValue()));
-				std::get<1>(res.GetValue())->unlock();
 			}
 			return Result::CreateSuccess();
 		}
@@ -119,13 +100,12 @@ namespace greaper::refl
 			int64 size = 0;
 			for (const auto& field : Fields)
 			{
-				auto value = field->GetCValue();
-				size += field->GetStaticSize() + field->GetDynamicSize(value);
+				size += field->GetStaticSize() + field->GetDynamicSize(&data);
 			}
 			return size;
 		}
-
-		NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		
+		/*NODISCARD static sizet GetArraySize(UNUSED const T& data)
 		{
 			Break("[refl::ComplexType<T>]::GetArraySize Trying to use a PlainType for array operations!");
 			return 0ll;
@@ -146,10 +126,8 @@ namespace greaper::refl
 		static void SetArrayValue(UNUSED T& data, UNUSED const ArrayValueType& value, UNUSED sizet index)
 		{
 			Break("[refl::ComplexType<T>]::SetArrayValue Trying to use a PlainType for array operations!");
-		}
+		}*/
 	};
-
-	constexpr auto x = ComplexType<float>::StaticSize;
 }
 
 #endif /* CORE_REFLECTION_COMPLEXTYPE_H */

@@ -29,7 +29,7 @@ namespace greaper::math
 		template<> struct Scan<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf"; };
 
 	public:
-		using Type_t = T;
+		using value_type = T;
 
 		static constexpr sizet RowCount = 2;
 		static constexpr sizet ColumnCount = 2;
@@ -221,6 +221,18 @@ namespace greaper::math
 
 	template<class T> INLINE constexpr bool operator==(const Matrix2Real<T>& left, const Matrix2Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
 	template<class T> INLINE constexpr bool operator!=(const Matrix2Real<T>& left, const Matrix2Real<T>& right)noexcept { return !(left == right); }
+}
+
+namespace std
+{
+	template<class T>
+	struct hash<greaper::math::Matrix2Real<T>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::math::Matrix2Real<T>& m)const noexcept
+		{
+			return ComputeHash(m.R0, m.R1);
+		}
+	};
 }
 
 #endif /* MATH_MATRIX2_H */

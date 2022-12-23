@@ -30,7 +30,7 @@ namespace greaper::math
 
 	public:
 		static constexpr sizet ComponentCount = 3;
-		using Type_t = T;
+		using value_type = T;
 
 		T X{ 0 };
 		T Y{ 0 };
@@ -250,7 +250,7 @@ namespace greaper::math
 
 	public:
 		static constexpr sizet ComponentCount = 3;
-		using Type_t = T;
+		using value_type = T;
 
 		T X{ 0 };
 		T Y{ 0 };
@@ -405,7 +405,7 @@ namespace greaper::math
 
 	public:
 		static constexpr sizet ComponentCount = 3;
-		using Type_t = T;
+		using value_type = T;
 
 		T X{ 0 };
 		T Y{ 0 };
@@ -522,7 +522,7 @@ namespace greaper::math
 	{
 	public:
 		static constexpr sizet ComponentCount = 3;
-		using Type_t = bool;
+		using value_type = bool;
 		
 		bool X = false;
 		bool Y = false;
@@ -613,6 +613,43 @@ namespace greaper::math
 	INLINE constexpr bool operator!=(const Vector3b& left, const Vector3b& right)noexcept { return !(left == right); }
 }
 
-#include "Reflection/Vector3.h"
+namespace std
+{
+	template<class T>
+	struct hash<greaper::math::Vector3Real<T>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::math::Vector3Real<T>& v)const noexcept
+		{
+			return ComputeHash(v.X, v.Y, v.Z);
+		}
+	};
+
+	template<class T>
+	struct hash<greaper::math::Vector3Signed<T>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::math::Vector3Signed<T>& v)const noexcept
+		{
+			return ComputeHash(v.X, v.Y, v.Z);
+		}
+	};
+
+	template<class T>
+	struct hash<greaper::math::Vector3Unsigned<T>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::math::Vector3Unsigned<T>& v)const noexcept
+		{
+			return ComputeHash(v.X, v.Y, v.Z);
+		}
+	};
+
+	template<>
+	struct hash<greaper::math::Vector3b>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::math::Vector3b& v)const noexcept
+		{
+			return ComputeHash(v.X, v.Y, v.Z);
+		}
+	};
+}
 
 #endif /* MATH_VECTOR3_H */

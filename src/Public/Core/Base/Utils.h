@@ -192,10 +192,14 @@ namespace std { template<class T> struct hash; }
 /**
 *	Computes the hash of a type given the seed.
 */
+INLINE void HashCombineHash(sizet& seed, sizet hash)
+{
+	seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
 template<typename T>
 INLINE void HashCombine(sizet& seed, const T& val)
 {
-	seed ^= std::hash<T>()(val) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	HashCombineHash(seed, std::hash<T>()(val));
 }
 /**
 *	Computes the hash of the concatenated types given the seed.

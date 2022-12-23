@@ -21,6 +21,8 @@ namespace greaper
 	public:
 		static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>, "RectT can only be instanced with an integer or a floating point type.");
 
+		using value_type = T;
+
 		using TCategory = typename refl::TypeInfo<T>::Type;
 		
 		T Left = T(0);
@@ -204,10 +206,16 @@ namespace greaper
 	}
 }
 
-#include "../Reflection/Rect.h"
-
-//ALLOW_MEMCPY_SERIALIZATION(greaper::RectF, data.ToString(), data.FromString(str));
-//ALLOW_MEMCPY_SERIALIZATION(greaper::RectI, data.ToString(), data.FromString(str));
-//ALLOW_MEMCPY_SERIALIZATION(greaper::RectU, data.ToString(), data.FromString(str));
+namespace std
+{
+	template<class T>
+	struct hash<greaper::RectT<T>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::RectT<T>& r)const noexcept
+		{
+			return ComputeHash(r.Left, r.Top, r.Right, r.Bottom);
+		}
+	};
+}
 
 #endif /* CORE_RECT_H */

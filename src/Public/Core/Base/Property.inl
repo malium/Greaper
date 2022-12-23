@@ -165,7 +165,7 @@ namespace greaper
 	}
 	
 	template<class T>
-	NODISCARD INLINE ReflectedTypeID_t TProperty<T>::_ValueTypeID()const noexcept
+	NODISCARD INLINE const ReflectedTypeID_t& TProperty<T>::_ValueTypeID()const noexcept
 	{
 		return refl::TypeInfo<T>::ID;
 	}
@@ -230,5 +230,12 @@ namespace greaper
 	NODISCARD INLINE const WGreaperLib& TProperty<T>::GetLibrary()const noexcept
 	{
 		return m_Library;
+	}
+
+	template<class T>
+	NODISCARD INLINE std::size_t TProperty<T>::GetValueHash()const noexcept
+	{
+		auto lck = SharedLock(m_Mutex);
+		return std::hash<T>()(m_Value);
 	}
 }

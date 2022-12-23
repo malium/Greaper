@@ -5,10 +5,37 @@
 
 #pragma once
 
-#include "../../Core/Reflection/PlainType.h"
-//#include "../Quaternion.h"
+#ifndef MATH_REFL_QUATERNION_H
+#define MATH_REFL_QUATERNION_H 1
 
-namespace greaper::refl
+#include "../../Core/Reflection/ComplexType.h"
+#include "../Quaternion.h"
+
+#define CreateQuatRefl(quatType)\
+namespace greaper::refl{\
+	template<>\
+	const Vector<SPtr<IField>> ComplexType<quatType>::Fields = Vector<SPtr<IField>>({\
+			SPtr<IField>(Construct<TField<quatType::value_type>>("W"sv, \
+			[](const void* obj) -> const void* { return &(((const quatType*)obj)->W); },\
+			[](void* obj, const void* value) { ((quatType*)obj)->W = *((const quatType::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<quatType::value_type>>("X"sv, \
+			[](const void* obj) -> const void* { return &(((const quatType*)obj)->X); },\
+			[](void* obj, const void* value) { ((quatType*)obj)->X = *((const quatType::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<quatType::value_type>>("Y"sv, \
+			[](const void* obj) -> const void* { return &(((const quatType*)obj)->Y); },\
+			[](void* obj, const void* value) { ((quatType*)obj)->Y = *((const quatType::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<quatType::value_type>>("Z"sv, \
+			[](const void* obj) -> const void* { return &(((const quatType*)obj)->Z); },\
+			[](void* obj, const void* value) { ((quatType*)obj)->Z = *((const quatType::value_type*)value); })),\
+		});\
+}
+
+CreateQuatRefl(greaper::math::QuaternionF);
+CreateQuatRefl(greaper::math::QuaternionD);
+
+#undef CreateQuatRefl
+
+/*namespace greaper::refl
 {
 	template<class T> 
 	struct ComplexType<math::QuaternionReal<T>> : public BaseType<math::QuaternionReal<T>>
@@ -109,4 +136,6 @@ namespace greaper::refl
 			Break("[refl::ComplexType<QuaternionReal>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
-}
+}*/
+
+#endif /* MATH_REFL_QUATERNION_H */

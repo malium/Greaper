@@ -5,10 +5,39 @@
 
 #pragma once
 
-#include "ComplexType.h"
-//#include "../Base/Rect.h"
+#ifndef CORE_REFL_RECT_H
+#define CORE_REFL_RECT_H 1
 
-namespace greaper::refl
+#include "ComplexType.h"
+#include "../Base/Rect.h"
+
+#define CreateRectRefl(recttype)\
+namespace greaper::refl{\
+	template<>\
+	const Vector<SPtr<IField>> ComplexType<recttype>::Fields = Vector<SPtr<IField>>({\
+			SPtr<IField>(Construct<TField<recttype::value_type>>("Left"sv, \
+			[](const void* obj) -> const void* { return &(((const recttype*)obj)->Left); },\
+			[](void* obj, const void* value) { ((recttype*)obj)->Left = *((const recttype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<recttype::value_type>>("Top"sv, \
+			[](const void* obj) -> const void* { return &(((const recttype*)obj)->Top); },\
+			[](void* obj, const void* value) { ((recttype*)obj)->Top = *((const recttype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<recttype::value_type>>("Right"sv, \
+			[](const void* obj) -> const void* { return &(((const recttype*)obj)->Right); },\
+			[](void* obj, const void* value) { ((recttype*)obj)->Right = *((const recttype::value_type*)value); })),\
+			SPtr<IField>(Construct<TField<recttype::value_type>>("Bottom"sv, \
+			[](const void* obj) -> const void* { return &(((const recttype*)obj)->Bottom); },\
+			[](void* obj, const void* value) { ((recttype*)obj)->Bottom = *((const recttype::value_type*)value); })),\
+		});\
+}
+
+CreateRectRefl(greaper::RectF);
+CreateRectRefl(greaper::RectD);
+CreateRectRefl(greaper::RectI);
+CreateRectRefl(greaper::RectU);
+
+#undef CreateRectRefl
+
+/*namespace greaper::refl
 {
 	template<class T> 
 	struct ComplexType<RectT<T>> : public BaseType<RectT<T>>
@@ -112,4 +141,6 @@ namespace greaper::refl
 			Break("[refl::ComplexType<RectT>]::SetArrayValue Trying to use a PlainType for array operations!");
 		}
 	};
-}
+}*/
+
+#endif /* CORE_REFL_RECT_H */

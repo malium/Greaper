@@ -62,6 +62,9 @@
 #if defined(__clang__)
 #define COMPILER_CLANG 1
 #define COMPILER_VERSION ((__clang_major__ * 10) + __clang_minor__)
+#if !__has_feature(cxx_rtti)
+#error "RTTI must be supported and enabled!"
+#endif
 #else
 #define COMPILER_CLANG 0
 #endif
@@ -71,17 +74,11 @@
 #if defined(__GNUC__) && !defined(COMPILER_VERSION)
 #define COMPILER_GCC 1
 #define COMPILER_VERSION __GNUC__
+#ifndef __GXX_RTTI
+#error "RTTI must be supported and enabled!"
+#endif
 #else
 #define COMPILER_GCC 0
-#endif
-#endif
-
-#ifndef COMPILER_ICC
-#if (defined(__INTEL_COMPILER) || defined(__ICC) || defined(__ECC) || defined(__ICL)) && !defined(COMPILER_VERSION)
-#define COMPILER_ICC 1
-#define COMPILER_VERSION __INTEL_COMPILER
-#else
-#define COMPILER_ICC 0
 #endif
 #endif
 
@@ -89,6 +86,9 @@
 #if defined(_MSC_VER) && !defined(COMPILER_VERSION)
 #define COMPILER_MSVC 1
 #define COMPILER_VERSION _MSC_VER
+#ifndef _CPPRTTI
+#error "RTTI must be supported and enabled!"
+#endif
 #else
 #define COMPILER_MSVC 0
 #endif
