@@ -130,7 +130,7 @@ namespace greaper
 			RTI_UnorderedMultiSet,
 
 			// Classes
-			RTI_UUID = 100,
+			RTI_UUID = 40,
 			RTI_Property,
 
 		};

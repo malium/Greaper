@@ -95,6 +95,22 @@ namespace greaper::math
 	template<class T> class QuaternionReal;
 	using QuaternionF = QuaternionReal<float>;
 	using QuaternionD = QuaternionReal<double>;
+
+	template<class T> class Segment2Real;
+	using Segment2f = Segment2Real<float>;
+	using Segment2d = Segment2Real<double>;
+
+	template<class T> class Segment3Real;
+	using Segment3f = Segment3Real<float>;
+	using Segment3d = Segment3Real<double>;
+
+	template<class T> class Line2Real;
+	using Line2f = Line2Real<float>;
+	using Line2d = Line2Real<double>;
+
+	template<class T> class Line3Real;
+	using Line3f = Line3Real<float>;
+	using Line3d = Line3Real<double>;
 }
 
 namespace greaper
@@ -164,6 +180,18 @@ namespace greaper::refl
 
 		RTI_QuaternionF,
 		RTI_QuaternionD,
+
+		RTI_Segment2f,
+		RTI_Segment2d,
+
+		RTI_Segment3f,
+		RTI_Segment3d,
+
+		RTI_Line2f,
+		RTI_Line2d,
+
+		RTI_Line3f,
+		RTI_Line3d,
 	};
 }
 
