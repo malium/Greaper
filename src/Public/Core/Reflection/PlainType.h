@@ -75,9 +75,7 @@ namespace greaper::refl { \
 		NODISCARD static int64 GetDynamicSize(UNUSED const type& data){\
 			return 0ll; \
 		}\
-	};\
-}
-		/*NODISCARD static sizet GetArraySize(UNUSED const type& data){\
+		NODISCARD static sizet GetArraySize(UNUSED const type& data){\
 			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
 			return 0ll;\
 		}\
@@ -93,7 +91,7 @@ namespace greaper::refl { \
 			Break("[refl::PlainType<"#type">]]::GetArraySize Trying to use a PlainType for array operations!");\
 		}\
 	};\
-}*/
+}
 
 namespace greaper::refl
 {
@@ -257,7 +255,7 @@ namespace greaper::refl
 			return 0ll; 
 		}
 
-		/*NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		NODISCARD static sizet GetArraySize(UNUSED const T& data)
 		{
 			Break("[refl::PlainType<TEnum>]::GetArraySize Trying to use a PlainType for array operations!");
 			return 0ll;
@@ -278,7 +276,7 @@ namespace greaper::refl
 		static void SetArrayValue(UNUSED T& data, UNUSED const int32& value, UNUSED sizet index)
 		{
 			Break("[refl::PlainType<TEnum>]::SetArrayValue Trying to use a PlainType for array operations!");
-		}*/
+		}
 	};
 
 	template<class First, class Second>
@@ -416,7 +414,7 @@ namespace greaper::refl
 			return FirstCat::GetDynamicSize(data.first) + SecondCat::GetDynamicSize(data.second);
 		}
 
-		/*NODISCARD static sizet GetArraySize(UNUSED const Type& data)
+		NODISCARD static sizet GetArraySize(UNUSED const Type& data)
 		{
 			Break("[refl::PlainType<std::pair>]::GetArraySize Trying to use a PlainType for array operations!");
 			return 0ll;
@@ -437,7 +435,7 @@ namespace greaper::refl
 		static void SetArrayValue(UNUSED Type& data, UNUSED const int32& value, UNUSED sizet index)
 		{
 			Break("[refl::PlainType<std::pair>]::SetArrayValue Trying to use a PlainType for array operations!");
-		}*/
+		}
 	};
 }
 

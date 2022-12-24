@@ -35,14 +35,11 @@ namespace greaper::refl
 
 		virtual TResult<ssizet> ToStream(const void* complexPtr, IStream& stream)const = 0;
 		virtual TResult<ssizet> FromStream(void* complexPtr, IStream& stream)const = 0;
-		virtual TResult<std::tuple<void*, ssizet, RecursiveMutex*>> CreateFromStream(IStream& stream)const = 0;
 		virtual SPtr<cJSON> CreateJSON(const void* complexPtr)const = 0;
 		virtual cJSON* ToJSON(const void* complexPtr, cJSON* json)const = 0;
 		virtual EmptyResult FromJSON(void* complexPtr, cJSON* json)const = 0;
-		virtual TResult<std::tuple<void*, RecursiveMutex*>> CreateFromJSON(cJSON* json)const = 0;
 		virtual String ToString(const void* complexPtr)const = 0;
 		virtual EmptyResult FromString(const String& str, void* complexPtr)const = 0;
-		virtual TResult<std::tuple<void*, RecursiveMutex*>> CreateFromString(const String& str)const = 0;
 		virtual int64 GetDynamicSize(const void* complexPtr)const = 0;
 		virtual int64 GetStaticSize()const = 0;
 
@@ -74,7 +71,7 @@ namespace greaper::refl
 	public:
 		using Type = RemoveEverything_t<T>;
 		using tInfo = TypeInfo<Type>;
-		using ArrayValueType = tInfo::Type::ArrayValueType;
+		using ArrayValueType = typename tInfo::Type::ArrayValueType;
 
 		static_assert(!std::is_same_v<tInfo::Type, void>, "[refl::TField<T>] instantiated with an Unknown TypeID.");
 
@@ -92,7 +89,7 @@ namespace greaper::refl
 		{
 			const Type* valuePtr = (const Type*)GetValue(complexPtr);
 			if(valuePtr == nullptr)
-				return Result::CreateFailure<ssizet>("[refl::TField<T>]::ToStream failed to obtain the value.");
+				return Result::CreateFailure<ssizet>("[refl::TField<T>]::ToStream failed to obtain the value."sv);
 
 			return tInfo::Type::ToStream(*valuePtr, stream);
 		}
@@ -109,7 +106,7 @@ namespace greaper::refl
 		{
 			const Type* valuePtr = (const Type*)GetValue(complexPtr);
 			if(valuePtr == nullptr)
-				return nullptr;
+				return SPtr<cJSON>();
 			return tInfo::Type::CreateJSON(*valuePtr, m_FieldName);
 		}
 		INLINE cJSON* ToJSON(const void* complexPtr, cJSON* json)const override
@@ -160,21 +157,21 @@ namespace greaper::refl
 			const Type* arrPtr = (const Type*)GetValue(complexPtr);
 			if(arrPtr == nullptr)
 				return 0ll;
-			return tInfo::Type::GetArraysize(*arrPtr);
+			return tInfo::Type::GetArraySize(*arrPtr);
 		}
 		INLINE void SetArraySize(void* complexPtr, sizet size)const override
 		{
 			Type* arrPtr = (Type*)GetValue(complexPtr);
 			if(arrPtr == nullptr)
 				return;
-			tInfo::Type::SetArraysize(*arrPtr, size);
+			tInfo::Type::SetArraySize(*arrPtr, size);
 		}
 		INLINE const void* GetArrayValue(const void* complexPtr, sizet index)const override
 		{
 			const Type* arrPtr = (const Type*)GetValue(complexPtr);
 			if(arrPtr == nullptr)
 				return nullptr;
-			return &tInfo::type::GetArrayValue(*arrPtr, index);
+			return &tInfo::Type::GetArrayValue(*arrPtr, index);
 		}
 		INLINE void SetArrayValue(void* complexPtr, const void* value, sizet index)const override
 		{

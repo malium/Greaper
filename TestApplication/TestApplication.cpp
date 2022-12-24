@@ -14,6 +14,8 @@
 #include <Math/Vector4.h>
 #include <Math/Matrix4.h>
 #include <Math/Quaternion.h>
+#include <Math/Reflection/Vector3.h>
+#include <Math/Reflection/Quaternion.h>
 #include <Core/MemoryStream.h>
 #include <Core/Reflection/Property.h>
 #include <random>

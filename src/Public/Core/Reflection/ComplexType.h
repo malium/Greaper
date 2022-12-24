@@ -62,7 +62,7 @@ namespace greaper::refl
 			cJSON* obj = cJSON_AddObjectToObject(json, name.data());
 			for (const auto& field : Fields)
 			{
-				field->ToJSON(&data, json);
+				field->ToJSON(&data, obj);
 			}
 			return obj;
 		}
@@ -105,7 +105,7 @@ namespace greaper::refl
 			return size;
 		}
 		
-		/*NODISCARD static sizet GetArraySize(UNUSED const T& data)
+		NODISCARD static sizet GetArraySize(UNUSED const T& data)
 		{
 			Break("[refl::ComplexType<T>]::GetArraySize Trying to use a PlainType for array operations!");
 			return 0ll;
@@ -116,17 +116,17 @@ namespace greaper::refl
 			Break("[refl::ComplexType<T>]::SetArraySize Trying to use a PlainType for array operations!");
 		}
 
-		NODISCARD static const ArrayValueType& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
+		NODISCARD static const BaseType<T>::ArrayValueType& GetArrayValue(UNUSED const T& data, UNUSED sizet index)
 		{
-			static constexpr ArrayValueType dummy = 0;
+			static constexpr BaseType<T>::ArrayValueType dummy = 0;
 			Break("[refl::ComplexType<T>]::GetArrayValue Trying to use a PlainType for array operations!");
 			return dummy;
 		}
 
-		static void SetArrayValue(UNUSED T& data, UNUSED const ArrayValueType& value, UNUSED sizet index)
+		static void SetArrayValue(UNUSED T& data, UNUSED const BaseType<T>::ArrayValueType& value, UNUSED sizet index)
 		{
 			Break("[refl::ComplexType<T>]::SetArrayValue Trying to use a PlainType for array operations!");
-		}*/
+		}
 	};
 }
 

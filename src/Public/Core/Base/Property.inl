@@ -236,6 +236,6 @@ namespace greaper
 	NODISCARD INLINE std::size_t TProperty<T>::GetValueHash()const noexcept
 	{
 		auto lck = SharedLock(m_Mutex);
-		return std::hash<T>()(m_Value);
+		return ComputeHash(m_Value);
 	}
 }

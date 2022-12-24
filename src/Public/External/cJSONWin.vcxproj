@@ -74,21 +74,29 @@
     <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
+    <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

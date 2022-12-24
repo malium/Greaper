@@ -199,7 +199,7 @@ INLINE void HashCombineHash(sizet& seed, sizet hash)
 template<typename T>
 INLINE void HashCombine(sizet& seed, const T& val)
 {
-	HashCombineHash(seed, std::hash<T>()(val));
+	HashCombineHash(seed, (sizet)std::hash<T>()(val));
 }
 /**
 *	Computes the hash of the concatenated types given the seed.

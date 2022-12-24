@@ -661,6 +661,30 @@ namespace std
 		}
 	};
 
+	template<class T, class A>
+	struct hash<greaper::Vector<T, A>>
+	{
+		NODISCARD INLINE size_t operator()(const greaper::Vector<T, A>& v)const noexcept
+		{
+			size_t seed = 0;
+			for (const T& elem : v)
+				HashCombine(seed, elem);
+			return seed;
+		}
+	};
+
+	template<class T, std::size_t N>
+	struct hash<std::array<T, N>>
+	{
+		NODISCARD INLINE size_t operator()(const std::array<T, N>& v)const noexcept
+		{
+			size_t seed = 0;
+			for (const T& elem : v)
+				HashCombine(seed, elem);
+			return seed;
+		}
+	};
+
 	template<class T>
 	struct hash<greaper::UPtr<T>>
 	{
@@ -747,4 +771,5 @@ namespace greaper
 		return IndexOf<T, N>(arr, elem);
 	}
 }
+
 #endif /* GREAPER_CORE_MEMORY_H */
