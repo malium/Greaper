@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -247,16 +247,6 @@ void LogManager::DeinitProperties()noexcept
 
 	for (auto& prop : m_Properties)
 		prop.reset();
-}
-
-void LogManager::InitSerialization() noexcept
-{
-
-}
-
-void LogManager::DeinitSerialization() noexcept
-{
-
 }
 
 LogManager::LogManager()

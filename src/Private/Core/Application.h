@@ -72,10 +72,6 @@ namespace greaper::core
 
 		void DeinitProperties()noexcept override;
 
-		void InitSerialization()noexcept override;
-
-		void DeinitSerialization()noexcept override;
-
 		TResult<PGreaperLib> RegisterGreaperLibrary(const WStringView& libPath)noexcept override;
 
 		TResult<PGreaperLib> GetGreaperLibrary(const StringView& libraryName)const noexcept override;
@@ -120,7 +116,7 @@ namespace greaper::core
 
 		WPtr<AppInstanceProp_t> GetAppInstance()const noexcept override { return (WPtr<AppInstanceProp_t>)m_Properties[(std::size_t)AppInstance]; }
 
-		[[nodiscard]] Vector<PGreaperLib> GetRegisteredLibrariesCopy()const noexcept override
+		NODISCARD Vector<PGreaperLib> GetRegisteredLibrariesCopy()const noexcept override
 		{
 			Vector<PGreaperLib> vec{ m_Libraries.size()};
 			for (const LibInfo& lib : m_Libraries)
@@ -129,7 +125,7 @@ namespace greaper::core
 			return vec;
 		}
 
-		[[nodiscard]] Vector<PInterface> GetActiveInterfacesCopy()const noexcept override { LOCK(m_ActiveMutex); return Vector<PInterface>{m_ActiveInterfaces}; }
+		NODISCARD Vector<PInterface> GetActiveInterfacesCopy()const noexcept override { LOCK(m_ActiveMutex); return Vector<PInterface>{m_ActiveInterfaces}; }
 	};
 }
 

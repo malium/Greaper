@@ -5,15 +5,15 @@
 
 #pragma once
 
-#ifndef CORE_DISPLAY_ADAPTER_H
-#define CORE_DISPLAY_ADAPTER_H 1
+#ifndef DISP_DISPLAY_ADAPTER_H
+#define DISP_DISPLAY_ADAPTER_H 1
 
-#include "../CorePrerequisites.h"
+#include "../DispPrerequisites.h"
 #include "VideoMode.h"
 #include "Monitor.h"
-#include "../Result.h"
+#include <Core/Result.h>
 
-namespace greaper
+namespace greaper::disp
 {
 	class DisplayAdapter
 	{
@@ -44,11 +44,11 @@ namespace greaper
 
 		INLINE bool IsDefault()const noexcept { return m_IsDefault; }
 		
-		Result<Monitor> GetMonitorWithSize(const std::pair<uint16, uint16>& size)const noexcept;
+		TResult<Monitor> GetMonitorWithSize(const math::Vector2u& size)const noexcept;
 
-		Result<Monitor> GetPrimaryMonitor()const noexcept;
+		TResult<Monitor> GetPrimaryMonitor()const noexcept;
 
-		Result<VideoMode> GetDefaultVideoMode()const noexcept;
+		TResult<VideoMode> GetDefaultVideoMode()const noexcept;
 
 		INLINE bool HasAnyMonitorConnected()const noexcept { return !m_Monitors.empty(); }
 	};
@@ -66,33 +66,33 @@ namespace greaper
 
 	}
 
-	INLINE Result<Monitor> DisplayAdapter::GetMonitorWithSize(const std::pair<uint16, uint16>& size) const noexcept
+	INLINE TResult<Monitor> DisplayAdapter::GetMonitorWithSize(const math::Vector2u& size) const noexcept
 	{
 		for(const Monitor& mon : m_Monitors)
 		{
 			if(mon.GetSize() == size)
-				return CreateResult(mon);
+				return Result::CreateSuccess(mon);
 		}
-		return CreateFailure<Monitor>(Format("Couldn't find a monitor with size (%d, %d).", size.first, size.second));
+		return Result::CreateFailure<Monitor>(Format("Couldn't find a monitor with size (%" PRIu32 ", %" PRIu32 ").", size.X, size.Y));
 	}
 	
-	INLINE Result<Monitor> DisplayAdapter::GetPrimaryMonitor() const noexcept
+	INLINE TResult<Monitor> DisplayAdapter::GetPrimaryMonitor() const noexcept
 	{
 		for(const Monitor& mon : m_Monitors)
 		{
 			if(mon.IsPrimary())
-				return CreateResult(mon);
+				return Result::CreateSuccess(mon);
 		}
-		return CreateFailure<Monitor>("Couldn't find a primary monitor."sv);
+		return Result::CreateFailure<Monitor>("Couldn't find a primary monitor."sv);
 	}
 
-	INLINE Result<VideoMode> DisplayAdapter::GetDefaultVideoMode() const noexcept
+	INLINE TResult<VideoMode> DisplayAdapter::GetDefaultVideoMode() const noexcept
 	{
 		const auto pmRes = GetPrimaryMonitor();
 		if(pmRes.HasFailed())
-			return CopyFailure<VideoMode>(pmRes);
+			return Result::CopyFailure<VideoMode>(pmRes);
 		const auto monitor = pmRes.GetValue();
-		auto found = VideoMode{std::make_pair<uint16, uint16>(0, 0), nullptr, 0, 0};
+		auto found = VideoMode{math::Vector2u::ZERO, nullptr, 0, 0};
 		for(const VideoMode& mode : m_VideoModes)
 		{
 			if(mode.GetResolution() != monitor.GetSize())
@@ -103,9 +103,9 @@ namespace greaper
 			}
 		}
 		if(found.GetAdapter() == nullptr)
-			return CreateFailure<VideoMode>("Coudn't find the default video mode.");
-		return CreateResult(found);
+			return Result::CreateFailure<VideoMode>("Coudn't find the default video mode."sv);
+		return Result::CreateSuccess(found);
 	}
 }
 
-#endif /* CORE_DISPLAY_ADAPTER_H */
+#endif /* DISP_DISPLAY_ADAPTER_H */

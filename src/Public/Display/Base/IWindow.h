@@ -5,22 +5,23 @@
 
 #pragma once
 
-#ifndef CORE_I_WINDOW_H
-#define CORE_I_WINDOW_H 1
+#ifndef DISP_I_WINDOW_H
+#define DISP_I_WINDOW_H 1
 
-#include "../Memory.h"
-#include "Rect.h"
-#include "IThread.h"
-#include "../Enumeration.h"
-#include "../Event.h"
+#include "../DispPrerequisites.h"
+#include <Core/Base/Rect.h>
+#include <Core/Base/IThread.h>
+#include <Core/Enumeration.h>
+#include <Core/Event.h>
+#include <Math/Vector2.h>
 
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
 	
 ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight);
 	
-ENUMERATION(FullScreenType, Windowed, Borderless, FullScreen);
+ENUMERATION(WindowMode, Windowed, Borderless, FullScreen);
 
-namespace greaper
+namespace greaper::disp
 {
 	struct WindowDesc
 	{
@@ -28,7 +29,7 @@ namespace greaper
 
 		int16 Width = -1; // < 0 == don't care
 		int16 Height = -1; // < 0 == don't care
-		FullScreenType_t FullScreen = FullScreenType_t::Windowed;
+		WindowMode_t FullScreen = WindowMode_t::Windowed;
 		AnchoredPosition_t Position = AnchoredPosition_t::COUNT; // COUNT == don't care
 		int MonitorIndex = -1; // < 0 == don't care
 
@@ -38,19 +39,17 @@ namespace greaper
 	class IWindow
 	{
 	public:
-		using Position_t = std::pair<int32, int32>;
-		using Size_t = std::pair<uint32, uint32>;
-		using WindowResizedEvt_t = Event<IWindow*, Size_t>;
-		using WindowMovedEvt_t = Event<IWindow*, Position_t>;
+		using WindowResizedEvt_t = Event<IWindow*, math::Vector2u>;
+		using WindowMovedEvt_t = Event<IWindow*, math::Vector2i>;
 		using WindowClosedEvt_t = Event<IWindow*>;
-		using WindowFullScreenChangedEvt_t = Event<IWindow*, FullScreenType_t>;
+		using WindowFullScreenChangedEvt_t = Event<IWindow*, WindowMode_t>;
 		using WindowStateChangedEvt_t = Event<IWindow*, WindowState_t>;
 
 		virtual ~IWindow() = default;
 
-		virtual Position_t GetWindowPosition()const = 0;
+		virtual math::Vector2i GetWindowPosition()const = 0;
 
-		virtual Size_t GetWindowSize()const = 0;
+		virtual math::Vector2u GetWindowSize()const = 0;
 
 		virtual RectI GetNCWindowRect()const = 0;
 
@@ -60,21 +59,21 @@ namespace greaper
 
 		virtual void SetWindowState(WindowState_t state) = 0;
 
-		virtual void SetWindowPosition(const Position_t& position) = 0;
+		virtual void SetWindowPosition(const math::Vector2i& position) = 0;
 
-		virtual void SetWindowSize(const Size_t& size) = 0;
+		virtual void SetWindowSize(const math::Vector2u& size) = 0;
 
 		virtual void SetTitle(const WString& title) = 0;
 
 		virtual const WString& GetTitle()const = 0;
 
-		virtual Position_t ScreenToWindowPos(const Position_t& pos)const = 0;
+		virtual math::Vector2i ScreenToWindowPos(const math::Vector2i& pos)const = 0;
 
-		virtual Position_t WindowPosToScreen(const Position_t& pos)const = 0;
+		virtual math::Vector2i WindowPosToScreen(const math::Vector2i& pos)const = 0;
 
-		virtual FullScreenType_t GetFullScreenType()const = 0;
+		virtual WindowMode_t GetFullScreenType()const = 0;
 
-		virtual void SetFullScreenType(FullScreenType_t type) = 0;
+		virtual void SetFullScreenType(WindowMode_t type) = 0;
 
 		virtual bool IsFocused()const = 0;
 
@@ -101,4 +100,4 @@ namespace greaper
 	};
 }
 
-#endif /* CORE_I_WINDOW_H */
+#endif /* DISP_I_WINDOW_H */

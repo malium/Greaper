@@ -29,10 +29,6 @@ namespace greaper
 
 		virtual void InitProperties()noexcept = 0;
 
-		virtual void InitReflection()noexcept = 0;
-
-		virtual void DeinitReflection()noexcept = 0;
-
 		virtual void DeinitProperties()noexcept = 0;
 
 		virtual void DeinitManagers()noexcept = 0;

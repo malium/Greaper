@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -48,16 +48,6 @@ void CommandManager::InitProperties() noexcept
 }
 
 void CommandManager::DeinitProperties() noexcept
-{
-
-}
-
-void CommandManager::InitSerialization() noexcept
-{
-
-}
-
-void CommandManager::DeinitSerialization() noexcept
 {
 
 }

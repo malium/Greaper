@@ -1,18 +1,17 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos S�nchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#include "GreaperCoreDLL.h"
-#include "Application.h"
-#include "LogManager.h"
-#include "ThreadManager.h"
-#include "CommandManager.h"
+#include "GreaperDisplayDLL.h"
+#include "WindowManager.h"
+#include <Core/Platform.h>
 #include <Core/FileStream.h>
+#include <Core/Reflection/Property.h>
 
-#if GREAPER_CORE_DLL
+#if GREAPER_DISP_DLL
 
-greaper::SPtr<greaper::core::GreaperCoreLibrary> gCoreLibrary = {};
+greaper::SPtr<greaper::disp::GreaperDispLibrary> gDispLibrary{};
 
 #if PLT_WINDOWS
 #define DLL_PROCESS_ATTACH   1
@@ -40,52 +39,40 @@ DLLEXPORT void* _Greaper();
 END_C
 
 const auto configPath = std::filesystem::current_path() / "Config";
-const auto configFilePath = configPath / "GreaperCore.json";
+const auto configFilePath = configPath / "GreaperDisplay.json";
 
 void* _Greaper()
 {
-	if (gCoreLibrary == nullptr)
+	if (gDispLibrary == nullptr)
 	{
-		gCoreLibrary.reset(greaper::Construct<greaper::core::GreaperCoreLibrary>());
+		gDispLibrary.reset(greaper::Construct<greaper::disp::GreaperDispLibrary>());
 		greaper::OSPlatform::PerLibraryInit();
 	}
-	return &gCoreLibrary;
+	return &gDispLibrary;
 }
 
-void greaper::core::GreaperCoreLibrary::Initialize() noexcept
+void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 {
 
 }
 
-void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
+void greaper::disp::GreaperDispLibrary::InitManagers()noexcept
 {
-	if (m_Application != nullptr)
-	{
-		LogError(Format("Trying to Initialize the Managers of the GreaperLibrary '%s', but IApplication was already initialized.", LibraryName.data()));
-		return;
-	}
-
-	m_Application.reset(Construct<Application>());
-	m_Application->Initialize((WGreaperLib)gCoreLibrary);
-
 	// add more managers
-	m_Managers.push_back((PInterface)Construct<ThreadManager>());
-	m_Managers.push_back((PInterface)Construct<LogManager>());
-	m_Managers.push_back((PInterface)Construct<CommandManager>());
+	m_Managers.push_back((PInterface)Construct<WindowManager>());
 
 
 
 
 	for (const auto& mgr : m_Managers)
 	{
-		mgr->Initialize((WGreaperLib)gCoreLibrary);
+		mgr->Initialize((WGreaperLib)gDispLibrary);
 		m_Application->RegisterInterface(mgr);
 	}
 }
 
-void greaper::core::GreaperCoreLibrary::InitProperties()noexcept
+void greaper::disp::GreaperDispLibrary::InitProperties()noexcept
 {
-	m_Application->InitProperties();
 	for (const auto& mgr : m_Managers)
 		mgr->InitProperties();
 
@@ -103,12 +90,10 @@ void greaper::core::GreaperCoreLibrary::InitProperties()noexcept
 	}
 }
 
-void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
+void greaper::disp::GreaperDispLibrary::DeinitProperties()noexcept
 {
 	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
 		(*it)->DeinitProperties();
-
-	m_Application->DeinitProperties();
 
 	auto json = SPtr<cJSON>(cJSON_CreateObject(), cJSON_Delete);
 	for (const auto& prop : m_Properties)
@@ -127,7 +112,7 @@ void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
 	m_PropertyMap.clear();
 }
 
-void greaper::core::GreaperCoreLibrary::DeinitManagers()noexcept
+void greaper::disp::GreaperDispLibrary::DeinitManagers()noexcept
 {
 	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
 	{
@@ -139,17 +124,15 @@ void greaper::core::GreaperCoreLibrary::DeinitManagers()noexcept
 		mgr.reset();
 	}
 
-	m_Application->Deinitialize();
-
 	m_Managers.clear();
 	m_Application.reset();
 }
 
-void greaper::core::GreaperCoreLibrary::Deinitialize()noexcept
+void greaper::disp::GreaperDispLibrary::Deinitialize()noexcept
 {
-	gCoreLibrary.reset();
+	gDispLibrary.reset();
 }
 
 #else
 
-#endif
+#endif // GREAPER_DISP_DLL

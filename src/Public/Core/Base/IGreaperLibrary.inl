@@ -51,7 +51,6 @@ namespace greaper
 		Initialize();
 		InitManagers();
 		InitProperties();
-		InitReflection();
 
 		if (m_Application != nullptr)
 		{
@@ -90,7 +89,6 @@ namespace greaper
 
 		m_InitializationState = InitState_t::Stopping;
 
-		DeinitReflection();
 		DeinitProperties();
 		DeinitManagers();
 		Deinitialize();

@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -30,17 +30,13 @@ namespace greaper::core
 
 		void OnDeinitialization()noexcept override;
 
-		void OnActivation(const PInterface& oldDefault)noexcept override;
+		void OnActivation(UNUSED const PInterface& oldDefault)noexcept override;
 
-		void OnDeactivation(const PInterface& newDefault)noexcept override;
+		void OnDeactivation(UNUSED const PInterface& newDefault)noexcept override;
 
 		void InitProperties()noexcept override;
 
 		void DeinitProperties()noexcept override;
-
-		void InitSerialization()noexcept override;
-
-		void DeinitSerialization()noexcept override;
 
 		EmptyResult HandleCommand(const CommandInfo& info)noexcept override;
 

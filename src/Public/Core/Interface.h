@@ -71,10 +71,6 @@ namespace greaper
 
 		virtual void DeinitProperties()noexcept = 0;
 
-		virtual void InitSerialization()noexcept = 0;
-
-		virtual void DeinitSerialization()noexcept = 0;
-
 		bool IsActive()const noexcept;
 		
 		bool IsInitialized()const noexcept;

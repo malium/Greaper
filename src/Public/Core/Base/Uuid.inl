@@ -206,7 +206,7 @@ namespace greaper
 		return *this;
 	}
 
-	[[nodiscard]] inline String Uuid::ToString()const noexcept
+	NODISCARD inline String Uuid::ToString()const noexcept
 	{
 		String uuid;
 		Impl::UUIDToString(m_Data, uuid);

@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -70,10 +70,6 @@ namespace greaper::core
 		void InitProperties()noexcept override;
 
 		void DeinitProperties()noexcept override;
-
-		void InitSerialization()noexcept override;
-
-		void DeinitSerialization()noexcept override;
 
 		WPtr<AsyncLogProp_t> GetAsyncLog()const noexcept override { return (WPtr<AsyncLogProp_t>)m_Properties[(sizet)AsyncProp]; }
 

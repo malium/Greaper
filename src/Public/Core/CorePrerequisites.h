@@ -64,9 +64,12 @@ namespace greaper
 	{
 		template<class T> class TResult;
 		struct EmptyStruc {  };
+		template<class T> class TReturn;
 	}
 	template<class T> using TResult = Impl::TResult<T>;
 	using EmptyResult = Impl::TResult<Impl::EmptyStruc>;
+	template<class T> using TReturn = Impl::TReturn<T>;
+	using EmptyReturn = Impl::TReturn<Impl::EmptyStruc>;
 
 	// Greaper Core specialization
 	using PropertyBool = TProperty<bool>;

@@ -255,15 +255,6 @@ void Application::DeinitProperties()noexcept
 		prop.reset();
 }
 
-void Application::InitSerialization() noexcept
-{
-
-}
-
-void Application::DeinitSerialization() noexcept
-{
-}
-
 TResult<PGreaperLib> Application::RegisterGreaperLibrary(const WStringView& libPath)noexcept
 {
 	PLibrary lib{ Construct<Library>(libPath) };

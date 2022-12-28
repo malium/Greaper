@@ -8,12 +8,11 @@
 #ifndef CORE_MONITOR_H
 #define CORE_MONITOR_H 1
 
-#include <utility>
+#include "../DispPrerequisites.h"
+#include <Core/Base/Rect.h>
+#include <Math/Vector2.h>
 
-#include "../CorePrerequisites.h"
-#include "Rect.h"
-
-namespace greaper
+namespace greaper::disp
 {
 	class DisplayAdapter;
 #if PLT_WINDOWS
@@ -24,7 +23,7 @@ namespace greaper
 
 	class Monitor
 	{
-		std::pair<uint16, uint16> m_Size;
+		math::Vector2u m_Size;
 		RectU m_WorkRect;
 		MonitorHandle m_Handle;
 		DisplayAdapter* m_Adapter;
@@ -35,11 +34,11 @@ namespace greaper
 		bool m_IsPrimary;
 
 	public:
-		Monitor(std::pair<uint16, uint16>  size, const RectU& workRect, MonitorHandle handle,
+		Monitor(math::Vector2u  size, const RectU& workRect, MonitorHandle handle,
 			DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
 			String monitorKey, bool isPrimary) noexcept;
 
-		INLINE const std::pair<uint16, uint16>& GetSize()const noexcept { return m_Size; }
+		INLINE const math::Vector2u& GetSize()const noexcept { return m_Size; }
 
 		INLINE const RectU& GetWorkRect()const noexcept { return m_WorkRect; }
 
@@ -58,7 +57,7 @@ namespace greaper
 		INLINE bool IsPrimary()const noexcept { return m_IsPrimary; }
 	};
 
-	INLINE Monitor::Monitor(std::pair<uint16, uint16>  size, const RectU& workRect, MonitorHandle handle,
+	INLINE Monitor::Monitor(math::Vector2u size, const RectU& workRect, MonitorHandle handle,
 				DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
 				String monitorKey, bool isPrimary) noexcept
 		:m_Size(std::move(size))

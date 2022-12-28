@@ -23,7 +23,7 @@ namespace greaper
 			bool m_Failure;
 
 		public:
-			INLINE TResult()noexcept = default;
+			TResult()noexcept = default;
 
 			NODISCARD INLINE bool IsOk()const noexcept { return !m_Failure; }
 
@@ -74,6 +74,27 @@ namespace greaper
 				return gRtn;
 			}
 			friend class greaper::Result;
+		};
+
+		template<class T>
+		class TReturn
+		{
+			T m_Value;
+			bool m_Failure;
+
+		public:
+			constexpr TReturn()noexcept = default;
+
+			NODISCARD INLINE constexpr bool IsOk()const noexcept { return !m_Failure; }
+
+			NODISCARD INLINE constexpr bool HasFailed()const noexcept { return m_Failure; }
+
+			NODISCARD INLINE constexpr const T& GetValue()const noexcept
+			{
+				Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
+				return m_Value;
+			}
+			friend class greaper::Return;
 		};
 	}
 
@@ -146,6 +167,25 @@ namespace greaper
 			res.m_FailMessage.assign(other.GetFailMessage());
 			res.m_Failure = true;
 			return res;
+		}
+	};
+	class Return
+	{
+	public:
+		template<class T>
+		NODISCARD INLINE constexpr static TReturn<T> CreateSucces(T value)noexcept
+		{
+			return TReturn<T>{ value, true };
+		}
+		template<class T>
+		NODISCARD INLINE constexpr static TReturn<T> CreateFailure()noexcept
+		{
+			return TReturn<T>{};
+		}
+		template<class T, class T2>
+		NODISCARD INLINE constexpr static TReturn<T> CopyFailure(const TReturn<T2>& other)noexcept
+		{
+			return TReturn<T>{};
 		}
 	};
 }

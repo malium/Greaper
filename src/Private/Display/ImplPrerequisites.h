@@ -5,18 +5,15 @@
 
 #pragma once
 
-#ifndef CORE_IMPL_PREREQUISITES_H
-#define CORE_IMPL_PREREQUISITES_H 1
+#ifndef DISP_IMPL_PREREQUISITES_H
+#define DISP_IMPL_PREREQUISITES_H 1
 
-#include <Core/CorePrerequisites.h>
+#include <Display/DispPrerequisites.h>
 
-namespace greaper::core
+namespace greaper::disp
 {
-	class Application;
-    class LogManager;
-    class ThreadManager;
-    class CommandManager;
-    class GreaperCoreLibrary;
+	class GreaperDispLibrary;
+	class WindowManager;
 }
 
-#endif /* CORE_IMPL_PREREQUISITES_H */
+#endif /* DISP_IMPL_PREREQUISITES_H */

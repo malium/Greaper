@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -44,10 +44,6 @@ namespace greaper::core
 		void InitProperties()noexcept override;
 
 		void DeinitProperties()noexcept override;
-
-		void InitSerialization()noexcept override;
-
-		void DeinitSerialization()noexcept override;
 
 		TResult<WThread> GetThread(ThreadID_t id)const noexcept override;
 

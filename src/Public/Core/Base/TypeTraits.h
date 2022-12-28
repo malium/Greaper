@@ -45,7 +45,7 @@ namespace greaper
 
 	template<class T> using RemoveSmartPointer_t = typename RemoveSmartPointer<T>::Type;
 
-	template<class T> using RemoveEverything_t = RemoveConst_t<RemoveReference_t<RemovePointer_t<RemoveArray_t<RemoveSmartPointer_t<T>>>>>;
+	template<class T> using RemoveEverything_t = RemoveSmartPointer_t<RemoveConst_t<RemoveReference_t<RemovePointer_t<RemoveArray_t<RemoveSmartPointer_t<T>>>>>>;
 }
 
 #endif /* CORE_TYPETRAITS_H */

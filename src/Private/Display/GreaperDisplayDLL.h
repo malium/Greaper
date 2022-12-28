@@ -1,27 +1,27 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos S�nchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#ifndef GREAPER_CORE_DLL_H
-#define GREAPER_CORE_DLL_H 1
-
 #pragma once
 
-#if GREAPER_CORE_DLL
+#ifndef GREAPER_DISP_DLL_H
+#define GREAPER_DISP_DLL_H 1
 
 #include "ImplPrerequisites.h"
 #include <Core/IGreaperLibrary.h>
 
-namespace greaper::core
+#if GREAPER_DISP_DLL
+
+namespace greaper::disp
 {
-	class GreaperCoreLibrary : public TGreaperLibrary<GreaperCoreLibrary>
+	class GreaperDispLibrary : public TGreaperLibrary<GreaperDispLibrary>
 	{
 	public:
-		static constexpr Uuid LibraryUUID = Uuid{ 0xDAC703FC, 0x16BD4F59, 0xB62D28ED, 0x3C9DE087 };
-		static constexpr StringView LibraryName = "GreaperCore"sv;
-		
-		GreaperCoreLibrary() = default;
+		static constexpr Uuid LibraryUUID = Uuid{ 0x5DECEE34, 0x86A911ED, 0xA1EB0242, 0xAC120002 };
+		static constexpr StringView LibraryName = "GreaperDisplay"sv;
+
+		GreaperDispLibrary() = default;
 
 		void Initialize()noexcept override;
 
@@ -35,10 +35,10 @@ namespace greaper::core
 
 		void Deinitialize()noexcept override;
 
-		uint32 GetLibraryVersion()const noexcept override { return GREAPER_CORE_VERSION; }
+		uint32 GetLibraryVersion()const noexcept override { return GREAPER_DISP_VERSION; }
 	};
 }
 
-#endif // GREAPER_CORE_DLL
+#endif // GREAPER_DISP_DLL
 
-#endif /* GREAPER_CORE_DLL_H */
+#endif /* GREAPER_DISP_DLL_H */

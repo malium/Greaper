@@ -8,10 +8,15 @@
 #ifndef CORE_RECT_H
 #define CORE_RECT_H 1
 
-#include "../Memory.h"
+#include "../CorePrerequisites.h"
 //#include "../Reflection/ReflectedPlainType.h"
 #include "../Reflection/PlainType.h"
 #include "../StringUtils.h"
+#include <Math/Vector2.h>
+#if PLT_WINDOWS
+#include "../Win/Win32Base.h"
+#endif
+#include "IntersectionResult.h"
 
 namespace greaper
 {
@@ -19,9 +24,12 @@ namespace greaper
 	class RectT
 	{
 	public:
-		static_assert(std::is_integral_v<T> || std::is_floating_point_v<T>, "RectT can only be instanced with an integer or a floating point type.");
+		static_assert(std::is_arithmetic_v<T>, "RectT can only be instanced with an integer or a floating point type.");
 
 		using value_type = T;
+		
+		using point_type = typename std::conditional_t<std::is_floating_point_v<T>, math::Vector2Real<T>, 
+							std::conditional_t<std::is_signed_v<T>, math::Vector2Signed<T>, math::Vector2Unsigned<T>>>;
 
 		using TCategory = typename refl::TypeInfo<T>::Type;
 		
@@ -32,22 +40,45 @@ namespace greaper
 
 		constexpr RectT() = default;
 		constexpr RectT(T left, T top, T width, T height) noexcept;
+		constexpr RectT(const point_type& origin, const point_type& size)noexcept;
 		
-		NODISCARD constexpr T GetWidth()const noexcept;
-		NODISCARD constexpr T GetHeight()const noexcept;
+		constexpr T GetWidth()const noexcept;
+		constexpr T GetHeight()const noexcept;
+		constexpr point_type GetOrigin()const noexcept;
+		constexpr point_type GetSize()const noexcept;
+		constexpr point_type GetLT()const noexcept;
+		constexpr point_type GetRT()const noexcept;
+		constexpr point_type GetLB()const noexcept;
+		constexpr point_type GetRB()const noexcept;
 
+		void Set(T left, T top, T width, T hegiht) noexcept;
+		void Set(const point_type& position, const point_type& size)noexcept;
 		void SetSize(T width, T height) noexcept;
+		void SetSize(const point_type& size)noexcept;
 		void SetOrigin(T left, T top, bool keepSize = false) noexcept;
+		void SetOrigin(const point_type& pos, bool keepSize = false)noexcept;
 
-		constexpr bool IsInside(T x, T y)const noexcept;
-		constexpr bool IsInside(const RectT& other)const noexcept;
+		constexpr IntersectionResult_t IsInside(T x, T y)const noexcept;
+		constexpr IntersectionResult_t IsInside(const point_type& point)const noexcept;
+		constexpr IntersectionResult_t IsInside(const RectT& other)const noexcept;
 
-		NODISCARD constexpr T GetArea()const noexcept;
+		constexpr T GetArea()const noexcept;
+		constexpr bool IsEmpty()const noexcept;
 
-		NODISCARD String ToString()const noexcept;
+		constexpr bool IsEqual(const RectT& other)const noexcept;
+
+		String ToString()const noexcept;
 		bool FromString(const String& str) noexcept;
-
 #if PLT_WINDOWS
+		INLINE constexpr explicit RectT(const RECT& rect)noexcept
+			:Left((T)rect.left)
+			,Top((T)rect.top)
+			,Right((T)rect.right)
+			,Bottom((T)rect.bottom)
+		{
+			
+		}
+		NODISCARD INLINE constexpr operator RECT()const noexcept { return ToRECT(); }
 		INLINE void Set(const RECT& rect) noexcept
 		{
 			Left = (T)rect.left;
@@ -55,16 +86,16 @@ namespace greaper
 			Right = (T)rect.right;
 			Bottom = (T)rect.bottom;
 		}
-		INLINE constexpr RECT ToRECT()const noexcept
+		NODISCARD INLINE constexpr RECT ToRECT()const noexcept
 		{
-			RECT r;
-			r.left = (decltype(r.left))Left;
-			r.top = (decltype(r.top))Top;
-			r.right = (decltype(r.right))Right;
-			r.bottom = (decltype(r.bottom))Bottom;
-			return r;
+			return RECT{
+					(LONG)Left,
+					(LONG)Top,
+					(LONG)Right,
+					(LONG)Bottom
+				};
 		}
-		INLINE constexpr bool IsInside(const POINT& p)const noexcept
+		NODISCARD INLINE constexpr bool IsInside(const POINT& p)const noexcept
 		{
 			return IsInside((T)p.x, (T)p.y);
 		}
@@ -73,36 +104,94 @@ namespace greaper
 
 	template<class T> NODISCARD INLINE constexpr bool operator==(const RectT<T>& left, const RectT<T>& right) noexcept
 	{
-		return left.Left == right.Left
-			&& left.Top == right.Top
-			&& left.Right == right.Right
-			&& left.Top == right.Top;
+		return left.IsEqual(right);
 	}
 	template<class T> NODISCARD INLINE constexpr bool operator!=(const RectT<T>& left, const RectT<T>& right) noexcept
 	{
 		return !(left == right);
 	}
-
+	
 	template<class T>
 	INLINE constexpr RectT<T>::RectT(T left, T top, T width, T height) noexcept
 		:Left(left)
 		,Top(top)
 		,Right(left + width)
-		,Bottom(top + height)
+		,Bottom(top - height)
 	{
 		
 	}
 
 	template<class T>
-	INLINE constexpr T RectT<T>::GetWidth()const noexcept
+	INLINE constexpr RectT<T>::RectT(const point_type& origin, const point_type& size) noexcept
+		:Left(origin.X)
+		,Top(origin.Y)
+		,Right(origin.X + size.X)
+		,Bottom(origin.Y - size.Y)
+	{
+
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr T RectT<T>::GetWidth()const noexcept
 	{
 		return Abs(Right - Left);
 	}
 
 	template<class T>
-	INLINE constexpr T RectT<T>::GetHeight()const noexcept
+	NODISCARD INLINE constexpr T RectT<T>::GetHeight()const noexcept
 	{
 		return Abs(Bottom - Top);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetOrigin() const noexcept
+	{
+		return point_type(Left, Top);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetSize() const noexcept
+	{
+		return point_type(GetWidth(), GetHeight());
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetLT() const noexcept
+	{
+		return point_type(Left, Top);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetRT() const noexcept
+	{
+		return point_type(Right, Top);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetLB() const noexcept
+	{
+		return point_type(Left, Bottom);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetRB() const noexcept
+	{
+		return point_type(Right, Bottom);
+	}
+
+	template<class T>
+	INLINE void RectT<T>::Set(T left, T top, T width, T hegiht) noexcept
+	{
+		Left = left;
+		Top = top;
+		Right = left + width;
+		Bottom = top - hegiht;
+	}
+
+	template<class T>
+	INLINE void RectT<T>::Set(const point_type& position, const point_type& size) noexcept
+	{
+		Set(position.X, position.Y, size.X, size.Y);
 	}
 
 	template<class T>
@@ -111,7 +200,13 @@ namespace greaper
 		width = Abs(width);
 		height = Abs(height);
 		Right = Left + width;
-		Bottom = Top + height;
+		Bottom = Top - height;
+	}
+
+	template<class T>
+	INLINE void RectT<T>::SetSize(const point_type& size) noexcept
+	{
+		SetSize(size.X, size.Y);
 	}
 
 	template<class T>
@@ -133,27 +228,88 @@ namespace greaper
 	}
 
 	template<class T>
-	INLINE constexpr bool RectT<T>::IsInside(T x, T y)const noexcept
+	INLINE void RectT<T>::SetOrigin(const point_type& pos, bool keepSize) noexcept
 	{
-		return Left <= x && Right >= x
-			&& Top <= y && Bottom >= y;
+		SetOrigin(pos.X, pos.Y, keepSize);
 	}
 
 	template<class T>
-	INLINE constexpr bool RectT<T>::IsInside(const RectT<T>& other)const noexcept
+	NODISCARD INLINE constexpr IntersectionResult_t RectT<T>::IsInside(T x, T y)const noexcept
 	{
-		return Left <= other.Left && Right >= other.Right
-			&& Top <= other.Top && Bottom >= other.Bottom;
+		if(IsEmpty())
+			return IntersectionResult_t::OUTSIDE;
+
+		if(Left < x && Right > x && Top > y && Bottom < y)
+			return IntersectionResult_t::FULLY_INSIDE;
+		
+		if(((Left == x || Right == x) && Top >= y && Bottom <= y) ||
+			((Top == y || Bottom == y) && Left <= x && Right >= x))
+			return IntersectionResult_t::ON_THE_EDGE;
+		
+		return IntersectionResult_t::OUTSIDE;
 	}
 
 	template<class T>
-	INLINE constexpr T RectT<T>::GetArea()const noexcept
+	NODISCARD INLINE constexpr IntersectionResult_t RectT<T>::IsInside(const point_type& point) const noexcept
+	{
+		return IsInside(point.X, point.Y);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr IntersectionResult_t RectT<T>::IsInside(const RectT<T>& other)const noexcept
+	{
+		if  (IsEmpty() || other.IsEmpty())
+			return IntersectionResult_t::OUTSIDE;
+
+		IntersectionResult_t ltInside = IsInside(other.GetLT());
+		IntersectionResult_t lbInside = IsInside(other.GetLB());
+		IntersectionResult_t rtInside = IsInside(other.GetRT());
+		IntersectionResult_t rbInside = IsInside(other.GetRB());
+
+		if (ltInside == IntersectionResult_t::FULLY_INSIDE &&
+			lbInside == IntersectionResult_t::FULLY_INSIDE &&
+			rtInside == IntersectionResult_t::FULLY_INSIDE &&
+			rbInside == IntersectionResult_t::FULLY_INSIDE)
+			return IntersectionResult_t::FULLY_INSIDE;
+		
+		if (ltInside == IntersectionResult_t::FULLY_INSIDE ||
+			lbInside == IntersectionResult_t::FULLY_INSIDE ||
+			rtInside == IntersectionResult_t::FULLY_INSIDE ||
+			rbInside == IntersectionResult_t::FULLY_INSIDE)
+			return IntersectionResult_t::PARTIALLY_INSIDE;
+		
+		if (ltInside == IntersectionResult_t::ON_THE_EDGE ||
+			lbInside == IntersectionResult_t::ON_THE_EDGE ||
+			rtInside == IntersectionResult_t::ON_THE_EDGE ||
+			rbInside == IntersectionResult_t::ON_THE_EDGE)
+			return IntersectionResult_t::ON_THE_EDGE;
+
+		return IntersectionResult_t::OUTSIDE;
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr T RectT<T>::GetArea()const noexcept
 	{
 		return GetWidth() * GetHeight();
 	}
+
+	template<class T>
+	NODISCARD INLINE constexpr bool RectT<T>::IsEmpty() const noexcept
+	{
+		return GetArea() == T(0);
+	}
+
+	template<class T>
+	NODISCARD INLINE constexpr bool RectT<T>::IsEqual(const RectT& other)const noexcept
+	{
+		return Left == other.Left
+			&& Top == other.Top
+			&& Right == other.Right
+			&& Top == other.Top;
+	}
 	
 	template<class T>
-	INLINE String RectT<T>::ToString()const noexcept
+	NODISCARD INLINE String RectT<T>::ToString()const noexcept
 	{ 
 		String left = TCategory::ToString(Left);
 		String top = TCategory::ToString(Top);
@@ -203,7 +359,7 @@ namespace greaper
 		}
 
 		SetSize(width, height);
-	}
+	} 
 }
 
 namespace std

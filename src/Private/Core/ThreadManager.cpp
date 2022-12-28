@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -109,19 +109,9 @@ void ThreadManager::InitProperties()noexcept
 
 }
 
-void ThreadManager::DeinitProperties()noexcept
+void ThreadManager::DeinitProperties() noexcept
 {
-
-}
-
-void ThreadManager::InitSerialization() noexcept
-{
-
-}
-
-void ThreadManager::DeinitSerialization() noexcept
-{
-
+	
 }
 
 ThreadManager::ThreadManager()
