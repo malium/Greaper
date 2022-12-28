@@ -256,6 +256,7 @@
     <ClInclude Include="Public\Core\Base\ICommand.h" />
     <ClInclude Include="Public\Core\Base\IConsole.h" />
     <ClInclude Include="Public\Core\Base\ILogWriter.h" />
+    <ClInclude Include="Public\Core\Base\IntersectionResult.h" />
     <ClInclude Include="Public\Core\Base\IThread.h" />
     <ClInclude Include="Public\Core\Base\IThreadPool.h" />
     <ClInclude Include="Public\Core\Base\IWindow.h" />
