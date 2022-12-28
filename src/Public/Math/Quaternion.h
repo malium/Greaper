@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos S�nchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -44,17 +44,17 @@ namespace greaper::math
 		constexpr explicit QuaternionReal(const std::array<T, ComponentCount>& arr)noexcept :W(arr[0]), X(arr[1]), Y(arr[2]), Z(arr[3]) {  }
 		INLINE constexpr QuaternionReal operator-()const noexcept { return { W, -X, -Y, -Z }; }
 
-		INLINE constexpr T& operator[](sizet index)noexcept
+		NODISCARD INLINE constexpr T& operator[](sizet index)noexcept
 		{
 			VerifyLess(index, ComponentCount, "Trying to access a Quaternion, but the index %" PRIuPTR " was out of range.", index);
 			return (&W)[index];
 		}
-		INLINE constexpr const T& operator[](sizet index)const noexcept
+		NODISCARD INLINE constexpr const T& operator[](sizet index)const noexcept
 		{
 			VerifyLess(index, ComponentCount, "Trying to access a Quaternion, but the index %" PRIuPTR " was out of range.", index);
 			return (&W)[index];
 		}
-		INLINE constexpr std::array<T, ComponentCount> ToArray()const noexcept
+		NODISCARD INLINE constexpr std::array<T, ComponentCount> ToArray()const noexcept
 		{
 			return { W, X, Y, Z };
 		}
@@ -79,7 +79,7 @@ namespace greaper::math
 			Y = T(0);
 			Z = T(0);
 		}
-		INLINE static QuaternionReal<T> FromEuler(T x, T y, T z)noexcept
+		NODISCARD INLINE static QuaternionReal<T> FromEuler(T x, T y, T z)noexcept
 		{
 			auto hx = x * T(0.5);
 			auto hy = y * T(0.5);
@@ -99,15 +99,15 @@ namespace greaper::math
 					cosx * cosy * sinz - sinx * siny * cosz
 			};
 		}
-		INLINE static QuaternionReal<T> FromEuler(const Vector3Real<T>& v)noexcept
+		NODISCARD INLINE static QuaternionReal<T> FromEuler(const Vector3Real<T>& v)noexcept
 		{
 			return FromEuler(v.X, v.Y, v.Z);
 		}
-		INLINE static QuaternionReal<T> FromEuler(const std::array<T, 3>& a)noexcept
+		NODISCARD INLINE static QuaternionReal<T> FromEuler(const std::array<T, 3>& a)noexcept
 		{
 			return FromEuler(a[0], a[1], a[2]);
 		}
-		INLINE T GetXEuler()const noexcept
+		NODISCARD INLINE T GetXEuler()const noexcept
 		{
 			auto wx = W * X;
 			auto yz = Y * Z;
@@ -118,7 +118,7 @@ namespace greaper::math
 			auto cosx = T(1) - T(2) * (xx + yy);
 			return ATan2(sinx, cosx);
 		}
-		INLINE T GetYEuler()const noexcept
+		NODISCARD INLINE T GetYEuler()const noexcept
 		{
 			auto wy = W * Y;
 			auto zx = Z * X;
@@ -133,7 +133,7 @@ namespace greaper::math
 
 			return y;
 		}
-		INLINE T GetZEuler()const noexcept
+		NODISCARD INLINE T GetZEuler()const noexcept
 		{
 			auto wz = W * Z;
 			auto xy = X * Y;
@@ -144,11 +144,11 @@ namespace greaper::math
 			auto cosz = T(1) - T(2) * (yy + zz);
 			return ATan2(sinz, cosz);
 		}
-		INLINE Vector3Real<T> ToEulerAngles()const noexcept
+		NODISCARD INLINE Vector3Real<T> ToEulerAngles()const noexcept
 		{
 			return Vector3Real<T>(GetXEuler(), GetYEuler(), GetZEuler());
 		}
-		INLINE constexpr QuaternionReal Conjugated()const noexcept
+		NODISCARD INLINE constexpr QuaternionReal Conjugated()const noexcept
 		{
 			return { W, -X, -Y, -Z };
 		}
@@ -156,11 +156,11 @@ namespace greaper::math
 		{
 			*this = Conjugated();
 		}
-		INLINE constexpr T DotProduct(const QuaternionReal<T>& other)const noexcept
+		NODISCARD INLINE constexpr T DotProduct(const QuaternionReal<T>& other)const noexcept
 		{
 			return W * other.W + X * other.X + Y * other.Y + Z * other.Z;
 		}
-		INLINE constexpr QuaternionReal<T> CrossProduct(const QuaternionReal<T>& other)const noexcept
+		NODISCARD INLINE constexpr QuaternionReal<T> CrossProduct(const QuaternionReal<T>& other)const noexcept
 		{
 			return QuaternionReal<T> {
 					W * other.W - X * other.X - Y * other.Y - Z * other.Z,
@@ -169,19 +169,19 @@ namespace greaper::math
 					W * other.Z + Z * other.W + X * other.Y - Y * other.X
 			};
 		}
-		INLINE constexpr QuaternionReal<T> Inverse()const noexcept
+		NODISCARD INLINE constexpr QuaternionReal<T> GetInverse()const noexcept
 		{
 			return Conjugated() / DotProduct(*this);
 		}
-		INLINE constexpr T LengthSquared()const noexcept
+		NODISCARD INLINE constexpr T LengthSquared()const noexcept
 		{
 			return DotProduct(*this);
 		}
-		INLINE T Length()const noexcept
+		NODISCARD INLINE T Length()const noexcept
 		{
 			return Sqrt(LengthSquared());
 		}
-		INLINE QuaternionReal Normalized(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE QuaternionReal GetNormalized(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			auto len = LengthSquared();
 			if (len > tolerance)
@@ -193,57 +193,57 @@ namespace greaper::math
 		}
 		INLINE void Normalize(T tolerance = (T)MATH_TOLERANCE)noexcept
 		{
-			*this = Normalized(tolerance);
+			*this = GetNormalized(tolerance);
 		}
 
-		INLINE constexpr bool IsNearlyEqual(const QuaternionReal& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const QuaternionReal& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return ::IsNearlyEqual(W, other.W, tolerance)
 				&& ::IsNearlyEqual(X, other.X, tolerance)
 				&& ::IsNearlyEqual(Y, other.Y, tolerance)
 				&& ::IsNearlyEqual(Z, other.Z, tolerance);
 		}
-		INLINE constexpr bool IsEqual(const QuaternionReal& other)const noexcept
+		NODISCARD INLINE constexpr bool IsEqual(const QuaternionReal& other)const noexcept
 		{
 			return W == other.W
 				&& X == other.X
 				&& Y == other.Y
 				&& Z == other.Z;
 		}
-		INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return ::IsNearlyEqual(W, T(0), tolerance)
 				&& ::IsNearlyEqual(X, T(0), tolerance)
 				&& ::IsNearlyEqual(Y, T(0), tolerance)
 				&& ::IsNearlyEqual(Z, T(0), tolerance);
 		}
-		INLINE constexpr bool IsZero()const noexcept
+		NODISCARD INLINE constexpr bool IsZero()const noexcept
 		{
 			return W == T(0)
 				&& X == T(0)
 				&& Y == T(0)
 				&& Z == T(0);
 		}
-		INLINE constexpr bool IsNearlyUnit(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyUnit(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return ::IsNearlyEqual(Length(), T(1), tolerance);
 		}
-		INLINE constexpr bool IsUnit()const noexcept
+		NODISCARD INLINE constexpr bool IsUnit()const noexcept
 		{
 			return Length() == T(1);
 		}
-		INLINE constexpr bool IsReal(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsReal(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return !::IsNearlyEqual(W, T(0), tolerance)
 				&& ::IsNearlyEqual(X, T(0), tolerance)
 				&& ::IsNearlyEqual(Y, T(0), tolerance)
 				&& ::IsNearlyEqual(Z, T(0), tolerance);
 		}
-		INLINE constexpr bool IsImaginary(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsImaginary(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return !IsImaginary(tolerance);
 		}
-		INLINE String ToString()const noexcept
+		NODISCARD INLINE String ToString()const noexcept
 		{
 			return Format(Print<T>::fmt, W, X, Y, Z);
 		}
@@ -259,17 +259,17 @@ namespace greaper::math
 	template<class T> const QuaternionReal<T> QuaternionReal<T>::ZERO{};
 	template<class T> const QuaternionReal<T> QuaternionReal<T>::IDENTITY{ T(1), T(0), T(0), T(0) };
 
-	template<class T> INLINE constexpr QuaternionReal<T> operator+(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left.W + right.W, left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
-	template<class T> INLINE constexpr QuaternionReal<T> operator-(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left.W - right.W, left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }
+	template<class T> NODISCARD INLINE constexpr QuaternionReal<T> operator+(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left.W + right.W, left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
+	template<class T> NODISCARD INLINE constexpr QuaternionReal<T> operator-(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left.W - right.W, left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }
 	template<class T> INLINE QuaternionReal<T>& operator+=(QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { left.W += right.W; left.X += right.X; left.Y += right.Y; left.Z += right.Z; return left; }
 	template<class T> INLINE QuaternionReal<T>& operator-=(QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { left.W -= right.W; left.X -= right.X; left.Y -= right.Y; left.Z -= right.Z; return left; }
 
-	template<class T> INLINE constexpr QuaternionReal<T> operator*(const QuaternionReal<T>& left, T right)noexcept { return QuaternionReal<T>{ left.W * right, left.X * right, left.Y * right, left.Z * right }; }
-	template<class T> INLINE constexpr QuaternionReal<T> operator/(const QuaternionReal<T>& left, T right)noexcept { float invRight = T(1) / right; return QuaternionReal<T>{ left.W * invRight, left.X * invRight, left.Y * invRight, left.Z * invRight }; }
-	template<class T> INLINE constexpr QuaternionReal<T> operator*(T left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left * right.W, left * right.X, left * right.Y, left * right.Z }; }
+	template<class T> NODISCARD INLINE constexpr QuaternionReal<T> operator*(const QuaternionReal<T>& left, T right)noexcept { return QuaternionReal<T>{ left.W * right, left.X * right, left.Y * right, left.Z * right }; }
+	template<class T> NODISCARD INLINE constexpr QuaternionReal<T> operator/(const QuaternionReal<T>& left, T right)noexcept { float invRight = T(1) / right; return QuaternionReal<T>{ left.W * invRight, left.X * invRight, left.Y * invRight, left.Z * invRight }; }
+	template<class T> NODISCARD INLINE constexpr QuaternionReal<T> operator*(T left, const QuaternionReal<T>& right)noexcept { return QuaternionReal<T>{ left * right.W, left * right.X, left * right.Y, left * right.Z }; }
 	template<class T> INLINE QuaternionReal<T>& operator*=(QuaternionReal<T>& left, T right)noexcept { left.W *= right; left.X *= right; left.Y *= right; left.Z *= right; return left; }
 	template<class T> INLINE QuaternionReal<T>& operator/=(QuaternionReal<T>& left, T right)noexcept { float invRight = T(1) / right; left.W *= invRight; left.X *= invRight; left.Y *= invRight; left.Z *= invRight; return left; }
-	template<class T> INLINE constexpr QuaternionReal<T> operator*(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept
+	template<class T> NODISCARD INLINE constexpr QuaternionReal<T> operator*(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept
 	{
 		return {
 			
@@ -288,8 +288,8 @@ namespace greaper::math
 	}
 	template<class T> INLINE QuaternionReal<T>& operator*=(QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { left = (left * right); return left; }
 
-	template<class T> INLINE constexpr bool operator==(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return left.IsNearlyEqual(right); }
-	template<class T> INLINE constexpr bool operator!=(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return !(left == right); }
+	template<class T> NODISCARD INLINE constexpr bool operator==(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return left.IsNearlyEqual(right); }
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const QuaternionReal<T>& left, const QuaternionReal<T>& right)noexcept { return !(left == right); }
 }
 
 namespace std

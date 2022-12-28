@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos S�nchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -45,42 +45,42 @@ namespace greaper::math
 		INLINE constexpr Matrix4Real(const Vector4Real<T>& r0, const Vector4Real<T>& r1, const Vector4Real<T>& r2, const Vector4Real<T>& r3)noexcept :R0(r0), R1(r1), R2(r2), R3(r3) {  }
 		INLINE constexpr explicit Matrix4Real(const Matrix3Real<T>& m3)noexcept :R0(m3.R0, T(0)), R1(m3.R1, T(0)), R2(m3.R2, T(0)), R3(T(0), T(0), T(0), T(1)) {  }
 
-		INLINE T& operator[](sizet index)noexcept
+		NODISCARD INLINE T& operator[](sizet index)noexcept
 		{
 			VerifyLess(index, ComponentCount, "Trying to access a Matrix4, but the index %" PRIuPTR " was out of range.", index);
 			return ((float*)&R0)[index];
 		}
-		INLINE constexpr const T& operator[](sizet index)const noexcept
+		NODISCARD INLINE constexpr const T& operator[](sizet index)const noexcept
 		{
 			VerifyLess(index, ComponentCount, "Trying to access a Matrix4, but the index %" PRIuPTR " was out of range.", index);
 			return ((const float*)&R0)[index];
 		}
 
-		INLINE Impl::Vector4Ref<T> C0()noexcept
+		NODISCARD INLINE Impl::Vector4Ref<T> C0()noexcept
 		{
 			return Impl::Vector4Ref<T>{ (T&)R0.X, (T&)R1.X, (T&)R2.X, (T&)R3.X };
 		}
-		INLINE Impl::Vector4CRef<T> C0()const noexcept
+		NODISCARD INLINE Impl::Vector4CRef<T> C0()const noexcept
 		{
 			return Impl::Vector4CRef<T>{ R0.X, R1.X, R2.X, R3.X };
 		}
-		INLINE Impl::Vector4Ref<T> C1()noexcept
+		NODISCARD INLINE Impl::Vector4Ref<T> C1()noexcept
 		{
 			return Impl::Vector4Ref<T>{ (T&)R0.Y, (T&)R1.Y, (T&)R2.Y, (T&)R3.Y };
 		}
-		INLINE Impl::Vector4CRef<T> C1()const noexcept
+		NODISCARD INLINE Impl::Vector4CRef<T> C1()const noexcept
 		{
 			return Impl::Vector4CRef<T>{ R0.Y, R1.Y, R2.Y, R3.Y };
 		}
-		INLINE Impl::Vector4Ref<T> C2()noexcept
+		NODISCARD INLINE Impl::Vector4Ref<T> C2()noexcept
 		{
 			return Impl::Vector4Ref<T>{ (T&)R0.Z, (T&)R1.Z, (T&)R2.Z, (T&)R3.Z };
 		}
-		INLINE Impl::Vector4CRef<T> C2()const noexcept
+		NODISCARD INLINE Impl::Vector4CRef<T> C2()const noexcept
 		{
 			return Impl::Vector4CRef<T>{ R0.Z, R1.Z, R2.Z, R3.Z };
 		}
-		INLINE constexpr std::array<T, ComponentCount> ToArray()const noexcept
+		NODISCARD INLINE constexpr std::array<T, ComponentCount> ToArray()const noexcept
 		{
 			return { R0.X, R0.Y, R0.Z, R0.W, R1.X, R1.Y, R1.Z, R1.W, R2.X, R2.Y, R2.Z, R2.W, R3.X, R3.Y, R3.Z, R3.W };
 		}
@@ -119,14 +119,14 @@ namespace greaper::math
 			R2.Set(T(0), T(0), T(1), T(0));
 			R3.Set(T(0), T(0), T(0), T(1));
 		}
-		INLINE constexpr T Determinant()const noexcept
+		NODISCARD INLINE constexpr T Determinant()const noexcept
 		{
 			return R0.X * Matrix3Real<T>{R1.Y, R1.Z, R1.W, R2.Y, R2.Z, R2.W, R3.Y, R3.Z, R3.W}.Determinant()
 				- R0.Y * Matrix3Real<T>{R1.X, R1.Z, R1.W, R2.X, R2.Z, R2.W, R3.X, R3.Z, R3.W}.Determinant()
 				+ R0.Z * Matrix3Real<T>{R1.X, R1.Y, R1.W, R2.X, R2.Y, R2.W, R3.X, R3.Y, R3.W}.Determinant()
 				- R0.W * Matrix3Real<T>{R1.X, R1.Y, R1.Z, R2.X, R2.Y, R2.Z, R3.X, R3.Y, R3.Z}.Determinant();
 		}
-		INLINE constexpr Matrix4Real Transposed()const noexcept
+		NODISCARD INLINE constexpr Matrix4Real GetTransposed()const noexcept
 		{
 			return { 
 				R0.X, R1.X, R2.X, R3.X,
@@ -137,9 +137,9 @@ namespace greaper::math
 		}
 		INLINE void Transpose()noexcept
 		{
-			*this = Transposed();
+			*this = GetTransposed();
 		}
-		INLINE constexpr Matrix4Real Adjoint()const noexcept
+		NODISCARD INLINE constexpr Matrix4Real GetAdjoint()const noexcept
 		{
 			return Matrix4Real{
 				 (Matrix3Real<T>{R1.Y, R1.Z, R1.W, R2.Y, R2.Z, R2.W, R3.Y, R3.Z, R3.W}.Determinant()), -(Matrix3Real<T>{R0.Y, R0.Z, R0.W, R2.Y, R2.Z, R2.W, R3.Y, R3.Z, R3.W}.Determinant()),  (Matrix3Real<T>{R0.Y, R0.Z, R0.W, R1.Y, R1.Z, R1.W, R3.Y, R3.Z, R3.W}.Determinant()), -(Matrix3Real<T>{R0.Y, R0.Z, R0.W, R1.Y, R1.Z, R1.W, R2.Y, R2.Z, R2.W}.Determinant()),
@@ -149,14 +149,14 @@ namespace greaper::math
 			};
 			
 		}
-		INLINE constexpr Matrix4Real Inverted()const noexcept
+		NODISCARD INLINE constexpr Matrix4Real GetInverted()const noexcept
 		{
 			T determinant = Determinant();
 			if (::IsNearlyEqual(determinant, T(0), (T)MATH_TOLERANCE))
 				return *this; // No inverse
 
 			T invDeterminant = T(1) / determinant;
-			Matrix4Real inv = Adjoint().Transposed();
+			Matrix4Real inv = GetAdjoint().GetTransposed();
 			return {
 				inv.R0 * invDeterminant,
 				inv.R1 * invDeterminant,
@@ -166,37 +166,37 @@ namespace greaper::math
 		}
 		INLINE void Inverse()noexcept
 		{
-			*this = Inverted();
+			*this = GetInverted();
 		}
-		INLINE constexpr float Trace()const noexcept
+		NODISCARD INLINE constexpr float Trace()const noexcept
 		{
 			return R0.X + R1.Y + R2.Z + R3.W;
 		}
-		INLINE constexpr bool IsNearlyEqual(const Matrix4Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Matrix4Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return R0.IsNearlyEqual(other.R0, tolerance) && R1.IsNearlyEqual(other.R1, tolerance) && R2.IsNearlyEqual(other.R2, tolerance) && R3.IsNearlyEqual(other.R3, tolerance);
 		}
-		INLINE constexpr bool IsEqual(const Matrix4Real& other)const noexcept
+		NODISCARD INLINE constexpr bool IsEqual(const Matrix4Real& other)const noexcept
 		{
 			return R0.IsEqual(other.R0) && R1.IsEqual(other.R1) && R2.IsEqual(other.R2) && R3.IsEqual(other.R3);
 		}
-		INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return IsNearlyEqual({ T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0) }, tolerance);
 		}
-		INLINE constexpr bool IsZero()const noexcept
+		NODISCARD INLINE constexpr bool IsZero()const noexcept
 		{
 			return IsEqual({ T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0) });
 		}
-		INLINE constexpr bool IsNearlyIdentity(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyIdentity(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return IsNearlyEqual({ T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1) }, tolerance);
 		}
-		INLINE constexpr bool IsIdentity()const noexcept
+		NODISCARD INLINE constexpr bool IsIdentity()const noexcept
 		{
 			return IsEqual({ T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1) });
 		}
-		INLINE constexpr bool IsNearlySymmetric(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlySymmetric(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return ::IsNearlyEqual(R0.Y, R1.X, tolerance)
 				&& ::IsNearlyEqual(R0.Z, R2.X, tolerance)
@@ -205,7 +205,7 @@ namespace greaper::math
 				&& ::IsNearlyEqual(R1.W, R3.Y, tolerance)
 				&& ::IsNearlyEqual(R2.W, R3.Z, tolerance);
 		}
-		INLINE constexpr bool IsSymmetric()const noexcept
+		NODISCARD INLINE constexpr bool IsSymmetric()const noexcept
 		{
 			return R0.Y == R1.X
 				&& R0.Z == R2.X
@@ -214,7 +214,7 @@ namespace greaper::math
 				&& R1.W == R3.Y
 				&& R2.W == R3.Z;
 		}
-		INLINE constexpr bool IsNearlyDiagonal(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyDiagonal(T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return ::IsNearlyEqual(R0.Y, T(0), tolerance)
 				&& ::IsNearlyEqual(R0.Z, T(0), tolerance)
@@ -229,7 +229,7 @@ namespace greaper::math
 				&& ::IsNearlyEqual(R3.Y, T(0), tolerance)
 				&& ::IsNearlyEqual(R3.Z, T(0), tolerance);
 		}
-		INLINE constexpr bool IsDiagonal()const noexcept
+		NODISCARD INLINE constexpr bool IsDiagonal()const noexcept
 		{
 			return R0.Y == T(0)
 				&& R0.Z == T(0)
@@ -244,7 +244,7 @@ namespace greaper::math
 				&& R3.Y == T(0)
 				&& R3.Z == T(0);
 		}
-		INLINE String ToString()const noexcept
+		NODISCARD INLINE String ToString()const noexcept
 		{
 			return Format(Print<T>::fmt, R0.X, R0.Y, R0.Z, R0.W, R1.X, R1.Y, R1.Z, R1.W, R2.X, R2.Y, R2.Z, R2.W, R3.X, R3.Y, R3.Z, R3.W);
 		}
@@ -263,9 +263,9 @@ namespace greaper::math
 																		T(0), T(0), T(0), T(1)};
 	template<class T> const Matrix4Real<T> Matrix4Real<T>::ZERO = {  };
 
-	template<class T> INLINE constexpr Matrix4Real<T> operator+(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return { left.R0 + right.R0, left.R1 + right.R1, left.R2 + right.R2, left.R3 + right.R3 }; }
-	template<class T> INLINE constexpr Matrix4Real<T> operator-(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return { left.R0 - right.R0, left.R1 - right.R1, left.R2 - right.R2, left.R3 - right.R3 }; }
-	template<class T> INLINE constexpr Matrix4Real<T> operator*(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept
+	template<class T> NODISCARD INLINE constexpr Matrix4Real<T> operator+(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return { left.R0 + right.R0, left.R1 + right.R1, left.R2 + right.R2, left.R3 + right.R3 }; }
+	template<class T> NODISCARD INLINE constexpr Matrix4Real<T> operator-(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return { left.R0 - right.R0, left.R1 - right.R1, left.R2 - right.R2, left.R3 - right.R3 }; }
+	template<class T> NODISCARD INLINE constexpr Matrix4Real<T> operator*(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept
 	{
 		return {
 			left.R0.X * right.R0.X + left.R0.Y * right.R1.X + left.R0.Z * right.R2.X + left.R0.W * right.R3.X,	left.R0.X * right.R0.Y + left.R0.Y * right.R1.Y + left.R0.Z * right.R2.Y + left.R0.W * right.R3.Y,	left.R0.X * right.R0.Z + left.R0.Y * right.R1.Z + left.R0.Z * right.R2.Z + left.R0.W * right.R3.Z,	left.R0.X * right.R0.W + left.R0.Y * right.R1.W + left.R0.Z * right.R2.W + left.R0.W * right.R3.W,
@@ -275,7 +275,7 @@ namespace greaper::math
 		};
 	}
 	template<class T> INLINE Matrix4Real<T>& operator*=(Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { left = (left * right); return left; }
-	template<class T> INLINE constexpr Vector4Real<T> operator*(const Vector4Real<T>& left, const Matrix4Real<T>& right)noexcept
+	template<class T> NODISCARD INLINE constexpr Vector4Real<T> operator*(const Vector4Real<T>& left, const Matrix4Real<T>& right)noexcept
 	{
 		return {
 			left.X * right.R0.X + left.Y * right.R0.Y + left.Z * right.R0.Z + left.W * right.R0.W,
@@ -285,7 +285,7 @@ namespace greaper::math
 		};
 	}
 	template<class T> INLINE Vector4Real<T>& operator*=(Vector4Real<T>& left, const Matrix4Real<T>& right)noexcept { left = (left * right); return left; }
-	template<class T> INLINE constexpr Vector4Real<T> operator*(const Matrix4Real<T>& left, const Vector4Real<T>& right)noexcept
+	template<class T> NODISCARD INLINE constexpr Vector4Real<T> operator*(const Matrix4Real<T>& left, const Vector4Real<T>& right)noexcept
 	{
 		return {
 			left.R0.X * right.X + left.R0.Y * right.Y + left.R0.Z * right.Z + left.R0.W * right.W,
@@ -299,12 +299,12 @@ namespace greaper::math
 	template<class T> INLINE Matrix4Real<T> operator-=(Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { left.R0 -= right.R0; left.R1 -= right.R1; left.R2 -= right.R2; left.R3 -= right.R3; return left; }
 	template<class T> INLINE Matrix4Real<T> operator*=(Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { left = (left * right); return left; }
 
-	template<class T> INLINE constexpr Matrix4Real<T> operator*(const Matrix4Real<T>& left, T right)noexcept { return { left.R0 * right, left.R1 * right, left.R2 * right, left.R3 * right }; }
+	template<class T> NODISCARD INLINE constexpr Matrix4Real<T> operator*(const Matrix4Real<T>& left, T right)noexcept { return { left.R0 * right, left.R1 * right, left.R2 * right, left.R3 * right }; }
 	template<class T> INLINE Matrix4Real<T> operator*=(Matrix4Real<T>& left, T right)noexcept { left.R0 *= right; left.R1 *= right; left.R2 *= right; left.R3 *= right; return left; }
-	template<class T> INLINE constexpr Matrix4Real<T> operator*(T left, const Matrix4Real<T>& right)noexcept { return { right.R0 * left, right.R1 * left, right.R2 * left, right.R3 * left }; }
+	template<class T> NODISCARD INLINE constexpr Matrix4Real<T> operator*(T left, const Matrix4Real<T>& right)noexcept { return { right.R0 * left, right.R1 * left, right.R2 * left, right.R3 * left }; }
 
-	template<class T> INLINE constexpr bool operator==(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
-	template<class T> INLINE constexpr bool operator!=(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return !(left == right); }
+	template<class T> NODISCARD INLINE constexpr bool operator==(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { return !(left == right); }
 }
 
 namespace std

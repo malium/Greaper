@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos S�nchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -32,15 +32,20 @@ namespace greaper::math
 			Direction = direction;
 		}
 
-		INLINE constexpr bool IsNearlyEqual(const Line3Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Line3Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return Origin.IsNearlyEqual(other.Origin, tolerance) && Direction.IsNearlyEqual(other.Direction, tolerance);
 		}
-		INLINE constexpr bool IsEqual(const Line3Real& other)const noexcept
+		NODISCARD INLINE constexpr bool IsEqual(const Line3Real& other)const noexcept
 		{
 			return Origin.IsEqual(other.Origin) && Direction.IsEqual(other.Direction);
 		}
 	};
+
+	template<class T>
+	NODISCARD INLINE constexpr bool operator==(const Line3Real<T>& left, const Line3Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
+	template<class T>
+	NODISCARD INLINE constexpr bool operator!=(const Line3Real<T>& left, const Line3Real<T>& right)noexcept { return !(left == right); }
 }
 
 namespace std

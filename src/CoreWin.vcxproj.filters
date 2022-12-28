@@ -341,6 +341,18 @@
     <ClInclude Include="Public\Core\Reflection\Uuid.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Math\Line2.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Segment2.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Segment3.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Line3.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -380,6 +392,9 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Public\Core\Base\Property.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Intersections.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>

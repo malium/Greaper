@@ -104,6 +104,38 @@ NODISCARD INLINE constexpr T Clamp(const T a, const T min, const T max)
 {
 	return Max(min, Min(max, a));
 }
+template<typename T>
+NODISCARD INLINE constexpr T ClampZeroToOne(const T a)noexcept
+{
+	return Clamp(a, T(0), T(1));
+}
+template<typename T>
+NODISCARD INLINE constexpr T ClampNegOneToOne(const T a)noexcept
+{
+	return Clamp(a, T(-1), T(1));
+}
+template<typename T>
+NODISCARD INLINE constexpr T Lerp(const T begin, const T end, float pct)noexcept
+{
+	pct = ClampZeroToOne(pct);
+	return begin * (1.f - pct) + end * pct;
+}
+template<typename T>
+NODISCARD INLINE constexpr T Lerp(const T begin, const T end, double pct)noexcept
+{
+	pct = ClampZeroToOne(pct);
+	return begin * (1.0 - pct) + end * pct;
+}
+template<typename T>
+NODISCARD INLINE constexpr T LerpUnclamped(const T begin, const T end, float pct)noexcept
+{
+	return begin * (1.f - pct) + end * pct;
+}
+template<typename T>
+NODISCARD INLINE constexpr T LerpUnclamped(const T begin, const T end, double pct)noexcept
+{
+	return begin * (1.0 - pct) + end * pct;
+}
 /** Computes the absolute value */
 template<class T> 
 NODISCARD INLINE constexpr T Abs(T a)

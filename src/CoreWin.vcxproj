@@ -330,6 +330,8 @@
     <ClInclude Include="Public\Math\Base\SSE.inl" />
     <ClInclude Include="Public\Math\Base\Utils.inl" />
     <ClInclude Include="Public\Math\Base\VecRef.h" />
+    <ClInclude Include="Public\Math\Line2.h" />
+    <ClInclude Include="Public\Math\Line3.h" />
     <ClInclude Include="Public\Math\MathPrerequisites.h" />
     <ClInclude Include="Public\Math\Matrix2.h" />
     <ClInclude Include="Public\Math\Matrix3.h" />
@@ -342,6 +344,8 @@
     <ClInclude Include="Public\Math\Reflection\Vector2.h" />
     <ClInclude Include="Public\Math\Reflection\Vector3.h" />
     <ClInclude Include="Public\Math\Reflection\Vector4.h" />
+    <ClInclude Include="Public\Math\Segment2.h" />
+    <ClInclude Include="Public\Math\Segment3.h" />
     <ClInclude Include="Public\Math\Vector2.h" />
     <ClInclude Include="Public\Math\Vector3.h" />
     <ClInclude Include="Public\Math\Vector4.h" />
@@ -360,6 +364,7 @@
     <None Include="Public\Core\Lnx\LnxThreadImpl.inl" />
     <None Include="Public\Core\Win\WinPlatform.inl" />
     <None Include="Public\Core\Win\WinThreadImpl.inl" />
+    <None Include="Public\Math\Base\Intersections.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

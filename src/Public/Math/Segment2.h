@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos S�nchez Torrent.                                         *
+*   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -10,6 +10,8 @@
 
 #include "MathPrerequisites.h"
 #include "Vector2.h"
+#include <Core/Result.h>
+#include "Base/Intersections.inl"
 
 namespace greaper::math
 {
@@ -32,20 +34,55 @@ namespace greaper::math
 			End = end;
 		}
 
-		INLINE T Length()const noexcept
+		NODISCARD INLINE T Length()const noexcept
 		{
 			return Begin.Distance(End);
 		}
+		NODISCARD INLINE constexpr Vector2Real<T> GetDirectionWithMagnitude()const noexcept
+		{
+			return (End - Begin);
+		}
+		NODISCARD INLINE Vector2Real<T> GetDirection()const noexcept
+		{
+			return GetDirectionWithMagnitude().GetNormalized();
+		}
+		NODISCARD INLINE constexpr Vector2Real<T> PointAt(T segmentPCT)const noexcept
+		{
+			return Lerp(Begin, End, segmentPCT);
+		}
+		NODISCARD INLINE constexpr Vector2Real<T> PointAtUnclamped(T segmentPCT)const noexcept
+		{
+			return LerpUnclamped(Begin, End, segmentPCT);
+		}
+		NODISCARD INLINE constexpr bool IsPointInside(const Vector2Real<T>& point)const noexcept
+		{
+			return IsWithinInclusive(point.X, Begin.X, End.X) && IsWithinInclusive(point.Y, Begin.Y, End.Y);
+		}
+		INLINE TResult<Vector2Real<T>> Intersects(const Segment2Real<T>& other)const noexcept
+		{
+			std::tuple<bool, T, T> res = Impl::Line2LineIntersection(Begin, GetDirectionWithMagnitude(), other.Begin, other.GetDirectionWithMagnitude());
+			if (std::get<0>(res))
+			{
+				T pointA = std::get<1>(res);
 
-		INLINE constexpr bool IsNearlyEqual(const Segment2Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+			}
+			return Result::CreateFailure<Vector2Real<T>>("Does not intersect!"sv);
+		}
+
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Segment2Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
 		{
 			return Begin.IsNearlyEqual(other.Begin, tolerance) && End.IsNearlyEqual(other.End, tolerance);
 		}
-		INLINE constexpr bool IsEqual(const Segment2Real& other)const noexcept
+		NODISCARD INLINE constexpr bool IsEqual(const Segment2Real& other)const noexcept
 		{
 			return Begin.IsEqual(other.Begin) && End.IsEqual(other.End);
 		}
 	};
+
+	template<class T>
+	NODISCARD INLINE constexpr bool operator==(const Segment2Real<T>& left, const Segment2Real<T>& right)noexcept { return left.IsNearlyEqual(right); }
+	template<class T>
+	NODISCARD INLINE constexpr bool operator!=(const Segment2Real<T>& left, const Segment2Real<T>& right)noexcept { return !(left == right); }
 }
 
 namespace std
