@@ -114,7 +114,7 @@ namespace greaper::math
 		NODISCARD INLINE constexpr Matrix2Real GetInverted()const noexcept
 		{
 			auto determinant = Determinant();
-			if (::IsNearlyEqual(determinant, T(0), (T)MATH_TOLERANCE))
+			if (::IsNearlyEqual(determinant, T(0), MATH_TOLERANCE<T>))
 				return *this; // No inverse
 
 			auto invDeterminant = T(1) / determinant;
@@ -129,7 +129,7 @@ namespace greaper::math
 		{
 			return R0.X + R1.Y;
 		}
-		NODISCARD INLINE constexpr bool IsNearlyEqual(const Matrix2Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Matrix2Real& other, T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return R0.IsNearlyEqual(other.R0, tolerance) && R1.IsNearlyEqual(other.R1, tolerance);
 		}
@@ -137,7 +137,7 @@ namespace greaper::math
 		{
 			return R0.IsEqual(other.R0) && R1.IsEqual(other.R1);
 		}
-		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return IsNearlyEqual({ T(0), T(0), T(0), T(0) }, tolerance);
 		}
@@ -145,7 +145,7 @@ namespace greaper::math
 		{
 			return IsEqual({ T(0), T(0), T(0), T(0) });
 		}
-		NODISCARD INLINE constexpr bool IsNearlyIdentity(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyIdentity(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return IsNearlyEqual({ T(1), T(0), T(0), T(1) }, tolerance);
 		}
@@ -153,7 +153,7 @@ namespace greaper::math
 		{
 			return IsEqual({ T(1), T(0), T(0), T(1) });
 		}
-		NODISCARD INLINE constexpr bool IsNearlySymmetric(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlySymmetric(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(R0.Y, R1.X, tolerance);
 		}
@@ -161,7 +161,7 @@ namespace greaper::math
 		{
 			return R0.Y == R1.X;
 		}
-		NODISCARD INLINE constexpr bool IsNearlyDiagonal(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyDiagonal(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(R0.Y, T(0), tolerance) && ::IsNearlyEqual(R1.X, T(0), tolerance);
 		}

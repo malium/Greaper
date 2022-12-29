@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -199,7 +199,7 @@ namespace greaper::math::SSE
 		*/
 		return _mm_movemask_epi8(_mm_castps_si128(_mm_cmpeq_ps(left, right))) == 0xFFFF;
 	}
-	INLINE bool NearlyEqual(__m128 left, __m128 right, float tolerance = MATH_TOLERANCE)noexcept
+	INLINE bool NearlyEqual(__m128 left, __m128 right, float tolerance = MATH_TOLERANCE<float>)noexcept
 	{
 		/*
 		auto mask = _mm_set_ps1(-0.f);
@@ -276,7 +276,7 @@ namespace greaper::math::SSE
 	{
 		return Sqrt(DistanceSquared(a, b));
 	}
-	INLINE __m128 Normalize(__m128 v, float tolerance = MATH_TOLERANCE)noexcept
+	INLINE __m128 Normalize(__m128 v, float tolerance = MATH_TOLERANCE<float>)noexcept
 	{
 		auto lenSqrt = LengthSquared(v);
 		if (lenSqrt > Square(tolerance))

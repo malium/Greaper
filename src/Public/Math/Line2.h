@@ -32,7 +32,7 @@ namespace greaper::math
 			Direction = direction;
 		}
 		
-		NODISCARD INLINE constexpr bool IsNearlyEqual(const Line2Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Line2Real& other, T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return Origin.IsNearlyEqual(other.Origin, tolerance) && Direction.IsNearlyEqual(other.Direction, tolerance);
 		}

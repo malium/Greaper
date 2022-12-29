@@ -114,17 +114,17 @@ NODISCARD INLINE constexpr T ClampNegOneToOne(const T a)noexcept
 {
 	return Clamp(a, T(-1), T(1));
 }
-template<typename T>
-NODISCARD INLINE constexpr T Lerp(const T begin, const T end, float pct)noexcept
+template<class T>
+NODISCARD INLINE constexpr float SmoothCubicZeroToOne(float val) noexcept
 {
-	pct = ClampZeroToOne(pct);
-	return begin * (1.f - pct) + end * pct;
+	static_assert(std::is_arithmetic_v<T>);
+	return val * val * (T(3) - T(2) * val);
 }
-template<typename T>
-NODISCARD INLINE constexpr T Lerp(const T begin, const T end, double pct)noexcept
+template<class T>
+NODISCARD INLINE constexpr T SmoothQuinticZeroToOne(T val) noexcept
 {
-	pct = ClampZeroToOne(pct);
-	return begin * (1.0 - pct) + end * pct;
+	static_assert(std::is_arithmetic_v<T>);
+	return val * val * val * (val * (val * T(6) - T(15)) + T(10));
 }
 template<typename T>
 NODISCARD INLINE constexpr T LerpUnclamped(const T begin, const T end, float pct)noexcept
@@ -136,6 +136,27 @@ NODISCARD INLINE constexpr T LerpUnclamped(const T begin, const T end, double pc
 {
 	return begin * (1.0 - pct) + end * pct;
 }
+template<typename T>
+NODISCARD INLINE constexpr T Lerp(const T begin, const T end, float pct)noexcept
+{
+	return LerpUnclamped(begin, end, ClampZeroToOne(pct));
+}
+template<typename T>
+NODISCARD INLINE constexpr T Lerp(const T begin, const T end, double pct)noexcept
+{
+	return LerpUnclamped(begin, end, ClampZeroToOne(pct));
+}
+template<typename Rtn, typename T>
+NODISCARD INLINE constexpr Rtn LerpInverseUnsafe(const T begin, const T end, const T value)noexcept
+{
+	return Rtn(value - begin) / Rtn(end - begin);
+}
+template<typename Rtn, typename T>
+NODISCARD INLINE constexpr Rtn LerpInverse(const T begin, const T end, const T value)noexcept
+{
+	return LerpInverseUnsafe<Rtn>(begin, end, Clamp(value, begin, end));
+}
+
 /** Computes the absolute value */
 template<class T> 
 NODISCARD INLINE constexpr T Abs(T a)

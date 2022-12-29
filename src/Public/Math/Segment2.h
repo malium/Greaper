@@ -33,6 +33,11 @@ namespace greaper::math
 			Begin = begin;
 			End = end;
 		}
+		INLINE void Set(const Segment2Real& other)noexcept
+		{
+			Begin = other.Begin;
+			End = other.End;
+		}
 
 		NODISCARD INLINE T Length()const noexcept
 		{
@@ -56,20 +61,34 @@ namespace greaper::math
 		}
 		NODISCARD INLINE constexpr bool IsPointInside(const Vector2Real<T>& point)const noexcept
 		{
-			return IsWithinInclusive(point.X, Begin.X, End.X) && IsWithinInclusive(point.Y, Begin.Y, End.Y);
+			Vector2Real<T> ba = End - Begin;
+			Vector2Real<T> ca = point - Begin;
+			T cross = ba.CrossProduct(ca);
+			if(!::IsNearlyEqual(cross, T(0), MATH_TOLERANCE<T>))
+				return false;
+			
+			T dot = ba.DotProduct(ca);
+			if(dot < T(0))
+				return false;
+			
+			T sqrtLengthBA = ba.LengthSquared();
+			return dot <= sqrtLengthBA;
 		}
-		INLINE TResult<Vector2Real<T>> Intersects(const Segment2Real<T>& other)const noexcept
+		INLINE constexpr TReturn<Vector2Real<T>> Intersects(const Segment2Real<T>& other)const noexcept
 		{
 			std::tuple<bool, T, T> res = Impl::Line2LineIntersection(Begin, GetDirectionWithMagnitude(), other.Begin, other.GetDirectionWithMagnitude());
 			if (std::get<0>(res))
 			{
-				T pointA = std::get<1>(res);
-
+				T tA = std::get<1>(res);
+				T tB = std::get<2>(res);
+				Vector2Real<T> point = PointAtUnclamped(tA);
+				if(IsPointInside(point) && other.IsPointInside(point))
+					return Return::CreateSuccess(point);
 			}
-			return Result::CreateFailure<Vector2Real<T>>("Does not intersect!"sv);
+			return Return::CreateFailure<Vector2Real<T>>();
 		}
 
-		NODISCARD INLINE constexpr bool IsNearlyEqual(const Segment2Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Segment2Real& other, T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return Begin.IsNearlyEqual(other.Begin, tolerance) && End.IsNearlyEqual(other.End, tolerance);
 		}

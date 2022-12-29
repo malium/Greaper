@@ -51,6 +51,7 @@ namespace greaper
 		constexpr point_type GetLB()const noexcept;
 		constexpr point_type GetRB()const noexcept;
 
+		void Set(const RectT& other)noexcept;
 		void Set(T left, T top, T width, T hegiht) noexcept;
 		void Set(const point_type& position, const point_type& size)noexcept;
 		void SetSize(T width, T height) noexcept;
@@ -177,6 +178,15 @@ namespace greaper
 	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetRB() const noexcept
 	{
 		return point_type(Right, Bottom);
+	}
+
+	template<class T>
+	INLINE void RectT<T>::Set(const RectT& other) noexcept
+	{
+		Left = other.Left;
+		Top = other.Top;
+		Right = other.Right;
+		Bottom = other.Bottom;
 	}
 
 	template<class T>

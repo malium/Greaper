@@ -152,7 +152,7 @@ namespace greaper::math
 		NODISCARD INLINE constexpr Matrix4Real GetInverted()const noexcept
 		{
 			T determinant = Determinant();
-			if (::IsNearlyEqual(determinant, T(0), (T)MATH_TOLERANCE))
+			if (::IsNearlyEqual(determinant, T(0), MATH_TOLERANCE<T>))
 				return *this; // No inverse
 
 			T invDeterminant = T(1) / determinant;
@@ -172,7 +172,7 @@ namespace greaper::math
 		{
 			return R0.X + R1.Y + R2.Z + R3.W;
 		}
-		NODISCARD INLINE constexpr bool IsNearlyEqual(const Matrix4Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Matrix4Real& other, T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return R0.IsNearlyEqual(other.R0, tolerance) && R1.IsNearlyEqual(other.R1, tolerance) && R2.IsNearlyEqual(other.R2, tolerance) && R3.IsNearlyEqual(other.R3, tolerance);
 		}
@@ -180,7 +180,7 @@ namespace greaper::math
 		{
 			return R0.IsEqual(other.R0) && R1.IsEqual(other.R1) && R2.IsEqual(other.R2) && R3.IsEqual(other.R3);
 		}
-		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return IsNearlyEqual({ T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0) }, tolerance);
 		}
@@ -188,7 +188,7 @@ namespace greaper::math
 		{
 			return IsEqual({ T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0), T(0) });
 		}
-		NODISCARD INLINE constexpr bool IsNearlyIdentity(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyIdentity(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return IsNearlyEqual({ T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1) }, tolerance);
 		}
@@ -196,7 +196,7 @@ namespace greaper::math
 		{
 			return IsEqual({ T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1), T(0), T(0), T(0), T(0), T(1) });
 		}
-		NODISCARD INLINE constexpr bool IsNearlySymmetric(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlySymmetric(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(R0.Y, R1.X, tolerance)
 				&& ::IsNearlyEqual(R0.Z, R2.X, tolerance)
@@ -214,7 +214,7 @@ namespace greaper::math
 				&& R1.W == R3.Y
 				&& R2.W == R3.Z;
 		}
-		NODISCARD INLINE constexpr bool IsNearlyDiagonal(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyDiagonal(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(R0.Y, T(0), tolerance)
 				&& ::IsNearlyEqual(R0.Z, T(0), tolerance)

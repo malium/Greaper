@@ -26,11 +26,11 @@
 
 namespace greaper::math
 {
-#ifndef MATH_TOLERANCE_VAL
-	inline constexpr float MATH_TOLERANCE = 0.001f;
-#else
-	inline constexpr float MATH_TOLERANCE = MATH_TOLERANCE_VAL;
-#endif
+//#ifndef MATH_TOLERANCE_VAL
+//	inline constexpr float MATH_TOLERANCE = 0.001f;
+//#else
+//	inline constexpr float MATH_TOLERANCE = MATH_TOLERANCE_VAL;
+//#endif
 
 	template<class T> class Vector2Real;
 	using Vector2f = Vector2Real<float>;

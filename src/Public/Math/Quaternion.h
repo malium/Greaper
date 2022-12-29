@@ -181,7 +181,7 @@ namespace greaper::math
 		{
 			return Sqrt(LengthSquared());
 		}
-		NODISCARD INLINE QuaternionReal GetNormalized(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE QuaternionReal GetNormalized(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			auto len = LengthSquared();
 			if (len > tolerance)
@@ -191,12 +191,12 @@ namespace greaper::math
 			}
 			return *this;
 		}
-		INLINE void Normalize(T tolerance = (T)MATH_TOLERANCE)noexcept
+		INLINE void Normalize(T tolerance = MATH_TOLERANCE<T>)noexcept
 		{
 			*this = GetNormalized(tolerance);
 		}
 
-		NODISCARD INLINE constexpr bool IsNearlyEqual(const QuaternionReal& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const QuaternionReal& other, T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(W, other.W, tolerance)
 				&& ::IsNearlyEqual(X, other.X, tolerance)
@@ -210,7 +210,7 @@ namespace greaper::math
 				&& Y == other.Y
 				&& Z == other.Z;
 		}
-		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(W, T(0), tolerance)
 				&& ::IsNearlyEqual(X, T(0), tolerance)
@@ -224,7 +224,7 @@ namespace greaper::math
 				&& Y == T(0)
 				&& Z == T(0);
 		}
-		NODISCARD INLINE constexpr bool IsNearlyUnit(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyUnit(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(Length(), T(1), tolerance);
 		}
@@ -232,14 +232,14 @@ namespace greaper::math
 		{
 			return Length() == T(1);
 		}
-		NODISCARD INLINE constexpr bool IsReal(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsReal(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return !::IsNearlyEqual(W, T(0), tolerance)
 				&& ::IsNearlyEqual(X, T(0), tolerance)
 				&& ::IsNearlyEqual(Y, T(0), tolerance)
 				&& ::IsNearlyEqual(Z, T(0), tolerance);
 		}
-		NODISCARD INLINE constexpr bool IsImaginary(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsImaginary(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return !IsImaginary(tolerance);
 		}

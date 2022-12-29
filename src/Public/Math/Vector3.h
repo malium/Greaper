@@ -99,7 +99,7 @@ namespace greaper::math
 		{
 			return { Y * other.Z - Z * other.Y, X * other.Z - Z * other.X, X * other.Y - Y * other.X };
 		}
-		NODISCARD INLINE Vector3Real GetNormalized(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE Vector3Real GetNormalized(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			auto len = LengthSquared();
 			if (len > tolerance)
@@ -109,11 +109,11 @@ namespace greaper::math
 			}
 			return *this;
 		}
-		INLINE void Normalize(T tolerance = (T)MATH_TOLERANCE)noexcept
+		INLINE void Normalize(T tolerance = MATH_TOLERANCE<T>)noexcept
 		{
 			*this = GetNormalized(tolerance);
 		}
-		NODISCARD INLINE constexpr bool IsNearlyEqual(const Vector3Real& other, T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyEqual(const Vector3Real& other, T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(X, other.X, tolerance) && ::IsNearlyEqual(Y, other.Y, tolerance) && ::IsNearlyEqual(Z, other.Z, tolerance);
 		}
@@ -121,7 +121,7 @@ namespace greaper::math
 		{
 			return X == other.X && Y == other.Y && Z == other.Z;
 		}
-		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyZero(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return IsNearlyEqual({ T(0), T(0), T(0) }, tolerance);
 		}
@@ -129,7 +129,7 @@ namespace greaper::math
 		{
 			return IsEqual({ T(0), T(0), T(0) });
 		}
-		NODISCARD INLINE constexpr bool IsNearlyUnit(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool IsNearlyUnit(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(Length(), T(1), tolerance);
 		}
@@ -141,7 +141,7 @@ namespace greaper::math
 		{
 			return X == Y && X == Z;
 		}
-		NODISCARD INLINE constexpr bool AreComponentsNearlyEqual(T tolerance = (T)MATH_TOLERANCE)const noexcept
+		NODISCARD INLINE constexpr bool AreComponentsNearlyEqual(T tolerance = MATH_TOLERANCE<T>)const noexcept
 		{
 			return ::IsNearlyEqual(X, Y, tolerance) && ::IsNearlyEqual(X, Z, tolerance);
 		}

@@ -79,11 +79,12 @@ namespace greaper
 		template<class T>
 		class TReturn
 		{
-			T m_Value;
-			bool m_Failure;
+			T m_Value{};
+			bool m_Failure{};
 
 		public:
-			constexpr TReturn()noexcept = default;
+			INLINE constexpr TReturn()noexcept : m_Failure(true) {  }
+			INLINE constexpr TReturn(T value)noexcept : m_Value(value), m_Failure(false) {  }
 
 			NODISCARD INLINE constexpr bool IsOk()const noexcept { return !m_Failure; }
 
@@ -173,9 +174,9 @@ namespace greaper
 	{
 	public:
 		template<class T>
-		NODISCARD INLINE constexpr static TReturn<T> CreateSucces(T value)noexcept
+		NODISCARD INLINE constexpr static TReturn<T> CreateSuccess(T value)noexcept
 		{
-			return TReturn<T>{ value, true };
+			return TReturn<T>(value);
 		}
 		template<class T>
 		NODISCARD INLINE constexpr static TReturn<T> CreateFailure()noexcept
