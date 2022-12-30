@@ -455,6 +455,7 @@ CREATE_MEMCPY_PLAINTYPE(int64,			String{ std::to_string(data).c_str() }, 	data =
 CREATE_MEMCPY_PLAINTYPE(uint64,			String{ std::to_string(data).c_str() }, 	data = (uint16)std::strtoull(str.c_str(), nullptr, 10),	cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 CREATE_MEMCPY_PLAINTYPE(float,			String{ std::to_string(data).c_str() }, 	data = std::strtof(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 CREATE_MEMCPY_PLAINTYPE(double,			String{ std::to_string(data).c_str() }, 	data = std::strtod(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
+CREATE_MEMCPY_PLAINTYPE(long double,	String{ std::to_string(data).c_str() }, 	data = std::strtold(str.c_str(), nullptr),				cJSON_AddNumberToObject, 	cJSON_IsNumber, cJSON_GetNumberValue);
 
 #if COMPILER_MSVC
 #pragma warning(pop)

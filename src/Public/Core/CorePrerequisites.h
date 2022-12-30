@@ -108,7 +108,7 @@ namespace greaper
 			RTI_Uint64,
 			RTI_Float,
 			RTI_Double,
-			RTI_Half,
+			RTI_LongDouble,
 			RTI_Enum,
 			RTI_RectF,
 			RTI_RectD,

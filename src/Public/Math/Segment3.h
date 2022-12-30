@@ -9,9 +9,7 @@
 #define MATH_SEGMENT3_H 1
 
 #include "MathPrerequisites.h"
-#include "Vector3.h"
-#include <Core/Result.h>
-#include "Base/Intersections.inl"
+#include "Base/Vector3Real.inl"
 
 namespace greaper::math
 {

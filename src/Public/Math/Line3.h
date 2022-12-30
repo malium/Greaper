@@ -9,7 +9,7 @@
 #define MATH_LINE3_H 1
 
 #include "MathPrerequisites.h"
-#include "Vector3.h"
+#include "Base/Vector3Real.inl"
 
 namespace greaper::math
 {

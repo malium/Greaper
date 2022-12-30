@@ -21,12 +21,12 @@ namespace greaper::math
 		template<class U> struct Print {  };
 		template<> struct Print<float> { static constexpr auto fmt = "%f, %f, %f, %f, %f, %f, %f, %f, %f"; };
 		template<> struct Print<double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
-		template<> struct Print<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
+		template<> struct Print<long double> { static constexpr auto fmt = "%Lf, %Lf, %Lf, %Lf, %Lf, %Lf, %Lf, %Lf, %Lf"; };
 
 		template<class U> struct Scan {  };
 		template<> struct Scan<float> { static constexpr auto fmt = "%f, %f, %f, %f, %f, %f, %f, %f, %f"; };
 		template<> struct Scan<double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
-		template<> struct Scan<long double> { static constexpr auto fmt = "%lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf, %lf"; };
+		template<> struct Scan<long double> { static constexpr auto fmt = "%Lf, %Lf, %Lf, %Lf, %Lf, %Lf, %Lf, %Lf, %Lf"; };
 
 	public:
 		using value_type = T;

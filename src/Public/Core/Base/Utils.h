@@ -115,7 +115,7 @@ NODISCARD INLINE constexpr T ClampNegOneToOne(const T a)noexcept
 	return Clamp(a, T(-1), T(1));
 }
 template<class T>
-NODISCARD INLINE constexpr float SmoothCubicZeroToOne(float val) noexcept
+NODISCARD INLINE constexpr T SmoothCubicZeroToOne(T val) noexcept
 {
 	static_assert(std::is_arithmetic_v<T>);
 	return val * val * (T(3) - T(2) * val);

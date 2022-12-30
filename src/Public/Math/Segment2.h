@@ -9,9 +9,7 @@
 #define MATH_SEGMENT2_H 1
 
 #include "MathPrerequisites.h"
-#include "Vector2.h"
-#include <Core/Result.h>
-#include "Base/Intersections.inl"
+#include "Base/Vector2Real.inl"
 
 namespace greaper::math
 {
@@ -58,21 +56,6 @@ namespace greaper::math
 		NODISCARD INLINE constexpr Vector2Real<T> PointAtUnclamped(T segmentPCT)const noexcept
 		{
 			return LerpUnclamped(Begin, End, segmentPCT);
-		}
-		NODISCARD INLINE constexpr bool IsPointInside(const Vector2Real<T>& point)const noexcept
-		{
-			Vector2Real<T> ba = End - Begin;
-			Vector2Real<T> ca = point - Begin;
-			T cross = ba.CrossProduct(ca);
-			if(!::IsNearlyEqual(cross, T(0), MATH_TOLERANCE<T>))
-				return false;
-			
-			T dot = ba.DotProduct(ca);
-			if(dot < T(0))
-				return false;
-			
-			T sqrtLengthBA = ba.LengthSquared();
-			return dot <= sqrtLengthBA;
 		}
 		INLINE constexpr TReturn<Vector2Real<T>> Intersects(const Segment2Real<T>& other)const noexcept
 		{

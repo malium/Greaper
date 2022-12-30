@@ -9,7 +9,7 @@
 #define MATH_LINE2_H 1
 
 #include "MathPrerequisites.h"
-#include "Vector2.h"
+#include "Base/Vector2Real.inl"
 
 namespace greaper::math
 {

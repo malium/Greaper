@@ -7,10 +7,10 @@
 
 #define MATH_USE_OPTIMIZATIONS 1
 
-#if PLT_WINDOWS
+#if COMPILER_MSVC
 #include <nmmintrin.h>
 #include <ammintrin.h>
-#elif PLT_LINUX
+#else
 #include <x86intrin.h>
 #endif
 #include <cmath>
@@ -36,45 +36,49 @@ namespace greaper::math
 		struct PI_t
 		{
 			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(3.14159265358979323846);
+			static constexpr T Value = T(3.1415926535897932384626433832795);
 		};
 		template<class T>
 		struct E_t
 		{
 			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(2.71828182845904523536);
+			static constexpr T Value = T(2.7182818284590452353602874713527);
 		};
 		template<class T>
 		struct GoldenRatio_t
 		{
 			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(1.61803398874989484820);
+			static constexpr T Value = T(1.6180339887498948482045868343656);
 
 		};
 		template<class T>
 		struct SqrtTwo_t
 		{
 			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(1.41421356237309504880);
+			static constexpr T Value = T(1.4142135623730950488016887242097);
 		};
 		template<class T>
 		struct SqrtThree_t
 		{
 			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(1.73205080756887729352);
+			static constexpr T Value = T(1.7320508075688772935274463415059);
 		};
 		template<class T>
-		struct SqrtOneOverTwo_t
-		{
-			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(0.70710678118654752440);
-		};
+		struct MathRetType { using Type = void; };
+		template<> struct MathRetType<float> { using Type = float; };
+		template<> struct MathRetType<double> { using Type = double; };
+		template<> struct MathRetType<long double> { using Type = long double; };
+		template<> struct MathRetType<int8> { using Type = float; };
+		template<> struct MathRetType<int16> { using Type = float; };
+		template<> struct MathRetType<int32> { using Type = float; };
+		template<> struct MathRetType<int64> { using Type = double; };
+		template<> struct MathRetType<uint8> { using Type = float; };
+		template<> struct MathRetType<uint16> { using Type = float; };
+		template<> struct MathRetType<uint32> { using Type = float; };
+		template<> struct MathRetType<uint64> { using Type = double; };
+
 		template<class T>
-		struct SqrtOneOverThree_t
-		{
-			static_assert(std::is_floating_point_v<T>);
-			static constexpr T Value = T(0.57735026918962576450);
-		};
+		using MathRetType_t = typename MathRetType<T>::Type;
 	}
 	
 	template<class T> constexpr inline T MATH_TOLERANCE = Impl::TOLERANCE_t<T>::Value;
@@ -89,8 +93,8 @@ namespace greaper::math
 	template<class T> constexpr inline T GOLDEN_RATIO = Impl::GoldenRatio_t<T>::Value;
 	template<class T> constexpr inline T SQRT_TWO = Impl::SqrtTwo_t<T>::Value;
 	template<class T> constexpr inline T SQRT_THREE = Impl::SqrtThree_t<T>::Value;
-	template<class T> constexpr inline T SQRT_ONEOVERTWO = Impl::SqrtOneOverTwo_t<T>::Value;
-	template<class T> constexpr inline T SQRT_ONEOVERTHREE = Impl::SqrtOneOverThree_t<T>::Value;
+	template<class T> constexpr inline T SQRT_ONEOVERTWO = T(1) / Impl::SqrtTwo_t<T>::Value;
+	template<class T> constexpr inline T SQRT_ONEOVERTHREE = T(1) / Impl::SqrtThree_t<T>::Value;
 	template<class T> constexpr inline T DEG2RAD = PI<T> / T(180);
 	template<class T> constexpr inline T RAD2DEG = T(180) * ONEOVER_PI<T>;
 	template<class T> constexpr inline T EPSILON = std::numeric_limits<T>::epsilon();
@@ -507,7 +511,7 @@ namespace greaper::math
 	}
 	/* Returns e^val */
 	template<class T>
-	NODISCARD INLINE T Exp(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Exp(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -521,12 +525,12 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Exp(static_cast<float>(val)));
+			return Exp(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	/* Returns 2^val */
 	template<class T>
-	NODISCARD INLINE T Exp2(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Exp2(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -545,7 +549,7 @@ namespace greaper::math
 	}
 	/* Returns ln(val) */
 	template<class T>
-	NODISCARD INLINE T LogN(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> LogN(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -559,22 +563,22 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(LogN(static_cast<float>(val)));
+			return LogN(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	/* Returns log[base](value) */
 	template<class T>
-	NODISCARD INLINE T LogB(T base, T value)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> LogB(T base, T value)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return LogN(value) / LogN(base);
 		else // integral
-			return static_cast<T>(LogB(static_cast<float>(base), static_cast<float>(value)));
+			return LogB(static_cast<Impl::MathRetType_t<T>>(base), static_cast<Impl::MathRetType_t<T>>(value));
 	}
 	/* Returns log2(val) */
 	template<class T>
-	NODISCARD INLINE T Log2(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Log2(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -584,12 +588,12 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Log2(static_cast<float>(val)));
+			return Log2(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	/* Returns log10(val) */
 	template<class T>
-	NODISCARD INLINE T Log10(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Log10(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -599,11 +603,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Log10(static_cast<float>(val)));
+			return Log10(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Sin(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Sin(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -617,11 +621,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Sin(static_cast<float>(val)));
+			return Sin(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ASin(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ASin(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -635,11 +639,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ASin(static_cast<float>(val)));
+			return ASin(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Sinh(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Sinh(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -653,11 +657,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Sinh(static_cast<float>(val)));
+			return Sinh(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ASinh(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ASinh(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -671,11 +675,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ASinh(static_cast<float>(val)));
+			return ASinh(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Cos(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Cos(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -689,11 +693,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Cos(static_cast<float>(val)));
+			return Cos(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ACos(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ACos(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -707,11 +711,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ACos(static_cast<float>(val)));
+			return ACos(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Cosh(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Cosh(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -725,11 +729,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Cosh(static_cast<float>(val)));
+			return Cosh(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ACosh(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ACosh(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -743,11 +747,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ACosh(static_cast<float>(val)));
+			return ACosh(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Tan(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Tan(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -761,11 +765,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Tan(static_cast<float>(val)));
+			return Tan(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ATan(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ATan(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -779,11 +783,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ATan(static_cast<float>(val)));
+			return ATan(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ATan2(T y, T x)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ATan2(T y, T x)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -797,11 +801,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ATan2(static_cast<float>(y), static_cast<float>(x)));
+			return ATan2(static_cast<Impl::MathRetType_t<T>>(y), static_cast<Impl::MathRetType_t<T>>(c));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Tanh(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Tanh(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -815,11 +819,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Tanh(static_cast<float>(val)));
+			return Tanh(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T ATanh(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> ATanh(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -833,11 +837,11 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(ATanh(static_cast<float>(val)));
+			return ATanh(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE std::tuple<T, T> SinCos(T val)noexcept
+	NODISCARD INLINE std::tuple<Impl::MathRetType_t<T>, Impl::MathRetType_t<T>> SinCos(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -861,63 +865,62 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			auto ret = SinCos(static_cast<float>(val));
-			return { static_cast<T>(std::get<0>(ret)), static_cast<T>(std::get<1>(ret)) };
+			return SinCos(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T Cosecant(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Cosecant(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return T(1) / Sin(val);
 		else // integral
-			return static_cast<T>(Cosecant(static_cast<float>(val)));
+			return Cosecant(static_cast<Impl::MathRetType_t<T>>(val));
 	}
 	template<class T> 
-	NODISCARD INLINE T Secant(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Secant(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return T(1) / Cos(val);
 		else // integral
-			return static_cast<T>(Secant(static_cast<float>(val)));
+			return Secant(static_cast<Impl::MathRetType_t<T>>(val));
 	}
 	template<class T> 
-	NODISCARD INLINE T Cotangent(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Cotangent(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return T(1) / Tan(val);
 		else // integral
-			return static_cast<T>(Cotangent(static_cast<float>(val)));
+			return Cotangent(static_cast<Impl::MathRetType_t<T>>(val));
 	}
 	template<class T> 
-	NODISCARD INLINE T Versine(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Versine(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return T(1) - Cos(val);
 		else // integral
-			return static_cast<T>(Versine(static_cast<float>(val)));
+			return Versine(static_cast<Impl::MathRetType_t<T>>(val));
 	}
 	template<class T> 
-	NODISCARD INLINE T Coversine(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Coversine(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return T(1) - Sin(val);
 		else // integral
-			return static_cast<T>(Coversine(static_cast<float>(val)));
+			return Coversine(static_cast<Impl::MathRetType_t<T>>(val));
 	}
 	template<class T>
-	NODISCARD INLINE T SmoothCosZeroToOne(const T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> SmoothCosZeroToOne(const T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
-		return Cos(val * PI<T>) * T(-0.5) + T(0.5);
+		return Cos(static_cast<Impl::MathRetType_t<T>>(val) * PI<Impl::MathRetType_t<T>>) * Impl::MathRetType_t<T>(-0.5) + Impl::MathRetType_t<T>(0.5);
 	}
 	template<class T> 
-	NODISCARD INLINE T Sqrt(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> Sqrt(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
@@ -931,7 +934,7 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return static_cast<T>(Sqrt(static_cast<float>(val)));
+			return Sqrt(static_cast<Impl::MathRetType_t<T>>(val));
 		}
 	}
 	template<class T> 
@@ -959,13 +962,13 @@ namespace greaper::math
 		}
 	}
 	template<class T> 
-	NODISCARD INLINE T InvSqrt(T val)noexcept
+	NODISCARD INLINE Impl::MathRetType_t<T> InvSqrt(T val)noexcept
 	{
 		static_assert(std::is_arithmetic_v<T>);
 		if constexpr (std::is_floating_point_v<T>)
 			return T(1) / Sqrt(val);
 		else // integral
-			return static_cast<T>(InvSqrt(static_cast<float>(val)));
+			return InvSqrt(static_cast<Impl::MathRetType_t<T>>(val));
 	}
  	// Currently 1 / sqrt is faster than Carmack 
 	/*NODISCARD INLINE float InvSqrtFast(float val)noexcept

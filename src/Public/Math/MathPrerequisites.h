@@ -111,6 +111,8 @@ namespace greaper::math
 	template<class T> class Line3Real;
 	using Line3f = Line3Real<float>;
 	using Line3d = Line3Real<double>;
+
+	class Half;
 }
 
 namespace greaper
@@ -192,6 +194,8 @@ namespace greaper::refl
 
 		RTI_Line3f,
 		RTI_Line3d,
+
+		RTI_Half,
 	};
 }
 

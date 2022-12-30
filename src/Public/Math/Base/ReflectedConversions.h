@@ -5,6 +5,7 @@
 
 #pragma once
 
+CREATE_TYPEINFO_CNAME(greaper::math::Half, 			greaper::refl::RTI_Half,		PlainType, "Half");
 CREATE_TYPEINFO_CNAME(greaper::math::Vector2f,		greaper::refl::RTI_Vector2f,	ComplexType, "Vector2f");
 CREATE_TYPEINFO_CNAME(greaper::math::Vector2d,		greaper::refl::RTI_Vector2d,	ComplexType, "Vector2d");
 CREATE_TYPEINFO_CNAME(greaper::math::Vector2i,		greaper::refl::RTI_Vector2i,	ComplexType, "Vector2i");
