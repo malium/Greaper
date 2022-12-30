@@ -801,7 +801,7 @@ namespace greaper::math
 		}
 		else // integral
 		{
-			return ATan2(static_cast<Impl::MathRetType_t<T>>(y), static_cast<Impl::MathRetType_t<T>>(c));
+			return ATan2(static_cast<Impl::MathRetType_t<T>>(y), static_cast<Impl::MathRetType_t<T>>(x));
 		}
 	}
 	template<class T> 

@@ -13,6 +13,8 @@
 
 namespace greaper
 {
+	class Result;
+	class Return;
 	namespace Impl
 	{
 		template<class T>
@@ -92,7 +94,7 @@ namespace greaper
 
 			NODISCARD INLINE constexpr const T& GetValue()const noexcept
 			{
-				Verify(IsOk(), "Trying to optain a failed result, msg: '%s'.", m_FailMessage.c_str());
+				Verify(IsOk(), "Trying to optain a failed return");
 				return m_Value;
 			}
 			friend class greaper::Return;

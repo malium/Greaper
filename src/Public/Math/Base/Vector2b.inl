@@ -10,6 +10,7 @@
 
 #include "../MathPrerequisites.h"
 #include <Core/StringUtils.h>
+#include <array>
 
 namespace greaper::math
 {
@@ -69,10 +70,17 @@ namespace greaper::math
 		}
 		NODISCARD INLINE String ToString()const noexcept
 		{
-			auto x = X ? "true"sv : "false"sv;
-			auto y = Y ? "true"sv : "false"sv;
-			auto space = ", "sv;
-			return String(x).append(space).append(y);
+			static constexpr StringView trueValueTxt = "true"sv;
+			static constexpr StringView falseValueTxt = "false"sv;
+			static constexpr StringView splitTxt = ", "sv;
+			static constexpr auto maxValueSize = Max(trueValueTxt.length(), falseValueTxt.length());
+			static constexpr auto maxStringSize = ComponentCount * maxValueSize + (ComponentCount - 1) * splitTxt.length();
+
+			String rtn;
+			rtn.reserve(maxStringSize);
+			auto x = X ? trueValueTxt : falseValueTxt;
+			auto y = Y ? trueValueTxt : falseValueTxt;
+			return rtn.append(x).append(splitTxt).append(y);
 		}
 		INLINE bool FromString(StringView str)noexcept
 		{
@@ -95,10 +103,10 @@ namespace greaper::math
 
 	const Vector2b Vector2b::ZERO = Vector2b{};
 	const Vector2b Vector2b::UNIT = Vector2b(true, true);
-}
 
-NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector2b& left, const greaper::math::Vector2b& right)noexcept { return left.IsEqual(right); }
-NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector2b& left, const greaper::math::Vector2b& right)noexcept { return !(left == right); }
+	NODISCARD INLINE constexpr bool operator==(const Vector2b& left, const Vector2b& right)noexcept { return left.IsEqual(right); }
+	NODISCARD INLINE constexpr bool operator!=(const Vector2b& left, const Vector2b& right)noexcept { return !(left == right); }
+}
 
 namespace std
 {

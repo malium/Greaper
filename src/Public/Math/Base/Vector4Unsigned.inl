@@ -135,27 +135,33 @@ namespace greaper::math
 
 	template<class T> const Vector4Unsigned<T> Vector4Unsigned<T>::ZERO = Vector4Unsigned<T>{};
 	template<class T> const Vector4Unsigned<T> Vector4Unsigned<T>::UNIT = Vector4Unsigned<T>((T)1, (T)1, (T)1, T(1));
+
+	template<class T> NODISCARD INLINE constexpr Vector4Unsigned<T> operator+(const Vector4Unsigned<T>& left, const Vector4Unsigned<T>& right)noexcept { return Vector4Unsigned<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W }; }
+	template<class T> NODISCARD INLINE constexpr Vector4Unsigned<T> operator-(const Vector4Unsigned<T>& left, const Vector4Unsigned<T>& right)noexcept { return Vector4Unsigned<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W }; }
+	template<class T> INLINE Vector4Unsigned<T>& operator+=(Vector4Unsigned<T>& left, const Vector4Unsigned<T>& right)noexcept { left.X += right.X; left.Y += right.Y; left.Z += right.Z; left.W += right.W; return left; }
+	template<class T> INLINE Vector4Unsigned<T>& operator-=(Vector4Unsigned<T>& left, const Vector4Unsigned<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; left.Z -= right.Z; left.W -= right.W; return left; }
+
+	template<class T> NODISCARD INLINE constexpr Vector4Unsigned<T> operator*(const Vector4Unsigned<T>& left, T right)noexcept { return Vector4Unsigned<T>{ left.X* right, left.Y* right, left.Z* right, left.W* right }; }
+	template<class T> NODISCARD INLINE constexpr Vector4Unsigned<T> operator/(const Vector4Unsigned<T>& left, T right)noexcept { return Vector4Unsigned<T>{ left.X / right, left.Y* right, left.Z* right, left.W* right }; }
+	template<class T> NODISCARD INLINE constexpr Vector4Unsigned<T> operator*(T left, const Vector4Unsigned<T>& right)noexcept { return Vector4Unsigned<T>{ left* right.X, left* right.Y, left* right.Z, left* right.W }; }
+	template<class T> INLINE Vector4Unsigned<T>& operator*=(Vector4Unsigned<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; left.W *= right; return left; }
+	template<class T> INLINE Vector4Unsigned<T>& operator/=(Vector4Unsigned<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; left.W *= right; return left; }
+
+	template<class T> NODISCARD INLINE constexpr bool operator==(const Vector4Unsigned<T>& left, const Vector4Unsigned<T>& right)noexcept { return left.IsEqual(right); }
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const Vector4Unsigned<T>& left, const Vector4Unsigned<T>& right)noexcept { return !(left == right); }
 }
 
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<T> operator+(const greaper::math::Vector4Unsigned<T>& left, const greaper::math::Vector4Unsigned<T>& right)noexcept { return greaper::math::Vector4Unsigned<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<T> operator-(const greaper::math::Vector4Unsigned<T>& left, const greaper::math::Vector4Unsigned<T>& right)noexcept { return greaper::math::Vector4Unsigned<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W }; }
-template<class T> INLINE greaper::math::Vector4Unsigned<T>& operator+=(greaper::math::Vector4Unsigned<T>& left, const greaper::math::Vector4Unsigned<T>& right)noexcept { left.X += right.X; left.Y += right.Y; left.Z += right.Z; left.W += right.W; return left; }
-template<class T> INLINE greaper::math::Vector4Unsigned<T>& operator-=(greaper::math::Vector4Unsigned<T>& left, const greaper::math::Vector4Unsigned<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; left.Z -= right.Z; left.W -= right.W; return left; }
-
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<T> operator*(const greaper::math::Vector4Unsigned<T>& left, T right)noexcept { return greaper::math::Vector4Unsigned<T>{ left.X* right, left.Y* right, left.Z* right, left.W* right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<T> operator/(const greaper::math::Vector4Unsigned<T>& left, T right)noexcept { return greaper::math::Vector4Unsigned<T>{ left.X / right, left.Y* right, left.Z* right, left.W* right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<T> operator*(T left, const greaper::math::Vector4Unsigned<T>& right)noexcept { return greaper::math::Vector4Unsigned<T>{ left* right.X, left* right.Y, left* right.Z, left* right.W }; }
-template<class T> INLINE greaper::math::Vector4Unsigned<T>& operator*=(greaper::math::Vector4Unsigned<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; left.W *= right; return left; }
-template<class T> INLINE greaper::math::Vector4Unsigned<T>& operator/=(greaper::math::Vector4Unsigned<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; left.W *= right; return left; }
-
-template<class T> NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector4Unsigned<T>& left, const greaper::math::Vector4Unsigned<T>& right)noexcept { return left.IsEqual(right); }
-template<class T> NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector4Unsigned<T>& left, const greaper::math::Vector4Unsigned<T>& right)noexcept { return !(left == right); }
-
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<T> Clamp<greaper::math::Vector4Unsigned<T>>(const greaper::math::Vector4Unsigned<T> a, const greaper::math::Vector4Unsigned<T> min, const greaper::math::Vector4Unsigned<T> max)noexcept
-{
-	return a.GetClamped(min, max);
+#define INSTANTIATE_VEC4U_UTILS(type)\
+template<> NODISCARD INLINE constexpr greaper::math::Vector4Unsigned<type> Clamp<greaper::math::Vector4Unsigned<type>>(const greaper::math::Vector4Unsigned<type> a, const greaper::math::Vector4Unsigned<type> min, const greaper::math::Vector4Unsigned<type> max)noexcept{\
+	return a.GetClamped(min, max);\
 }
+
+INSTANTIATE_VEC4U_UTILS(uint8);
+INSTANTIATE_VEC4U_UTILS(uint16);
+INSTANTIATE_VEC4U_UTILS(uint32);
+INSTANTIATE_VEC4U_UTILS(uint64);
+
+#undef INSTANTIATE_VEC4U_UTILS
 
 namespace std
 {

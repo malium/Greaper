@@ -356,6 +356,33 @@
     <ClInclude Include="Public\Core\Base\IntersectionResult.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Public\Display\Base\DisplayAdapter.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Display\Base\IWindow.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Display\Base\Monitor.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Display\Base\VideoMode.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Display\DispPrerequisites.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Display\IWindowManager.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Base\Half.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Reflection\Half.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Public\Math\Intersections.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Public\Core\Base\MemoryStream.inl">
@@ -398,6 +425,42 @@
       <Filter>Archivos de encabezado</Filter>
     </None>
     <None Include="Public\Math\Base\Intersections.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector2b.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector2Real.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector2Signed.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector2Unsigned.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector3b.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector3Real.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector3Signed.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector3Unsigned.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector4b.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector4Real.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector4Signed.inl">
+      <Filter>Archivos de encabezado</Filter>
+    </None>
+    <None Include="Public\Math\Base\Vector4Unsigned.inl">
       <Filter>Archivos de encabezado</Filter>
     </None>
   </ItemGroup>

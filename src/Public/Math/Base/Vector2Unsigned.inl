@@ -10,13 +10,14 @@
 
 #include "../MathPrerequisites.h"
 #include <Core/StringUtils.h>
+#include <array>
 
 namespace greaper::math
 {
 	template<class T>
 	class Vector2Unsigned
 	{
-		static_assert(std::is_integral_v<T> && std::is_unsigned_v<T>, "Vector2Unsigned can only work with unsigned intXX types");
+		static_assert(std::is_integral_v<T>&& std::is_unsigned_v<T>, "Vector2Unsigned can only work with unsigned intXX types");
 
 		template<class U> struct Print {  };
 		template<> struct Print<uint8> { static constexpr auto fmt = "%" PRIu8 ", %" PRIu8; };
@@ -119,27 +120,33 @@ namespace greaper::math
 
 	template<class T> const Vector2Unsigned<T> Vector2Unsigned<T>::ZERO = Vector2Unsigned<T>{};
 	template<class T> const Vector2Unsigned<T> Vector2Unsigned<T>::UNIT = Vector2Unsigned<T>((T)1, (T)1);
+
+	template<class T> NODISCARD INLINE constexpr Vector2Unsigned<T> operator+(const Vector2Unsigned<T>& left, const Vector2Unsigned<T>& right)noexcept { return Vector2Unsigned<T>{ left.X + right.X, left.Y + right.Y }; }
+	template<class T> NODISCARD INLINE constexpr Vector2Unsigned<T> operator-(const Vector2Unsigned<T>& left, const Vector2Unsigned<T>& right)noexcept { return Vector2Unsigned<T>{ left.X - right.X, left.Y - right.Y }; }
+	template<class T> INLINE Vector2Unsigned<T>& operator+=(Vector2Unsigned<T>& left, const Vector2Unsigned<T>& right)noexcept { left.X += right.X; left.Y += right.Y; return left; }
+	template<class T> INLINE Vector2Unsigned<T>& operator-=(Vector2Unsigned<T>& left, const Vector2Unsigned<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; return left; }
+
+	template<class T> NODISCARD INLINE constexpr Vector2Unsigned<T> operator*(const Vector2Unsigned<T>& left, T right)noexcept { return Vector2Unsigned<T>{ left.X* right, left.Y* right }; }
+	template<class T> NODISCARD INLINE constexpr Vector2Unsigned<T> operator/(const Vector2Unsigned<T>& left, T right)noexcept { return Vector2Unsigned<T>{ left.X / right, left.Y / right }; }
+	template<class T> NODISCARD INLINE constexpr Vector2Unsigned<T> operator*(T left, const Vector2Unsigned<T>& right)noexcept { return Vector2Unsigned<T>{ left* right.X, left* right.Y }; }
+	template<class T> INLINE Vector2Unsigned<T>& operator*=(Vector2Unsigned<T>& left, T right)noexcept { left.X *= right; left.Y *= right; return left; }
+	template<class T> INLINE Vector2Unsigned<T>& operator/=(Vector2Unsigned<T>& left, T right)noexcept { left.X /= right; left.Y /= right; return left; }
+
+	template<class T> NODISCARD INLINE constexpr bool operator==(const Vector2Unsigned<T>& left, const Vector2Unsigned<T>& right)noexcept { return left.IsEqual(right); }
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const Vector2Unsigned<T>& left, const Vector2Unsigned<T>& right)noexcept { return !(left == right); }
 }
 
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<T> operator+(const greaper::math::Vector2Unsigned<T>& left, const greaper::math::Vector2Unsigned<T>& right)noexcept { return greaper::math::Vector2Unsigned<T>{ left.X + right.X, left.Y + right.Y }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<T> operator-(const greaper::math::Vector2Unsigned<T>& left, const greaper::math::Vector2Unsigned<T>& right)noexcept { return greaper::math::Vector2Unsigned<T>{ left.X - right.X, left.Y - right.Y }; }
-template<class T> INLINE greaper::math::Vector2Unsigned<T>& operator+=(greaper::math::Vector2Unsigned<T>& left, const greaper::math::Vector2Unsigned<T>& right)noexcept { left.X += right.X; left.Y += right.Y; return left; }
-template<class T> INLINE greaper::math::Vector2Unsigned<T>& operator-=(greaper::math::Vector2Unsigned<T>& left, const greaper::math::Vector2Unsigned<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; return left; }
-
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<T> operator*(const greaper::math::Vector2Unsigned<T>& left, T right)noexcept { return greaper::math::Vector2Unsigned<T>{ left.X * right, left.Y * right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<T> operator/(const greaper::math::Vector2Unsigned<T>& left, T right)noexcept { return greaper::math::Vector2Unsigned<T>{ left.X / right, left.Y / right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<T> operator*(T left, const greaper::math::Vector2Unsigned<T>& right)noexcept { return greaper::math::Vector2Unsigned<T>{ left * right.X, left * right.Y }; }
-template<class T> INLINE greaper::math::Vector2Unsigned<T>& operator*=(greaper::math::Vector2Unsigned<T>& left, T right)noexcept { left.X *= right; left.Y *= right; return left; }
-template<class T> INLINE greaper::math::Vector2Unsigned<T>& operator/=(greaper::math::Vector2Unsigned<T>& left, T right)noexcept { left.X /= right; left.Y /= right; return left; }
-
-template<class T> NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector2Unsigned<T>& left, const greaper::math::Vector2Unsigned<T>& right)noexcept { return left.IsEqual(right); }
-template<class T> NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector2Unsigned<T>& left, const greaper::math::Vector2Unsigned<T>& right)noexcept { return !(left == right); }
-
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<T> Clamp<greaper::math::Vector2Unsigned<T>>(const greaper::math::Vector2Unsigned<T> a, const greaper::math::Vector2Unsigned<T> min, const greaper::math::Vector2Unsigned<T> max)noexcept
-{
-	return a.GetClamped(min, max);
+#define INSTANTIATE_VEC2U_UTILS(type)\
+template<> NODISCARD INLINE constexpr greaper::math::Vector2Unsigned<type> Clamp<greaper::math::Vector2Unsigned<type>>(const greaper::math::Vector2Unsigned<type> a, const greaper::math::Vector2Unsigned<type> min, const greaper::math::Vector2Unsigned<type> max)noexcept{\
+	return a.GetClamped(min, max);\
 }
+
+INSTANTIATE_VEC2U_UTILS(uint8);
+INSTANTIATE_VEC2U_UTILS(uint16);
+INSTANTIATE_VEC2U_UTILS(uint32);
+INSTANTIATE_VEC2U_UTILS(uint64);
+
+#undef INSTANTIATE_VEC2U_UTILS
 
 namespace std
 {

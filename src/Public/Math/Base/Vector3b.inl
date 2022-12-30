@@ -9,7 +9,7 @@
 #define MATH_VECTOR3B_H 1
 
 #include "Vector2b.inl"
-#include "Base/VecRef.h"
+#include "VecRef.h"
 
 namespace greaper::math
 {
@@ -18,7 +18,7 @@ namespace greaper::math
 	public:
 		static constexpr sizet ComponentCount = 3;
 		using value_type = bool;
-		
+
 		bool X = false;
 		bool Y = false;
 		bool Z = false;
@@ -75,11 +75,18 @@ namespace greaper::math
 		}
 		NODISCARD INLINE String ToString()const noexcept
 		{
-			auto x = X ? "true"sv : "false"sv;
-			auto y = Y ? "true"sv : "false"sv;
-			auto z = Z ? "true"sv : "false"sv;
-			auto space = ", "sv;
-			return String(x).append(space).append(y).append(space).append(z);
+			static constexpr StringView trueValueTxt = "true"sv;
+			static constexpr StringView falseValueTxt = "false"sv;
+			static constexpr StringView splitTxt = ", "sv;
+			static constexpr auto maxValueSize = Max(trueValueTxt.length(), falseValueTxt.length());
+			static constexpr auto maxStringSize = ComponentCount * maxValueSize + (ComponentCount - 1) * splitTxt.length();
+
+			String rtn;
+			rtn.reserve(maxStringSize);
+			auto x = X ? trueValueTxt : falseValueTxt;
+			auto y = Y ? trueValueTxt : falseValueTxt;
+			auto z = Z ? trueValueTxt : falseValueTxt;
+			return rtn.append(x).append(splitTxt).append(y).append(splitTxt).append(z);
 		}
 		INLINE bool FromString(StringView str)noexcept
 		{
@@ -93,20 +100,20 @@ namespace greaper::math
 			X = split[0] == "true"sv ? true : false;
 			Y = split[1] == "true"sv ? true : false;
 			Z = split[2] == "true"sv ? true : false;
-			
+
 			return true;
 		}
-		
+
 		static const Vector3b ZERO;
 		static const Vector3b UNIT;
 	};
 
 	const Vector3b Vector3b::ZERO = Vector3b{ };
 	const Vector3b Vector3b::UNIT = Vector3b(true, true, true);
-}
 
-NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector3b& left, const greaper::math::Vector3b& right)noexcept { return left.IsEqual(right); }
-NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector3b& left, const greaper::math::Vector3b& right)noexcept { return !(left == right); }
+	NODISCARD INLINE constexpr bool operator==(const Vector3b& left, const Vector3b& right)noexcept { return left.IsEqual(right); }
+	NODISCARD INLINE constexpr bool operator!=(const Vector3b& left, const Vector3b& right)noexcept { return !(left == right); }
+}
 
 namespace std
 {

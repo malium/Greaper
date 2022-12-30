@@ -327,10 +327,18 @@
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
     <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
+    <ClInclude Include="Public\Display\Base\DisplayAdapter.h" />
+    <ClInclude Include="Public\Display\Base\IWindow.h" />
+    <ClInclude Include="Public\Display\Base\Monitor.h" />
+    <ClInclude Include="Public\Display\Base\VideoMode.h" />
+    <ClInclude Include="Public\Display\DispPrerequisites.h" />
+    <ClInclude Include="Public\Display\IWindowManager.h" />
+    <ClInclude Include="Public\Math\Base\Half.h" />
     <ClInclude Include="Public\Math\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Math\Base\SSE.inl" />
     <ClInclude Include="Public\Math\Base\Utils.inl" />
     <ClInclude Include="Public\Math\Base\VecRef.h" />
+    <ClInclude Include="Public\Math\Intersections.h" />
     <ClInclude Include="Public\Math\Line2.h" />
     <ClInclude Include="Public\Math\Line3.h" />
     <ClInclude Include="Public\Math\MathPrerequisites.h" />
@@ -338,6 +346,7 @@
     <ClInclude Include="Public\Math\Matrix3.h" />
     <ClInclude Include="Public\Math\Matrix4.h" />
     <ClInclude Include="Public\Math\Quaternion.h" />
+    <ClInclude Include="Public\Math\Reflection\Half.h" />
     <ClInclude Include="Public\Math\Reflection\Matrix2.h" />
     <ClInclude Include="Public\Math\Reflection\Matrix3.h" />
     <ClInclude Include="Public\Math\Reflection\Matrix4.h" />
@@ -366,6 +375,18 @@
     <None Include="Public\Core\Win\WinPlatform.inl" />
     <None Include="Public\Core\Win\WinThreadImpl.inl" />
     <None Include="Public\Math\Base\Intersections.inl" />
+    <None Include="Public\Math\Base\Vector2b.inl" />
+    <None Include="Public\Math\Base\Vector2Real.inl" />
+    <None Include="Public\Math\Base\Vector2Signed.inl" />
+    <None Include="Public\Math\Base\Vector2Unsigned.inl" />
+    <None Include="Public\Math\Base\Vector3b.inl" />
+    <None Include="Public\Math\Base\Vector3Real.inl" />
+    <None Include="Public\Math\Base\Vector3Signed.inl" />
+    <None Include="Public\Math\Base\Vector3Unsigned.inl" />
+    <None Include="Public\Math\Base\Vector4b.inl" />
+    <None Include="Public\Math\Base\Vector4Real.inl" />
+    <None Include="Public\Math\Base\Vector4Signed.inl" />
+    <None Include="Public\Math\Base\Vector4Unsigned.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

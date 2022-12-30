@@ -9,7 +9,7 @@
 #define MATH_VECTOR4B_H 1
 
 #include "Vector3b.inl"
-#include "Base/VecRef.h"
+#include "VecRef.h"
 
 namespace greaper::math
 {
@@ -81,12 +81,19 @@ namespace greaper::math
 		}
 		NODISCARD INLINE String ToString()const noexcept
 		{
-			auto x = X ? "true"sv : "false"sv;
-			auto y = Y ? "true"sv : "false"sv;
-			auto z = Z ? "true"sv : "false"sv;
-			auto w = W ? "true"sv : "false"sv;
-			auto space = ", "sv;
-			return String(x).append(space).append(y).append(space).append(z).append(space).append(w);
+			static constexpr StringView trueValueTxt = "true"sv;
+			static constexpr StringView falseValueTxt = "false"sv;
+			static constexpr StringView splitTxt = ", "sv;
+			static constexpr auto maxValueSize = Max(trueValueTxt.length(), falseValueTxt.length());
+			static constexpr auto maxStringSize = ComponentCount * maxValueSize + (ComponentCount - 1) * splitTxt.length();
+
+			String rtn;
+			rtn.reserve(maxStringSize);
+			auto x = X ? trueValueTxt : falseValueTxt;
+			auto y = Y ? trueValueTxt : falseValueTxt;
+			auto z = Z ? trueValueTxt : falseValueTxt;
+			auto w = W ? trueValueTxt : falseValueTxt;
+			return rtn.append(x).append(splitTxt).append(y).append(splitTxt).append(z).append(splitTxt).append(w);
 		}
 		INLINE bool FromString(StringView str)noexcept
 		{
@@ -111,10 +118,10 @@ namespace greaper::math
 
 	const Vector4b Vector4b::ZERO = Vector4b{};
 	const Vector4b Vector4b::UNIT = Vector4b(true, true, true, true);
-}
 
-NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector4b& left, const greaper::math::Vector4b& right)noexcept { return left.IsEqual(right); }
-NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector4b& left, const greaper::math::Vector4b& right)noexcept { return !(left == right); }
+	NODISCARD INLINE constexpr bool operator==(const Vector4b& left, const Vector4b& right)noexcept { return left.IsEqual(right); }
+	NODISCARD INLINE constexpr bool operator!=(const Vector4b& left, const Vector4b& right)noexcept { return !(left == right); }
+}
 
 namespace std
 {

@@ -157,37 +157,39 @@ namespace greaper::math
 	template<class T> const Vector3Signed<T> Vector3Signed<T>::RIGHT 	= Vector3Signed<T>((T)1,  (T)0,  (T)0);
 	template<class T> const Vector3Signed<T> Vector3Signed<T>::FRONT 	= Vector3Signed<T>((T)0,  (T)0,  (T)1);
 	template<class T> const Vector3Signed<T> Vector3Signed<T>::BACK 	= Vector3Signed<T>((T)0,  (T)0,  (T)-1);
+
+	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator+(const Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { return Vector3Signed<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
+	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator-(const Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { return Vector3Signed<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }
+	template<class T> INLINE Vector3Signed<T>& operator+=(Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { left.X += right.X; left.Y += right.Y; left.Z += right.Z; return left; }
+	template<class T> INLINE Vector3Signed<T>& operator-=(Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; left.Z -= right.Z; return left; }
+
+	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator*(const Vector3Signed<T>& left, T right)noexcept { return Vector3Signed<T>{ left.X* right, left.Y* right, left.Z* right }; }
+	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator/(const Vector3Signed<T>& left, T right)noexcept { return Vector3Signed<T>{ left.X / right, left.Y / right, left.Z / right }; }
+	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator*(T left, const Vector3Signed<T>& right)noexcept { return Vector3Signed<T>{ left* right.X, left* right.Y, left* right.Z }; }
+	template<class T> INLINE Vector3Signed<T>& operator*=(Vector3Signed<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; return left; }
+	template<class T> INLINE Vector3Signed<T>& operator/=(Vector3Signed<T>& left, T right)noexcept { left.X /= right; left.Y /= right; left.Z /= right; return left; }
+
+	template<class T> NODISCARD INLINE constexpr bool operator==(const Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { return left.IsEqual(right); }
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { return !(left == right); }
 }
 
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> operator+(const greaper::math::Vector3Signed<T>& left, const greaper::math::Vector3Signed<T>& right)noexcept { return greaper::math::Vector3Signed<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> operator-(const greaper::math::Vector3Signed<T>& left, const greaper::math::Vector3Signed<T>& right)noexcept { return greaper::math::Vector3Signed<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }
-template<class T> INLINE greaper::math::Vector3Signed<T>& operator+=(greaper::math::Vector3Signed<T>& left, const greaper::math::Vector3Signed<T>& right)noexcept { left.X += right.X; left.Y += right.Y; left.Z += right.Z; return left; }
-template<class T> INLINE greaper::math::Vector3Signed<T>& operator-=(greaper::math::Vector3Signed<T>& left, const greaper::math::Vector3Signed<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; left.Z -= right.Z; return left; }
-
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> operator*(const greaper::math::Vector3Signed<T>& left, T right)noexcept { return greaper::math::Vector3Signed<T>{ left.X* right, left.Y* right, left.Z* right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> operator/(const greaper::math::Vector3Signed<T>& left, T right)noexcept { return greaper::math::Vector3Signed<T>{ left.X / right, left.Y / right, left.Z / right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> operator*(T left, const greaper::math::Vector3Signed<T>& right)noexcept { return greaper::math::Vector3Signed<T>{ left* right.X, left* right.Y, left* right.Z }; }
-template<class T> INLINE greaper::math::Vector3Signed<T>& operator*=(greaper::math::Vector3Signed<T>& left, T right)noexcept { left.X *= right; left.Y *= right; left.Z *= right; return left; }
-template<class T> INLINE greaper::math::Vector3Signed<T>& operator/=(greaper::math::Vector3Signed<T>& left, T right)noexcept { left.X /= right; left.Y /= right; left.Z /= right; return left; }
-
-template<class T> NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector3Signed<T>& left, const greaper::math::Vector3Signed<T>& right)noexcept { return left.IsEqual(right); }
-template<class T> NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector3Signed<T>& left, const greaper::math::Vector3Signed<T>& right)noexcept { return !(left == right); }
-
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> Abs<greaper::math::Vector3Signed<T>>(const greaper::math::Vector3Signed<T> a)noexcept
-{
-	return a.GetAbs();
+#define INSTANTIATE_VEC3S_UTILS(type)\
+template<> NODISCARD INLINE constexpr greaper::math::Vector3Signed<type> Abs<greaper::math::Vector3Signed<type>>(const greaper::math::Vector3Signed<type> a)noexcept{\
+	return a.GetAbs();\
+}\
+template<> NODISCARD INLINE constexpr greaper::math::Vector3Signed<type> Clamp<greaper::math::Vector3Signed<type>>(const greaper::math::Vector3Signed<type> a, const greaper::math::Vector3Signed<type> min, const greaper::math::Vector3Signed<type> max)noexcept{\
+	return a.GetClamped(min, max);\
+}\
+template<> NODISCARD INLINE constexpr greaper::math::Vector3Signed<type> Sign<greaper::math::Vector3Signed<type>>(const greaper::math::Vector3Signed<type> a)noexcept{\
+	return a.GetSignVector();\
 }
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> Clamp<greaper::math::Vector3Signed<T>>(const greaper::math::Vector3Signed<T> a, const greaper::math::Vector3Signed<T> min, const greaper::math::Vector3Signed<T> max)noexcept
-{
-	return a.GetClamped(min, max);
-}
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector3Signed<T> Sign<greaper::math::Vector3Signed<T>>(const greaper::math::Vector3Signed<T> a)noexcept
-{
-	return a.GetSignVector();
-}
+
+INSTANTIATE_VEC3S_UTILS(int8);
+INSTANTIATE_VEC3S_UTILS(int16);
+INSTANTIATE_VEC3S_UTILS(int32);
+INSTANTIATE_VEC3S_UTILS(int64);
+
+#undef INSTANTIATE_VEC3S_UTILS
 
 namespace std
 {

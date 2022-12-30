@@ -423,7 +423,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> NormV4
 	Timepoint_t beginNormal = Clock_t::now();
 	for (sizet i = 0; i < sampleCount; ++i)
 	{
-		auto norm = samplesV4[i].Normalized();
+		auto norm = samplesV4[i].GetNormalized();
 		resultNormal[i] = norm.Length();
 	}
 	Timepoint_t endNormal = Clock_t::now();

@@ -6,8 +6,7 @@
 #pragma once
 
 #if PLT_WINDOWS
-#include <nmmintrin.h>
-#include <ammintrin.h>
+#include <intrin.h>
 #elif PLT_LINUX
 #include <x86intrin.h>
 #endif

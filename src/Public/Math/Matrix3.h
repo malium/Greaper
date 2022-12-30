@@ -152,7 +152,7 @@ namespace greaper::math
 		}
 		INLINE void Inverse()noexcept
 		{
-			*this = Inverted();
+			*this = GetInverted();
 		}
 		NODISCARD INLINE constexpr float Trace()const noexcept
 		{

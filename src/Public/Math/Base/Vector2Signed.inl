@@ -10,6 +10,7 @@
 
 #include "../MathPrerequisites.h"
 #include <Core/StringUtils.h>
+#include <array>
 
 namespace greaper::math
 {
@@ -136,37 +137,39 @@ namespace greaper::math
 
 	template<class T> const Vector2Signed<T> Vector2Signed<T>::ZERO = Vector2Signed<T>{};
 	template<class T> const Vector2Signed<T> Vector2Signed<T>::UNIT = Vector2Signed<T>((T)1, (T)1);
+
+	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator+(const Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { return Vector2Signed<T>{ left.X + right.X, left.Y + right.Y }; }
+	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator-(const Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { return Vector2Signed<T>{ left.X - right.X, left.Y - right.Y }; }
+	template<class T> INLINE Vector2Signed<T>& operator+=(Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { left.X += right.X; left.Y += right.Y; return left; }
+	template<class T> INLINE Vector2Signed<T>& operator-=(Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; return left; }
+
+	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator*(const Vector2Signed<T>& left, T right)noexcept { return Vector2Signed<T>{ left.X* right, left.Y* right }; }
+	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator/(const Vector2Signed<T>& left, T right)noexcept { return Vector2Signed<T>{ left.X / right, left.Y / right }; }
+	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator*(T left, const Vector2Signed<T>& right)noexcept { return Vector2Signed<T>{ left* right.X, left* right.Y }; }
+	template<class T> INLINE Vector2Signed<T>& operator*=(Vector2Signed<T>& left, T right)noexcept { left.X *= right; left.Y *= right; return left; }
+	template<class T> INLINE Vector2Signed<T>& operator/=(Vector2Signed<T>& left, T right)noexcept { left.X /= right; left.Y /= right; return left; }
+
+	template<class T> NODISCARD INLINE constexpr bool operator==(const Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { return left.IsEqual(right); }
+	template<class T> NODISCARD INLINE constexpr bool operator!=(const Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { return !(left == right); }
 }
 
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> operator+(const greaper::math::Vector2Signed<T>& left, const greaper::math::Vector2Signed<T>& right)noexcept { return greaper::math::Vector2Signed<T>{ left.X + right.X, left.Y + right.Y }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> operator-(const greaper::math::Vector2Signed<T>& left, const greaper::math::Vector2Signed<T>& right)noexcept { return greaper::math::Vector2Signed<T>{ left.X - right.X, left.Y - right.Y }; }
-template<class T> INLINE greaper::math::Vector2Signed<T>& operator+=(greaper::math::Vector2Signed<T>& left, const greaper::math::Vector2Signed<T>& right)noexcept { left.X += right.X; left.Y += right.Y; return left; }
-template<class T> INLINE greaper::math::Vector2Signed<T>& operator-=(greaper::math::Vector2Signed<T>& left, const greaper::math::Vector2Signed<T>& right)noexcept { left.X -= right.X; left.Y -= right.Y; return left; }
-
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> operator*(const greaper::math::Vector2Signed<T>& left, T right)noexcept { return greaper::math::Vector2Signed<T>{ left.X * right, left.Y * right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> operator/(const greaper::math::Vector2Signed<T>& left, T right)noexcept { return greaper::math::Vector2Signed<T>{ left.X / right, left.Y / right }; }
-template<class T> NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> operator*(T left, const greaper::math::Vector2Signed<T>& right)noexcept { return greaper::math::Vector2Signed<T>{ left * right.X, left * right.Y }; }
-template<class T> INLINE greaper::math::Vector2Signed<T>& operator*=(greaper::math::Vector2Signed<T>& left, T right)noexcept { left.X *= right; left.Y *= right; return left; }
-template<class T> INLINE greaper::math::Vector2Signed<T>& operator/=(greaper::math::Vector2Signed<T>& left, T right)noexcept { left.X /= right; left.Y /= right; return left; }
-
-template<class T> NODISCARD INLINE constexpr bool operator==(const greaper::math::Vector2Signed<T>& left, const greaper::math::Vector2Signed<T>& right)noexcept { return left.IsEqual(right); }
-template<class T> NODISCARD INLINE constexpr bool operator!=(const greaper::math::Vector2Signed<T>& left, const greaper::math::Vector2Signed<T>& right)noexcept { return !(left == right); }
-
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> Abs<greaper::math::Vector2Signed<T>>(const greaper::math::Vector2Signed<T> a)noexcept
-{
-	return a.GetAbs();
+#define INSTANTIATE_VEC2S_UTILS(type)\
+template<> NODISCARD INLINE constexpr greaper::math::Vector2Signed<type> Abs<greaper::math::Vector2Signed<type>>(const greaper::math::Vector2Signed<type> a)noexcept{\
+	return a.GetAbs();\
+}\
+template<> NODISCARD INLINE constexpr greaper::math::Vector2Signed<type> Clamp<greaper::math::Vector2Signed<type>>(const greaper::math::Vector2Signed<type> a, const greaper::math::Vector2Signed<type> min, const greaper::math::Vector2Signed<type> max)noexcept{\
+	return a.GetClamped(min, max);\
+}\
+template<> NODISCARD INLINE constexpr greaper::math::Vector2Signed<type> Sign<greaper::math::Vector2Signed<type>>(const greaper::math::Vector2Signed<type> a)noexcept{\
+	return a.GetSignVector();\
 }
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> Clamp<greaper::math::Vector2Signed<T>>(const greaper::math::Vector2Signed<T> a, const greaper::math::Vector2Signed<T> min, const greaper::math::Vector2Signed<T> max)noexcept
-{
-	return a.GetClamped(min, max);
-}
-template<class T>
-NODISCARD INLINE constexpr greaper::math::Vector2Signed<T> Sign<greaper::math::Vector2Signed<T>>(const greaper::math::Vector2Signed<T> a)noexcept
-{
-	return a.GetSignVector();
-}
+
+INSTANTIATE_VEC2S_UTILS(int8);
+INSTANTIATE_VEC2S_UTILS(int16);
+INSTANTIATE_VEC2S_UTILS(int32);
+INSTANTIATE_VEC2S_UTILS(int64);
+
+#undef INSTANTIATE_VEC2S_UTILS
 
 namespace std
 {

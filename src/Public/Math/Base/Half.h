@@ -27,8 +27,7 @@ namespace greaper::math
 			__m128 v1 = _mm_set_ss(v);
 			__m128i v2 = _mm_cvtps_ph(v1, 0);
 			int32 res = _mm_cvtsi128_si32(v2);
-			Cvt u;
-			u.i = res;
+			Cvt u{ res };
 			m_Value = u.t;
 		}
 	public:
@@ -51,8 +50,7 @@ namespace greaper::math
 		}
 		INLINE float Get()const noexcept
 		{
-			Cvt u;
-			u.t = m_Value;
+			Cvt u{ m_Value };
 			__m128i v1 = _mm_cvtsi32_si128(u.i);
 			__m128 v2 = _mm_cvtph_ps(v1);
 			return _mm_cvtss_f32(v2);
