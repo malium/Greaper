@@ -5,64 +5,68 @@
 
 #pragma once
 
-#if PLT_WINDOWS
+#if COMPILER_MSVC
 #include <intrin.h>
-#elif PLT_LINUX
+#else
 #include <x86intrin.h>
 #endif
 
 namespace greaper::math::SSE
 {
+	using Vector4f = __m128;
+	using Vector4i = __m128i;
+	using Vector2d = __m128d;
+
 	/* Basic functions */
-	INLINE __m128 CreateV4f()noexcept
+	INLINE Vector4f CreateV4f()noexcept
 	{
 		return _mm_setzero_ps();
 	}
-	INLINE __m128 CreateV4f(float a)noexcept
+	INLINE Vector4f CreateV4f(float a)noexcept
 	{
 		return _mm_set_ps1(a);
 	}
-	INLINE __m128 CreateV4f(float x, float y, float z, float w)noexcept
+	INLINE Vector4f CreateV4f(float x, float y, float z, float w)noexcept
 	{
 		return _mm_set_ps(x, y, z, w);
 	}
-	INLINE __m128d CreateV2d()noexcept
+	INLINE Vector2d CreateV2d()noexcept
 	{
 		return _mm_setzero_pd();
 	}
-	INLINE __m128d CreateV2d(double a)noexcept
+	INLINE Vector2d CreateV2d(double a)noexcept
 	{
 		return _mm_set_pd1(a);
 	}
-	INLINE __m128d CreateV2d(double x, double y)noexcept
+	INLINE Vector2d CreateV2d(double x, double y)noexcept
 	{
 		return _mm_set_pd(x, y);
 	}
-	INLINE __m128i CreateV4i()noexcept
+	INLINE Vector4i CreateV4i()noexcept
 	{
 		return _mm_setzero_si128();
 	}
-	INLINE __m128i CreateV4i(int32 a)noexcept
+	INLINE Vector4i CreateV4i(int32 a)noexcept
 	{
 		return _mm_set1_epi32(a);
 	}
-	INLINE __m128i CreateV4i(int32 x, int32 y, int32 z, int32 w)noexcept
+	INLINE Vector4i CreateV4i(int32 x, int32 y, int32 z, int32 w)noexcept
 	{
 		return _mm_set_epi32(x, y, z, w);
 	}
-	INLINE std::tuple<float, float, float, float> Extract(__m128 v)noexcept
+	INLINE std::tuple<float, float, float, float> Extract(Vector4f v)noexcept
 	{
 		alignas(16) float values[4];
 		_mm_store_ps(values, v);
 		return { values[0], values[1], values[2], values[3] };
 	}
-	INLINE std::tuple<double, double> Extract(__m128d v)noexcept
+	INLINE std::tuple<double, double> Extract(Vector2d v)noexcept
 	{
 		alignas(16) double values[2];
 		_mm_store_pd(values, v);
 		return { values[0], values[1] };
 	}
-	INLINE std::tuple<int32, int32, int32, int32> Extract(__m128i v)noexcept
+	INLINE std::tuple<int32, int32, int32, int32> Extract(Vector4i v)noexcept
 	{
 		std::tuple<int32, int32, int32, int32> values;
 		
@@ -73,75 +77,75 @@ namespace greaper::math::SSE
 		return values;
 	}
 	/* Arithmetic */
-	INLINE __m128 Add(__m128 left, __m128 right)noexcept
+	INLINE Vector4f Add(Vector4f left, Vector4f right)noexcept
 	{
 		return _mm_add_ps(left, right);
 	}
-	INLINE __m128d Add(__m128d left, __m128d right)noexcept
+	INLINE Vector2d Add(Vector2d left, Vector2d right)noexcept
 	{
 		return _mm_add_pd(left, right);
 	}
-	INLINE __m128i Add(__m128i left, __m128i right)noexcept
+	INLINE Vector4i Add(Vector4i left, Vector4i right)noexcept
 	{
 		return _mm_add_epi32(left, right);
 	}
-	INLINE __m128 Sub(__m128 left, __m128 right)noexcept
+	INLINE Vector4f Sub(Vector4f left, Vector4f right)noexcept
 	{
 		return _mm_sub_ps(left, right);
 	}
-	INLINE __m128d Sub(__m128d left, __m128d right)noexcept
+	INLINE Vector2d Sub(Vector2d left, Vector2d right)noexcept
 	{
 		return _mm_sub_pd(left, right);
 	}
-	INLINE __m128i Sub(__m128i left, __m128i right)noexcept
+	INLINE Vector4i Sub(Vector4i left, Vector4i right)noexcept
 	{
 		return _mm_sub_epi32(left, right);
 	}
-	INLINE __m128 Mul(__m128 left, __m128 right)noexcept
+	INLINE Vector4f Mul(Vector4f left, Vector4f right)noexcept
 	{
 		return _mm_mul_ps(left, right);
 	}
-	INLINE __m128d Mul(__m128d left, __m128d right)noexcept
+	INLINE Vector2d Mul(Vector2d left, Vector2d right)noexcept
 	{
 		return _mm_mul_pd(left, right);
 	}
-	INLINE __m128i Mul(__m128i left, __m128i right)noexcept
+	INLINE Vector4i Mul(Vector4i left, Vector4i right)noexcept
 	{
 		return _mm_mul_epi32(left, right);
 	}
-	INLINE __m128 Mul(float left, __m128 right)noexcept
+	INLINE Vector4f Mul(float left, Vector4f right)noexcept
 	{
 		return _mm_mul_ps(_mm_set_ps1(left), right);
 	}
-	INLINE __m128d Mul(double left, __m128d right)noexcept
+	INLINE Vector2d Mul(double left, Vector2d right)noexcept
 	{
 		return _mm_mul_pd(_mm_set_pd1(left), right);
 	}
-	INLINE __m128i Mul(int32 left, __m128i right)noexcept
+	INLINE Vector4i Mul(int32 left, Vector4i right)noexcept
 	{
 		return _mm_mul_epi32(_mm_set1_epi32(left), right);
 	}
-	INLINE __m128 Mul(__m128 left, float right)noexcept
+	INLINE Vector4f Mul(Vector4f left, float right)noexcept
 	{
 		return _mm_mul_ps(left, _mm_set_ps1(right));
 	}
-	INLINE __m128d Mul(__m128d left, double right)noexcept
+	INLINE Vector2d Mul(Vector2d left, double right)noexcept
 	{
 		return _mm_mul_pd(left, _mm_set_pd1(right));
 	}
-	INLINE __m128i Mul(__m128i left, int32 right)noexcept
+	INLINE Vector4i Mul(Vector4i left, int32 right)noexcept
 	{
 		return _mm_mul_epi32(left, _mm_set1_epi32(right));
 	}
-	INLINE __m128 Div(__m128 left, __m128 right)noexcept
+	INLINE Vector4f Div(Vector4f left, Vector4f right)noexcept
 	{
 		return _mm_div_ps(left, right);
 	}
-	INLINE __m128d Div(__m128d left, __m128d right)noexcept
+	INLINE Vector2d Div(Vector2d left, Vector2d right)noexcept
 	{
 		return _mm_div_pd(left, right);
 	}
-	INLINE __m128i Div(__m128i left, __m128i right)noexcept
+	INLINE Vector4i Div(Vector4i left, Vector4i right)noexcept
 	{
 		auto l = Extract(left);
 		auto r = Extract(right);
@@ -152,15 +156,15 @@ namespace greaper::math::SSE
 		auto i3 = std::get<3>(l) / std::get<3>(r);
 		return CreateV4i(i0, i1, i2, i3);
 	}
-	INLINE __m128 Div(float left, __m128 right)noexcept
+	INLINE Vector4f Div(float left, Vector4f right)noexcept
 	{
 		return _mm_div_ps(_mm_set_ps1(left), right);
 	}
-	INLINE __m128d Div(double left, __m128d right)noexcept
+	INLINE Vector2d Div(double left, Vector2d right)noexcept
 	{
 		return _mm_div_pd(_mm_set_pd1(left), right);
 	}
-	INLINE __m128i Div(int32 left, __m128i right)noexcept
+	INLINE Vector4i Div(int32 left, Vector4i right)noexcept
 	{
 		auto r = Extract(right);
 
@@ -170,15 +174,15 @@ namespace greaper::math::SSE
 		auto i3 = left / std::get<3>(r);
 		return CreateV4i(i0, i1, i2, i3);
 	}
-	INLINE __m128 Div(__m128 left, float right)noexcept
+	INLINE Vector4f Div(Vector4f left, float right)noexcept
 	{
 		return Mul(left, 1.f / right);
 	}
-	INLINE __m128d Div(__m128d left, double right)noexcept
+	INLINE Vector2d Div(Vector2d left, double right)noexcept
 	{
 		return Mul(left, 1.0 / right);
 	}
-	INLINE __m128i Div(__m128i left, int32 right)noexcept
+	INLINE Vector4i Div(Vector4i left, int32 right)noexcept
 	{
 		auto l = Extract(left);
 
@@ -190,7 +194,7 @@ namespace greaper::math::SSE
 	}
 
 	/* Comparision */
-	INLINE bool Equal(__m128 left, __m128 right)noexcept
+	INLINE bool Equal(Vector4f left, Vector4f right)noexcept
 	{
 		/*
 		auto cmp = _mm_castps_si128(_mm_cmpeq_ps(left, right));
@@ -198,7 +202,7 @@ namespace greaper::math::SSE
 		*/
 		return _mm_movemask_epi8(_mm_castps_si128(_mm_cmpeq_ps(left, right))) == 0xFFFF;
 	}
-	INLINE bool NearlyEqual(__m128 left, __m128 right, float tolerance = MATH_TOLERANCE<float>)noexcept
+	INLINE bool NearlyEqual(Vector4f left, Vector4f right, float tolerance = MATH_TOLERANCE<float>)noexcept
 	{
 		/*
 		auto mask = _mm_set_ps1(-0.f);
@@ -214,7 +218,7 @@ namespace greaper::math::SSE
 	}
 
 	/* Vector functions */
-	INLINE float DotProduct(__m128 a, __m128 b)noexcept
+	INLINE float DotProduct(Vector4f a, Vector4f b)noexcept
 	{
 #define DOTPRODUCT_VER 2
 #if DOTPRODUCT_VER == 0 // Same speed as Vector4 implementation
@@ -240,15 +244,15 @@ namespace greaper::math::SSE
 #endif
 #undef DOTPRODUCT_VER
 	}
-	INLINE float LengthSquared(__m128 v)noexcept
+	INLINE float LengthSquared(Vector4f v)noexcept
 	{
 		return DotProduct(v, v);
 	}
-	INLINE float Length(__m128 v)noexcept
+	INLINE float Length(Vector4f v)noexcept
 	{
 		return Sqrt(LengthSquared(v));
 	}
-	INLINE float DistanceSquared(__m128 a, __m128 b)noexcept
+	INLINE float DistanceSquared(Vector4f a, Vector4f b)noexcept
 	{
 		auto t = Sub(a, b);
 		auto m0 = Mul(t, t);
@@ -271,11 +275,11 @@ namespace greaper::math::SSE
 #endif
 #undef DISTANCE_VER
 	}
-	INLINE float Distance(__m128 a, __m128 b)noexcept
+	INLINE float Distance(Vector4f a, Vector4f b)noexcept
 	{
 		return Sqrt(DistanceSquared(a, b));
 	}
-	INLINE __m128 Normalize(__m128 v, float tolerance = MATH_TOLERANCE<float>)noexcept
+	INLINE Vector4f Normalize(Vector4f v, float tolerance = MATH_TOLERANCE<float>)noexcept
 	{
 		auto lenSqrt = LengthSquared(v);
 		if (lenSqrt > Square(tolerance))
@@ -285,7 +289,7 @@ namespace greaper::math::SSE
 		}
 		return v;
 	}
-	INLINE __m128 Clamp(__m128 val, float min, float max)noexcept
+	INLINE Vector4f Clamp(Vector4f val, float min, float max)noexcept
 	{
 		/*
 		auto m0 = _mm_set_ps1(min);
@@ -296,7 +300,7 @@ namespace greaper::math::SSE
 		*/
 		return _mm_min_ps(_mm_max_ps(val, _mm_set_ps1(min)), _mm_set_ps1(max));
 	}
-	INLINE __m128 Clamp(__m128 val, __m128 min, __m128 max)noexcept
+	INLINE Vector4f Clamp(Vector4f val, Vector4f min, Vector4f max)noexcept
 	{
 		/*
 		auto t0 = _mm_max_ps(val, min);
@@ -305,7 +309,7 @@ namespace greaper::math::SSE
 		*/
 		return _mm_min_ps(_mm_max_ps(val, min), max);
 	}
-	INLINE __m128 Sign(__m128 v)noexcept
+	INLINE Vector4f Sign(Vector4f v)noexcept
 	{
 		return _mm_and_ps(v, _mm_set_ps1(-0.f));
 	}

@@ -13,7 +13,7 @@
 namespace greaper::math
 {
 	template<class T>
-	class QuaternionReal
+	class alignas(16) QuaternionReal
 	{
 		static_assert(std::is_floating_point_v<T>, "QuaternionReal can only work with float, double or long double types");
 

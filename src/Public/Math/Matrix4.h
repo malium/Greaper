@@ -14,7 +14,7 @@
 namespace greaper::math
 {
 	template<class T>
-	class Matrix4Real
+	class alignas(16) Matrix4Real
 	{
 		static_assert(std::is_floating_point_v<T>, "Matrix4Real can only work with float, double or long double types");
 
@@ -294,7 +294,7 @@ namespace greaper::math
 			left.R3.X * right.X + left.R3.Y * right.Y + left.R3.Z * right.Z + left.R3.W * right.W
 		};
 	}
-
+	
 	template<class T> INLINE Matrix4Real<T> operator+=(Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { left.R0 += right.R0; left.R1 += right.R1; left.R2 += right.R2; left.R3 += right.R3; return left; }
 	template<class T> INLINE Matrix4Real<T> operator-=(Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { left.R0 -= right.R0; left.R1 -= right.R1; left.R2 -= right.R2; left.R3 -= right.R3; return left; }
 	template<class T> INLINE Matrix4Real<T> operator*=(Matrix4Real<T>& left, const Matrix4Real<T>& right)noexcept { left = (left * right); return left; }

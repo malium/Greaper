@@ -14,7 +14,7 @@
 namespace greaper::math
 {
 	template<class T>
-	class Vector4Real
+	class alignas(16) Vector4Real
 	{
 		static_assert(std::is_floating_point_v<T>, "Vector4Real can only work with float, double or long double types");
 

@@ -55,7 +55,23 @@ namespace greaper::math
 			__m128 v2 = _mm_cvtph_ps(v1);
 			return _mm_cvtss_f32(v2);
 		}
+		INLINE int16 GetRaw()const noexcept
+		{
+			return m_Value;
+		}
+		INLINE void SetRaw(int16 rawValue)noexcept
+		{
+			m_Value = rawValue;
+		}
 	};
+	INLINE constexpr bool operator==(const Half& left, const Half& right)noexcept
+	{
+		return left.GetRaw() == right.GetRaw();
+	}
+	INLINE constexpr bool operator!=(const Half& left, const Half& right)noexcept
+	{
+		return !(left == right);
+	}
 }
 
 #endif /* MATH_HALF_H */
