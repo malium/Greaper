@@ -128,12 +128,12 @@ namespace greaper::math
 		static const Vector3Unsigned FRONT;
 	};
 
-	template<class T> const Vector3Unsigned<T> Vector3Unsigned<T>::ZERO = Vector3Unsigned<T>{};
-	template<class T> const Vector3Unsigned<T> Vector3Unsigned<T>::UNIT = Vector3Unsigned<T>((T)1, (T)1, (T)1);
+	template<class T> inline const Vector3Unsigned<T> Vector3Unsigned<T>::ZERO = Vector3Unsigned<T>{};
+	template<class T> inline const Vector3Unsigned<T> Vector3Unsigned<T>::UNIT = Vector3Unsigned<T>((T)1, (T)1, (T)1);
 
-	template<class T> const Vector3Unsigned<T> Vector3Unsigned<T>::UP = Vector3Unsigned<T>((T)0, (T)1, (T)0);
-	template<class T> const Vector3Unsigned<T> Vector3Unsigned<T>::RIGHT = Vector3Unsigned<T>((T)1, (T)0, (T)0);
-	template<class T> const Vector3Unsigned<T> Vector3Unsigned<T>::FRONT = Vector3Unsigned<T>((T)0, (T)0, (T)1);
+	template<class T> inline const Vector3Unsigned<T> Vector3Unsigned<T>::UP = Vector3Unsigned<T>((T)0, (T)1, (T)0);
+	template<class T> inline const Vector3Unsigned<T> Vector3Unsigned<T>::RIGHT = Vector3Unsigned<T>((T)1, (T)0, (T)0);
+	template<class T> inline const Vector3Unsigned<T> Vector3Unsigned<T>::FRONT = Vector3Unsigned<T>((T)0, (T)0, (T)1);
 
 	template<class T> NODISCARD INLINE constexpr Vector3Unsigned<T> operator+(const Vector3Unsigned<T>& left, const Vector3Unsigned<T>& right)noexcept { return Vector3Unsigned<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
 	template<class T> NODISCARD INLINE constexpr Vector3Unsigned<T> operator-(const Vector3Unsigned<T>& left, const Vector3Unsigned<T>& right)noexcept { return Vector3Unsigned<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }

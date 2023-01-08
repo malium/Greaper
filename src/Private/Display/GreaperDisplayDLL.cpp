@@ -12,6 +12,7 @@
 #if GREAPER_DISP_DLL
 
 greaper::SPtr<greaper::disp::GreaperDispLibrary> gDispLibrary{};
+extern greaper::SPtr<greaper::disp::WindowManager> gWindowManager;
 
 #if PLT_WINDOWS
 #define DLL_PROCESS_ATTACH   1
@@ -51,15 +52,45 @@ void* _Greaper()
 	return &gDispLibrary;
 }
 
+greaper::EmptyResult greaper::disp::GreaperDispLibrary::InitMiniSDL() noexcept
+{
+	TResult<FuncPtr> fnRes;
+#define GET_FUNC(fnName)\
+	fnRes = m_SDLlib.GetFunction(#fnName##sv);\
+	if (fnRes.HasFailed()) return Result::CopyFailure(fnRes);\
+	m_SDL.fnName = reinterpret_cast<decltype(m_SDL.fnName)>(fnRes.GetValue());
+
+	GET_FUNC(SDL_Init);
+	GET_FUNC(SDL_Quit);
+	GET_FUNC(SDL_GetError);
+	GET_FUNC(SDL_CreateWindow);
+	GET_FUNC(SDL_DestroyWindow);
+	GET_FUNC(SDL_PollEvent);
+	GET_FUNC(SDL_StartTextInput);
+	GET_FUNC(SDL_StopTextInput);
+	GET_FUNC(SDL_GetMouseState);
+	GET_FUNC(SDL_GetKeyboardState);
+	GET_FUNC(SDL_GL_CreateContext);
+	GET_FUNC(SDL_GL_DeleteContext);
+
+	return Result::CreateSuccess();
+#undef GET_FUNC
+}
+
 void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 {
+	auto res = m_SDLlib.Open(L"SDL.dll"sv);
+	Verify(res.IsOk(), "Trying to open SDL.dll but something happened: %s.", res.GetFailMessage().c_str());
 
+	res = InitMiniSDL();
+	Verify(res.IsOk(), "Trying to initialize MiniSDL but something happened: %s.", res.GetFailMessage().c_str());
 }
 
 void greaper::disp::GreaperDispLibrary::InitManagers()noexcept
 {
 	// add more managers
-	m_Managers.push_back((PInterface)Construct<WindowManager>());
+	gWindowManager.reset(Construct<WindowManager>());
+	m_Managers.push_back((PInterface)gWindowManager);
 
 
 
@@ -124,6 +155,7 @@ void greaper::disp::GreaperDispLibrary::DeinitManagers()noexcept
 		mgr.reset();
 	}
 
+	gWindowManager.reset();
 	m_Managers.clear();
 	m_Application.reset();
 }

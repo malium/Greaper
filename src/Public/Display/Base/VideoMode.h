@@ -15,13 +15,18 @@ namespace greaper::disp
 {
 	class VideoMode
 	{
-		math::Vector2u m_Resolution;
-		DisplayAdapter* m_Adapter;
-		uint16 m_Frequency;
-		uint8 m_PixelDepth;
+		math::Vector2u m_Resolution = math::Vector2u(0,0);
+		DisplayAdapter* m_Adapter = nullptr;
+		uint16 m_Frequency = 0;
+		uint8 m_PixelDepth = 0;
 
 	public:
+		constexpr VideoMode()noexcept = default;
 		constexpr VideoMode(math::Vector2u resolution, DisplayAdapter* adapter, uint16 frequency, uint8 pixelDepth)noexcept;
+		VideoMode(const VideoMode&) = default;
+		VideoMode(VideoMode&&)noexcept = default;
+		VideoMode& operator=(const VideoMode&) = default;
+		VideoMode& operator=(VideoMode&&)noexcept = default;
 
 		INLINE constexpr const math::Vector2u& GetResolution()const noexcept { return m_Resolution; }
 

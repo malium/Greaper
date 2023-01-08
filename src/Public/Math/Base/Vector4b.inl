@@ -116,8 +116,8 @@ namespace greaper::math
 		static const Vector4b UNIT;
 	};
 
-	const Vector4b Vector4b::ZERO = Vector4b{};
-	const Vector4b Vector4b::UNIT = Vector4b(true, true, true, true);
+	inline const Vector4b Vector4b::ZERO = Vector4b{};
+	inline const Vector4b Vector4b::UNIT = Vector4b(true, true, true, true);
 
 	NODISCARD INLINE constexpr bool operator==(const Vector4b& left, const Vector4b& right)noexcept { return left.IsEqual(right); }
 	NODISCARD INLINE constexpr bool operator!=(const Vector4b& left, const Vector4b& right)noexcept { return !(left == right); }

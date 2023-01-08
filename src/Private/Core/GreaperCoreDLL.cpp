@@ -13,6 +13,10 @@
 #if GREAPER_CORE_DLL
 
 greaper::SPtr<greaper::core::GreaperCoreLibrary> gCoreLibrary = {};
+extern greaper::SPtr<greaper::core::Application> gApplication;
+extern greaper::SPtr<greaper::core::ThreadManager> gThreadManager;
+extern greaper::SPtr<greaper::core::LogManager> gLogManager;
+extern greaper::SPtr<greaper::core::CommandManager> gCommandManager;
 
 #if PLT_WINDOWS
 #define DLL_PROCESS_ATTACH   1
@@ -66,12 +70,16 @@ void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
 	}
 
 	m_Application.reset(Construct<Application>());
+	gApplication = m_Application;
 	m_Application->Initialize((WGreaperLib)gCoreLibrary);
 
 	// add more managers
-	m_Managers.push_back((PInterface)Construct<ThreadManager>());
-	m_Managers.push_back((PInterface)Construct<LogManager>());
-	m_Managers.push_back((PInterface)Construct<CommandManager>());
+	gThreadManager.reset(Construct<ThreadManager>());
+	m_Managers.push_back((PInterface)gThreadManager);
+	gLogManager.reset(Construct<LogManager>());
+	m_Managers.push_back((PInterface)gLogManager);
+	gCommandManager.reset(Construct<CommandManager>());
+	m_Managers.push_back((PInterface)gCommandManager);
 
 
 
@@ -139,6 +147,9 @@ void greaper::core::GreaperCoreLibrary::DeinitManagers()noexcept
 		mgr.reset();
 	}
 
+	gCommandManager.reset();
+	gLogManager.reset();
+	gThreadManager.reset();
 	m_Application->Deinitialize();
 
 	m_Managers.clear();

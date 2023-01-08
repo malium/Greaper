@@ -34,9 +34,14 @@ namespace greaper::disp
 		bool m_IsPrimary;
 
 	public:
+		Monitor()noexcept = default;
 		Monitor(math::Vector2u  size, const RectU& workRect, MonitorHandle handle,
 			DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
 			String monitorKey, bool isPrimary) noexcept;
+		Monitor(const Monitor&) = default;
+		Monitor(Monitor&&)noexcept = default;
+		Monitor& operator=(const Monitor&) = default;
+		Monitor& operator=(Monitor&&)noexcept = default;
 
 		INLINE const math::Vector2u& GetSize()const noexcept { return m_Size; }
 

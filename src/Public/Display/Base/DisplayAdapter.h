@@ -27,8 +27,14 @@ namespace greaper::disp
 		bool m_IsDefault;
 
 	public:
+		DisplayAdapter()noexcept = default;
 		DisplayAdapter(Vector<Monitor> monitors, Vector<VideoMode> videoModes, String adapterName,
 			String adapterString, String adapterID, String adapterKey, bool isDefault) noexcept;
+
+		DisplayAdapter(const DisplayAdapter&) = default;
+		DisplayAdapter(DisplayAdapter&&)noexcept = default;
+		DisplayAdapter& operator=(const DisplayAdapter&) = default;
+		DisplayAdapter& operator=(DisplayAdapter&&)noexcept = default;
 
 		INLINE const Vector<Monitor>& GetMonitors()const noexcept { return m_Monitors; }
 

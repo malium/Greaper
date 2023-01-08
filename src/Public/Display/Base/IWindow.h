@@ -15,6 +15,17 @@
 #include <Core/Event.h>
 #include <Math/Vector2.h>
 
+ENUMERATION(RenderBackend, OpenGL, Vulkan, DirectX);
+ENUMERATION(WindowState, Normal, Minimized, Maximized);
+ENUMERATION(WindowMode, Windowed, Borderless, FullScreen);
+
+namespace greaper::disp
+{
+
+}
+
+
+#if 0 // Old window class
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
 	
 ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight);
@@ -99,5 +110,6 @@ namespace greaper::disp
 		// SetCursor(CursorType, Image...)
 	};
 }
+#endif
 
 #endif /* DISP_I_WINDOW_H */

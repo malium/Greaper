@@ -135,8 +135,8 @@ namespace greaper::math
 		static const Vector2Signed UNIT;
 	};
 
-	template<class T> const Vector2Signed<T> Vector2Signed<T>::ZERO = Vector2Signed<T>{};
-	template<class T> const Vector2Signed<T> Vector2Signed<T>::UNIT = Vector2Signed<T>((T)1, (T)1);
+	template<class T> inline const Vector2Signed<T> Vector2Signed<T>::ZERO = Vector2Signed<T>{};
+	template<class T> inline const Vector2Signed<T> Vector2Signed<T>::UNIT = Vector2Signed<T>((T)1, (T)1);
 
 	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator+(const Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { return Vector2Signed<T>{ left.X + right.X, left.Y + right.Y }; }
 	template<class T> NODISCARD INLINE constexpr Vector2Signed<T> operator-(const Vector2Signed<T>& left, const Vector2Signed<T>& right)noexcept { return Vector2Signed<T>{ left.X - right.X, left.Y - right.Y }; }

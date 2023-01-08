@@ -72,32 +72,32 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(ExternalIncludePath)</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
@@ -124,10 +124,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <Manifest>
       <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -160,10 +160,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <Manifest>
       <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -191,10 +191,10 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <Manifest>
       <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -227,10 +227,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <Manifest>
       <AdditionalManifestFiles>$(SolutionDir)TestApplication\Manifest.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>

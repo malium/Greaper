@@ -148,15 +148,15 @@ namespace greaper::math
 		static const Vector3Signed BACK;
 	};
 
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::ZERO = Vector3Signed<T>{};
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::UNIT = Vector3Signed<T>((T)1, (T)1, (T)1);
-
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::UP 		= Vector3Signed<T>((T)0,  (T)1,  (T)0);
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::DOWN 	= Vector3Signed<T>((T)0,  (T)-1, (T)0);
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::LEFT 	= Vector3Signed<T>((T)-1, (T)0,  (T)0);
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::RIGHT 	= Vector3Signed<T>((T)1,  (T)0,  (T)0);
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::FRONT 	= Vector3Signed<T>((T)0,  (T)0,  (T)1);
-	template<class T> const Vector3Signed<T> Vector3Signed<T>::BACK 	= Vector3Signed<T>((T)0,  (T)0,  (T)-1);
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::ZERO = Vector3Signed<T>{};
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::UNIT = Vector3Signed<T>((T)1, (T)1, (T)1);
+	
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::UP 		= Vector3Signed<T>((T)0,  (T)1,  (T)0);
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::DOWN 	= Vector3Signed<T>((T)0,  (T)-1, (T)0);
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::LEFT 	= Vector3Signed<T>((T)-1, (T)0,  (T)0);
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::RIGHT 	= Vector3Signed<T>((T)1,  (T)0,  (T)0);
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::FRONT 	= Vector3Signed<T>((T)0,  (T)0,  (T)1);
+	template<class T> inline const Vector3Signed<T> Vector3Signed<T>::BACK 	= Vector3Signed<T>((T)0,  (T)0,  (T)-1);
 
 	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator+(const Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { return Vector3Signed<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
 	template<class T> NODISCARD INLINE constexpr Vector3Signed<T> operator-(const Vector3Signed<T>& left, const Vector3Signed<T>& right)noexcept { return Vector3Signed<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }

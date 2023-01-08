@@ -72,32 +72,32 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
@@ -126,10 +126,10 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -161,10 +161,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -192,10 +192,10 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -228,10 +228,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSON$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
-      <Path>$(SolutionDir)obj\Core$(SDKIdentifier)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -327,12 +327,6 @@
     <ClInclude Include="Public\Core\Win\WinLibrary.h" />
     <ClInclude Include="Public\Core\Win\WinPlatform.h" />
     <ClInclude Include="Public\Core\Win\WinThreading.h" />
-    <ClInclude Include="Public\Display\Base\DisplayAdapter.h" />
-    <ClInclude Include="Public\Display\Base\IWindow.h" />
-    <ClInclude Include="Public\Display\Base\Monitor.h" />
-    <ClInclude Include="Public\Display\Base\VideoMode.h" />
-    <ClInclude Include="Public\Display\DispPrerequisites.h" />
-    <ClInclude Include="Public\Display\IWindowManager.h" />
     <ClInclude Include="Public\Math\Base\Half.h" />
     <ClInclude Include="Public\Math\Base\ReflectedConversions.h" />
     <ClInclude Include="Public\Math\Base\SSE.inl" />

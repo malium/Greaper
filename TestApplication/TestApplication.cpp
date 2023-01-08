@@ -22,7 +22,7 @@
 #include <iostream>
 
 #if PLT_WINDOWS
-#define PLT_NAME "Windows"
+#define PLT_NAME "Win"
 #else
 #define PLT_NAME "Linux"
 #endif

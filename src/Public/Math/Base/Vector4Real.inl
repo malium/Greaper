@@ -202,8 +202,8 @@ namespace greaper::math
 		static const Vector4Real UNIT;
 	};
 
-	template<class T> const Vector4Real<T> Vector4Real<T>::ZERO = Vector4Real<T>{};
-	template<class T> const Vector4Real<T> Vector4Real<T>::UNIT = Vector4Real<T>((T)1, (T)1, (T)1, T(1));
+	template<class T> inline const Vector4Real<T> Vector4Real<T>::ZERO = Vector4Real<T>{};
+	template<class T> inline const Vector4Real<T> Vector4Real<T>::UNIT = Vector4Real<T>((T)1, (T)1, (T)1, T(1));
 
 	template<class T> NODISCARD INLINE constexpr Vector4Real<T> operator+(const Vector4Real<T>& left, const Vector4Real<T>& right)noexcept { return Vector4Real<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z, left.W + right.W }; }
 	template<class T> NODISCARD INLINE constexpr Vector4Real<T> operator-(const Vector4Real<T>& left, const Vector4Real<T>& right)noexcept { return Vector4Real<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z, left.W - right.W }; }

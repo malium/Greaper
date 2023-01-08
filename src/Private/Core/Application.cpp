@@ -103,7 +103,6 @@ void Application::OnInitialization() noexcept
 {
 	VerifyNot(m_Library.expired(), "Trying to initialize an application with an expired GreaperLib.");
 	auto lib = m_Library.lock();
-	gApplication = lib->GetApplication().lock();
 
 	RegisterGreaperLibrary(lib);
 }

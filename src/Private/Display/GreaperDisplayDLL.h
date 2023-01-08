@@ -10,6 +10,7 @@
 
 #include "ImplPrerequisites.h"
 #include <Core/IGreaperLibrary.h>
+#include "MiniSDL.h"
 
 #if GREAPER_DISP_DLL
 
@@ -17,6 +18,11 @@ namespace greaper::disp
 {
 	class GreaperDispLibrary : public TGreaperLibrary<GreaperDispLibrary>
 	{
+		Library m_SDLlib;
+		MiniSDL m_SDL;
+
+		EmptyResult InitMiniSDL()noexcept;
+
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{ 0x5DECEE34, 0x86A911ED, 0xA1EB0242, 0xAC120002 };
 		static constexpr StringView LibraryName = "GreaperDisplay"sv;
@@ -34,6 +40,8 @@ namespace greaper::disp
 		void DeinitManagers()noexcept override;
 
 		void Deinitialize()noexcept override;
+
+		const MiniSDL& GetSDL()const noexcept;
 
 		uint32 GetLibraryVersion()const noexcept override { return GREAPER_DISP_VERSION; }
 	};

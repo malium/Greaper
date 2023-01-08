@@ -39,21 +39,11 @@ void ThreadManager::OnThreadDestruction(const PThread& thread) noexcept
 void ThreadManager::OnInitialization() noexcept
 {
 	VerifyNot(m_Library.expired(), "Trying to initialize ThreadManager, but its library is expired.");
-	auto lib = m_Library.lock();
-	auto managers = lib->GetManagers();
-	for(const auto& mgr : managers)
-	{
-		if (mgr.get() == this)
-		{
-			gThreadManager = mgr;
-			break;
-		}
-	}
 }
 
 void ThreadManager::OnDeinitialization() noexcept
 {
-	gThreadManager.reset();
+
 }
 
 void ThreadManager::OnActivation(const PInterface& oldDefault) noexcept

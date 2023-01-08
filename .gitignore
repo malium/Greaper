@@ -52,4 +52,4 @@ bin/**
 build/**
 src/Public/External/cJSON/**
 src/Public/External/glm/**
-src/Public/External/SDL2/**
+src/Public/External/SDL/**

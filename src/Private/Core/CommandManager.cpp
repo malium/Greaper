@@ -15,21 +15,11 @@ SPtr<CommandManager> gCommandManager = {};
 void CommandManager::OnInitialization() noexcept
 {
 	VerifyNot(m_Library.expired(), "Trying to initialize LogManager, but its library is expired.");
-	auto lib = m_Library.lock();
-	auto managers = lib->GetManagers();
-	for (const auto& mgr : managers)
-	{
-		if (mgr.get() == this)
-		{
-			gCommandManager = mgr;
-			break;
-		}
-	}
 }
 
 void CommandManager::OnDeinitialization() noexcept
 {
-	gCommandManager.reset();
+
 }
 
 void CommandManager::OnActivation(UNUSED const PInterface& oldDefault) noexcept

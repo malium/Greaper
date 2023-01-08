@@ -101,8 +101,8 @@ namespace greaper::math
 		static const Vector2b UNIT;
 	};
 
-	const Vector2b Vector2b::ZERO = Vector2b{};
-	const Vector2b Vector2b::UNIT = Vector2b(true, true);
+	inline const Vector2b Vector2b::ZERO = Vector2b{};
+	inline const Vector2b Vector2b::UNIT = Vector2b(true, true);
 
 	NODISCARD INLINE constexpr bool operator==(const Vector2b& left, const Vector2b& right)noexcept { return left.IsEqual(right); }
 	NODISCARD INLINE constexpr bool operator!=(const Vector2b& left, const Vector2b& right)noexcept { return !(left == right); }

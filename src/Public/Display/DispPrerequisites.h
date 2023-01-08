@@ -15,6 +15,7 @@
 #undef GREAPER_DISP_VERSION
 #endif
 #define GREAPER_DISP_VERSION VERSION_SETTER(0, 0, 1, 0)
+
 namespace greaper::disp
 {
 	class IWindowManager; using PWindowManager = SPtr<IWindowManager>; using WWindowManager = WPtr<IWindowManager>;

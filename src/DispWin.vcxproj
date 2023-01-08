@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{98991d11-62c2-4cc5-a866-b2ed790ec1ca}</ProjectGuid>
-    <RootNamespace>cJSONWin</RootNamespace>
+    <ProjectGuid>{2ae173d8-1d13-457e-bcc0-e8a254707b97}</ProjectGuid>
+    <RootNamespace>CoreWin</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,46 +71,62 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x86;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <OutDir>$(SolutionDir)bin\</OutDir>
     <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IncludePath>$(SolutionDir)src\Public\;$(IncludePath)</IncludePath>
     <ExternalIncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.20348.0\ucrt;$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <LibraryPath>C:\Program Files (x86)\Windows Kits\10\Lib\10.0.20348.0\ucrt\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GREAPER_DISP_DLL;WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <CompileAs>CompileAsC</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <StructMemberAlignment />
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <PrecompiledHeaderOutputFile />
+      <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -118,23 +134,34 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GREAPER_DISP_DLL;WIN32;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <CompileAs>CompileAsC</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <StructMemberAlignment />
       <FloatingPointModel>Fast</FloatingPointModel>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <PrecompiledHeaderOutputFile />
+      <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -142,17 +169,30 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GREAPER_DISP_DLL;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <CompileAs>CompileAsC</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <StructMemberAlignment />
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <PrecompiledHeaderOutputFile />
+      <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -160,35 +200,70 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GREAPER_DISP_DLL;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <LanguageStandard_C>stdc11</LanguageStandard_C>
-      <CompileAs>CompileAsC</CompileAs>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <StructMemberAlignment />
       <FloatingPointModel>Fast</FloatingPointModel>
+      <EnforceTypeConversionRules>true</EnforceTypeConversionRules>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <PrecompiledHeaderOutputFile />
+      <ShowIncludes>false</ShowIncludes>
+      <AssemblerOutput>NoListing</AssemblerOutput>
+      <EnableEnhancedInstructionSet>
+      </EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cJSON\cJSON.c" />
-    <ClCompile Include="cJSON\cJSON_Utils.c" />
+    <ClInclude Include="Private\Display\GreaperDisplayDLL.h" />
+    <ClInclude Include="Private\Display\ImplPrerequisites.h" />
+    <ClInclude Include="Private\Display\MiniSDL.h" />
+    <ClInclude Include="Private\Display\WindowManager.h" />
+    <ClInclude Include="Public\Core\Base\DisplayAdapter.h" />
+    <ClInclude Include="Public\Core\Base\IWindow.h" />
+    <ClInclude Include="Public\Core\Base\Monitor.h" />
+    <ClInclude Include="Public\Core\Base\VideoMode.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedField.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainContainer.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainEnum.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainField.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedPlainType.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedProperty.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedReflField.h" />
+    <ClInclude Include="Public\Core\Reflection\ReflectedTypeInfo.h" />
+    <ClInclude Include="Public\Display\Base\DisplayAdapter.h" />
+    <ClInclude Include="Public\Display\Base\IWindow.h" />
+    <ClInclude Include="Public\Display\Base\Monitor.h" />
+    <ClInclude Include="Public\Display\Base\VideoMode.h" />
+    <ClInclude Include="Public\Display\DispPrerequisites.h" />
+    <ClInclude Include="Public\Display\IWindowManager.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cJSON\cJSON.h" />
-    <ClInclude Include="cJSON\cJSON_Utils.h" />
+    <None Include="Public\Math\Base\Intersections.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Private\Display\GreaperDisplayDLL.cpp" />
+    <ClCompile Include="Private\Display\WindowManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

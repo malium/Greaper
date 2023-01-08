@@ -145,37 +145,37 @@ namespace greaper
 	}
 
 	template<class T>
-	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetOrigin() const noexcept
+	NODISCARD INLINE constexpr typename RectT<T>::point_type RectT<T>::GetOrigin() const noexcept
 	{
 		return point_type(Left, Top);
 	}
 
 	template<class T>
-	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetSize() const noexcept
+	NODISCARD INLINE constexpr typename RectT<T>::point_type RectT<T>::GetSize() const noexcept
 	{
 		return point_type(GetWidth(), GetHeight());
 	}
 
 	template<class T>
-	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetLT() const noexcept
+	NODISCARD INLINE constexpr typename RectT<T>::point_type RectT<T>::GetLT() const noexcept
 	{
 		return point_type(Left, Top);
 	}
 
 	template<class T>
-	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetRT() const noexcept
+	NODISCARD INLINE constexpr typename RectT<T>::point_type RectT<T>::GetRT() const noexcept
 	{
 		return point_type(Right, Top);
 	}
 
 	template<class T>
-	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetLB() const noexcept
+	NODISCARD INLINE constexpr typename RectT<T>::point_type RectT<T>::GetLB() const noexcept
 	{
 		return point_type(Left, Bottom);
 	}
 
 	template<class T>
-	NODISCARD INLINE constexpr RectT<T>::point_type RectT<T>::GetRB() const noexcept
+	NODISCARD INLINE constexpr typename RectT<T>::point_type RectT<T>::GetRB() const noexcept
 	{
 		return point_type(Right, Bottom);
 	}

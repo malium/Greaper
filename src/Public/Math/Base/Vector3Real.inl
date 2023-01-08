@@ -204,14 +204,14 @@ namespace greaper::math
 		static const Vector3Real BACK;
 	};
 
-	template<class T> const Vector3Real<T> Vector3Real<T>::ZERO = Vector3Real<T>{};
-	template<class T> const Vector3Real<T> Vector3Real<T>::UNIT = Vector3Real<T>((T)1, (T)1, (T)1);
-	template<class T> const Vector3Real<T> Vector3Real<T>::UP = Vector3Real<T>((T)0, (T)1, (T)0);
-	template<class T> const Vector3Real<T> Vector3Real<T>::DOWN = Vector3Real<T>((T)0, (T)-1, (T)0);
-	template<class T> const Vector3Real<T> Vector3Real<T>::LEFT = Vector3Real<T>((T)-1, (T)0, (T)0);
-	template<class T> const Vector3Real<T> Vector3Real<T>::RIGHT = Vector3Real<T>((T)1, (T)0, (T)0);
-	template<class T> const Vector3Real<T> Vector3Real<T>::FRONT = Vector3Real<T>((T)0, (T)0, (T)1);
-	template<class T> const Vector3Real<T> Vector3Real<T>::BACK = Vector3Real<T>((T)0, (T)0, (T)-1);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::ZERO = Vector3Real<T>{};
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::UNIT = Vector3Real<T>((T)1, (T)1, (T)1);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::UP = Vector3Real<T>((T)0, (T)1, (T)0);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::DOWN = Vector3Real<T>((T)0, (T)-1, (T)0);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::LEFT = Vector3Real<T>((T)-1, (T)0, (T)0);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::RIGHT = Vector3Real<T>((T)1, (T)0, (T)0);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::FRONT = Vector3Real<T>((T)0, (T)0, (T)1);
+	template<class T> inline const Vector3Real<T> Vector3Real<T>::BACK = Vector3Real<T>((T)0, (T)0, (T)-1);
 
 	template<class T> NODISCARD INLINE constexpr Vector3Real<T> operator+(const Vector3Real<T>& left, const Vector3Real<T>& right)noexcept { return Vector3Real<T>{ left.X + right.X, left.Y + right.Y, left.Z + right.Z }; }
 	template<class T> NODISCARD INLINE constexpr Vector3Real<T> operator-(const Vector3Real<T>& left, const Vector3Real<T>& right)noexcept { return Vector3Real<T>{ left.X - right.X, left.Y - right.Y, left.Z - right.Z }; }

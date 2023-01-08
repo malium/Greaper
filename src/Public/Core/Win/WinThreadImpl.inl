@@ -5,8 +5,11 @@
 
 #pragma once
 
+#include "../CorePrerequisites.h"
 #include "../IGreaperLibrary.h"
+#include "../IApplication.h"
 #include "../Platform.h"
+#include "../IThreadManager.h"
 
 namespace greaper
 {

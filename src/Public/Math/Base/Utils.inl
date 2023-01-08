@@ -8,8 +8,7 @@
 #define MATH_USE_OPTIMIZATIONS 1
 
 #if COMPILER_MSVC
-#include <nmmintrin.h>
-#include <ammintrin.h>
+#include <intrin.h>
 #else
 #include <x86intrin.h>
 #endif
