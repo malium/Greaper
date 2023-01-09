@@ -15,13 +15,27 @@
 #include <Core/Event.h>
 #include <Math/Vector2.h>
 
-ENUMERATION(RenderBackend, OpenGL, Vulkan, DirectX);
+ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
+ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight);
 ENUMERATION(WindowMode, Windowed, Borderless, FullScreen);
 
 namespace greaper::disp
 {
+	struct WindowDesc
+	{
+		StringView Title = "GreaperWindow"sv;
+		math::Vector2i Size = math::Vector2i(-1, -1); // Don't care
+		AnchoredPosition_t Position = AnchoredPosition_t::COUNT; // Don't care
+		RenderBackend_t Backend = RenderBackend_t::Native;
 
+		
+	};
+
+	class IWindow
+	{
+
+	};
 }
 
 

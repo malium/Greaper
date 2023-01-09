@@ -8,6 +8,7 @@
 #include <Core/Platform.h>
 #include <Core/FileStream.h>
 #include <Core/Reflection/Property.h>
+#include <SDL/SDL.h>
 
 #if GREAPER_DISP_DLL
 
@@ -52,38 +53,11 @@ void* _Greaper()
 	return &gDispLibrary;
 }
 
-greaper::EmptyResult greaper::disp::GreaperDispLibrary::InitMiniSDL() noexcept
-{
-	TResult<FuncPtr> fnRes;
-#define GET_FUNC(fnName)\
-	fnRes = m_SDLlib.GetFunction(#fnName##sv);\
-	if (fnRes.HasFailed()) return Result::CopyFailure(fnRes);\
-	m_SDL.fnName = reinterpret_cast<decltype(m_SDL.fnName)>(fnRes.GetValue());
-
-	GET_FUNC(SDL_Init);
-	GET_FUNC(SDL_Quit);
-	GET_FUNC(SDL_GetError);
-	GET_FUNC(SDL_CreateWindow);
-	GET_FUNC(SDL_DestroyWindow);
-	GET_FUNC(SDL_PollEvent);
-	GET_FUNC(SDL_StartTextInput);
-	GET_FUNC(SDL_StopTextInput);
-	GET_FUNC(SDL_GetMouseState);
-	GET_FUNC(SDL_GetKeyboardState);
-	GET_FUNC(SDL_GL_CreateContext);
-	GET_FUNC(SDL_GL_DeleteContext);
-
-	return Result::CreateSuccess();
-#undef GET_FUNC
-}
-
 void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 {
-	auto res = m_SDLlib.Open(L"SDL.dll"sv);
-	Verify(res.IsOk(), "Trying to open SDL.dll but something happened: %s.", res.GetFailMessage().c_str());
-
-	res = InitMiniSDL();
-	Verify(res.IsOk(), "Trying to initialize MiniSDL but something happened: %s.", res.GetFailMessage().c_str());
+	auto rtn = SDL_Init(SDL_INIT_VIDEO);
+	VerifyGreaterEqual(rtn, 0, "Couldn't initialize SDL, error: %s.", SDL_GetError());
+	SDL_CreateWindow("", 0,0,0,0, SDL_WINDOW_OPENGL);
 }
 
 void greaper::disp::GreaperDispLibrary::InitManagers()noexcept
@@ -162,6 +136,8 @@ void greaper::disp::GreaperDispLibrary::DeinitManagers()noexcept
 
 void greaper::disp::GreaperDispLibrary::Deinitialize()noexcept
 {
+	SDL_Quit();
+
 	gDispLibrary.reset();
 }
 
