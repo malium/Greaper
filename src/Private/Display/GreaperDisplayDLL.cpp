@@ -57,7 +57,6 @@ void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 {
 	auto rtn = SDL_Init(SDL_INIT_VIDEO);
 	VerifyGreaterEqual(rtn, 0, "Couldn't initialize SDL, error: %s.", SDL_GetError());
-	SDL_CreateWindow("", 0,0,0,0, SDL_WINDOW_OPENGL);
 }
 
 void greaper::disp::GreaperDispLibrary::InitManagers()noexcept

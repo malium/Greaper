@@ -10,56 +10,86 @@ using namespace greaper::disp;
 
 SPtr<WindowManager> gWindowManager = {};
 
-void greaper::disp::WindowManager::OnInitialization() noexcept
+void WindowManager::QueryMonitors()
 {
 
 }
 
-void greaper::disp::WindowManager::OnDeinitialization() noexcept
+void WindowManager::OnInitialization() noexcept
 {
 
 }
 
-void greaper::disp::WindowManager::OnActivation(const PInterface& oldDefault) noexcept
+void WindowManager::OnDeinitialization() noexcept
 {
 
 }
 
-void greaper::disp::WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
+void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
+{
+	const auto& prev = (const PWindowManager&)oldDefault;
+	m_Monitors.clear();
+	m_MainMonitor = 0;
+	if(prev != nullptr)
+	{
+		prev->AccessMonitors([this](CSpan<SPtr<Monitor>> span)
+		{
+			const auto size = span.GetSizeFn();
+			if(m_Monitors.size() < size)
+				m_Monitors.reserve(size);
+			for(const auto& elem : span)
+			{
+				if(elem->IsPrimary())
+					m_MainMonitor = m_Monitors.size();
+				m_Monitors.push_back(elem);
+			}
+		});
+	}
+	else
+	{
+		QueryMonitors();
+	}
+}
+
+void WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
 {
 
 }
 
-void greaper::disp::WindowManager::InitProperties() noexcept
+void WindowManager::InitProperties() noexcept
 {
 }
 
-void greaper::disp::WindowManager::DeinitProperties() noexcept
+void WindowManager::DeinitProperties() noexcept
 {
 
 }
 
-const DisplayAdapter& greaper::disp::WindowManager::GetMainDisplayAdapter() const
+SPtr<Monitor> WindowManager::GetMainMonitor() const
 {
-	static DisplayAdapter da{ Vector<Monitor>{}, Vector<VideoMode>{}, "", "", "", "", false };
-	return da;
+	LOCK(m_MonitorMutex);
+	if(m_Monitors.size() > m_MainMonitor)
+		return m_Monitors[m_MainMonitor];
+	return SPtr<Monitor>();
 }
 
-void greaper::disp::WindowManager::AccessDisplayAdapters(const std::function<void(CSpan<DisplayAdapter>)>& accessFn) const
+void WindowManager::AccessMonitors(const std::function<void(CSpan<SPtr<Monitor>>)>& accessFn) const
 {
+	LOCK(m_MonitorMutex);
+	accessFn(CreateSpan(m_Monitors));
 }
 
-TResult<PWindow> greaper::disp::WindowManager::CreateWindow(const WindowDesc& desc)
+TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& desc)
 {
 	return Result::CreateFailure<PWindow>(""sv);
 }
 
-TResult<PWindow> greaper::disp::WindowManager::GetWindow(const String& windowID) const
+TResult<PWindow> WindowManager::GetWindow(const String& windowID) const
 {
 	return Result::CreateFailure<PWindow>(""sv);
 }
 
-void greaper::disp::WindowManager::AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const
+void WindowManager::AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const
 {
 
 }

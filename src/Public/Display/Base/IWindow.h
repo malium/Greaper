@@ -28,13 +28,15 @@ namespace greaper::disp
 		math::Vector2i Size = math::Vector2i(-1, -1); // Don't care
 		AnchoredPosition_t Position = AnchoredPosition_t::COUNT; // Don't care
 		RenderBackend_t Backend = RenderBackend_t::Native;
-
+		WindowMode_t Mode = WindowMode_t::Windowed;
 		
+		constexpr WindowDesc()noexcept = default;
 	};
 
 	class IWindow
 	{
-
+	public:
+	
 	};
 }
 

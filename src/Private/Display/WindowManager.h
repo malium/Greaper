@@ -10,11 +10,18 @@
 
 #include "ImplPrerequisites.h"
 #include <Display/IWindowManager.h>
+#include <Core/Concurrency.h>
 
 namespace greaper::disp
 {
 	class WindowManager final : public IWindowManager
 	{
+		mutable Mutex m_MonitorMutex;
+		Vector<SPtr<Monitor>> m_Monitors;
+		sizet m_MainMonitor;
+
+		void QueryMonitors();
+
 	public:
 		WindowManager()noexcept = default;
 		~WindowManager()noexcept = default;
@@ -31,9 +38,9 @@ namespace greaper::disp
 
 		void DeinitProperties()noexcept override;
 
-		const DisplayAdapter& GetMainDisplayAdapter() const override;
+		SPtr<Monitor> GetMainMonitor() const override;
 		
-		void AccessDisplayAdapters(const std::function<void(CSpan<DisplayAdapter>)>& accessFn) const override;
+		void AccessMonitors(const std::function<void(CSpan<SPtr<Monitor>>)>& accessFn) const override;
 
 		TResult<PWindow> CreateWindow(const WindowDesc& desc)override;
 

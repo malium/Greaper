@@ -11,69 +11,47 @@
 #include "../DispPrerequisites.h"
 #include <Core/Base/Rect.h>
 #include <Math/Vector2.h>
+#include "VideoMode.h"
 
 namespace greaper::disp
 {
-	class DisplayAdapter;
-#if PLT_WINDOWS
-	using MonitorHandle = HMONITOR;
-#else
-	using MonitorHandle = void*;
-#endif
-
 	class Monitor
 	{
-		math::Vector2u m_Size;
-		RectU m_WorkRect;
-		MonitorHandle m_Handle;
-		DisplayAdapter* m_Adapter;
-		String m_MonitorName;
-		String m_MonitorString;
-		String m_MonitorID;
-		String m_MonitorKey;
+		math::Vector2i m_Size;
+		RectI m_WorkRect;
+		int32 m_Index;
 		bool m_IsPrimary;
+		Vector<SPtr<VideoMode>> m_VideoModes;
+		sizet m_MainVideoMode;
 
 	public:
 		Monitor()noexcept = default;
-		Monitor(math::Vector2u  size, const RectU& workRect, MonitorHandle handle,
-			DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
-			String monitorKey, bool isPrimary) noexcept;
+		Monitor(math::Vector2i size, RectI workRect, int32 index, Vector<SPtr<VideoMode>> videoModes, bool isPrimary, sizet mainVideoMode) noexcept;
 		Monitor(const Monitor&) = default;
 		Monitor(Monitor&&)noexcept = default;
 		Monitor& operator=(const Monitor&) = default;
 		Monitor& operator=(Monitor&&)noexcept = default;
 
-		INLINE const math::Vector2u& GetSize()const noexcept { return m_Size; }
+		INLINE const math::Vector2i& GetSize()const noexcept { return m_Size; }
 
-		INLINE const RectU& GetWorkRect()const noexcept { return m_WorkRect; }
+		INLINE const RectI& GetWorkRect()const noexcept { return m_WorkRect; }
 
-		INLINE MonitorHandle GetHandle()const noexcept { return m_Handle; }
-
-		INLINE DisplayAdapter* GetAdapter()const noexcept { return m_Adapter; }
-
-		INLINE const String& GetMonitorName()const noexcept { return m_MonitorName; }
-
-		INLINE const String& GetMonitorString()const noexcept { return m_MonitorString; }
-
-		INLINE const String& GetMonitorID()const noexcept { return m_MonitorID; }
-
-		INLINE const String& GetMonitorKey()const noexcept { return m_MonitorKey; }
+		INLINE int32 GetIndex()const noexcept { return m_Index; }
 
 		INLINE bool IsPrimary()const noexcept { return m_IsPrimary; }
+
+		INLINE const Vector<SPtr<VideoMode>>& GetVideoModes()const noexcept { return m_VideoModes; }
+
+		INLINE SPtr<VideoMode> GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
 	};
 
-	INLINE Monitor::Monitor(math::Vector2u size, const RectU& workRect, MonitorHandle handle,
-				DisplayAdapter* adapter, String monitorName, String monitorString, String monitorID, 
-				String monitorKey, bool isPrimary) noexcept
+	INLINE Monitor::Monitor(math::Vector2i size, RectI workRect, int32 index, Vector<SPtr<VideoMode>> videoModes, bool isPrimary, sizet mainVideoMode) noexcept
 		:m_Size(std::move(size))
-		,m_WorkRect(workRect)
-		,m_Handle(handle)
-		,m_Adapter(adapter)
-		,m_MonitorName(std::move(monitorName))
-		,m_MonitorString(std::move(monitorString))
-		,m_MonitorID(std::move(monitorID))
-		,m_MonitorKey(std::move(monitorKey))
+		,m_WorkRect(std::move(workRect))
+		,m_Index(index)
 		,m_IsPrimary(isPrimary)
+		,m_VideoModes(std::move(videoModes))
+		,m_MainVideoMode(mainVideoMode)
 	{
 
 	}

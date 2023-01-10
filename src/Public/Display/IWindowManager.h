@@ -10,7 +10,7 @@
 
 #include "DispPrerequisites.h"
 #include <Core/Interface.h>
-#include "Base/DisplayAdapter.h"
+#include "Base/Monitor.h"
 #include "Base/IWindow.h"
 
 namespace greaper::disp
@@ -28,9 +28,9 @@ namespace greaper::disp
 		using WindowModeChangedEvent_t = Event<const PWindow&, WindowMode_t, WindowMode_t>;
 		using WindowStateChangedEvent_t = Event<const PWindow&, WindowState_t, WindowState_t>;
 
-		virtual const DisplayAdapter& GetMainDisplayAdapter()const = 0;
+		virtual SPtr<Monitor> GetMainMonitor()const = 0;
 		
-		virtual void AccessDisplayAdapters(const std::function<void(CSpan<DisplayAdapter>)>& accessFn)const = 0;
+		virtual void AccessMonitors(const std::function<void(CSpan<SPtr<Monitor>>)>& accessFn)const = 0;
 
 		virtual TResult<PWindow> CreateWindow(const WindowDesc& desc) = 0;
 
