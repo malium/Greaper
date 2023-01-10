@@ -257,34 +257,46 @@ void Application::DeinitProperties()noexcept
 TResult<PGreaperLib> Application::RegisterGreaperLibrary(const WStringView& libPath)noexcept
 {
 	PLibrary lib{ Construct<Library>(libPath) };
+	return RegisterGreaperLibrary(lib);
+}
 
-	if (!lib->IsOpen())
+TResult<PGreaperLib> greaper::core::Application::RegisterGreaperLibrary(const StringView& libPath) noexcept
+{
+	PLibrary lib{ Construct<Library>(libPath) };
+	return RegisterGreaperLibrary(lib);
+}
+
+TResult<PGreaperLib> greaper::core::Application::RegisterGreaperLibrary(PLibrary library) noexcept
+{
+	if (library == nullptr)
 	{
-		return Result::CreateFailure<PGreaperLib>(Format(
-			"Trying to register a GreaperLibrary with path '%S', but couldn't be openned.", libPath.data()));
+		return Result::CreateFailure<PGreaperLib>("Trying to register a GreaperLibrary, but a nullptr Library was given."sv);
 	}
-	auto fnRes = lib->GetFunctionT<void*>("_Greaper"sv);
+	if (!library->IsOpen())
+	{
+		return Result::CreateFailure<PGreaperLib>(
+			"Trying to register a GreaperLibrary, but couldn't be openned."sv);
+	}
+	auto fnRes = library->GetFunctionT<void*>("_Greaper"sv);
 	if (fnRes.HasFailed())
 	{
-		return Result::CreateFailure<PGreaperLib>(Format(
-			"Trying to register a GreaperLibrary with path '%S', but does not comply with Greaper modular protocol.",
-			libPath.data()));
+		return Result::CreateFailure<PGreaperLib>(
+			"Trying to register a GreaperLibrary', but does not comply with Greaper modular protocol."sv);
 	}
 	auto gLibPtr = reinterpret_cast<PGreaperLib*>(fnRes.GetValue()());
 	if (gLibPtr == nullptr || (*gLibPtr) == nullptr)
 	{
-		return Result::CreateFailure<PGreaperLib>(Format(
-			"Trying to register a GreaperLibrary with path '%S', but the library returned a nullptr GreaperLibrary.",
-			libPath.data()));
+		return Result::CreateFailure<PGreaperLib>(
+			"Trying to register a GreaperLibrary, but the library returned a nullptr GreaperLibrary."sv);
 	}
 	auto gLib = PGreaperLib(*gLibPtr);
 	auto res = RegisterGreaperLibrary(gLib);
-	
+
 	if (res.HasFailed())
 		return Result::CopyFailure<PGreaperLib>(res);
 
-	gLib->InitLibrary(lib, (PApplication)gApplication);
-	
+	gLib->InitLibrary(library, (PApplication)gApplication);
+
 	return Result::CreateSuccess(gLib);
 }
 

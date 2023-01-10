@@ -8,7 +8,7 @@
 #include <Core/Platform.h>
 #include <Core/FileStream.h>
 #include <Core/Reflection/Property.h>
-#include <SDL/SDL.h>
+#include <External/SDL/SDL.h>
 
 #if GREAPER_DISP_DLL
 

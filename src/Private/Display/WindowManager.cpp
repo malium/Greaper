@@ -70,28 +70,28 @@ void WindowManager::QueryMonitors()
 
 		auto monitor = PMonitor(AllocT<Monitor>());
 
-		SDL_DisplayMode* displayMode;
-		SDL_DisplayMode* currentDisplayMode;
-		if(SDL_GetCurrentDisplayMode(i, currentDisplayMode) != 0)
+		SDL_DisplayMode displayMode;
+		SDL_DisplayMode currentDisplayMode;
+		if(SDL_GetCurrentDisplayMode(i, &currentDisplayMode) != 0)
 		{
 			lib->LogError(Format("Error on SDL_GetCurrentDisplayMode, msg:%s.", SDL_GetError()));
-			currentDisplayMode = nullptr;
+			ClearMemory(currentDisplayMode);
 		}
 		sizet mainVideoMode = 0;
 		for(decltype(displayModeCount) j = 0; j < displayModeCount; ++j)
 		{
-			if(SDL_GetDisplayMode(i, j, displayMode) != 0)
+			if(SDL_GetDisplayMode(i, j, &displayMode) != 0)
 			{
 				lib->LogError(Format("Error on SDL_GetDisplayMode, msg:%s.", SDL_GetError()));
 				continue;
 			}
-			math::Vector2i resolution { displayMode->w, displayMode->h };
-			uint8 depth = GetPixelDepthFromFormat(displayMode->format);
-			if(displayMode == currentDisplayMode)
+			math::Vector2i resolution { displayMode.w, displayMode.h };
+			uint8 depth = GetPixelDepthFromFormat(displayMode.format);
+			if(memcmp(&displayMode, &currentDisplayMode, sizeof(displayMode) - sizeof(void*)) == 0)
 				mainVideoMode = j;
 			
 			auto* videoMode = AllocT<VideoMode>();
-			new(videoMode)VideoMode(resolution, (WMonitor)monitor, (uint16)displayMode->refresh_rate, depth);
+			new(videoMode)VideoMode(resolution, (WMonitor)monitor, (uint16)displayMode.refresh_rate, depth);
 			videoModes.push_back(PVideoMode(videoMode));
 		}
 

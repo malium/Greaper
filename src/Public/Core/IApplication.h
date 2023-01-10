@@ -50,6 +50,10 @@ namespace greaper
 		virtual ~IApplication()noexcept = default;
 
 		virtual TResult<PGreaperLib> RegisterGreaperLibrary(const WStringView& libPath)noexcept = 0;
+		
+		virtual TResult<PGreaperLib> RegisterGreaperLibrary(const StringView& libPath)noexcept = 0;
+		
+		virtual TResult<PGreaperLib> RegisterGreaperLibrary(PLibrary library)noexcept = 0;
 
 		virtual TResult<PGreaperLib> GetGreaperLibrary(const StringView& libraryName)const noexcept = 0;
 

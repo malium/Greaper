@@ -301,6 +301,11 @@ INLINE void DuplicateMemory(const T& source, T& dst) noexcept
 	memcpy(&dst, &source, sizeof(T));
 }
 template<class T>
+INLINE bool CompareMemory(const T& left, const T& right)noexcept
+{
+	return memcmp(&left, &right, sizeof(T)) == 0;
+}
+template<class T>
 NODISCARD INLINE bool IsMemoryCleared(const T& data) noexcept
 {
 	static const uint8 zeros[sizeof(T)]  = {};

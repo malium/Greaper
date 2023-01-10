@@ -74,6 +74,10 @@ namespace greaper::core
 
 		TResult<PGreaperLib> RegisterGreaperLibrary(const WStringView& libPath)noexcept override;
 
+		TResult<PGreaperLib> RegisterGreaperLibrary(const StringView& libPath)noexcept override;
+
+		TResult<PGreaperLib> RegisterGreaperLibrary(PLibrary library)noexcept override;
+
 		TResult<PGreaperLib> GetGreaperLibrary(const StringView& libraryName)const noexcept override;
 
 		TResult<PGreaperLib> GetGreaperLibrary(const Uuid& libraryUUID)const noexcept override;

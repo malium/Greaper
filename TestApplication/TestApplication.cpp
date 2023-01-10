@@ -10,6 +10,7 @@
 #include <Core/Property.h>
 #include <Core/Base/LogWriterFile.h>
 #include <Core/IThreadManager.h>
+#include <Core/ICommandManager.h>
 #include <Core/Platform.h>
 #include <Math/Vector4.h>
 #include <Math/Matrix4.h>
@@ -18,6 +19,7 @@
 #include <Math/Reflection/Quaternion.h>
 #include <Core/MemoryStream.h>
 #include <Core/Reflection/Property.h>
+#include <Display/IWindowManager.h>
 #include <random>
 #include <iostream>
 
@@ -34,17 +36,22 @@
 
 #if PLT_WINDOWS
 #define CORE_LIBRARY_NAME "Core" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
+#define DISP_LIBRARY_NAME "Disp" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
 #elif PLT_LINUX
 #define CORE_LIBRARY_NAME "./Core" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
+#define CORE_LIBRARY_NAME "./Disp" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
 #endif
 constexpr greaper::StringView CORE_LIB_NAME = { CORE_LIBRARY_NAME };
+constexpr greaper::StringView DISP_LIB_NAME = { DISP_LIBRARY_NAME };
 constexpr greaper::StringView LibFnName = "_Greaper"sv;
 constexpr static bool AsyncLog = true;
-greaper::PLibrary gCoreLib;
-greaper::PGreaperLib gCore;
+greaper::PLibrary gCoreLib, gDispLib;
+greaper::PGreaperLib gCore, gDisp;
 greaper::PApplication gApplication;
 greaper::PLogManager gLogManager;
-greaper::PThreadManager gThreadManger;
+greaper::PThreadManager gThreadManager;
+greaper::PCommandManager gCommandManager;
+greaper::disp::PWindowManager gWindowManager;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
@@ -126,21 +133,30 @@ static void ActivateManagers()
 	mgrRes = gApplication->GetInterface(IThreadManager::InterfaceUUID, gCore->GetLibraryUuid());
 	if (mgrRes.IsOk())
 	{
-		gThreadManger = (PThreadManager)mgrRes.GetValue();
+		gThreadManager = (PThreadManager)mgrRes.GetValue();
+	}
+	mgrRes = gApplication->GetInterface(ICommandManager::InterfaceUUID, gCore->GetLibraryUuid());
+	if (mgrRes.IsOk())
+	{
+		gCommandManager = (PCommandManager)mgrRes.GetValue();
 	}
 
-	gApplication->ActivateInterface((const PInterface&)gThreadManger);
+	gApplication->ActivateInterface((const PInterface&)gThreadManager);
 	gApplication->ActivateInterface((const PInterface&)gLogManager);
+	gApplication->ActivateInterface((const PInterface&)gCommandManager);
 }
 
 static void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
 
+	gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));
+	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
+
 	auto libFNRes = gCoreLib->GetFunctionT<void*>(LibFnName);
 	TRYEXP(libFNRes.IsOk(), CORE_LIBRARY_NAME " does not have the _Greaper function.");
 
-	// init Greaper
+	// init GreaperCore
 	auto* corePtr = static_cast<PGreaperLib*>(libFNRes.GetValue()());
 	TRYEXP(corePtr, CORE_LIBRARY_NAME " does not return a IGreaperLibrary.");
 	gCore = *corePtr;
@@ -166,7 +182,8 @@ static void GreaperCoreLibClose()
 	String appName = gApplication->GetApplicationName().lock()->GetValueCopy();
 	gCore->Log(Format("Closing %s...", appName.c_str()));
 
-	gThreadManger.reset();
+	gCommandManager.reset();
+	gThreadManager.reset();
 	gLogManager.reset();
 	gApplication.reset();
 	gCore->DeinitLibrary();
@@ -673,6 +690,37 @@ static void TestFunction()
 	}
 }
 
+static void GreaperDispLibInit()
+{
+	using namespace greaper;
+
+	gDispLib.reset(Construct<Library>(DISP_LIB_NAME));
+	TRYEXP(gDispLib->IsOpen(), "Couldn't open " DISP_LIBRARY_NAME);
+
+	auto dispRes = gApplication->RegisterGreaperLibrary(gDispLib);
+	TRYEXP(dispRes.IsOk(), "Something went wrong registering " DISP_LIBRARY_NAME);
+	gDisp = dispRes.GetValue();
+
+	auto wndMgrRes = gApplication->GetInterface(disp::IWindowManager::InterfaceUUID, gDisp->GetLibraryUuid());
+	TRYEXP(wndMgrRes.IsOk(), "Something went wrong obtaining interface WindowManager.");
+	gWindowManager = wndMgrRes.GetValue();
+	auto activateRes = gApplication->ActivateInterface((const PInterface&)gWindowManager);
+	TRYEXP(activateRes.IsOk(), "Something went wrong activating interface WindowManager.");
+}
+
+static void GreaperDispLibClose()
+{
+	using namespace greaper;
+
+	gWindowManager.reset();
+	gDisp.reset();
+	gDispLib.reset();
+	//auto dispRes = gApplication->UnregisterGreaperLibrary(gDisp);
+	//TRYEXP(dispRes.IsOk(), "Something went wrong unregistering " DISP_LIBRARY_NAME);
+
+
+}
+
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
@@ -681,16 +729,15 @@ int MainCode(void* hInstance, int argc, char** argv)
 	
 	try
 	{
-		gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));
-		TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
-
 		GreaperCoreLibInit(hInstance, argc, argv);
+		GreaperDispLibInit();
 
 		TestFunction();
 		std::cout << "Test finished" << std::endl;
 		char c;
 		std::cin >> c;
 
+		GreaperDispLibClose();
 		GreaperCoreLibClose();
 
 		gCoreLib->Close();
