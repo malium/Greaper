@@ -17,41 +17,55 @@ namespace greaper::disp
 {
 	class Monitor
 	{
-		math::Vector2i m_Size;
+		RectI m_SizeRect;
 		RectI m_WorkRect;
 		int32 m_Index;
-		bool m_IsPrimary;
-		Vector<SPtr<VideoMode>> m_VideoModes;
+		String m_Name;
+		Vector<PVideoMode> m_VideoModes;
 		sizet m_MainVideoMode;
+		float m_DiagonalDPI;
+		float m_HorizontalDPI;
+		float m_VerticalDPI;
 
 	public:
 		Monitor()noexcept = default;
-		Monitor(math::Vector2i size, RectI workRect, int32 index, Vector<SPtr<VideoMode>> videoModes, bool isPrimary, sizet mainVideoMode) noexcept;
+		Monitor(RectI sizeRect, RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi)noexcept;
 		Monitor(const Monitor&) = default;
 		Monitor(Monitor&&)noexcept = default;
 		Monitor& operator=(const Monitor&) = default;
 		Monitor& operator=(Monitor&&)noexcept = default;
 
-		INLINE const math::Vector2i& GetSize()const noexcept { return m_Size; }
+		INLINE const RectI& GetSizeRect()const noexcept { return m_SizeRect; }
 
 		INLINE const RectI& GetWorkRect()const noexcept { return m_WorkRect; }
 
+		INLINE const String& GetName()const noexcept { return m_Name; }
+
 		INLINE int32 GetIndex()const noexcept { return m_Index; }
 
-		INLINE bool IsPrimary()const noexcept { return m_IsPrimary; }
+		INLINE bool IsPrimary()const noexcept { return m_Index == 0; }
 
-		INLINE const Vector<SPtr<VideoMode>>& GetVideoModes()const noexcept { return m_VideoModes; }
+		INLINE float GetDiagonalDPI()const noexcept { return m_DiagonalDPI; }
 
-		INLINE SPtr<VideoMode> GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
+		INLINE float GetHorizontalDPI()const noexcept { return m_HorizontalDPI; }
+
+		INLINE float GetVerticalDPI()const noexcept { return m_VerticalDPI; }
+
+		INLINE const Vector<PVideoMode>& GetVideoModes()const noexcept { return m_VideoModes; }
+
+		INLINE PVideoMode GetMainVideoMode()const noexcept { if(m_VideoModes.size() > m_MainVideoMode) return m_VideoModes[m_MainVideoMode]; return SPtr<VideoMode>(); }
 	};
 
-	INLINE Monitor::Monitor(math::Vector2i size, RectI workRect, int32 index, Vector<SPtr<VideoMode>> videoModes, bool isPrimary, sizet mainVideoMode) noexcept
-		:m_Size(std::move(size))
+	INLINE Monitor::Monitor(RectI sizeRect, RectI workRect, int32 index, String name, Vector<PVideoMode> videoModes, sizet mainVideoMode, float ddpi, float hdpi, float vdpi) noexcept
+		:m_SizeRect(std::move(sizeRect))
 		,m_WorkRect(std::move(workRect))
 		,m_Index(index)
-		,m_IsPrimary(isPrimary)
+		,m_Name(std::move(name))
 		,m_VideoModes(std::move(videoModes))
 		,m_MainVideoMode(mainVideoMode)
+		,m_DiagonalDPI(ddpi)
+		,m_HorizontalDPI(hdpi)
+		,m_VerticalDPI(vdpi)
 	{
 
 	}

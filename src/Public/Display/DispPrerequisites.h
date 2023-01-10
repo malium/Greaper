@@ -22,9 +22,8 @@ namespace greaper::disp
 	class IWindow; using PWindow = SPtr<IWindow>; using WWindow = WPtr<IWindow>;
 
 
-	class DisplayAdapter;
-	class Monitor;
-	class VideoMode;
+	class Monitor; using PMonitor = SPtr<Monitor>; using WMonitor = WPtr<Monitor>;
+	class VideoMode; using PVideoMode = SPtr<VideoMode>; using WVideoMode = WPtr<VideoMode>;
 }
 
 #endif /* DISP_PREREQUISITES_H */

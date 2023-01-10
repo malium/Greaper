@@ -17,7 +17,7 @@ namespace greaper::disp
 	class WindowManager final : public IWindowManager
 	{
 		mutable Mutex m_MonitorMutex;
-		Vector<SPtr<Monitor>> m_Monitors;
+		Vector<PMonitor> m_Monitors;
 		sizet m_MainMonitor;
 
 		void QueryMonitors();
@@ -38,9 +38,9 @@ namespace greaper::disp
 
 		void DeinitProperties()noexcept override;
 
-		SPtr<Monitor> GetMainMonitor() const override;
+		PMonitor GetMainMonitor() const override;
 		
-		void AccessMonitors(const std::function<void(CSpan<SPtr<Monitor>>)>& accessFn) const override;
+		void AccessMonitors(const std::function<void(CSpan<PMonitor>)>& accessFn) const override;
 
 		TResult<PWindow> CreateWindow(const WindowDesc& desc)override;
 

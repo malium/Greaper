@@ -16,14 +16,14 @@ namespace greaper::disp
 	class Monitor;
 	class VideoMode
 	{
-		WPtr<Monitor> m_Monitor;
+		WMonitor m_Monitor;
 		math::Vector2i m_Resolution = math::Vector2i(0,0);
 		uint16 m_Frequency = 0;
 		uint8 m_PixelDepth = 0;
 
 	public:
 		constexpr VideoMode()noexcept = default;
-		constexpr VideoMode(math::Vector2i resolution, WPtr<Monitor> monitor, uint16 frequency, uint8 pixelDepth)noexcept;
+		VideoMode(math::Vector2i resolution, WMonitor monitor, uint16 frequency, uint8 pixelDepth)noexcept;
 		VideoMode(const VideoMode&) = default;
 		VideoMode(VideoMode&&)noexcept = default;
 		VideoMode& operator=(const VideoMode&) = default;
@@ -31,14 +31,14 @@ namespace greaper::disp
 
 		INLINE constexpr const math::Vector2i& GetResolution()const noexcept { return m_Resolution; }
 
-		INLINE WPtr<Monitor> GetMonitor()const noexcept { return m_Monitor; }
+		INLINE WMonitor GetMonitor()const noexcept { return m_Monitor; }
 
 		INLINE constexpr uint16 GetFrequency()const noexcept { return m_Frequency; }
 
 		INLINE constexpr uint8 GetPixelDepth()const noexcept { return m_PixelDepth; }
 	};
 
-	INLINE constexpr VideoMode::VideoMode(math::Vector2i resolution, WPtr<Monitor> monitor, uint16 frequency, uint8 pixelDepth) noexcept
+	INLINE VideoMode::VideoMode(math::Vector2i resolution, WMonitor monitor, uint16 frequency, uint8 pixelDepth) noexcept
 		:m_Resolution(std::move(resolution))
 		,m_Monitor(std::move(monitor))
 		,m_Frequency(frequency)
