@@ -79,7 +79,7 @@ namespace greaper
 			if(res.HasFailed())
 				LogWarning(res.GetFailMessage());
 			
-			mgr->Deinitialize();
+			//mgr->Deinitialize();
 			mgr.reset();
 		}
 	}
@@ -130,12 +130,12 @@ namespace greaper
 		{
 			if(prop->IsStatic())
 				continue; // Static are regenerated each library init, never stored
-			refl::ComplexType<IProperty>::ToJSON(*prop, json.get(), prop->GetPropertyName());
+			prop->_ValueToJSON(json.get(), prop->GetPropertyName());
 		}
 		auto text = SPtr<char>(cJSON_Print(json.get()));
 		const auto textLength = strlen(text.get());
 		auto written = stream.Write(text.get(), textLength);
-		if(written != textLength)
+		if(written < 0 || (sizet)written != textLength)
 		{
 			LogWarning(Format("Something went wrong while writting the config file, TextLength:%" PRIiPTR " Written:%" PRIiPTR ".", textLength, written));
 			return; // Added in case we need to expand this function
@@ -177,7 +177,9 @@ namespace greaper
 		{
 			if (prop->IsStatic())
 				continue; // Static are regenerated each library init, never stored
-			refl::ComplexType<IProperty>::FromJSON(*prop, json.get(), prop->GetPropertyName());
+			auto res = prop->_ValueFromJSON(json.get(), prop->GetPropertyName());
+			if (res.HasFailed())
+				LogWarning(res.GetFailMessage());
 		}
 	}
 

@@ -730,14 +730,14 @@ int MainCode(void* hInstance, int argc, char** argv)
 	try
 	{
 		GreaperCoreLibInit(hInstance, argc, argv);
-		GreaperDispLibInit();
+		//GreaperDispLibInit();
 
 		TestFunction();
 		std::cout << "Test finished" << std::endl;
 		char c;
 		std::cin >> c;
 
-		GreaperDispLibClose();
+		//GreaperDispLibClose();
 		GreaperCoreLibClose();
 
 		gCoreLib->Close();
