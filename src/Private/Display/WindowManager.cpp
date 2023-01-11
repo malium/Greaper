@@ -32,13 +32,13 @@ void WindowManager::QueryMonitors()
 		lib->LogError(Format("Error on SDL_GetNumVideoDisplays, msg:%s.", SDL_GetError()));
 		return;
 	}
-	if(m_Monitors.capacity() < displayCount)
-		m_Monitors.reserve(displayCount);
-	
+	m_Monitors.resize(displayCount, PMonitor());
+
 	SDL_Rect bounds, usableBounds;
 	float ddpi, hdpi, vdpi;
 	for(decltype(displayCount) i = 0; i < displayCount; ++i)
 	{
+		auto& monitor = m_Monitors[i];
 		String name{};
 		auto nameRet = SDL_GetDisplayName(i);
 		if(nameRet != nullptr)
@@ -66,9 +66,9 @@ void WindowManager::QueryMonitors()
 		
 		auto displayModeCount = SDL_GetNumDisplayModes(i);
 		Vector<PVideoMode> videoModes;
-		videoModes.reserve(displayModeCount);
+		videoModes.resize(displayModeCount, PVideoMode());
 
-		auto monitor = PMonitor(AllocT<Monitor>());
+		monitor.reset(AllocT<Monitor>());
 
 		SDL_DisplayMode displayMode;
 		SDL_DisplayMode currentDisplayMode;
@@ -90,13 +90,11 @@ void WindowManager::QueryMonitors()
 			if(memcmp(&displayMode, &currentDisplayMode, sizeof(displayMode) - sizeof(void*)) == 0)
 				mainVideoMode = j;
 			
-			auto* videoMode = AllocT<VideoMode>();
-			new(videoMode)VideoMode(resolution, (WMonitor)monitor, (uint16)displayMode.refresh_rate, depth);
-			videoModes.push_back(PVideoMode(videoMode));
+			auto& videoMode = videoModes[j];
+			videoMode.reset(AllocT<VideoMode>());
+			new(videoMode.get())VideoMode(resolution, (WMonitor)monitor, (uint16)displayMode.refresh_rate, depth);
 		}
-
 		new(monitor.get())Monitor(sizeRect, workRect, i, std::move(name), std::move(videoModes), mainVideoMode, ddpi, hdpi, vdpi);
-		m_Monitors.push_back(monitor);
 	}
 }
 
@@ -134,7 +132,7 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 	}
 	else
 	{
-		//QueryMonitors();
+		QueryMonitors();
 	}
 }
 

@@ -53,16 +53,22 @@ namespace greaper
 			}
 			INLINE void DecSharedReference() noexcept override
 			{
-				--m_SharedReferences;
-				if (m_SharedReferences <= 0)
+				if (m_SharedReferences <= 1)
 				{
-					m_Deleter(m_Value);
-					m_Value = nullptr;
-
+					if (m_Value != nullptr)
+					{
+						m_Deleter(m_Value);
+						m_Value = nullptr;
+					}
+					--m_SharedReferences;
 					if (m_WeakReferences <= 0)
 					{
 						PlatformDealloc(this);
 					}
+				}
+				else
+				{
+					--m_SharedReferences;
 				}
 			}
 			INLINE void AddWeakReference() noexcept override
@@ -107,16 +113,22 @@ namespace greaper
 			}
 			INLINE void DecSharedReference() noexcept override
 			{
-				--m_SharedReferences;
-				if (m_SharedReferences <= 0)
+				if (m_SharedReferences <= 1)
 				{
-					m_Deleter(m_Value);
-					m_Value = nullptr;
-
+					if (m_Value != nullptr)
+					{
+						m_Deleter(m_Value);
+						m_Value = nullptr;
+					}
+					--m_SharedReferences;
 					if (m_WeakReferences <= 0)
 					{
 						PlatformDealloc(this);
 					}
+				}
+				else
+				{
+					--m_SharedReferences;
 				}
 			}
 			INLINE void AddWeakReference() noexcept override
