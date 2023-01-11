@@ -25,13 +25,9 @@ namespace greaper::disp
 
 		void Initialize()noexcept override;
 
-		void InitManagers()noexcept override;
+		void AddManagers()noexcept override;
 
-		void InitProperties()noexcept override;
-
-		void DeinitProperties()noexcept override;
-
-		void DeinitManagers()noexcept override;
+		void RemoveManagers()noexcept override;
 
 		void Deinitialize()noexcept override;
 

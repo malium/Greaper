@@ -23,22 +23,32 @@ namespace greaper
 	protected:
 		EmptyResult RegisterProperty(const PIProperty& property)noexcept;
 
-		virtual void Initialize()noexcept = 0;
+		// Used normally to initialize sub libraries (SDL, FreeImage...)
+		virtual void Initialize()noexcept;
+		// Used normally to deinitialize sub libraries (SDL, FreeImage...)
+		virtual void Deinitialize()noexcept;
 
-		virtual void InitManagers()noexcept = 0;
+		// Creates all the managers of this library and adds them to the m_Managers vector
+		virtual void AddManagers()noexcept;
+		// Talk to application to register all created managers, can be overriden but usually is not needed
+		virtual void RegisterManagers()noexcept;
+		// Talk to application to unregister all created managers, can be overriden but usually is not needed
+		virtual void UnregisterManagers()noexcept;
+		// Removes all managers from the m_Managers vector, can be overriden but usually is not needed
+		virtual void RemoveManagers()noexcept;
 
-		virtual void InitProperties()noexcept = 0;
+		// Creates all the properties of this library and adds them to the m_Properties vector
+		virtual void AddProperties()noexcept;
+		// Removes all properties from the m_Properties vector, can be overriden but usually is not needed
+		virtual void RemoveProperties()noexcept;
 
-		virtual void DeinitProperties()noexcept = 0;
-
-		virtual void DeinitManagers()noexcept = 0;
-
-		virtual void Deinitialize()noexcept = 0;
-
+		// Allows the import and export of the configuration (Properties) of the library, if not overrided defaults to true
 		virtual bool ShouldImportExportConfig()const noexcept;
 
-		void ExportConfig()noexcept;
-		void ImportConfig()noexcept;
+		// Exports all the configuration (Properties) of the library, can be overriden but usually is not needed
+		virtual void ExportConfig()noexcept;
+		// Imports all the configuration (Properties) of the library, can be overriden but usually is not needed
+		virtual void ImportConfig()noexcept;
 
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{  };

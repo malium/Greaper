@@ -43,9 +43,6 @@ BEGIN_C
 DLLEXPORT void* _Greaper();
 END_C
 
-const auto configPath = std::filesystem::current_path() / "Config";
-const auto configFilePath = configPath / "GreaperCore.json";
-
 void* _Greaper()
 {
 	if (gCoreLibrary == nullptr)
@@ -56,104 +53,39 @@ void* _Greaper()
 	return &gCoreLibrary;
 }
 
-void greaper::core::GreaperCoreLibrary::Initialize() noexcept
+void greaper::core::GreaperCoreLibrary::AddManagers() noexcept
 {
-
-}
-
-void greaper::core::GreaperCoreLibrary::InitManagers()noexcept
-{
-	if (m_Application != nullptr)
-	{
-		LogError(Format("Trying to Initialize the Managers of the GreaperLibrary '%s', but IApplication was already initialized.", LibraryName.data()));
-		return;
-	}
-
 	m_Application.reset(Construct<Application>());
 	gApplication = m_Application;
 	m_Application->Initialize((WGreaperLib)gCoreLibrary);
 
-	// add more managers
 	gThreadManager.reset(Construct<ThreadManager>());
 	m_Managers.push_back((PInterface)gThreadManager);
 	gLogManager.reset(Construct<LogManager>());
 	m_Managers.push_back((PInterface)gLogManager);
 	gCommandManager.reset(Construct<CommandManager>());
 	m_Managers.push_back((PInterface)gCommandManager);
-
-
-
-
-	for (const auto& mgr : m_Managers)
-	{
-		mgr->Initialize((WGreaperLib)gCoreLibrary);
-		m_Application->RegisterInterface(mgr);
-	}
 }
 
-void greaper::core::GreaperCoreLibrary::InitProperties()noexcept
+void greaper::core::GreaperCoreLibrary::AddProperties() noexcept
 {
 	m_Application->InitProperties();
-	for (const auto& mgr : m_Managers)
-		mgr->InitProperties();
-
-	std::filesystem::create_directories(configPath);
-	auto stream = FileStream(configFilePath, FileStream::READ);
-	String fileTxt{};
-	fileTxt.resize(stream.Size());
-	stream.Read(fileTxt.data(), stream.Size());
-	auto json = SPtr<cJSON>(cJSON_Parse(fileTxt.c_str()), cJSON_Delete);
-	for (auto& prop : m_Properties)
-	{
-		if (prop->IsStatic())
-			continue;
-		refl::ComplexType<IProperty>::FromJSON(*prop, json.get(), prop->GetPropertyName().c_str());
-	}
+	IGreaperLibrary::AddProperties();
 }
 
-void greaper::core::GreaperCoreLibrary::DeinitProperties()noexcept
+void greaper::core::GreaperCoreLibrary::RemoveProperties() noexcept
 {
-	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
-		(*it)->DeinitProperties();
-
 	m_Application->DeinitProperties();
-
-	auto json = SPtr<cJSON>(cJSON_CreateObject(), cJSON_Delete);
-	for (const auto& prop : m_Properties)
-	{
-		if (prop->IsStatic())
-			continue;
-		refl::ComplexType<IProperty>::ToJSON(*prop, json.get(), prop->GetPropertyName());
-	}
-	std::filesystem::create_directories(configPath);
-	std::filesystem::remove(configFilePath);
-	auto stream = FileStream(configFilePath, FileStream::READ | FileStream::WRITE);
-	auto text = SPtr<char>(cJSON_Print(json.get()));
-	stream.Write(text.get(), strlen(text.get()));
-	
-	m_Properties.clear();
-	m_PropertyMap.clear();
+	IGreaperLibrary::RemoveProperties();
 }
 
-void greaper::core::GreaperCoreLibrary::DeinitManagers()noexcept
+void greaper::core::GreaperCoreLibrary::RemoveManagers() noexcept
 {
-	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
-	{
-		auto& mgr = (*it);
-		if (mgr->IsActive())
-			m_Application->DeactivateInterface(mgr->GetInterfaceUUID());
-		m_Application->UnregisterInterface(mgr);
-
-		mgr.reset();
-	}
-
+	IGreaperLibrary::RemoveManagers();
 	gCommandManager.reset();
 	gLogManager.reset();
 	gThreadManager.reset();
 	m_Application->Deinitialize();
-
-	m_Managers.clear();
-	m_Application.reset();
 }
 
 void greaper::core::GreaperCoreLibrary::Deinitialize()noexcept

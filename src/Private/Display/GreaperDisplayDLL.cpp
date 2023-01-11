@@ -59,78 +59,18 @@ void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 	VerifyGreaterEqual(rtn, 0, "Couldn't initialize SDL, error: %s.", SDL_GetError());
 }
 
-void greaper::disp::GreaperDispLibrary::InitManagers()noexcept
+void greaper::disp::GreaperDispLibrary::AddManagers()noexcept
 {
 	// add more managers
 	gWindowManager.reset(Construct<WindowManager>());
 	m_Managers.push_back((PInterface)gWindowManager);
 
-
-
-
-	for (const auto& mgr : m_Managers)
-	{
-		mgr->Initialize((WGreaperLib)gDispLibrary);
-		m_Application->RegisterInterface(mgr);
-	}
 }
 
-void greaper::disp::GreaperDispLibrary::InitProperties()noexcept
+void greaper::disp::GreaperDispLibrary::RemoveManagers()noexcept
 {
-	for (const auto& mgr : m_Managers)
-		mgr->InitProperties();
-
-	std::filesystem::create_directories(configPath);
-	auto stream = FileStream(configFilePath, FileStream::READ);
-	String fileTxt{};
-	fileTxt.resize(stream.Size());
-	stream.Read(fileTxt.data(), stream.Size());
-	auto json = SPtr<cJSON>(cJSON_Parse(fileTxt.c_str()), cJSON_Delete);
-	for (auto& prop : m_Properties)
-	{
-		if (prop->IsStatic())
-			continue;
-		refl::ComplexType<IProperty>::FromJSON(*prop, json.get(), prop->GetPropertyName().c_str());
-	}
-}
-
-void greaper::disp::GreaperDispLibrary::DeinitProperties()noexcept
-{
-	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
-		(*it)->DeinitProperties();
-
-	auto json = SPtr<cJSON>(cJSON_CreateObject(), cJSON_Delete);
-	for (const auto& prop : m_Properties)
-	{
-		if (prop->IsStatic())
-			continue;
-		refl::ComplexType<IProperty>::ToJSON(*prop, json.get(), prop->GetPropertyName());
-	}
-	std::filesystem::create_directories(configPath);
-	std::filesystem::remove(configFilePath);
-	auto stream = FileStream(configFilePath, FileStream::READ | FileStream::WRITE);
-	auto text = SPtr<char>(cJSON_Print(json.get()));
-	stream.Write(text.get(), strlen(text.get()));
-	
-	m_Properties.clear();
-	m_PropertyMap.clear();
-}
-
-void greaper::disp::GreaperDispLibrary::DeinitManagers()noexcept
-{
-	for (auto it = m_Managers.rbegin(); it < m_Managers.rend(); ++it)
-	{
-		auto& mgr = (*it);
-		if (mgr->IsActive())
-			m_Application->DeactivateInterface(mgr->GetInterfaceUUID());
-		m_Application->UnregisterInterface(mgr);
-
-		mgr.reset();
-	}
-
+	IGreaperLibrary::RemoveManagers();
 	gWindowManager.reset();
-	m_Managers.clear();
-	m_Application.reset();
 }
 
 void greaper::disp::GreaperDispLibrary::Deinitialize()noexcept

@@ -1,4 +1,3 @@
-#include "IGreaperLibrary.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
@@ -33,6 +32,75 @@ namespace greaper
 		m_Properties.push_back(property);
 		m_PropertyMap.insert_or_assign(property->GetPropertyName(), index);
 		return Result::CreateSuccess();
+	}
+
+	INLINE void IGreaperLibrary::Initialize() noexcept
+	{
+		/* No-op */
+	}
+
+	INLINE void IGreaperLibrary::Deinitialize() noexcept
+	{
+		/* No-op */
+	}
+
+	INLINE void IGreaperLibrary::AddManagers() noexcept
+	{
+		/* No-op */
+	}
+
+	INLINE void IGreaperLibrary::RegisterManagers() noexcept
+	{
+		auto libRes = m_Application->GetGreaperLibrary(GetLibraryUuid());
+		Verify(libRes.IsOk(), "Couldn't get the GreaperLibrary %s from application.", GetLibraryName().data());
+		auto lib = libRes.GetValue();
+		for (const auto& mgr : m_Managers)
+		{
+			mgr->Initialize((WGreaperLib)lib);
+			auto res = m_Application->RegisterInterface(mgr);
+			if(res.HasFailed())
+				LogWarning(res.GetFailMessage());
+		}
+	}
+
+	INLINE void IGreaperLibrary::UnregisterManagers() noexcept
+	{
+		for(auto it = m_Managers.rbegin(); it != m_Managers.rend(); ++it)
+		{
+			auto& mgr = *it;
+			EmptyResult res;
+			if(mgr->IsActive())
+			{
+				res = m_Application->DeactivateInterface(mgr->GetInterfaceUUID());
+				if(res.HasFailed())
+					LogWarning(res.GetFailMessage());
+			}
+			res = m_Application->UnregisterInterface(mgr);
+			if(res.HasFailed())
+				LogWarning(res.GetFailMessage());
+			
+			mgr->Deinitialize();
+			mgr.reset();
+		}
+	}
+
+	INLINE void IGreaperLibrary::RemoveManagers() noexcept
+	{
+		m_Managers.clear();
+	}
+
+	INLINE void IGreaperLibrary::AddProperties() noexcept
+	{
+		for(const auto& mgr : m_Managers)
+			mgr->InitProperties();
+	}
+
+	INLINE void IGreaperLibrary::RemoveProperties() noexcept
+	{
+		for(const auto& mgr : m_Managers)
+			mgr->DeinitProperties();
+		m_Properties.clear();
+		m_PropertyMap.clear();
 	}
 
 	NODISCARD INLINE bool IGreaperLibrary::ShouldImportExportConfig() const noexcept
@@ -129,8 +197,9 @@ namespace greaper
 		m_Application = std::move(app);
 
 		Initialize();
-		InitManagers();
-		InitProperties();
+		AddManagers();
+		RegisterManagers();
+		AddProperties();
 		if(ShouldImportExportConfig())
 			ImportConfig();
 
@@ -173,9 +242,11 @@ namespace greaper
 
 		if(ShouldImportExportConfig())
 			ExportConfig();
-		DeinitProperties();
-		DeinitManagers();
+		RemoveProperties();
+		UnregisterManagers();
+		RemoveManagers();
 		Deinitialize();
+		m_Application.reset();
 
 		Log(Format("%s has been deinitialized.", GetLibraryName().data()));
 
