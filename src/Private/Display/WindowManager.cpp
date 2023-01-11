@@ -134,7 +134,7 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 	}
 	else
 	{
-		QueryMonitors();
+		//QueryMonitors();
 	}
 }
 

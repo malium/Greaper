@@ -341,17 +341,13 @@ EmptyResult Application::UnregisterGreaperLibrary(const PGreaperLib& library)noe
 	sizet nIndex = std::numeric_limits<sizet>::max();
 	sizet uIndex = std::numeric_limits<sizet>::max();
 	sizet index = std::numeric_limits<sizet>::max();
-	if (nameIT != m_LibraryNameMap.end())
-	{
-		nIndex = nameIT->second;
-		m_LibraryNameMap.erase(nameIT);
-	}
-	if (uuidIT != m_LibraryUuidMap.end())
-	{
-		uIndex = uuidIT->second;
-		m_LibraryUuidMap.erase(uuidIT);
-	}
 
+	if (nameIT != m_LibraryNameMap.end())
+		nIndex = nameIT->second;
+	
+	if (uuidIT != m_LibraryUuidMap.end())
+		uIndex = uuidIT->second;
+	
 	auto lib = m_Library.lock();
 	VerifyNotNull(lib, "Trying to unregister a GreaperLibrary, but the Application library is expired.");
 
@@ -373,7 +369,7 @@ EmptyResult Application::UnregisterGreaperLibrary(const PGreaperLib& library)noe
 
 	auto& libInfo = m_Libraries[index];
 	lib->Log(Format("Unregistering GraeperLibrary '%s'.", library->GetLibraryName().data()));
-	for (auto& iface : libInfo.Interfaces)
+	/*for (auto& iface : libInfo.Interfaces)
 	{
 		if (iface == nullptr)
 			continue;
@@ -386,12 +382,20 @@ EmptyResult Application::UnregisterGreaperLibrary(const PGreaperLib& library)noe
 		{
 			iface->Deinitialize();
 		}
-	}
+	}*/
 	libInfo.Lib->DeinitLibrary();
 	libInfo.Lib.reset();
 	libInfo.IntefaceNameMap.clear();
 	libInfo.InterfaceUuidMap.clear();
 	libInfo.Interfaces.clear();
+
+	if (nameIT != m_LibraryNameMap.end())
+		m_LibraryNameMap.erase(nameIT);
+
+	if (uuidIT != m_LibraryUuidMap.end())
+		m_LibraryUuidMap.erase(uuidIT);
+
+	m_Libraries.erase(m_Libraries.begin() + index);
 	return Result::CreateSuccess();
 }
 

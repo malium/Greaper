@@ -712,6 +712,9 @@ static void GreaperDispLibClose()
 {
 	using namespace greaper;
 
+	auto res = gApplication->UnregisterGreaperLibrary(gDisp);
+	if (res.HasFailed())
+		gLogManager->Log(LogLevel_t::ERROR, res.GetFailMessage(), DISP_LIB_NAME);
 	gWindowManager.reset();
 	gDisp.reset();
 	gDispLib.reset();
@@ -724,20 +727,24 @@ static void GreaperDispLibClose()
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
+	const bool RunTests = false;
 
 	OSPlatform::PerThreadInit();
 	
 	try
 	{
 		GreaperCoreLibInit(hInstance, argc, argv);
-		//GreaperDispLibInit();
+		GreaperDispLibInit();
 
-		TestFunction();
-		std::cout << "Test finished" << std::endl;
-		char c;
-		std::cin >> c;
+		if (RunTests)
+		{
+			TestFunction();
+			std::cout << "Test finished" << std::endl;
+			char c;
+			std::cin >> c;
+		}
 
-		//GreaperDispLibClose();
+		GreaperDispLibClose();
 		GreaperCoreLibClose();
 
 		gCoreLib->Close();
