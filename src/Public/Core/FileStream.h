@@ -35,7 +35,11 @@ namespace greaper
 
 		bool Eof()const noexcept override;
 
-		NODISCARD SPtr<IStream> Clone(bool copyData = true)const noexcept override;
+		bool IsReadable()const noexcept override;
+
+		bool IsWritable()const noexcept override;
+
+		SPtr<IStream> Clone(UNUSED bool copyData = true)const noexcept override;
 
 		void Close()noexcept override;
 

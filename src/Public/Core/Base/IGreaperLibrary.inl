@@ -1,3 +1,4 @@
+#include "IGreaperLibrary.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
@@ -6,6 +7,7 @@
 #pragma once
 
 //#include "../IGreaperLibrary.h"
+#include "../FileStream.h"
 
 namespace greaper
 {
@@ -33,6 +35,84 @@ namespace greaper
 		return Result::CreateSuccess();
 	}
 
+	NODISCARD INLINE bool IGreaperLibrary::ShouldImportExportConfig() const noexcept
+	{
+		return true;
+	}
+
+	INLINE void IGreaperLibrary::ExportConfig() noexcept
+	{
+		const auto configPath = std::filesystem::current_path() / "Config";
+		const auto configFileName = String{GetLibraryName()} + ".json";
+		const auto configFilePath = configPath / configFileName;
+
+		std::filesystem::create_directories(configPath);
+		std::filesystem::remove(configFilePath);
+		FileStream stream{ configFilePath, FileStream::READ | FileStream::WRITE };
+
+		// Something went wrong
+		if(!stream.IsWritable())
+		{
+			LogError("Something went wrong while creating the config file");
+			return;
+		}
+
+		auto json = SPtr<cJSON>(cJSON_CreateObject(), cJSON_Delete);
+		for (const auto& prop : m_Properties)
+		{
+			if(prop->IsStatic())
+				continue; // Static are regenerated each library init, never stored
+			refl::ComplexType<IProperty>::ToJSON(*prop, json.get(), prop->GetPropertyName());
+		}
+		auto text = SPtr<char>(cJSON_Print(json.get()));
+		const auto textLength = strlen(text.get());
+		auto written = stream.Write(text.get(), textLength);
+		if(written != textLength)
+		{
+			LogWarning(Format("Something went wrong while writting the config file, TextLength:%" PRIiPTR " Written:%" PRIiPTR ".", textLength, written));
+			return; // Added in case we need to expand this function
+		}
+	}
+
+	INLINE void IGreaperLibrary::ImportConfig() noexcept
+	{
+		if(m_Properties.empty())
+			return; // No config to import
+
+		const auto configPath = std::filesystem::current_path() / "Config";
+		const auto configFileName = String{GetLibraryName()} + ".json";
+		const auto configFilePath = configPath / configFileName;
+
+		std::filesystem::create_directories(configPath);
+		FileStream stream{ configFilePath, FileStream::READ };
+		// Could not be opened because it didn't exist
+		if(!stream.IsReadable())
+			return; 
+
+		String fileTxt{};
+		const auto fileLength = stream.Size();
+		if(fileLength <= 0) 
+		{ // Empty or something went wrong
+			LogWarning("Config file could not be read, length <= 0.");
+			return;
+		}
+		fileTxt.resize(fileLength);
+		auto readAmount = stream.Read(fileTxt.data(), fileLength);
+		stream.Close(); // Close the file as soon as possible
+		if(readAmount != fileLength)
+		{ // Couldn't read it all? Something went wrong
+			LogWarning(Format("Something went wrong while reading the config file, FileSize:%" PRIiPTR " Read:%" PRIiPTR ".", fileLength, readAmount));
+			return;
+		}
+		auto json = SPtr<cJSON>(cJSON_Parse(fileTxt.c_str()), cJSON_Delete);
+		for(auto& prop : m_Properties)
+		{
+			if (prop->IsStatic())
+				continue; // Static are regenerated each library init, never stored
+			refl::ComplexType<IProperty>::FromJSON(*prop, json.get(), prop->GetPropertyName());
+		}
+	}
+
 	INLINE void IGreaperLibrary::InitLibrary(PLibrary lib, PApplication app) noexcept
 	{
 		using namespace std::placeholders;
@@ -51,6 +131,8 @@ namespace greaper
 		Initialize();
 		InitManagers();
 		InitProperties();
+		if(ShouldImportExportConfig())
+			ImportConfig();
 
 		if (m_Application != nullptr)
 		{
@@ -89,6 +171,8 @@ namespace greaper
 
 		m_InitializationState = InitState_t::Stopping;
 
+		if(ShouldImportExportConfig())
+			ExportConfig();
 		DeinitProperties();
 		DeinitManagers();
 		Deinitialize();

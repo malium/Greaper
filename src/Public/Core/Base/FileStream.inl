@@ -1,3 +1,4 @@
+#include "FileStream.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
@@ -31,6 +32,7 @@ namespace greaper
 
 		if (m_Stream->fail())
 		{
+			m_Stream.reset();
 			return;
 		}
 
@@ -46,8 +48,13 @@ namespace greaper
 
 	INLINE ssizet FileStream::Read(void* buf, ssizet count) const noexcept
 	{
-		m_Stream->read((char*)buf, static_cast<std::streamsize>(count));
-		return (ssizet)m_Stream->gcount();
+		ssizet read = 0;
+		if(IsReadable())
+		{
+			m_Stream->read((char*)buf, static_cast<std::streamsize>(count));
+			read = (ssizet)m_Stream->gcount();
+		}
+		return read;
 	}
 
 	INLINE ssizet FileStream::Write(const void* buf, ssizet count)noexcept
@@ -63,34 +70,64 @@ namespace greaper
 
 	INLINE void FileStream::Skip(ssizet count)noexcept
 	{
-		m_Stream->clear();
-		if ((m_Access & WRITE) != 0)
+		if (IsWritable())
+		{
+			m_Stream->clear();
 			m_Stream->seekp(static_cast<std::ofstream::pos_type>(count), std::ios::cur);
-		else
+		}
+		else if(IsReadable())
+		{
+			m_Stream->clear();
 			m_Stream->seekg(static_cast<std::ifstream::pos_type>(count), std::ios::cur);
+		}
 	}
 
 	INLINE void FileStream::Seek(ssizet pos)noexcept
 	{
-		m_Stream->clear();
-		if ((m_Access & WRITE) != 0)
+		if(IsWritable())
+		{
+			m_Stream->clear();
 			m_Stream->seekp(static_cast<std::ofstream::pos_type>(pos), std::ios::beg);
-		else
+		}
+		else if(IsReadable())
+		{
+			m_Stream->clear();
 			m_Stream->seekg(static_cast<std::ifstream::pos_type>(pos), std::ios::beg);
+		}
 	}
 
 	INLINE ssizet FileStream::Tell() const noexcept
 	{
-		m_Stream->clear();
-		return (ssizet)m_Stream->tellg();
+		if(m_Stream != nullptr)
+		{
+			m_Stream->clear();
+			return (ssizet)m_Stream->tellg();
+		}
+		return -1;
 	}
 
 	INLINE bool FileStream::Eof() const noexcept
 	{
-		return m_Stream->eof();
+		if(m_Stream != nullptr)
+			return m_Stream->eof();
+		return true;
 	}
 
-	INLINE SPtr<IStream> FileStream::Clone(UNUSED bool copyData) const noexcept
+	INLINE bool FileStream::IsReadable() const noexcept
+	{
+		if(m_Stream != nullptr)
+			return IStream::IsReadable();
+		return false;
+	}
+
+	INLINE bool FileStream::IsWritable() const noexcept
+	{
+		if(m_Stream != nullptr)
+			return IStream::IsWritable();
+		return false;
+	}
+
+	NODISCARD INLINE SPtr<IStream> FileStream::Clone(UNUSED bool copyData) const noexcept
 	{
 		return SPtr<IStream>(Construct<FileStream>(m_Path, GetAccessMode(), m_FreeOnClose));
 	}

@@ -35,6 +35,11 @@ namespace greaper
 
 		virtual void Deinitialize()noexcept = 0;
 
+		virtual bool ShouldImportExportConfig()const noexcept;
+
+		void ExportConfig()noexcept;
+		void ImportConfig()noexcept;
+
 	public:
 		static constexpr Uuid LibraryUUID = Uuid{  };
 		static constexpr StringView LibraryName = StringView{ "Unknown Greaper Library" };
