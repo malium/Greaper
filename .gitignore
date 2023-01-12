@@ -53,3 +53,4 @@ build/**
 src/Public/External/cJSON/**
 src/Public/External/glm/**
 src/Public/External/SDL/**
+src/Public/External/GLFW/**

@@ -130,7 +130,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;$(SolutionDir)bin/SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;$(SolutionDir)bin/glfw3Win$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
@@ -196,7 +196,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;$(SolutionDir)bin/SDL2.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin/cJSONWin$(PlatformArchitecture)_$(Configuration).lib;$(SolutionDir)bin/glfw3Win$(PlatformArchitecture)_$(Configuration).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>

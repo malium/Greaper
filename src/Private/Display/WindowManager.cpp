@@ -4,97 +4,110 @@
 ***********************************************************************************/
 
 #include "WindowManager.h"
-#include <External/SDL/SDL.h>
+#define GLFW_DLL
+#include <External/GLFW/glfw3.h>
 
 using namespace greaper;
 using namespace greaper::disp;
 
 SPtr<WindowManager> gWindowManager = {};
 
-static uint8 GetPixelDepthFromFormat(uint32 format)noexcept
-{
-	auto pixelFormat = SPtr<SDL_PixelFormat>(SDL_AllocFormat(format), SDL_FreeFormat);
-	if(pixelFormat == nullptr)
-		return 0;
-	return pixelFormat->BitsPerPixel;
-}
-
 void WindowManager::QueryMonitors()
 {
 	Verify(!m_Library.expired(), "GreaperLibrary attached was expired!");
 	auto lib = m_Library.lock();
 
+	int32 monitorCount;
+	auto** monitors = glfwGetMonitors(&monitorCount);
 	LOCK(m_MonitorMutex);
 	m_Monitors.clear();
-	auto displayCount = SDL_GetNumVideoDisplays();
-	if(displayCount < 1)
+	m_Monitors.resize(monitorCount, PMonitor());
+	m_MainMonitor = 0;
+	const char* errorMsg = nullptr;
+	float hdpi, vdpi;
+	int32 workX, workY, workW, workH;
+	int32 monX, monY;
+	int32 videoModeCount;
+	for (int32 i = 0; i < monitorCount; ++i)
 	{
-		lib->LogError(Format("Error on SDL_GetNumVideoDisplays, msg:%s.", SDL_GetError()));
-		return;
-	}
-	m_Monitors.resize(displayCount, PMonitor());
-
-	SDL_Rect bounds, usableBounds;
-	float ddpi, hdpi, vdpi;
-	for(decltype(displayCount) i = 0; i < displayCount; ++i)
-	{
-		auto& monitor = m_Monitors[i];
+		auto& monitorPtr = m_Monitors[i];
+		auto* monitorInfo = monitors[i];
 		String name{};
-		auto nameRet = SDL_GetDisplayName(i);
-		if(nameRet != nullptr)
+
+		auto nameRet = glfwGetMonitorName(monitorInfo);
+		if (nameRet != nullptr)
 			name.assign(nameRet);
 		else
-			lib->LogWarning(Format("Error on SDL_GetDisplayName, msg:%s.", SDL_GetError()));
+			lib->LogWarning(Format("Couldn't retrive the monitor name, error code: %" PRIi32 " error msg: %s.", glfwGetError(&errorMsg), errorMsg));
 
-		if(SDL_GetDisplayDPI(i, &ddpi, &hdpi, &vdpi) != 0)
-		{
-			lib->LogWarning(Format("Error on SDL_GetDisplayDPI, msg:%s.", SDL_GetError()));
-			ddpi = hdpi = vdpi = 0.f;
-		}
-		if(SDL_GetDisplayBounds(i, &bounds) != 0)
-		{
-			lib->LogWarning(Format("Error on SDL_GetDisplayBounds, msg:%s.", SDL_GetError()));
-			ClearMemory(bounds);
-		}
-		RectI sizeRect{math::Vector2i(bounds.x, bounds.y), math::Vector2i(bounds.w, bounds.h)};
-		if(SDL_GetDisplayUsableBounds(i, &usableBounds) != 0)
-		{
-			lib->LogWarning(Format("Error on SDL_GetDisplayUsableBounds, msg:%s.", SDL_GetError()));
-			ClearMemory(usableBounds);
-		}
-		RectI workRect{math::Vector2i(usableBounds.x, usableBounds.y), math::Vector2i(usableBounds.w, usableBounds.h)};
+		glfwGetMonitorContentScale(monitorInfo, &hdpi, &vdpi);
+
+		glfwGetMonitorWorkarea(monitorInfo, &workX, &workY, &workW, &workH);
+
+		glfwGetMonitorPos(monitorInfo, &monX, &monY);
 		
-		auto displayModeCount = SDL_GetNumDisplayModes(i);
-		Vector<PVideoMode> videoModes;
-		videoModes.resize(displayModeCount, PVideoMode());
+		const auto* videoModeInfos = glfwGetVideoModes(monitorInfo, &videoModeCount);
 
-		monitor.reset(AllocT<Monitor>());
+		Vector<PVideoMode> videoModes{};
+		videoModes.resize(videoModeCount, PVideoMode());
 
-		SDL_DisplayMode displayMode;
-		SDL_DisplayMode currentDisplayMode;
-		if(SDL_GetCurrentDisplayMode(i, &currentDisplayMode) != 0)
+		const auto* currentVideoMode = glfwGetVideoMode(monitorInfo);
+
+		monitorPtr.reset(AllocT<Monitor>());
+
+		int32 primaryVideoModeIndex = -1;
+
+		int32 workWDiff, workHDiff;
+		workWDiff = workHDiff = std::numeric_limits<int32>::max();
+		int32 closestVideoModeIndex = -1;
+		PVideoMode closestVideoMode{};
+		int32 highestBits = 0;
+		int32 highestRefresh = 0;
+
+		for (int32 j = 0; j < videoModeCount; ++j)
 		{
-			lib->LogError(Format("Error on SDL_GetCurrentDisplayMode, msg:%s.", SDL_GetError()));
-			ClearMemory(currentDisplayMode);
-		}
-		sizet mainVideoMode = 0;
-		for(decltype(displayModeCount) j = 0; j < displayModeCount; ++j)
-		{
-			if(SDL_GetDisplayMode(i, j, &displayMode) != 0)
+			auto& videoModePtr = videoModes[j];
+			const auto& videoModeInfo = videoModeInfos[j];
+
+			if (primaryVideoModeIndex < 0)
 			{
-				lib->LogError(Format("Error on SDL_GetDisplayMode, msg:%s.", SDL_GetError()));
-				continue;
+				if (CompareMemory(*currentVideoMode, videoModeInfo))
+					primaryVideoModeIndex = j;
 			}
-			math::Vector2i resolution { displayMode.w, displayMode.h };
-			uint8 depth = GetPixelDepthFromFormat(displayMode.format);
-			if(memcmp(&displayMode, &currentDisplayMode, sizeof(displayMode) - sizeof(void*)) == 0)
-				mainVideoMode = j;
-			
-			auto& videoMode = videoModes[j];
-			videoMode.reset(AllocT<VideoMode>());
-			new(videoMode.get())VideoMode(resolution, (WMonitor)monitor, (uint16)displayMode.refresh_rate, depth);
+
+			int32 bits = videoModeInfo.redBits + videoModeInfo.greenBits + videoModeInfo.blueBits;
+
+			int32 wDiff = Abs(videoModeInfo.width - workW);
+			int32 hDiff = Abs(videoModeInfo.height - workH);
+
+			math::Vector2i resolution{ videoModeInfo.width, videoModeInfo.height };
+
+			videoModePtr.reset(Construct<VideoMode>((resolution), (WMonitor)monitorPtr, (uint16)videoModeInfo.refreshRate, (uint8)bits));
+
+			if (wDiff < workWDiff || hDiff < workHDiff)
+			{
+				workWDiff = wDiff;
+				workHDiff = hDiff;
+				highestBits = bits;
+				highestRefresh = videoModeInfo.refreshRate;
+				closestVideoMode = videoModePtr;
+				closestVideoModeIndex = j;
+			}
+			else if (wDiff == workWDiff && hDiff == workHDiff && bits >= highestBits && videoModeInfo.refreshRate >= highestRefresh)
+			{
+				workWDiff = wDiff;
+				workHDiff = hDiff;
+				highestBits = bits;
+				highestRefresh = videoModeInfo.refreshRate;
+				closestVideoMode = videoModePtr;
+				closestVideoModeIndex = j;
+			}
 		}
-		new(monitor.get())Monitor(sizeRect, workRect, i, std::move(name), std::move(videoModes), mainVideoMode, ddpi, hdpi, vdpi);
+
+		RectI sizeRect{ math::Vector2i(monX, monY), closestVideoMode->GetResolution() };
+		RectI workRect{ math::Vector2i(workX, workY), math::Vector2i(workW, workH) };
+
+		new(monitorPtr.get())Monitor(sizeRect, workRect, i, name, std::move(videoModes), closestVideoModeIndex, (hdpi + vdpi) * 0.5f, hdpi, vdpi);
 	}
 }
 

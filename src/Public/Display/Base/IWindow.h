@@ -48,7 +48,6 @@ namespace greaper::disp
 		virtual EmptyResult ChangeWindowPosition(math::Vector2i size) = 0;
 
 		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
-		virtual EmptyResult ChangeMonitor
 
 		virtual int32 GetCurrentMonitorIndex()const = 0;
 

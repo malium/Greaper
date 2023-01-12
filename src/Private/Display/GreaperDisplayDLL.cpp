@@ -8,7 +8,8 @@
 #include <Core/Platform.h>
 #include <Core/FileStream.h>
 #include <Core/Reflection/Property.h>
-#include <External/SDL/SDL.h>
+#define GLFW_DLL
+#include <External/GLFW/glfw3.h>
 
 #if GREAPER_DISP_DLL
 
@@ -55,8 +56,16 @@ void* _Greaper()
 
 void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 {
-	auto rtn = SDL_Init(SDL_INIT_VIDEO);
-	VerifyGreaterEqual(rtn, 0, "Couldn't initialize SDL, error: %s.", SDL_GetError());
+	int major, minor, rev;
+	glfwGetVersion(&major, &minor, &rev);
+	Log(Format("Initializing GLFW %" PRIi32 ".%" PRIi32 ".%" PRIi32 "...", major, minor, rev));
+	auto rtn = glfwInit();
+	if (rtn != GLFW_TRUE)
+	{
+		const char* errorMsg;
+		auto errorCode = glfwGetError(&errorMsg);
+		Break("Couldn't initialize GLFW, error code:%" PRIi32 ", error msg: %s.", errorCode, errorMsg);
+	}
 }
 
 void greaper::disp::GreaperDispLibrary::AddManagers()noexcept
@@ -75,8 +84,8 @@ void greaper::disp::GreaperDispLibrary::RemoveManagers()noexcept
 
 void greaper::disp::GreaperDispLibrary::Deinitialize()noexcept
 {
-	SDL_Quit();
-
+	Log("Shutting down GLFW...");
+	glfwTerminate();
 	gDispLibrary.reset();
 }
 
