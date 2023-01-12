@@ -34,8 +34,6 @@ namespace greaper::disp
 
 		virtual TResult<PWindow> CreateWindow(const WindowDesc& desc) = 0;
 
-		virtual TResult<PWindow> GetWindow(const String& windowID)const = 0;
-		
 		virtual void AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn)const = 0;
 	};
 }

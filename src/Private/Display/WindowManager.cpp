@@ -114,21 +114,28 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 	
 	if(prev != nullptr)
 	{
-		LOCK(m_MonitorMutex);
-		m_Monitors.clear();
-		m_MainMonitor = 0;
-		prev->AccessMonitors([this](CSpan<PMonitor> span)
+		// Copy monitors
 		{
-			const auto size = span.GetSizeFn();
-			if(m_Monitors.capacity() < size)
-				m_Monitors.reserve(size);
-			for(const auto& elem : span)
+			LOCK(m_MonitorMutex);
+			m_Monitors.clear();
+			m_MainMonitor = 0;
+			prev->AccessMonitors([this](CSpan<PMonitor> span)
 			{
-				if(elem->IsPrimary())
-					m_MainMonitor = m_Monitors.size();
-				m_Monitors.push_back(elem);
-			}
-		});
+				const auto size = span.GetSizeFn();
+				if(m_Monitors.capacity() < size)
+					m_Monitors.reserve(size);
+				for(const auto& elem : span)
+				{
+					if(elem->IsPrimary())
+						m_MainMonitor = m_Monitors.size();
+					m_Monitors.push_back(elem);
+				}
+			});
+		}
+		// Copy windows
+		{
+
+		}
 	}
 	else
 	{
@@ -166,11 +173,6 @@ void WindowManager::AccessMonitors(const std::function<void(CSpan<PMonitor>)>& a
 }
 
 TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& desc)
-{
-	return Result::CreateFailure<PWindow>(""sv);
-}
-
-TResult<PWindow> WindowManager::GetWindow(const String& windowID) const
 {
 	return Result::CreateFailure<PWindow>(""sv);
 }

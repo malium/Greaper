@@ -20,6 +20,10 @@ namespace greaper::disp
 		Vector<PMonitor> m_Monitors;
 		sizet m_MainMonitor;
 
+		mutable Mutex m_WindowMutex;
+		Vector<PWindow> m_Windows;
+
+
 		void QueryMonitors();
 
 	public:
@@ -44,8 +48,6 @@ namespace greaper::disp
 
 		TResult<PWindow> CreateWindow(const WindowDesc& desc)override;
 
-		TResult<PWindow> GetWindow(const String& windowID) const override;
-		
 		void AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const override;
 	};
 }

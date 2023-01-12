@@ -29,14 +29,32 @@ namespace greaper::disp
 		AnchoredPosition_t Position = AnchoredPosition_t::COUNT; // Don't care
 		RenderBackend_t Backend = RenderBackend_t::Native;
 		WindowMode_t Mode = WindowMode_t::Windowed;
+		int32 MonitorIndex = -1; // Don't care (usually main monitor)
 		
 		constexpr WindowDesc()noexcept = default;
 	};
 
 	class IWindow
 	{
+	protected:
+
 	public:
-	
+		virtual ~IWindow() = default;
+
+		virtual math::Vector2i GetWindowSize()const = 0;
+		virtual EmptyResult ChangeWindowSize(math::Vector2i size) = 0;
+		
+		virtual math::Vector2i GetWindowPosition() = 0;
+		virtual EmptyResult ChangeWindowPosition(math::Vector2i size) = 0;
+
+		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
+		virtual EmptyResult ChangeMonitor
+
+		virtual int32 GetCurrentMonitorIndex()const = 0;
+
+
+		virtual WindowMode_t GetWindowMode()const = 0;
+		virtual EmptyResult ChangeWindowMode(WindowMode_t mode) = 0;
 	};
 }
 
