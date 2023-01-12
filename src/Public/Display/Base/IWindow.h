@@ -49,11 +49,15 @@ namespace greaper::disp
 
 		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
 
-		virtual int32 GetCurrentMonitorIndex()const = 0;
-
+		virtual const WString& GetWindowTitle()const = 0;
+		virtual void SetWindowTitle(WStringView title) = 0;
 
 		virtual WindowMode_t GetWindowMode()const = 0;
 		virtual EmptyResult ChangeWindowMode(WindowMode_t mode) = 0;
+
+		virtual RenderBackend_t GetRenderBackend()const = 0;
+
+		virtual WWindowManager GetWindowManager()const = 0;
 	};
 }
 
