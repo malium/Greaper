@@ -46,7 +46,6 @@ namespace greaper::disp
 		
 		virtual math::Vector2i GetWindowPosition() = 0;
 		virtual EmptyResult ChangeWindowPosition(math::Vector2i size) = 0;
-
 		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
 
 		virtual const WString& GetWindowTitle()const = 0;

@@ -12,6 +12,8 @@
 #include <Display/IWindowManager.h>
 #include <Core/Concurrency.h>
 
+struct GLFWmonitor;
+
 namespace greaper::disp
 {
 	class WindowManager final : public IWindowManager
@@ -23,9 +25,7 @@ namespace greaper::disp
 		mutable Mutex m_WindowMutex;
 		Vector<PWindow> m_Windows;
 
-
-		void QueryMonitors();
-
+		friend void OnMonitorChange(GLFWmonitor* monitor, int32 event);
 	public:
 		WindowManager()noexcept = default;
 		~WindowManager()noexcept = default;
@@ -41,6 +41,8 @@ namespace greaper::disp
 		void InitProperties()noexcept override;
 
 		void DeinitProperties()noexcept override;
+		
+		void QueryMonitors();
 
 		PMonitor GetMainMonitor() const override;
 		

@@ -14,6 +14,7 @@ namespace greaper::disp
 {
 	class GreaperDispLibrary;
 	class WindowManager;
+	class GLFWWindow;
 }
 
 #endif /* DISP_IMPL_PREREQUISITES_H */

@@ -41,9 +41,6 @@ BEGIN_C
 DLLEXPORT void* _Greaper();
 END_C
 
-const auto configPath = std::filesystem::current_path() / "Config";
-const auto configFilePath = configPath / "GreaperDisplay.json";
-
 void* _Greaper()
 {
 	if (gDispLibrary == nullptr)
@@ -54,8 +51,14 @@ void* _Greaper()
 	return &gDispLibrary;
 }
 
+static void GLFWErrorReporter(int32 errorCode, const char* errorMessage)
+{
+	gDispLibrary->LogError(greaper::Format("GLFW error, code:%" PRIi32 " msg: %s.", errorCode, errorMessage));
+}
+
 void greaper::disp::GreaperDispLibrary::Initialize() noexcept
 {
+	glfwSetErrorCallback(&GLFWErrorReporter);
 	int major, minor, rev;
 	glfwGetVersion(&major, &minor, &rev);
 	Log(Format("Initializing GLFW %" PRIi32 ".%" PRIi32 ".%" PRIi32 "...", major, minor, rev));
