@@ -45,6 +45,7 @@ static PMonitor CreateMonitor(GLFWmonitor* monitorInfo, int32 index)
 	const auto* currentVideoMode = glfwGetVideoMode(monitorInfo);
 
 	monitorPtr.reset(AllocT<Monitor>());
+	glfwSetMonitorUserPointer(monitorInfo, monitorPtr.get());
 
 	int32 primaryVideoModeIndex = -1;
 
@@ -99,19 +100,40 @@ static PMonitor CreateMonitor(GLFWmonitor* monitorInfo, int32 index)
 	RectI workRect{ math::Vector2i(workX, workY), math::Vector2i(workW, workH) };
 
 	new(monitorPtr.get())Monitor(sizeRect, workRect, index, name, std::move(videoModes), closestVideoModeIndex, (hdpi + vdpi) * 0.5f, hdpi, vdpi);
+	return monitorPtr;
 }
 
 void greaper::disp::OnMonitorChange(GLFWmonitor* monitor, int32 event)
 {
+	if (gWindowManager == nullptr || !gWindowManager->IsInitialized() || !gWindowManager->IsActive())
+		return;
+		
 	if(event == GLFW_CONNECTED)
 	{
 		LOCK(gWindowManager->m_MonitorMutex);
 		auto mon = CreateMonitor(monitor, (int32)gWindowManager->m_Monitors.size());
+		gDispLibrary->LogVerbose(Format("The monitor with name '%s' has been attached.", mon->GetName().c_str()));
 		gWindowManager->m_Monitors.push_back(std::move(mon));
 	}
 	else if(event == GLFW_DISCONNECTED)
 	{
-
+		auto* monitorPtr = glfwGetMonitorUserPointer(monitor);
+		if (monitorPtr == nullptr)
+		{
+			gDispLibrary->LogWarning("A monitor has been disconnected but its UserPointer was nullptr (It was not handled, weird).");
+			return;
+		}
+		LOCK(gWindowManager->m_MonitorMutex);
+		auto findIT = std::find_if(gWindowManager->m_Monitors.begin(), gWindowManager->m_Monitors.end(), [monitorPtr](PMonitor mon) { return mon.get() == monitorPtr; });
+		if (findIT != gWindowManager->m_Monitors.end())
+		{
+			gDispLibrary->LogVerbose(Format("The monitor with name '%s' has been disconnected.", findIT->get()->GetName().c_str()));
+			gWindowManager->m_Monitors.erase(findIT);
+		}
+		else
+		{
+			gDispLibrary->LogWarning("A monitor has been disconnected but the Monitor class was not found (weird).");
+		}
 	}
 }
 
@@ -164,6 +186,8 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 void WindowManager::OnDeactivation(const PInterface& newDefault) noexcept
 {
 	m_Monitors.clear();
+	if (newDefault == nullptr) // If there's no new WindowManager disconnect callback
+		glfwSetMonitorCallback(nullptr);
 }
 
 void WindowManager::InitProperties() noexcept
@@ -185,12 +209,12 @@ void WindowManager::QueryMonitors()
 	auto** monitors = glfwGetMonitors(&monitorCount);
 	LOCK(m_MonitorMutex);
 	m_Monitors.clear();
-	m_Monitors.resize(monitorCount, PMonitor());
+	m_Monitors.reserve(monitorCount);
 	m_MainMonitor = 0;
 	
 	for (int32 i = 0; i < monitorCount; ++i)
 	{
-		m_Monitors[i] = CreateMonitor(monitors[i], i);
+		m_Monitors.push_back(CreateMonitor(monitors[i], i));
 	}
 }
 
@@ -215,6 +239,7 @@ TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& desc)
 
 void WindowManager::AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const
 {
-
+	LOCK(m_WindowMutex);
+	accessFn(CreateSpan(m_Windows));
 }
 
