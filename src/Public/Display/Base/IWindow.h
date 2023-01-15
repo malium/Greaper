@@ -54,6 +54,13 @@ namespace greaper::disp
 		virtual WindowMode_t GetWindowMode()const = 0;
 		virtual EmptyResult ChangeWindowMode(WindowMode_t mode) = 0;
 
+		virtual void ShowWindow() = 0;
+		virtual void HideWindow() = 0;
+		virtual bool IsWindowShown()const = 0;
+
+		virtual bool IsWindowFocused()const = 0;
+		virtual void RequestFocus() = 0;
+
 		virtual RenderBackend_t GetRenderBackend()const = 0;
 
 		virtual WWindowManager GetWindowManager()const = 0;
