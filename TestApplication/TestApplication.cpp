@@ -718,16 +718,48 @@ static void GreaperDispLibClose()
 	gWindowManager.reset();
 	gDisp.reset();
 	gDispLib.reset();
-	//auto dispRes = gApplication->UnregisterGreaperLibrary(gDisp);
-	//TRYEXP(dispRes.IsOk(), "Something went wrong unregistering " DISP_LIBRARY_NAME);
+}
 
+static void WindowedRunFunction()
+{
+	using namespace greaper;
 
+	// Create a test window
+	disp::WindowDesc windowDesc
+	{
+		"Greaper Test Window"sv,
+		math::Vector2i(800, 600),
+		AnchoredPosition_t::Center,
+		RenderBackend_t::OpenGL,
+		WindowMode_t::Windowed,
+		0, // Main monitor
+		PTaskScheduler(),
+		disp::PWindow()
+	};
+
+	auto windowRes = gWindowManager->CreateWindow(windowDesc);
+
+	if(windowRes.HasFailed())
+	{
+		gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
+		return;
+	}
+	auto window = windowRes.GetValue();
+
+	// Keep running until the test window is closed
+	bool shouldClose = false;
+	while(!shouldClose)
+	{
+		gWindowManager->PollEvents();
+		gWindowManager->AccessWindows([&shouldClose](CSpan<disp::PWindow> windows) { shouldClose = windows.GetSizeFn() > 0; });
+	}
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
 	const bool RunTests = false;
+	const bool RunWindow = false;
 
 	OSPlatform::PerThreadInit();
 	
@@ -742,6 +774,11 @@ int MainCode(void* hInstance, int argc, char** argv)
 			std::cout << "Test finished" << std::endl;
 			char c;
 			std::cin >> c;
+		}
+
+		if(RunWindow)
+		{
+			WindowedRunFunction();
 		}
 
 		GreaperDispLibClose();

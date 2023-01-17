@@ -139,7 +139,7 @@ void greaper::disp::OnMonitorChange(GLFWmonitor* monitor, int32 event)
 
 void WindowManager::OnInitialization() noexcept
 {
-
+	
 }
 
 void WindowManager::OnDeinitialization() noexcept
@@ -173,7 +173,18 @@ void WindowManager::OnActivation(const PInterface& oldDefault) noexcept
 		}
 		// Copy windows
 		{
-
+			LOCK(m_WindowMutex);
+			m_Windows.clear();
+			prev->AccessWindows([this](CSpan<PWindow> span)
+			{
+				const auto size = span.GetSizeFn();
+				if(m_Windows.capacity() < size)
+					m_Windows.reserve(size);
+				for(const auto& elem : span)
+				{
+					m_Windows.push_back(elem);
+				}
+			});
 		}
 	}
 	else
@@ -228,18 +239,47 @@ SPtr<Monitor> WindowManager::GetMainMonitor() const
 
 void WindowManager::AccessMonitors(const std::function<void(CSpan<PMonitor>)>& accessFn) const
 {
-	LOCK(m_MonitorMutex);
+	SharedLock lock(m_MonitorMutex);
 	accessFn(CreateSpan(m_Monitors));
 }
 
 TResult<PWindow> WindowManager::CreateWindow(const WindowDesc& desc)
 {
-	return Result::CreateFailure<PWindow>(""sv);
+	auto scheduler = desc.Scheduler;
+	if(scheduler == nullptr)
+		scheduler = MPMCTaskScheduler::Create(m_ThreadManager, "GreaperWindow TaskScheduler"sv, 1, false);
+	
+	
+
+	return Result::CreateFailure<PWindow>("Not implemented"sv);
+}
+
+void WindowManager::PollEvents()
+{
+	if(m_MainThread.expired())
+	{
+		Verify(!m_Library.expired(), "Trying to PollEvents, but the MainThread handler expired and the GreaperLibrary too!");
+		auto lib = m_Library.lock();
+		lib->LogError("Trying to WindowManager::PollEvents, but it has no MainThread, something went wrong!");
+		return;
+	}
+
+	auto mainThread = m_MainThread.lock();
+	auto curThreadID = CUR_THID();
+	if(mainThread->GetID() != curThreadID)
+	{
+		Verify(!m_Library.expired(), "Trying to PollEvents, but the GreaperLibrary has expired!");
+		auto lib = m_Library.lock();
+		lib->LogError(Format("Trying to WindowManager::PollEvents, but it must be called from the MainThread, Calling:%d Main:%d.", curThreadID, mainThread->GetID()));
+		return;
+	}
+
+	glfwPollEvents();
 }
 
 void WindowManager::AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const
 {
-	LOCK(m_WindowMutex);
+	SharedLock lock(m_WindowMutex);
 	accessFn(CreateSpan(m_Windows));
 }
 

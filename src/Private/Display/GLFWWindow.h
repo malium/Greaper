@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -11,11 +11,15 @@
 #include "ImplPrerequisites.h"
 #include <Display/Base/IWindow.h>
 
+struct GLFWwindow;
+
 namespace greaper::disp
 {
 	class GLFWWindow : public IWindow
 	{
+		GLFWwindow* m_WindowHandle;
 	public:
+
 
 	};
 }

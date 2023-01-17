@@ -1,5 +1,5 @@
 /***********************************************************************************
-*   Copyright 2022 Marcos Sánchez Torrent.                                         *
+*   Copyright 2022 Marcos Sï¿½nchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
@@ -20,7 +20,6 @@ ENUMERATION(TaskState, Inactive, InProgress, Completed);
 
 namespace greaper
 {
-	class MPMCTaskScheduler;
 	namespace Impl
 	{
 		class Task
@@ -41,11 +40,11 @@ namespace greaper
 		class HTask
 		{
 			WPtr<Task> m_Task;
-			WPtr<MPMCTaskScheduler> m_Scheduler;
+			WTaskScheduler m_Scheduler;
 
 			friend MPMCTaskScheduler;
 
-			HTask(WPtr<Task> task, WPtr<MPMCTaskScheduler> scheduler)noexcept;
+			HTask(WPtr<Task> task, WTaskScheduler scheduler)noexcept;
 
 		public:
 			constexpr HTask()noexcept = default;
@@ -64,7 +63,7 @@ namespace greaper
 	{
 	public:
 		template<class _Alloc_ = GenericAllocator>
-		static SPtr<MPMCTaskScheduler> Create(WThreadManager threadMgr, StringView name, sizet workerCount)noexcept;
+		static PTaskScheduler Create(WThreadManager threadMgr, StringView name, sizet workerCount, bool allowGrowth = true)noexcept;
 
 		~MPMCTaskScheduler()noexcept;
 
@@ -83,6 +82,9 @@ namespace greaper
 
 		const String& GetName()const noexcept;
 
+		bool IsGrowthEnabled()const noexcept;
+		void EnableGrowth(bool enable)noexcept;
+
 	private:
 		WThreadManager m_ThreadManager;
 		String m_Name;
@@ -98,6 +100,7 @@ namespace greaper
 		mutable Mutex m_FreeTaskPoolMutex;
 
 		SPtr<MPMCTaskScheduler> m_This;
+		bool m_AllowGrowth;
 
 		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
 		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
@@ -109,7 +112,7 @@ namespace greaper
 
 		bool AreThereAnyAvailableWorker()const noexcept;
 		
-		MPMCTaskScheduler(WThreadManager threadMgr, StringView name, sizet workerCount)noexcept;
+		MPMCTaskScheduler(WThreadManager threadMgr, StringView name, sizet workerCount, bool allowGrowth)noexcept;
 
 		bool CanWorkerContinueWorking(sizet workerID)const noexcept;
 

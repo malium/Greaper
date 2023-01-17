@@ -1,3 +1,4 @@
+#include "MPMCTaskScheduler.h"
 /***********************************************************************************
 *   Copyright 2022 Marcos Sánchez Torrent.                                         *
 *   All Rights Reserved.                                                           *
@@ -17,6 +18,7 @@ namespace greaper
 		{
 
 		}
+
 		INLINE TaskState_t Task::GetCurrentState()const noexcept { return m_State; }
 
 		INLINE void HTask::WaitUntilFinish()noexcept
@@ -30,10 +32,10 @@ namespace greaper
 	}
 	
 	template<class _Alloc_>
-	INLINE SPtr<MPMCTaskScheduler> MPMCTaskScheduler::Create(WThreadManager threadMgr, StringView name, sizet workerCount) noexcept
+	INLINE SPtr<MPMCTaskScheduler> MPMCTaskScheduler::Create(WThreadManager threadMgr, StringView name, sizet workerCount, bool allowGrowth) noexcept
 	{
 		auto* ptr = AllocT<MPMCTaskScheduler, _Alloc_>();
-		new ((void*)ptr)MPMCTaskScheduler(threadMgr, std::move(name), workerCount);
+		new ((void*)ptr)MPMCTaskScheduler(threadMgr, std::move(name), workerCount, allowGrowth);
 		return SPtr<MPMCTaskScheduler>((MPMCTaskScheduler*)ptr, &Impl::DefaultDeleter<MPMCTaskScheduler, _Alloc_>);
 	}
 
@@ -57,9 +59,13 @@ namespace greaper
 		if (m_TaskWorkers.size() < count)
 		{
 			auto lck = Lock<decltype(m_TaskWorkersMutex)>(m_TaskWorkersMutex, AdoptLock{});
+			
+			if(!m_AllowGrowth)
+				return Result::CreateFailure("Trying to add more workers to a MPMCTaskScheduler, but it has forbidden the growth."sv);
 
 			if (m_ThreadManager.expired())
 				return Result::CreateFailure("Trying to add more workers to a MPMCTaskScheduler, but the ThreadManager has expired."sv);
+
 			auto thManager = m_ThreadManager.lock();
 			for (sizet i = m_TaskWorkers.size(); i < count; ++i)
 			{
@@ -100,6 +106,7 @@ namespace greaper
 		}
 		return Result::CreateSuccess();
 	}
+
 	inline TResult<Impl::HTask> MPMCTaskScheduler::AddTask(StringView name, std::function<void()> workFn) noexcept
 	{
 		auto wkLck = SharedLock(m_TaskWorkersMutex); // we keep the lock so if there's only 1 task worker and someone wants to remove it, we can still schedule this task
@@ -138,6 +145,7 @@ namespace greaper
 		
 		return Result::CreateSuccess(hTask);
 	}
+
 	inline TResult<Vector<Impl::HTask>> MPMCTaskScheduler::AddTasks(const Vector<std::tuple<StringView, std::function<void()>>>& tasks) noexcept
 	{
 		if(tasks.empty())
@@ -201,6 +209,7 @@ namespace greaper
 		while (Contains(m_TaskQueue, task))
 			m_TaskQueueSignal.wait(lck);
 	}
+
 	INLINE void MPMCTaskScheduler::WaitUntilFinishAllTasks() noexcept
 	{
 		// Don't add more tasks nor change the amount of workers
@@ -211,7 +220,21 @@ namespace greaper
 		while (!m_TaskQueue.empty())
 			m_TaskQueueSignal.wait(lck);
 	}
+
 	INLINE const String& MPMCTaskScheduler::GetName() const noexcept { return m_Name; }
+
+	INLINE bool MPMCTaskScheduler::IsGrowthEnabled() const noexcept
+	{
+		auto lck = SharedLock(m_TaskWorkersMutex);
+		return m_AllowGrowth;
+	}
+
+	INLINE void MPMCTaskScheduler::EnableGrowth(bool enable) noexcept
+	{
+		LOCK(m_TaskWorkersMutex);
+		m_AllowGrowth = enable;
+	}
+
 	INLINE void MPMCTaskScheduler::OnNewManager(const PInterface& newInterface) noexcept
 	{
 		auto lck = SharedLock(m_TaskWorkersMutex);
@@ -223,6 +246,7 @@ namespace greaper
 		newInterface->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldInterface, const PInterface& newInterface) { OnManagerActivation(active, oldInterface, newInterface); });
 		m_OnNewManager.Disconnect();
 	}
+
 	INLINE void MPMCTaskScheduler::OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface) noexcept
 	{
 		auto lck = SharedLock(m_TaskWorkersMutex);
@@ -251,6 +275,7 @@ namespace greaper
 			app->GetOnInterfaceActivationEvent()->Connect(m_OnNewManager, [this](const PInterface& newManager) { OnNewManager(newManager); });
 		}
 	}
+
 	INLINE void MPMCTaskScheduler::Stop() noexcept
 	{
 		SetWorkerCount(0);
@@ -268,6 +293,7 @@ namespace greaper
 			Destroy(task);
 		}
 	}
+
 	INLINE bool MPMCTaskScheduler::AreThereAnyAvailableWorker() const noexcept
 	{
 		if (m_TaskWorkers.empty())
@@ -280,21 +306,27 @@ namespace greaper
 		}
 		return false; // There is no active worker
 	}
-	INLINE MPMCTaskScheduler::MPMCTaskScheduler(WThreadManager threadMgr, StringView name, sizet workerCount)noexcept
+
+	INLINE MPMCTaskScheduler::MPMCTaskScheduler(WThreadManager threadMgr, StringView name, sizet workerCount, bool allowGrowth)noexcept
 		:m_ThreadManager(std::move(threadMgr))
 		,m_Name(name)
 		,m_This(this, &Impl::EmptyDeleter<MPMCTaskScheduler>)
+		,m_AllowGrowth(true)
 	{
 		VerifyNot(m_ThreadManager.expired(), "Trying to initialize a MPMCTaskScheduler, but an expired ThreadManager was given.");
 		auto mgr = m_ThreadManager.lock();
 		mgr->GetActivationEvent()->Connect(m_OnManagerActivation, [this](bool active, IInterface* oldInterface, const PInterface& newInterface) { OnManagerActivation(active, oldInterface, newInterface); });
+
 		SetWorkerCount(workerCount);
+		m_AllowGrowth = allowGrowth;
 	}
+
 	INLINE bool MPMCTaskScheduler::CanWorkerContinueWorking(sizet workerID)const noexcept
 	{
 		auto lck = SharedLock(m_TaskWorkersMutex);
 		return m_TaskWorkers.size() > workerID && m_TaskWorkers[workerID] != nullptr;
 	}
+
 	INLINE void MPMCTaskScheduler::WorkerFn(MPMCTaskScheduler& scheduler, sizet id) noexcept
 	{
 		while (true)

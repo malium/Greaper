@@ -51,12 +51,14 @@ namespace greaper
 	template<class T> class TProperty; template<class T> using PProperty = SPtr<TProperty<T>>; template<class T> using WProperty = WPtr<TProperty<T>>;
 	template<class T> class TPropertyValidator;
 	template<class... Args> class Event;
+	class MPMCTaskScheduler; using PTaskScheduler = SPtr<MPMCTaskScheduler>; using WTaskScheduler = WPtr<MPMCTaskScheduler>;
 	template<class T> class RectT;
 	using RectF = RectT<float>;
 	using RectD = RectT<double>;
 	using RectI = RectT<int32>;
 	using RectU = RectT<uint32>;
 	
+
 	class IStream;
 	class Uuid;
 	class Result;

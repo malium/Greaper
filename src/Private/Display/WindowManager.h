@@ -10,6 +10,7 @@
 
 #include "ImplPrerequisites.h"
 #include <Display/IWindowManager.h>
+#include <Core/IApplication.h>
 #include <Core/Concurrency.h>
 
 struct GLFWmonitor;
@@ -18,14 +19,24 @@ namespace greaper::disp
 {
 	class WindowManager final : public IWindowManager
 	{
-		mutable Mutex m_MonitorMutex;
+		mutable RWMutex m_MonitorMutex;
 		Vector<PMonitor> m_Monitors;
 		sizet m_MainMonitor;
 
-		mutable Mutex m_WindowMutex;
+		mutable RWMutex m_WindowMutex;
 		Vector<PWindow> m_Windows;
 
+		WThreadManager m_ThreadManager;
+		WThread m_MainThread;
+
+		// ThreadManager getter and updater
+		IInterface::ActivationEvt_t::HandlerType m_OnManagerActivation;
+		void OnManagerActivation(bool active, IInterface* oldInterface, const PInterface& newInterface)noexcept;
+		IApplication::OnInterfaceActivationEvent_t::HandlerType m_OnNewManager;
+		void OnNewManager(const PInterface& newInterface)noexcept;
+
 		friend void OnMonitorChange(GLFWmonitor* monitor, int32 event);
+
 	public:
 		WindowManager()noexcept = default;
 		~WindowManager()noexcept = default;
@@ -44,11 +55,13 @@ namespace greaper::disp
 		
 		void QueryMonitors();
 
+		TResult<PWindow> CreateWindow(const WindowDesc& desc)override;
+
+		void PollEvents()override;
+
 		PMonitor GetMainMonitor() const override;
 		
 		void AccessMonitors(const std::function<void(CSpan<PMonitor>)>& accessFn) const override;
-
-		TResult<PWindow> CreateWindow(const WindowDesc& desc)override;
 
 		void AccessWindows(const std::function<void(CSpan<PWindow>)>& accessFn) const override;
 	};

@@ -14,14 +14,48 @@
 #include <Core/Enumeration.h>
 #include <Core/Event.h>
 #include <Math/Vector2.h>
+#include <Core/MPMCTaskScheduler.h>
 
 ENUMERATION(RenderBackend, OpenGL, Vulkan, Native);
 ENUMERATION(WindowState, Normal, Minimized, Maximized);
 ENUMERATION(AnchoredPosition, TopLeft, Top, TopRight, Left, Center, Right, BottomLeft, Bottom, BottomRight);
 ENUMERATION(WindowMode, Windowed, Borderless, FullScreen);
 
+ENUMERATION(OpenGLCreationAPI, Native, EGL, OSMESA);
+ENUMERATION(OpenGLProfile, Compatibility, Core);
+ENUMERATION(OpenGLContextRobustness, NoRobustness, NoResetNotification, LooseContextOnReset);
+ENUMERATION(OpenGLReleaseBehaviour, Flush, None);
+
 namespace greaper::disp
 {
+	struct FramebufferDesc
+	{
+		int32 RedBits = 8;
+		int32 GreenBits = 8;
+		int32 BlueBits = 8;
+		int32 AlphaBits = 8;
+		int32 DepthBits;
+		int32 StencilBits;
+
+		int32 MSAASamples;
+		bool SRGBCapable;
+		bool DoubleBuffer;
+	};
+	struct OpenGLDesc
+	{
+		OpenGLCreationAPI_t CreationAPI = OpenGLCreationAPI_t::Native;
+		int32 VersionMajor = -1;
+		int32 VersionMinor = -1;
+		OpenGLProfile_t Profile = OpenGLProfile_t::Core;
+		bool ContextDebug = GREAPER_DEBUG; // GL_KHR_debug
+		OpenGLContextRobustness_t ContextRobustness = OpenGLContextRobustness_t::NoRobustness;
+		OpenGLReleaseBehaviour_t ContextReleaseBehaviour = OpenGLReleaseBehaviour_t::Flush; // GL_KHR_context_flush_control
+		bool ContextGenerateErrors = true; // GL_KHR_no_error
+	};
+	struct VulkanDesc
+	{
+
+	};
 	struct WindowDesc
 	{
 		StringView Title = "GreaperWindow"sv;
@@ -29,8 +63,20 @@ namespace greaper::disp
 		AnchoredPosition_t Position = AnchoredPosition_t::Center;
 		RenderBackend_t Backend = RenderBackend_t::Native;
 		WindowMode_t Mode = WindowMode_t::Windowed;
+		WindowState_t State = WindowState_t::Normal;
+		bool AllowResizing = true;
+		bool StartVisible = true;
+		bool StartFocused = true;
 		int32 MonitorIndex = 0;
+		PTaskScheduler Scheduler = PTaskScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
+		PWindow SharedWindow = PWindow(); // Window that its context can share information with, needs to have the same scheduler on both
 		
+		StringView X11ClassName = ""sv;
+		StringView X11InstanceName = ""sv;
+		FramebufferDesc Framebuffer = FramebufferDesc();
+		OpenGLDesc OpenGL = OpenGLDesc();
+		VulkanDesc Vulkan = VulkanDesc();
+
 		constexpr WindowDesc()noexcept = default;
 	};
 
@@ -65,7 +111,7 @@ namespace greaper::disp
 
 		virtual WWindowManager GetWindowManager()const = 0;
 
-		virtual PThread GetWindowThread()const = 0;
+		virtual PTaskScheduler GetTaskScheduler()const = 0;
 	};
 }
 

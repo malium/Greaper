@@ -123,7 +123,7 @@ void LogManager::LogToWriters(const LogData& data)
 
 void LogManager::OnInitialization() noexcept
 {
-	VerifyNot(m_Library.expired(), "Trying to initialize LogManager, but its library is expired.");
+	/*VerifyNot(m_Library.expired(), "Trying to initialize LogManager, but its library is expired.");
 	auto lib = m_Library.lock();
 	auto managers = lib->GetManagers();
 	for (const auto& mgr : managers)
@@ -133,7 +133,7 @@ void LogManager::OnInitialization() noexcept
 			gLogManager = mgr;
 			break;
 		}
-	}
+	}*/
 
 }
 
@@ -151,7 +151,7 @@ void LogManager::OnDeinitialization() noexcept
 		LOCK(m_WriterMutex);
 		m_Writers.clear();
 	}
-	gLogManager.reset();
+	//gLogManager.reset();
 }
 
 void LogManager::OnActivation(const PInterface& oldDefault) noexcept
@@ -177,7 +177,7 @@ void LogManager::OnActivation(const PInterface& oldDefault) noexcept
 	auto thmgrRes = gApplication->GetActiveInterface(IThreadManager::InterfaceUUID);
 	if (thmgrRes.IsOk())
 	{
-		m_Scheduler = MPMCTaskScheduler::Create((WThreadManager)thmgrRes.GetValue(), "AsyncLogger"sv, 1);
+		m_Scheduler = MPMCTaskScheduler::Create((WThreadManager)thmgrRes.GetValue(), "AsyncLogger"sv, 1, false);
 	}
 	else
 	{
