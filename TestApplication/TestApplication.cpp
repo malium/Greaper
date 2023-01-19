@@ -3,23 +3,23 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#include <Core/CorePrerequisites.h>
-#include <Core/IGreaperLibrary.h>
-#include <Core/IApplication.h>
-#include <Core/Reflection/ContainerType.h>
-#include <Core/Property.h>
-#include <Core/Base/LogWriterFile.h>
-#include <Core/IThreadManager.h>
-#include <Core/ICommandManager.h>
-#include <Core/Platform.h>
-#include <Math/Vector4.h>
-#include <Math/Matrix4.h>
-#include <Math/Quaternion.h>
-#include <Math/Reflection/Vector3.h>
-#include <Math/Reflection/Quaternion.h>
-#include <Core/MemoryStream.h>
-#include <Core/Reflection/Property.h>
-#include <Display/IWindowManager.h>
+#include "../GreaperCore/Public/CorePrerequisites.h"
+#include "../GreaperCore/Public/IGreaperLibrary.h"
+#include "../GreaperCore/Public/IApplication.h"
+#include "../GreaperCore/Public/Reflection/ContainerType.h"
+#include "../GreaperCore/Public/Property.h"
+#include "../GreaperCore/Public/Base/LogWriterFile.h"
+#include "../GreaperCore/Public/IThreadManager.h"
+#include "../GreaperCore/Public/ICommandManager.h"
+#include "../GreaperCore/Public/Platform.h"
+#include "../GreaperMath/Public/Vector4.h"
+#include "../GreaperMath/Public/Matrix4.h"
+#include "../GreaperMath/Public/Quaternion.h"
+#include "../GreaperMath/Public/Reflection/Vector3.h"
+#include "../GreaperMath/Public/Reflection/Quaternion.h"
+#include "../GreaperCore/Public/MemoryStream.h"
+#include "../GreaperCore/Public/Reflection/Property.h"
+#include "../GreaperGAL/Public/IWindowManager.h"
 #include <random>
 #include <iostream>
 
@@ -36,22 +36,22 @@
 
 #if PLT_WINDOWS
 #define CORE_LIBRARY_NAME "Core" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
-#define DISP_LIBRARY_NAME "Disp" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
+#define GAL_LIBRARY_NAME "GAL" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
 #elif PLT_LINUX
 #define CORE_LIBRARY_NAME "./Core" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
-#define CORE_LIBRARY_NAME "./Disp" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
+#define GAL_LIBRARY_NAME "./GAL" PLT_NAME ARCH_NAME GREAPER_LIBSUFFIX GREAPER_DLLEXT
 #endif
 constexpr greaper::StringView CORE_LIB_NAME = { CORE_LIBRARY_NAME };
-constexpr greaper::StringView DISP_LIB_NAME = { DISP_LIBRARY_NAME };
+constexpr greaper::StringView GAL_LIB_NAME = { GAL_LIBRARY_NAME };
 constexpr greaper::StringView LibFnName = "_Greaper"sv;
 constexpr static bool AsyncLog = true;
-greaper::PLibrary gCoreLib, gDispLib;
-greaper::PGreaperLib gCore, gDisp;
+greaper::PLibrary gCoreLib, gGALLib;
+greaper::PGreaperLib gCore, gGAL;
 greaper::PApplication gApplication;
 greaper::PLogManager gLogManager;
 greaper::PThreadManager gThreadManager;
 greaper::PCommandManager gCommandManager;
-greaper::disp::PWindowManager gWindowManager;
+greaper::gal::PWindowManager gWindowManager;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
@@ -690,34 +690,34 @@ static void TestFunction()
 	}
 }
 
-static void GreaperDispLibInit()
+static void GreaperGALLibInit()
 {
 	using namespace greaper;
 
-	gDispLib.reset(Construct<Library>(DISP_LIB_NAME));
-	TRYEXP(gDispLib->IsOpen(), "Couldn't open " DISP_LIBRARY_NAME);
+	gGALLib.reset(Construct<Library>(GAL_LIB_NAME));
+	TRYEXP(gGALLib->IsOpen(), "Couldn't open " GAL_LIBRARY_NAME);
 
-	auto dispRes = gApplication->RegisterGreaperLibrary(gDispLib);
-	TRYEXP(dispRes.IsOk(), "Something went wrong registering " DISP_LIBRARY_NAME);
-	gDisp = dispRes.GetValue();
+	auto galRes = gApplication->RegisterGreaperLibrary(gGALLib);
+	TRYEXP(galRes.IsOk(), "Something went wrong registering " GAL_LIBRARY_NAME);
+	gGAL = galRes.GetValue();
 
-	auto wndMgrRes = gApplication->GetInterface(disp::IWindowManager::InterfaceUUID, gDisp->GetLibraryUuid());
+	auto wndMgrRes = gApplication->GetInterface(gal::IWindowManager::InterfaceUUID, gGAL->GetLibraryUuid());
 	TRYEXP(wndMgrRes.IsOk(), "Something went wrong obtaining interface WindowManager.");
 	gWindowManager = wndMgrRes.GetValue();
 	auto activateRes = gApplication->ActivateInterface((const PInterface&)gWindowManager);
 	TRYEXP(activateRes.IsOk(), "Something went wrong activating interface WindowManager.");
 }
 
-static void GreaperDispLibClose()
+static void GreaperGALLibClose()
 {
 	using namespace greaper;
 
-	auto res = gApplication->UnregisterGreaperLibrary(gDisp);
+	auto res = gApplication->UnregisterGreaperLibrary(gGAL);
 	if (res.HasFailed())
-		gLogManager->Log(LogLevel_t::ERROR, res.GetFailMessage(), DISP_LIB_NAME);
+		gLogManager->Log(LogLevel_t::ERROR, res.GetFailMessage(), GAL_LIB_NAME);
 	gWindowManager.reset();
-	gDisp.reset();
-	gDispLib.reset();
+	gGAL.reset();
+	gGALLib.reset();
 }
 
 static void WindowedRunFunction()
@@ -725,34 +725,34 @@ static void WindowedRunFunction()
 	using namespace greaper;
 
 	// Create a test window
-	disp::WindowDesc windowDesc
-	{
-		"Greaper Test Window"sv,
-		math::Vector2i(800, 600),
-		AnchoredPosition_t::Center,
-		RenderBackend_t::OpenGL,
-		WindowMode_t::Windowed,
-		0, // Main monitor
-		PTaskScheduler(),
-		disp::PWindow()
-	};
+	//gal::WindowDesc windowDesc
+	//{
+	//	"Greaper Test Window"sv,
+	//	math::Vector2i(800, 600),
+	//	AnchoredPosition_t::Center,
+	//	RenderBackend_t::OpenGL,
+	//	WindowMode_t::Windowed,
+	//	0, // Main monitor
+	//	PTaskScheduler(),
+	//	gal::PWindow()
+	//};
 
-	auto windowRes = gWindowManager->CreateWindow(windowDesc);
+	//auto windowRes = gWindowManager->CreateWindow(windowDesc);
 
-	if(windowRes.HasFailed())
-	{
-		gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
-		return;
-	}
-	auto window = windowRes.GetValue();
+	//if(windowRes.HasFailed())
+	//{
+	//	gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
+	//	return;
+	//}
+	//auto window = windowRes.GetValue();
 
-	// Keep running until the test window is closed
-	bool shouldClose = false;
-	while(!shouldClose)
-	{
-		gWindowManager->PollEvents();
-		gWindowManager->AccessWindows([&shouldClose](CSpan<disp::PWindow> windows) { shouldClose = windows.GetSizeFn() > 0; });
-	}
+	//// Keep running until the test window is closed
+	//bool shouldClose = false;
+	//while(!shouldClose)
+	//{
+	//	gWindowManager->PollEvents();
+	//	gWindowManager->AccessWindows([&shouldClose](CSpan<gal::PWindow> windows) { shouldClose = windows.GetSizeFn() > 0; });
+	//}
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
@@ -766,7 +766,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 	try
 	{
 		GreaperCoreLibInit(hInstance, argc, argv);
-		GreaperDispLibInit();
+		GreaperGALLibInit();
 
 		if (RunTests)
 		{
@@ -781,7 +781,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 			WindowedRunFunction();
 		}
 
-		GreaperDispLibClose();
+		GreaperGALLibClose();
 		GreaperCoreLibClose();
 
 		gCoreLib->Close();
