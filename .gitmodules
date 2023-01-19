@@ -1,0 +1,12 @@
+[submodule "GreaperCore"]
+	path = GreaperCore
+	url = https://github.com/malium/GreaperCore
+[submodule "GreaperMath"]
+	path = GreaperMath
+	url = https://github.com/malium/GreaperMath
+[submodule "GreaperGAL"]
+	path = GreaperGAL
+	url = https://github.com/malium/GreaperGAL
+[submodule "cJSON"]
+	path = cJSON
+	url = https://github.com/malium/cJSON
