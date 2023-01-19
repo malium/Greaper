@@ -34,8 +34,8 @@ namespace greaper::disp
 		int32 GreenBits = 8;
 		int32 BlueBits = 8;
 		int32 AlphaBits = 8;
-		int32 DepthBits;
-		int32 StencilBits;
+		int32 DepthBits = 24;
+		int32 StencilBits = 8;
 
 		int32 MSAASamples;
 		bool SRGBCapable;
@@ -51,6 +51,7 @@ namespace greaper::disp
 		OpenGLContextRobustness_t ContextRobustness = OpenGLContextRobustness_t::NoRobustness;
 		OpenGLReleaseBehaviour_t ContextReleaseBehaviour = OpenGLReleaseBehaviour_t::Flush; // GL_KHR_context_flush_control
 		bool ContextGenerateErrors = true; // GL_KHR_no_error
+		PWindow SharedContextWindow;
 	};
 	struct VulkanDesc
 	{
@@ -58,19 +59,20 @@ namespace greaper::disp
 	};
 	struct WindowDesc
 	{
-		StringView Title = "GreaperWindow"sv;
+		WStringView Title = L"GreaperWindow"sv;
 		math::Vector2i Size = math::Vector2i(1280, 720);
 		AnchoredPosition_t Position = AnchoredPosition_t::Center;
 		RenderBackend_t Backend = RenderBackend_t::Native;
 		WindowMode_t Mode = WindowMode_t::Windowed;
 		WindowState_t State = WindowState_t::Normal;
-		bool AllowResizing = true;
+		bool ResizingEnabled = true;
 		bool StartVisible = true;
 		bool StartFocused = true;
-		int32 MonitorIndex = 0;
+		int32 MonitorIndex = 0; // On what monitor should the window appear, <=0 selects the primary monitor
 		PTaskScheduler Scheduler = PTaskScheduler(); // Scheduler running on the thread which the window is running, if nullptr WindowManager will create one
-		PWindow SharedWindow = PWindow(); // Window that its context can share information with, needs to have the same scheduler on both
-		
+		math::Vector2i ResizingAspectRatio = math::Vector2i(0, 0); // What ratio aspec ratio scaling is allowed, (<=0,<=0) will not lock scaling
+		math::Vector2i MaxSize = math::Vector2i(0, 0); // What is the maximum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
+		math::Vector2i MinSize = math::Vector2i(0, 0); // What is the minimum window size, if a ResizingRatio is set, this value should be se according to it, (<=0,<=0) will ignore this
 		StringView X11ClassName = ""sv;
 		StringView X11InstanceName = ""sv;
 		FramebufferDesc Framebuffer = FramebufferDesc();
@@ -83,35 +85,79 @@ namespace greaper::disp
 	class IWindow
 	{
 	protected:
+		mutable RWMutex m_Mutex;
+		WString m_Title;
+		math::Vector2i m_Size;
+		math::Vector2i m_DrawingSize;
+		math::Vector2i m_Position;
+		math::Vector2i m_ResizingRatio;
+		math::Vector2i m_MaxSize;
+		math::Vector2i m_MinSize;
+		WindowMode_t m_Mode = WindowMode_t::COUNT;
+		WindowState_t m_State = WindowState_t::COUNT;
+		PMonitor m_CurrentMonitor;
+		bool m_ResizingEnabled = false;
+		bool m_HasFocus = false;
+		bool m_IsVisible = false;
+		WWindowManager m_WindowManager;
+		PTaskScheduler m_TaskScheduler;
 
 	public:
+		IWindow()noexcept = default;
 		virtual ~IWindow() = default;
 
-		virtual math::Vector2i GetWindowSize()const = 0;
+		INLINE math::Vector2i GetWindowSize()const noexcept { SHAREDLOCK(m_Mutex); return m_Size; }
 		virtual EmptyResult ChangeWindowSize(math::Vector2i size) = 0;
+		INLINE math::Vector2i GetWindowDrawingSize()const noexcept { SHAREDLOCK(m_Mutex); return m_DrawingSize; }
 		
-		virtual math::Vector2i GetWindowPosition() = 0;
+		INLINE math::Vector2i GetWindowPosition()const noexcept { SHAREDLOCK(m_Mutex); return m_Position; }
 		virtual EmptyResult ChangeWindowPosition(math::Vector2i size) = 0;
 		virtual EmptyResult ChangeWindowPosition(AnchoredPosition_t anchor) = 0;
 
-		virtual const WString& GetWindowTitle()const = 0;
+		INLINE const WString& GetWindowTitle()const noexcept { SHAREDLOCK(m_Mutex); return m_Title; }
 		virtual void SetWindowTitle(WStringView title) = 0;
 
-		virtual WindowMode_t GetWindowMode()const = 0;
+		INLINE WindowMode_t GetWindowMode()const noexcept { SHAREDLOCK(m_Mutex); return m_Mode; }
 		virtual EmptyResult ChangeWindowMode(WindowMode_t mode) = 0;
+
+		INLINE WindowState_t GetWindowState()const noexcept { SHAREDLOCK(m_Mutex); return m_State; }
+		virtual EmptyResult ChangeWindowState(WindowState_t state) = 0;
 
 		virtual void ShowWindow() = 0;
 		virtual void HideWindow() = 0;
-		virtual bool IsWindowShown()const = 0;
+		INLINE bool IsWindowShown()const noexcept { SHAREDLOCK(m_Mutex); return m_IsVisible; }
 
-		virtual bool IsWindowFocused()const = 0;
+		INLINE bool IsWindowFocused()const noexcept { SHAREDLOCK(m_Mutex); return m_HasFocus; }
 		virtual void RequestFocus() = 0;
+
+		INLINE bool IsResizingEnabled()const noexcept { SHAREDLOCK(m_Mutex); return m_ResizingEnabled; }
+		virtual void EnableResizing(bool enable) = 0;
+
+		virtual void SetResizingAspectRatio(math::Vector2i aspectRatio, bool changeCurrent = false) = 0;
+		INLINE math::Vector2i GetResizingAspectRatio()const noexcept { SHAREDLOCK(m_Mutex); return m_ResizingRatio; }
+		INLINE bool IsResizingAspectRatioEnabled()const noexcept { auto ratio = GetResizingAspectRatio(); return ratio.X > 0 && ratio.Y > 0; }
+
+		virtual void SetMaxWindowSize(math::Vector2i maxSize, bool changeCurrent = false) = 0;
+		INLINE math::Vector2i GetMaxWindowSize()const noexcept { SHAREDLOCK(m_Mutex); return m_MaxSize; }
+		INLINE bool IsMaxWindowSizeEnabled()const noexcept { auto maxSize = GetMaxWindowSize(); return maxSize.X > 0 && maxSize.Y > 0; }
+		
+		virtual void SetMinWindowSize(math::Vector2i minSize, bool changeCurrent = false) = 0;
+		INLINE math::Vector2i GetMinWindowSize()const noexcept { SHAREDLOCK(m_Mutex); return m_MinSize; }
+		INLINE bool IsMinWindowSizeEnabled()const noexcept { auto minSize = GetMinWindowSize(); return minSize.X > 0 && minSize.Y > 0; }
+
+		INLINE PMonitor GetCurrentMonitor()const noexcept { SHAREDLOCK(m_Mutex); return m_CurrentMonitor; }
+
+		virtual String GetClipboardText()const = 0;
+		virtual EmptyResult SetClipboardText(StringView text) = 0;
+		virtual bool HasClipboardText() = 0;
+
+		virtual void SwapWindow() = 0;
 
 		virtual RenderBackend_t GetRenderBackend()const = 0;
 
-		virtual WWindowManager GetWindowManager()const = 0;
+		INLINE WWindowManager GetWindowManager()const noexcept { return m_WindowManager; }
 
-		virtual PTaskScheduler GetTaskScheduler()const = 0;
+		INLINE PTaskScheduler GetTaskScheduler()const noexcept { return m_TaskScheduler; }
 	};
 }
 

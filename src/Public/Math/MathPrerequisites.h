@@ -112,6 +112,12 @@ namespace greaper::math
 	using Line3f = Line3Real<float>;
 	using Line3d = Line3Real<double>;
 
+	template<class T> class RectT;
+	using RectF = RectT<float>;
+	using RectD = RectT<double>;
+	using RectI = RectT<int32>;
+	using RectU = RectT<uint32>;
+
 	class Half;
 }
 
@@ -128,6 +134,10 @@ namespace greaper
 	using PropertyVector4f = TProperty<math::Vector4f>;
 	using PropertyVector4i = TProperty<math::Vector4i>;
 	using PropertyVector4u = TProperty<math::Vector4u>;
+
+	using PropertyRectF = TProperty<math::RectF>;
+	using PropertyRectI = TProperty<math::RectI>;
+	using PropertyRectU = TProperty<math::RectU>;
 }
 
 namespace greaper::refl
@@ -135,7 +145,7 @@ namespace greaper::refl
 	enum MathReflectedTypeID : ReflectedTypeID_t
 	{
 		// Math 
-		RTI_Vector2f = 50,
+		RTI_Vector2f = 40,
 		RTI_Vector2d,
 		RTI_Vector2i,
 		RTI_Vector2i8,
@@ -196,6 +206,11 @@ namespace greaper::refl
 		RTI_Line3d,
 
 		RTI_Half,
+
+		RTI_RectF,
+		RTI_RectD,
+		RTI_RectI,
+		RTI_RectU,
 	};
 }
 

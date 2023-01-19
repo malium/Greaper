@@ -53,3 +53,8 @@ CREATE_TYPEINFO_CNAME(greaper::math::Matrix4d,		greaper::refl::RTI_Matrix4d,	Con
 
 CREATE_TYPEINFO_CNAME(greaper::math::QuaternionF, 	greaper::refl::RTI_QuaternionF, ComplexType, "QuaternionF");
 CREATE_TYPEINFO_CNAME(greaper::math::QuaternionD, 	greaper::refl::RTI_QuaternionD, ComplexType, "QuaternionD");
+
+CREATE_TYPEINFO_CNAME(greaper::math::RectF, greaper::refl::RTI_RectF, ComplexType, "RectF");
+CREATE_TYPEINFO_CNAME(greaper::math::RectD, greaper::refl::RTI_RectD, ComplexType, "RectD");
+CREATE_TYPEINFO_CNAME(greaper::math::RectI, greaper::refl::RTI_RectI, ComplexType, "RectI");
+CREATE_TYPEINFO_CNAME(greaper::math::RectU, greaper::refl::RTI_RectU, ComplexType, "RectU");

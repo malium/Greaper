@@ -52,11 +52,7 @@ namespace greaper
 	template<class T> class TPropertyValidator;
 	template<class... Args> class Event;
 	class MPMCTaskScheduler; using PTaskScheduler = SPtr<MPMCTaskScheduler>; using WTaskScheduler = WPtr<MPMCTaskScheduler>;
-	template<class T> class RectT;
-	using RectF = RectT<float>;
-	using RectD = RectT<double>;
-	using RectI = RectT<int32>;
-	using RectU = RectT<uint32>;
+	
 	
 
 	class IStream;
@@ -79,9 +75,6 @@ namespace greaper
 	using PropertyFloat = TProperty<float>;
 	using PropertyDouble = TProperty<double>;
 	using PropertyString = TProperty<String>;
-	using PropertyRectF = TProperty<RectF>;
-	using PropertyRectI = TProperty<RectI>;
-	using PropertyRectU = TProperty<RectU>;
 	using PropertyStringVec = TProperty<StringVec>;
 
 	// types
@@ -112,10 +105,8 @@ namespace greaper
 			RTI_Double,
 			RTI_LongDouble,
 			RTI_Enum,
-			RTI_RectF,
-			RTI_RectD,
-			RTI_RectI,
-			RTI_RectU,
+			RTI_UUID = 40,
+			RTI_Property,			
 
 			// Base Containers
 			RTI_String = 25,
@@ -133,11 +124,6 @@ namespace greaper
 			RTI_UnorderedSet,
 			RTI_MultiSet,
 			RTI_UnorderedMultiSet,
-
-			// Classes
-			RTI_UUID = 40,
-			RTI_Property,
-
 		};
 
 		template<class T> struct PlainType {  };

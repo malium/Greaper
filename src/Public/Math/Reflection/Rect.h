@@ -5,11 +5,11 @@
 
 #pragma once
 
-#ifndef CORE_REFL_RECT_H
-#define CORE_REFL_RECT_H 1
+#ifndef MATH_REFL_RECT_H
+#define MATH_REFL_RECT_H 1
 
-#include "ComplexType.h"
-#include "../Base/Rect.h"
+#include <Core/Reflection/ComplexType.h>
+#include "../Rect.h"
 
 #define CreateRectRefl(recttype)\
 namespace greaper::refl{\
@@ -30,10 +30,10 @@ namespace greaper::refl{\
 		});\
 }
 
-CreateRectRefl(greaper::RectF);
-CreateRectRefl(greaper::RectD);
-CreateRectRefl(greaper::RectI);
-CreateRectRefl(greaper::RectU);
+CreateRectRefl(greaper::math::RectF);
+CreateRectRefl(greaper::math::RectD);
+CreateRectRefl(greaper::math::RectI);
+CreateRectRefl(greaper::math::RectU);
 
 #undef CreateRectRefl
 
@@ -143,4 +143,4 @@ CreateRectRefl(greaper::RectU);
 	};
 }*/
 
-#endif /* CORE_REFL_RECT_H */
+#endif /* MATH_REFL_RECT_H */

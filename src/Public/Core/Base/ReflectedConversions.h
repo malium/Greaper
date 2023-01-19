@@ -26,10 +26,7 @@ CREATE_TYPEINFO(uint64, greaper::refl::RTI_Uint64, PlainType);
 CREATE_TYPEINFO(float, greaper::refl::RTI_Float, PlainType);
 CREATE_TYPEINFO(double, greaper::refl::RTI_Double, PlainType);
 CREATE_TYPEINFO(long double, greaper::refl::RTI_LongDouble, PlainType);
-CREATE_TYPEINFO_CNAME(greaper::RectF, greaper::refl::RTI_RectF, ComplexType, "RectF");
-CREATE_TYPEINFO_CNAME(greaper::RectD, greaper::refl::RTI_RectD, ComplexType, "RectD");
-CREATE_TYPEINFO_CNAME(greaper::RectI, greaper::refl::RTI_RectI, ComplexType, "RectI");
-CREATE_TYPEINFO_CNAME(greaper::RectU, greaper::refl::RTI_RectU, ComplexType, "RectU");
+
 CREATE_TYPEINFO_CNAME(greaper::Uuid, greaper::refl::RTI_UUID, PlainType, "UUID");
 CREATE_TYPEINFO_CNAME(greaper::IProperty, greaper::refl::RTI_Property, ComplexType, "Property");
 CREATE_TYPEINFO_CNAME(greaper::String, greaper::refl::RTI_String, ContainerType, "String");

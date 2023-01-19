@@ -5,20 +5,18 @@
 
 #pragma once
 
-#ifndef CORE_RECT_H
-#define CORE_RECT_H 1
+#ifndef MATH_RECT_H
+#define MATH_RECT_H 1
 
-#include "../CorePrerequisites.h"
-//#include "../Reflection/ReflectedPlainType.h"
-#include "../Reflection/PlainType.h"
-#include "../StringUtils.h"
-#include <Math/Vector2.h>
+#include "MathPrerequisites.h"
+#include <Core/StringUtils.h>
+#include "Vector2.h"
 #if PLT_WINDOWS
-#include "../Win/Win32Base.h"
+#include <Core/Win/Win32Base.h>
 #endif
-#include "IntersectionResult.h"
+#include "Base/IntersectionResult.h"
 
-namespace greaper
+namespace greaper::math
 {
 	template<class T>
 	class RectT
@@ -375,7 +373,7 @@ namespace greaper
 namespace std
 {
 	template<class T>
-	struct hash<greaper::RectT<T>>
+	struct hash<greaper::math::RectT<T>>
 	{
 		NODISCARD INLINE size_t operator()(const greaper::RectT<T>& r)const noexcept
 		{
@@ -384,4 +382,4 @@ namespace std
 	};
 }
 
-#endif /* CORE_RECT_H */
+#endif /* MATH_RECT_H */

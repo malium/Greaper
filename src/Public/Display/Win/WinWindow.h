@@ -5,7 +5,22 @@
 
 #pragma once
 
-#include "../CorePrerequisites.h"
-#include "../Enumeration.h"
+#ifndef DISP_WIN_WINDOW_H
+#define DISP_WIN_WINDOW_H 1
 
-ENUMERATION(IntersectionResult, OUTSIDE, ON_THE_EDGE, PARTIALLY_INSIDE, FULLY_INSIDE);
+#include "../Base/IWindow.h"
+#include <Core/Win/Win32Base.h>
+
+namespace greaper::disp
+{
+	struct WinWindowDesc : public WindowDesc
+	{
+
+	};
+	class WinWindow : public IWindow
+	{
+		
+	};
+}
+
+#endif /* DISP_WIN_WINDOW_H */

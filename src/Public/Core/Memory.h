@@ -728,11 +728,16 @@ namespace greaper
 			if ((*it) == element)
 				return std::distance(container.begin(), it);
 		}
-		/*for (std::size_t i = 0; i < container.size(); ++i)
+		return -1;
+	}
+	template<class T, class _Alloc_, class CheckFn>
+	NODISCARD INLINE ssizet IndexOf(const Vector<T, _Alloc_>& container, CheckFn checkFn)noexcept
+	{
+		for(auto it = container.begin(); it != container.end(); ++it)
 		{
-			if (container[i] == element)
-				return (ssizet)i;
-		}*/
+			if(checkFn(*it))
+				return std::distance(container.begin(), it);
+		}
 		return -1;
 	}
 	template<class T, class _Alloc_>
@@ -741,6 +746,16 @@ namespace greaper
 		for (auto it = container.cbegin(); it != container.cend(); ++it)
 		{
 			if ((*it) == element)
+				return std::distance(container.begin(), it);
+		}
+		return -1;
+	}
+	template<class T, class _Alloc_, class CheckFn>
+	NODISCARD INLINE ssizet IndexOf(const Deque<T, _Alloc_>& container, CheckFn checkFn)noexcept
+	{
+		for(auto it = container.begin(); it != container.end(); ++it)
+		{
+			if(checkFn(*it))
 				return std::distance(container.begin(), it);
 		}
 		return -1;
@@ -755,20 +770,45 @@ namespace greaper
 		}
 		return -1;
 	}
+	template<class T, std::size_t N, class CheckFn>
+	NODISCARD INLINE ssizet IndexOf(T(&arr)[N], CheckFn checkFn) noexcept
+	{
+		for (std::size_t i = 0; i < N; ++i)
+		{
+			if(checkFn(arr[i]))
+				return static_cast<ssizet>(i);
+		}
+		return -1;
+	}
 	template<class T, class _Alloc_>
 	NODISCARD INLINE bool Contains(const Vector<T, _Alloc_>& container, const T& elem) noexcept
 	{
 		return IndexOf<T, _Alloc_>(container, elem) >= 0;
+	}
+	template<class T, class _Alloc_, class CheckFn>
+	NODISCARD INLINE bool Contains(const Vector<T, _Alloc_>& container, CheckFn checkFn) noexcept
+	{
+		return IndexOf<T, _Alloc_, CheckFn>(container, checkFn) >= 0;
 	}
 	template<class T, class _Alloc_>
 	NODISCARD INLINE bool Contains(const Deque<T, _Alloc_>& container, const T& elem) noexcept
 	{
 		return IndexOf<T, _Alloc_>(container, elem) >= 0;
 	}
+	template<class T, class _Alloc_, class CheckFn>
+	NODISCARD INLINE bool Contains(const Deque<T, _Alloc_>& container, CheckFn checkFn) noexcept
+	{
+		return IndexOf<T, _Alloc_, CheckFn>(container, checkFn) >= 0;
+	}
 	template<class T, std::size_t N>
 	NODISCARD INLINE bool Contains(T(&arr)[N], const T& elem) noexcept
 	{
 		return IndexOf<T, N>(arr, elem);
+	}
+	template<class T, std::size_t N, class CheckFn>
+	NODISCARD INLINE bool Contains(T(&arr)[N], CheckFn checkFn) noexcept
+	{
+		return IndexOf<T, N, CheckFn>(arr, checkFn);
 	}
 }
 
