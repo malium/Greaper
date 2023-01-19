@@ -30,6 +30,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApplicationWin", "TestA
 		{F36B383C-EC70-4B68-998D-3B852AF836C7} = {F36B383C-EC70-4B68-998D-3B852AF836C7}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TestApplicationLnx", "TestApplication\TestApplicationLnx.vcxproj", "{97714F0F-7634-468A-B2F2-EE328D13F141}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6A470868-C9D0-46E0-BD01-43048977BC7F} = {6A470868-C9D0-46E0-BD01-43048977BC7F}
+		{A19D8BAC-EE48-47E4-85F7-5DCE17D1F690} = {A19D8BAC-EE48-47E4-85F7-5DCE17D1F690}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -94,6 +100,18 @@ Global
 		{E86E719C-45D7-4CE8-9498-D8B945E46735}.Release|x64.Build.0 = Release|x64
 		{E86E719C-45D7-4CE8-9498-D8B945E46735}.Release|x86.ActiveCfg = Release|Win32
 		{E86E719C-45D7-4CE8-9498-D8B945E46735}.Release|x86.Build.0 = Release|Win32
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Debug|x64.ActiveCfg = Debug|x64
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Debug|x64.Build.0 = Debug|x64
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Debug|x64.Deploy.0 = Debug|x64
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Debug|x86.ActiveCfg = Debug|x86
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Debug|x86.Build.0 = Debug|x86
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Debug|x86.Deploy.0 = Debug|x86
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Release|x64.ActiveCfg = Release|x64
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Release|x64.Build.0 = Release|x64
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Release|x64.Deploy.0 = Release|x64
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Release|x86.ActiveCfg = Release|x86
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Release|x86.Build.0 = Release|x86
+		{97714F0F-7634-468A-B2F2-EE328D13F141}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

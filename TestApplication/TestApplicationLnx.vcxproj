@@ -52,8 +52,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
@@ -63,8 +63,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
@@ -74,8 +74,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
@@ -85,8 +85,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <OutDir>$(SolutionDir)bin\</OutDir>
-    <IntDir>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)\</IntDir>
-    <TargetName>TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration)</TargetName>
+    <IntDir>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration)\</IntDir>
+    <TargetName>$(ProjectName)$(PlatformArchitecture)_$(Configuration)</TargetName>
     <IncludePath>$(RemoteProjectDir)/;$(IncludePath)</IncludePath>
     <SourcePath>
     </SourcePath>
@@ -99,7 +99,7 @@
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
@@ -119,7 +119,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
@@ -140,7 +140,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
@@ -160,7 +160,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <BuildLog>
-      <Path>$(SolutionDir)obj\TestApplication$(ApplicationType)$(PlatformArchitecture)_$(Configuration).log</Path>
+      <Path>$(SolutionDir)obj\$(ProjectName)$(PlatformArchitecture)_$(Configuration).log</Path>
     </BuildLog>
     <ClCompile>
       <SymbolsHiddenByDefault>true</SymbolsHiddenByDefault>
