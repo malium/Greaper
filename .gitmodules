@@ -10,3 +10,6 @@
 [submodule "cJSON"]
 	path = cJSON
 	url = https://github.com/malium/cJSON
+[submodule "utf8.h"]
+	path = utf8.h
+	url = https://github.com/sheredom/utf8.h
