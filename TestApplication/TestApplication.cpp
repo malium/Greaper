@@ -759,7 +759,7 @@ void UTF8Test()
 {
 	using namespace greaper;
 	String str{};
-	
+	str.append("😀");
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
