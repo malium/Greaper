@@ -755,19 +755,11 @@ static void WindowedRunFunction()
 	//}
 }
 
-void UTF8Test()
-{
-	using namespace greaper;
-	String str{};
-	str.append("😀");
-}
-
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
 	const bool RunTests = false;
 	const bool RunWindow = false;
-	const bool RunUTF8Tests = true;
 
 	OSPlatform::PerThreadInit();
 	
@@ -787,11 +779,6 @@ int MainCode(void* hInstance, int argc, char** argv)
 		if(RunWindow)
 		{
 			WindowedRunFunction();
-		}
-
-		if (RunUTF8Tests)
-		{
-			UTF8Test();
 		}
 
 		GreaperGALLibClose();
