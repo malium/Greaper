@@ -91,7 +91,7 @@ static void SetProperties(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
 
-	auto propAppInstanceRes = CreateProperty<ptruint>((WGreaperLib)gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, nullptr);
+	auto propAppInstanceRes = CreateProperty<ptruint>((WGreaperLib)gCore, IApplication::AppInstanceName, (ptruint)hInstance, ""sv, true, true, {});
 	if (propAppInstanceRes.HasFailed())
 		gCore->LogError(propAppInstanceRes.GetFailMessage());
 
@@ -99,15 +99,15 @@ static void SetProperties(void* hInstance, int32 argc, achar** argv)
 	commandLine.resize(argc);
 	for (int32 i = 0; i < argc; ++i)
 		commandLine[i].assign(argv[i]);
-	auto propCmdLineRes = CreateProperty<StringVec>((WGreaperLib)gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, nullptr);
+	auto propCmdLineRes = CreateProperty<StringVec>((WGreaperLib)gCore, IApplication::CommandLineName, std::move(commandLine), ""sv, true, true, {});
 	if (propCmdLineRes.HasFailed())
 		gCore->LogError(propCmdLineRes.GetFailMessage());
 
-	auto propAppNameRes = CreateProperty<String>((WGreaperLib)gCore, IApplication::ApplicationNameName, String{"TestApplication"sv}, ""sv, true, true, nullptr);
+	auto propAppNameRes = CreateProperty<String>((WGreaperLib)gCore, IApplication::ApplicationNameName, String{ "TestApplication"sv }, ""sv, true, true, {});
 	if (propAppNameRes.HasFailed())
 		gCore->LogError(propAppNameRes.GetFailMessage());
 
-	auto propAppVersionRes = CreateProperty<uint32>((WGreaperLib)gCore, IApplication::ApplicationVersionName, APPLICATION_VERSION, ""sv, true, true, nullptr);
+	auto propAppVersionRes = CreateProperty<uint32>((WGreaperLib)gCore, IApplication::ApplicationVersionName, APPLICATION_VERSION, ""sv, true, true, {});
 	if (propAppVersionRes.HasFailed())
 		gCore->LogError(propAppVersionRes.GetFailMessage());
 
