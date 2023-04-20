@@ -20,6 +20,11 @@
 #include "../GreaperCore/Public/MemoryStream.h"
 #include "../GreaperCore/Public/Reflection/Property.h"
 #include "../GreaperGAL/Public/IWindowManager.h"
+#if PLT_WINDOWS
+#include "../GreaperGAL/Public/Win/WinWindow.h"
+#elif PLT_LINUX
+#include "../GreaperGAL/Public/Lnx/LnxWindow.h"
+#endif
 #include <random>
 #include <iostream>
 
@@ -725,29 +730,35 @@ static void WindowedRunFunction()
 	using namespace greaper;
 
 	// Create a test window
-	//gal::WindowDesc windowDesc
-	//{
-	//	"Greaper Test Window"sv,
-	//	math::Vector2i(800, 600),
-	//	AnchoredPosition_t::Center,
-	//	RenderBackend_t::OpenGL,
-	//	WindowMode_t::Windowed,
-	//	0, // Main monitor
-	//	PTaskScheduler(),
-	//	gal::PWindow()
-	//};
+#if PLT_WINDOWS
+	gal::WinWindowDesc windowDesc{};
 
-	//auto windowRes = gWindowManager->CreateWindow(windowDesc);
+#elif PLT_LINUX
+	gal::LnxWindowDesc windowDesc;
+#endif
 
-	//if(windowRes.HasFailed())
-	//{
-	//	gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
-	//	return;
-	//}
-	//auto window = windowRes.GetValue();
+	windowDesc.Title = "Greaper Test Window"sv;
+	windowDesc.Size = math::Vector2i(800, 600);
+	
+	gal::PWindow window;
+	{
+		auto windowRes = gWindowManager->CreateWindow(windowDesc);
 
-	//// Keep running until the test window is closed
-	//bool shouldClose = false;
+		if (windowRes.HasFailed())
+		{
+			gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
+			return;
+		}
+		window = windowRes.GetValue();
+	}
+
+	// Keep running until the test window is closed
+	bool shouldClose = false;
+	while (!window->ShouldClose())
+	{
+		window->PollEvents();
+		window->SwapWindow();
+	}
 	//while(!shouldClose)
 	//{
 	//	gWindowManager->PollEvents();
@@ -759,7 +770,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
 	const bool RunTests = false;
-	const bool RunWindow = false;
+	const bool RunWindow = true;
 
 	OSPlatform::PerThreadInit();
 	
