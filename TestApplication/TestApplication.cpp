@@ -25,6 +25,7 @@
 #elif PLT_LINUX
 #include "../GreaperGAL/Public/Lnx/LnxWindow.h"
 #endif
+#include "../GreaperCore/Public/SlimTaskScheduler.h"
 #include <random>
 #include <iostream>
 
@@ -753,12 +754,19 @@ static void WindowedRunFunction()
 	}
 
 	// Keep running until the test window is closed
-	bool shouldClose = false;
 	while (!window->ShouldClose())
 	{
-		window->PollEvents();
-		window->SwapWindow();
+		auto ret = window->GetTaskScheduler()->AddTask([&window]() { window->PollEvents(); });
+		if (ret.IsOk())
+		{
+			window->GetTaskScheduler()->WaitUntilTaskFinished(ret.GetValue());
+			//auto& future = ret.GetValue();
+			//if (future.valid())
+			//	future.wait();
+		}
+		//window->SwapWindow();
 	}
+
 	//while(!shouldClose)
 	//{
 	//	gWindowManager->PollEvents();
@@ -800,8 +808,10 @@ int MainCode(void* hInstance, int argc, char** argv)
 	}
 	catch (const std::exception& e)
 	{
-		TRIGGER_BREAKPOINT();
+		DEBUG_OUTPUT("-------------");
 		DEBUG_OUTPUT(e.what());
+		DEBUG_OUTPUT("-------------");
+		TRIGGER_BREAKPOINT();
 	}
 
 	return EXIT_SUCCESS;
