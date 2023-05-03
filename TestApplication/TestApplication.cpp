@@ -133,7 +133,7 @@ static void ActivateManagers()
 	if (mgrRes.IsOk())
 	{
 		gLogManager = (PLogManager)mgrRes.GetValue();
-		gLogManager->AddLogWriter(SPtr<ILogWriter>(Construct<LogWriterFile>()));
+		gLogManager->AddLogWriter(SPtr<ILogWriter>(ConstructShared<LogWriterFile>()));
 	}
 
 	mgrRes = gApplication->GetInterface(IThreadManager::InterfaceUUID, gCore->GetLibraryUuid());
@@ -156,7 +156,7 @@ static void GreaperCoreLibInit(void* hInstance, int32 argc, achar** argv)
 {
 	using namespace greaper;
 
-	gCoreLib.reset(Construct<Library>(CORE_LIB_NAME));
+	gCoreLib = ConstructShared<Library>(CORE_LIB_NAME);
 	TRYEXP(gCoreLib->IsOpen(), "Couldn't open " CORE_LIBRARY_NAME);
 
 	auto libFNRes = gCoreLib->GetFunctionT<void*>(LibFnName);
@@ -700,7 +700,7 @@ static void GreaperGALLibInit()
 {
 	using namespace greaper;
 
-	gGALLib.reset(Construct<Library>(GAL_LIB_NAME));
+	gGALLib = ConstructShared<Library>(GAL_LIB_NAME);
 	TRYEXP(gGALLib->IsOpen(), "Couldn't open " GAL_LIBRARY_NAME);
 
 	auto galRes = gApplication->RegisterGreaperLibrary(gGALLib);
@@ -733,9 +733,10 @@ static void WindowedRunFunction()
 	// Create a test window
 #if PLT_WINDOWS
 	gal::WinWindowDesc windowDesc{};
-
+	using WindowType = gal::WinWindow;
 #elif PLT_LINUX
-	gal::LnxWindowDesc windowDesc;
+	gal::LnxWindowDesc windowDesc{};
+	using WindowType = gal::LnxWindow;
 #endif
 
 	windowDesc.Title = "Greaper Test Window"sv;
@@ -753,18 +754,51 @@ static void WindowedRunFunction()
 		window = windowRes.GetValue();
 	}
 
+
 	// Keep running until the test window is closed
+	auto prevTime = Clock_t::now();
+	achar buffer[64];
+	uint64 frameCount = 0;
+	double accumTimes[60];
+	ClearMemory(accumTimes);
+	double invTimeCount = 1.0 / ArraySize(accumTimes);
+	//auto hWnd = ((SPtr<gal::WinWindow>)window)->GetOSHandle();
 	while (!window->ShouldClose())
 	{
-		auto ret = window->GetTaskScheduler()->AddTask([&window]() { window->PollEvents(); });
-		if (ret.IsOk())
-		{
-			window->GetTaskScheduler()->WaitUntilTaskFinished(ret.GetValue());
+		/*auto ret = */window->GetTaskScheduler()->AddTask([&window]() { 
+			window->PollEvents();
+			window->SwapWindow();
+		});
+		//if (ret.IsOk())
+		//{
+		//	window->GetTaskScheduler()->WaitUntilTaskFinished(ret.GetValue());
 			//auto& future = ret.GetValue();
 			//if (future.valid())
 			//	future.wait();
+		//}
+		
+		window->GetTaskScheduler()->WaitUntilAllTasksFinished();
+
+		auto curTime = Clock_t::now();
+		auto diff = curTime - prevTime;
+		
+		auto millis = diff.count() * 1e-6;
+		auto mod = frameCount % ArraySize(accumTimes);
+		accumTimes[mod] = millis;
+
+		if (mod == 0)
+		{
+			auto avgTime = 0.0;
+			for (sizet i = 0; i < ArraySize(accumTimes); ++i)
+				avgTime += accumTimes[i];
+			avgTime *= invTimeCount;
+			double avgUpdate = 1.0 / (avgTime * 1e-3);
+			snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
+			window->GetTaskScheduler()->AddTask([&window, &buffer]() { window->SetWindowTitle(StringView(buffer)); });
 		}
-		//window->SwapWindow();
+
+		prevTime = curTime;
+		++frameCount;
 	}
 
 	//while(!shouldClose)
