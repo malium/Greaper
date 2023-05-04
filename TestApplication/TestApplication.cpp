@@ -763,11 +763,15 @@ static void WindowedRunFunction()
 	ClearMemory(accumTimes);
 	double invTimeCount = 1.0 / ArraySize(accumTimes);
 	//auto hWnd = ((SPtr<gal::WinWindow>)window)->GetOSHandle();
-	while (!window->ShouldClose())
+	bool closeWindow = false;
+	while (!closeWindow)
 	{
-		/*auto ret = */window->GetTaskScheduler()->AddTask([&window]() { 
+		/*auto ret = */window->GetTaskScheduler()->AddTask([&window, &closeWindow]() { 
 			window->PollEvents();
 			window->SwapWindow();
+			auto res = window->ShouldClose();
+			if (res.IsOk())
+				closeWindow = res.GetValue();
 		});
 		//if (ret.IsOk())
 		//{
@@ -794,7 +798,7 @@ static void WindowedRunFunction()
 			avgTime *= invTimeCount;
 			double avgUpdate = 1.0 / (avgTime * 1e-3);
 			snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
-			window->GetTaskScheduler()->AddTask([&window, &buffer]() { window->SetWindowTitle(StringView(buffer)); });
+			window->ChangeWindowTitle(StringView(buffer));
 		}
 
 		prevTime = curTime;
