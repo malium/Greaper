@@ -741,6 +741,7 @@ static void WindowedRunFunction()
 
 	windowDesc.Title = "Greaper Test Window"sv;
 	windowDesc.Size = math::Vector2i(800, 600);
+	windowDesc.State = WindowState_t::Normal;
 	
 	gal::PWindow window;
 	{
