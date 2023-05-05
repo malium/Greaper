@@ -798,8 +798,8 @@ static void WindowedRunFunction()
 				avgTime += accumTimes[i];
 			avgTime *= invTimeCount;
 			double avgUpdate = 1.0 / (avgTime * 1e-3);
-			snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
-			window->ChangeWindowTitle(StringView(buffer));
+			int sz = snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
+			window->ChangeWindowTitle(StringView(buffer, sz+1));
 		}
 
 		prevTime = curTime;
