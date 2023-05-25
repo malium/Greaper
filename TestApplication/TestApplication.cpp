@@ -32,7 +32,7 @@
 #if PLT_WINDOWS
 #define PLT_NAME "Win"
 #else
-#define PLT_NAME "Linux"
+#define PLT_NAME "Lnx"
 #endif
 // DROP SUPPORT FOR 32bit
 #if ARCHITECTURE_X64
