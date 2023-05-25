@@ -34,10 +34,15 @@
 #else
 #define PLT_NAME "Linux"
 #endif
+// DROP SUPPORT FOR 32bit
 #if ARCHITECTURE_X64
-#define ARCH_NAME "64"
+#define ARCH_NAME /*"64"*/
 #else
-#define ARCH_NAME "32"
+#define ARCH_NAME /*"32"*/
+#endif
+
+#if RelWithDebInfo
+
 #endif
 
 #if PLT_WINDOWS

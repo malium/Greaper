@@ -48,5 +48,6 @@ cmake-build-release/**
 *.exp
 *.recipe
 obj/**
+out/**
 bin/**
 build/**
