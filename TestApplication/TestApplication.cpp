@@ -765,9 +765,11 @@ static void WindowedRunFunction()
 	auto prevTime = Clock_t::now();
 	achar buffer[64];
 	uint64 frameCount = 0;
-	double accumTimes[60];
-	ClearMemory(accumTimes);
-	double invTimeCount = 1.0 / ArraySize(accumTimes);
+	static constexpr sizet accumFrames = 60;
+	static constexpr double invTimeCount = 1.0 / accumFrames;
+	double accumTime = 0.0;
+	//double accumTimes[60];
+	//ClearMemory(accumTimes);
 	//auto hWnd = ((SPtr<gal::WinWindow>)window)->GetOSHandle();
 	bool closeWindow = false;
 	while (!closeWindow)
@@ -792,19 +794,17 @@ static void WindowedRunFunction()
 		auto curTime = Clock_t::now();
 		auto diff = curTime - prevTime;
 		
-		auto millis = diff.count() * 1e-6;
-		auto mod = frameCount % ArraySize(accumTimes);
-		accumTimes[mod] = millis;
+		accumTime += diff.count();
 
-		if (mod == 0)
+		if ((frameCount % accumFrames) == 0)
 		{
-			auto avgTime = 0.0;
-			for (sizet i = 0; i < ArraySize(accumTimes); ++i)
-				avgTime += accumTimes[i];
-			avgTime *= invTimeCount;
+			double avgTime = accumTime * 1e-6 * invTimeCount;
 			double avgUpdate = 1.0 / (avgTime * 1e-3);
 			int sz = snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
 			window->ChangeWindowTitle(StringView(buffer, sz+1));
+			accumTime = 0.0;
+			//if(frameCount % 10000 == 0)
+			//	printf_s("Times: %fms %.2f\n", avgTime, avgUpdate);
 		}
 
 		prevTime = curTime;
