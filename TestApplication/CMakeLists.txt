@@ -48,7 +48,7 @@ set_target_properties(TestApp PROPERTIES
 
 target_compile_definitions(TestApp PRIVATE $<CONFIG>)
 if(MSVC)
-	set(MSVC_COMPILE_OPTIONS "/W4;/sdl;/Gm-;/EHa;/GF;/Zc:inline;/Zc:forScope;/Zc:wchar_t;/permissive-;/openmp-;/GR;/GS")
+	set(MSVC_COMPILE_OPTIONS "/sdl;/Gm-;/EHa;/GF;/Zc:inline;/Zc:forScope;/Zc:wchar_t;/permissive-;/openmp-;/GR;/GS")
 	if(release EQUAL TRUE)
 		string(APPEND MSVC_COMPILE_OPTIONS ";/Oi;/Ot;/Gy;/fp:fast")
 	endif()
