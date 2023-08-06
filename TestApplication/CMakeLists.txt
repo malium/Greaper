@@ -43,6 +43,7 @@ set_target_properties(TestApp PROPERTIES
 						RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${PROJECT_SOURCE_DIR}/bin
 						RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${PROJECT_SOURCE_DIR}/bin
 						OUTPUT_NAME ${TESTAPP_OUTPUT_NAME}
+						LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin
 						CXX_STANDARD 17
 						C_STANDARD 11)
 
@@ -59,4 +60,7 @@ if(MSVC)
 	add_custom_command(TARGET TestApp POST_BUILD COMMAND 
 					"mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\Manifest.xml\" -outputresource:\"${PROJECT_SOURCE_DIR}\\bin\\${TESTAPP_OUTPUT_NAME}.exe\"\;\#1
 					COMMENT "Adding custom manifest...")
+elseif(CMAKE_COMPILER_IS_GNUCC)
+	#target_compile_options(TestApp PRIVATE "-lm")
+	target_link_options(TestApp PRIVATE "-lstdc++")
 endif()

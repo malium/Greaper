@@ -4,11 +4,13 @@
 ***********************************************************************************/
 
 #include "../GreaperCore/Public/CorePrerequisites.h"
+#include "../GreaperCore/Public/Library.h"
 #include "../GreaperCore/Public/IGreaperLibrary.h"
 #include "../GreaperCore/Public/IApplication.h"
 #include "../GreaperCore/Public/Reflection/ContainerType.h"
 #include "../GreaperCore/Public/Property.h"
 #include "../GreaperCore/Public/Base/LogWriterFile.h"
+#include "../GreaperCore/Public/Base/LogWriterStdout.h"
 #include "../GreaperCore/Public/IThreadManager.h"
 #include "../GreaperCore/Public/ICommandManager.h"
 #include "../GreaperCore/Public/Platform.h"
@@ -19,12 +21,12 @@
 #include "../GreaperMath/Public/Reflection/Quaternion.h"
 #include "../GreaperCore/Public/MemoryStream.h"
 #include "../GreaperCore/Public/Reflection/Property.h"
-#include "../GreaperGAL/Public/IWindowManager.h"
-#if PLT_WINDOWS
-#include "../GreaperGAL/Public/Win/WinWindow.h"
-#elif PLT_LINUX
-#include "../GreaperGAL/Public/Lnx/LnxWindow.h"
-#endif
+//#include "../GreaperGAL/Public/IWindowManager.h"
+//#if PLT_WINDOWS
+//#include "../GreaperGAL/Public/Win/WinWindow.h"
+//#elif PLT_LINUX
+//#include "../GreaperGAL/Public/Lnx/LnxWindow.h"
+//#endif
 #include "../GreaperCore/Public/SlimTaskScheduler.h"
 #include <random>
 #include <iostream>
@@ -62,7 +64,7 @@ greaper::PApplication gApplication;
 greaper::PLogManager gLogManager;
 greaper::PThreadManager gThreadManager;
 greaper::PCommandManager gCommandManager;
-greaper::gal::PWindowManager gWindowManager;
+//greaper::gal::PWindowManager gWindowManager;
 
 #define APPLICATION_VERSION VERSION_SETTER(1, 0, 0, 0)
 
@@ -139,6 +141,7 @@ static void ActivateManagers()
 	{
 		gLogManager = (PLogManager)mgrRes.GetValue();
 		gLogManager->AddLogWriter(SPtr<ILogWriter>(ConstructShared<LogWriterFile>()));
+		gLogManager->AddLogWriter(SPtr<ILogWriter>(ConstructShared<LogWriterStdout>()));
 	}
 
 	mgrRes = gApplication->GetInterface(IThreadManager::InterfaceUUID, gCore->GetLibraryUuid());
@@ -416,7 +419,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> InvSqr
 }
 
 static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> LenghtV4FTest(sizet sampleCount,
-	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128, 16>& samplesSSE,
+	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128>& samplesSSE,
 	greaper::Vector<float>& resultNormal, greaper::Vector<float>& resultOptim)
 {
 	using namespace greaper;
@@ -442,7 +445,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> Lenght
 }
 
 static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> NormV4FTest(sizet sampleCount,
-	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128, 16>& samplesSSE,
+	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128>& samplesSSE,
 	greaper::Vector<float>& resultNormal, greaper::Vector<float>& resultOptim)
 {
 	using namespace greaper;
@@ -472,7 +475,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> NormV4
 }
 
 static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4FTest(sizet sampleCount,
-	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128, 16>& samplesSSE,
+	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128>& samplesSSE,
 	greaper::Vector<float>& resultNormal, greaper::Vector<float>& resultOptim)
 {
 	using namespace greaper;
@@ -528,7 +531,7 @@ static void TestFunction()
 
 	Vector<Vector4f> samplesV4;
 	samplesV4.resize(sampleCount, Vector4f{});
-	VectorAligned<__m128, 16> samplesSSE;
+	VectorAligned<__m128> samplesSSE;
 	samplesSSE.resize(sampleCount, __m128{});
 
 	Vector<int32> resultNormal, resultOptim;
@@ -643,7 +646,7 @@ static void TestFunction()
 	auto quatArray = Vector<std::pair<QuaternionReal<prec>, Vector3Real<prec>>>{ {qf0,edeg0}, {qf1, edeg1}, {qf2, edeg2}, {qf3, edeg3}, {qf4, edeg4}, {qf5, edeg5} };
 	decltype(quatArray) testArray, testArray2{};
 
-	using typeInfo = refl::TypeInfo_t<decltype(quatArray)>::Type;
+	using typeInfo = typename refl::TypeInfo_t<decltype(quatArray)>::Type;
 
 	auto json = typeInfo::CreateJSON(quatArray, "quatMap"sv);
 	auto text = SPtr<char>(cJSON_Print(json.get()));
@@ -712,11 +715,11 @@ static void GreaperGALLibInit()
 	TRYEXP(galRes.IsOk(), "Something went wrong registering " GAL_LIBRARY_NAME);
 	gGAL = galRes.GetValue();
 
-	auto wndMgrRes = gApplication->GetInterface(gal::IWindowManager::InterfaceUUID, gGAL->GetLibraryUuid());
-	TRYEXP(wndMgrRes.IsOk(), "Something went wrong obtaining interface WindowManager.");
-	gWindowManager = wndMgrRes.GetValue();
-	auto activateRes = gApplication->ActivateInterface((const PInterface&)gWindowManager);
-	TRYEXP(activateRes.IsOk(), "Something went wrong activating interface WindowManager.");
+	//auto wndMgrRes = gApplication->GetInterface(gal::IWindowManager::InterfaceUUID, gGAL->GetLibraryUuid());
+	//TRYEXP(wndMgrRes.IsOk(), "Something went wrong obtaining interface WindowManager.");
+	//gWindowManager = wndMgrRes.GetValue();
+	//auto activateRes = gApplication->ActivateInterface((const PInterface&)gWindowManager);
+	//TRYEXP(activateRes.IsOk(), "Something went wrong activating interface WindowManager.");
 }
 
 static void GreaperGALLibClose()
@@ -726,7 +729,7 @@ static void GreaperGALLibClose()
 	auto res = gApplication->UnregisterGreaperLibrary(gGAL);
 	if (res.HasFailed())
 		gLogManager->Log(LogLevel_t::ERROR, res.GetFailMessage(), GAL_LIB_NAME);
-	gWindowManager.reset();
+	//gWindowManager.reset();
 	gGAL.reset();
 	gGALLib.reset();
 }
@@ -736,100 +739,100 @@ static void WindowedRunFunction()
 	using namespace greaper;
 
 	// Create a test window
-#if PLT_WINDOWS
-	gal::WinWindowDesc windowDesc{};
-	using WindowType = gal::WinWindow;
-#elif PLT_LINUX
-	gal::LnxWindowDesc windowDesc{};
-	using WindowType = gal::LnxWindow;
-#endif
-
-	windowDesc.Title = "Greaper Test Window"sv;
-	windowDesc.Size = math::Vector2i(800, 600);
-	windowDesc.State = WindowState_t::Normal;
-	
-	gal::PWindow window;
-	{
-		auto windowRes = gWindowManager->CreateWindow(windowDesc);
-
-		if (windowRes.HasFailed())
-		{
-			gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
-			return;
-		}
-		window = windowRes.GetValue();
-	}
-
-
-	// Keep running until the test window is closed
-	auto prevTime = Clock_t::now();
-	achar buffer[64];
-	uint64 frameCount = 0;
-	static constexpr sizet accumFrames = 60;
-	static constexpr double invTimeCount = 1.0 / accumFrames;
-	double accumTime = 0.0;
-	//double accumTimes[60];
-	//ClearMemory(accumTimes);
-	//auto hWnd = ((SPtr<gal::WinWindow>)window)->GetOSHandle();
-	bool closeWindow = false;
-	while (!closeWindow)
-	{
-		/*auto ret = */window->GetTaskScheduler()->AddTask([&window, &closeWindow]() { 
-			window->PollEvents();
-			window->SwapWindow();
-			auto res = window->ShouldClose();
-			if (res.IsOk())
-				closeWindow = res.GetValue();
-		});
-		//if (ret.IsOk())
-		//{
-		//	window->GetTaskScheduler()->WaitUntilTaskFinished(ret.GetValue());
-			//auto& future = ret.GetValue();
-			//if (future.valid())
-			//	future.wait();
-		//}
-		
-		window->GetTaskScheduler()->WaitUntilAllTasksFinished();
-
-		auto curTime = Clock_t::now();
-		auto diff = curTime - prevTime;
-		
-		accumTime += diff.count();
-
-		if ((frameCount % accumFrames) == 0)
-		{
-			double avgTime = accumTime * 1e-6 * invTimeCount;
-			double avgUpdate = 1.0 / (avgTime * 1e-3);
-			int sz = snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
-			window->ChangeWindowTitle(StringView(buffer, sz+1));
-			accumTime = 0.0;
-			//if(frameCount % 10000 == 0)
-			//	printf_s("Times: %fms %.2f\n", avgTime, avgUpdate);
-		}
-
-		prevTime = curTime;
-		++frameCount;
-	}
-
-	//while(!shouldClose)
-	//{
-	//	gWindowManager->PollEvents();
-	//	gWindowManager->AccessWindows([&shouldClose](CSpan<gal::PWindow> windows) { shouldClose = windows.GetSizeFn() > 0; });
-	//}
+//#if PLT_WINDOWS
+//	gal::WinWindowDesc windowDesc{};
+//	using WindowType = gal::WinWindow;
+//#elif PLT_LINUX
+//	gal::LnxWindowDesc windowDesc{};
+//	using WindowType = gal::LnxWindow;
+//#endif
+//
+//	windowDesc.Title = "Greaper Test Window"sv;
+//	windowDesc.Size = math::Vector2i(800, 600);
+//	windowDesc.State = WindowState_t::Normal;
+//	
+//	gal::PWindow window;
+//	{
+//		auto windowRes = gWindowManager->CreateWindow(windowDesc);
+//
+//		if (windowRes.HasFailed())
+//		{
+//			gLogManager->Log(LogLevel_t::ERROR, windowRes.GetFailMessage(), "TestApplication"sv);
+//			return;
+//		}
+//		window = windowRes.GetValue();
+//	}
+//
+//
+//	// Keep running until the test window is closed
+//	auto prevTime = Clock_t::now();
+//	achar buffer[64];
+//	uint64 frameCount = 0;
+//	static constexpr sizet accumFrames = 60;
+//	static constexpr double invTimeCount = 1.0 / accumFrames;
+//	double accumTime = 0.0;
+//	//double accumTimes[60];
+//	//ClearMemory(accumTimes);
+//	//auto hWnd = ((SPtr<gal::WinWindow>)window)->GetOSHandle();
+//	bool closeWindow = false;
+//	while (!closeWindow)
+//	{
+//		/*auto ret = */window->GetTaskScheduler()->AddTask([&window, &closeWindow]() { 
+//			window->PollEvents();
+//			window->SwapWindow();
+//			auto res = window->ShouldClose();
+//			if (res.IsOk())
+//				closeWindow = res.GetValue();
+//		});
+//		//if (ret.IsOk())
+//		//{
+//		//	window->GetTaskScheduler()->WaitUntilTaskFinished(ret.GetValue());
+//			//auto& future = ret.GetValue();
+//			//if (future.valid())
+//			//	future.wait();
+//		//}
+//		
+//		window->GetTaskScheduler()->WaitUntilAllTasksFinished();
+//
+//		auto curTime = Clock_t::now();
+//		auto diff = curTime - prevTime;
+//		
+//		accumTime += diff.count();
+//
+//		if ((frameCount % accumFrames) == 0)
+//		{
+//			double avgTime = accumTime * 1e-6 * invTimeCount;
+//			double avgUpdate = 1.0 / (avgTime * 1e-3);
+//			int sz = snprintf(buffer, ArraySize(buffer), "Greaper Test Window %fms %.2f", avgTime, avgUpdate);
+//			window->ChangeWindowTitle(StringView(buffer, sz+1));
+//			accumTime = 0.0;
+//			//if(frameCount % 10000 == 0)
+//			//	printf_s("Times: %fms %.2f\n", avgTime, avgUpdate);
+//		}
+//
+//		prevTime = curTime;
+//		++frameCount;
+//	}
+//
+//	//while(!shouldClose)
+//	//{
+//	//	gWindowManager->PollEvents();
+//	//	gWindowManager->AccessWindows([&shouldClose](CSpan<gal::PWindow> windows) { shouldClose = windows.GetSizeFn() > 0; });
+//	//}
 }
 
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
-	const bool RunTests = false;
-	const bool RunWindow = true;
+	const bool RunTests = true;
+	const bool RunWindow = false;
 
 	OSPlatform::PerThreadInit();
 	
 	try
 	{
 		GreaperCoreLibInit(hInstance, argc, argv);
-		GreaperGALLibInit();
+		//GreaperGALLibInit();
 
 		if (RunTests)
 		{
@@ -844,7 +847,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 			WindowedRunFunction();
 		}
 
-		GreaperGALLibClose();
+		//GreaperGALLibClose();
 		GreaperCoreLibClose();
 
 		gCoreLib->Close();

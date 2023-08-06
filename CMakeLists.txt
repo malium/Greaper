@@ -20,7 +20,8 @@ if(MSVC)
   endif()
 elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Update if necessary
-  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -pedantic")
+  set(CMAKE_SHARED_LIBRARY_PREFIX "")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lm -Wall -msse4.1 -Wno-long-long -pedantic -Wno-comment -Wno-unused-function -Wno-ignored-attributes")
 endif()
 
 add_subdirectory("cJSON")
@@ -34,7 +35,7 @@ endif()
 # Include sub-projects.
 add_subdirectory ("GreaperCore")
 
-add_subdirectory ("GreaperGAL")
+#add_subdirectory ("GreaperGAL")
 
 
 add_subdirectory ("TestApplication")
