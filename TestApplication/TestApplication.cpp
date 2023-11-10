@@ -821,11 +821,21 @@ static void WindowedRunFunction()
 //	//}
 }
 
+extern void WaylandTest();
+
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
 	const bool RunTests = true;
 	const bool RunWindow = false;
+	const bool RunWaylandTest = true;
+
+	if (RunWaylandTest)
+	{
+		WaylandTest();
+		return EXIT_SUCCESS;
+	}
+
 
 	OSPlatform::PerThreadInit();
 	
