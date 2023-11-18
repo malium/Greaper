@@ -828,7 +828,7 @@ int MainCode(void* hInstance, int argc, char** argv)
 	using namespace greaper;
 	const bool RunTests = true;
 	const bool RunWindow = false;
-	const bool RunWaylandTest = true;
+	const bool RunWaylandTest = PLT_LINUX;
 
 	if (RunWaylandTest)
 	{

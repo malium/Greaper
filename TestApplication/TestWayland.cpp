@@ -9,6 +9,7 @@
 #include <time.h>
 #include <wayland-client.h>
 #include "xdg-shell-client-protocol.h"
+#include "xdg-decoration-unstable-v1.h"
 #include <vector>
 #include <string>
 
@@ -20,6 +21,11 @@ static xdg_wm_base* gxdg_wm_base = nullptr;
 static wl_surface* gwl_surface = nullptr;
 static xdg_surface* gxdg_surface = nullptr;
 static xdg_toplevel* gxdg_toplevel = nullptr;
+
+struct zxdg_decoration_manager_v1;
+static zxdg_decoration_manager_v1* gzxdg_decoration_manager_v1 = nullptr;
+struct zxdg_toplevel_decoration_v1;
+static zxdg_toplevel_decoration_v1* gzxdg_toplevel_decoration_v1 = nullptr;
 
 static void wl_buffer_release(void *data, wl_buffer *wl_buffer)
 {
@@ -158,6 +164,12 @@ static void registry_global(void *data, wl_registry *wl_registry,
         xdg_wm_base_add_listener(gxdg_wm_base,
                 &wm_listener, nullptr);
     }
+    else if (strcmp(interface, zxdg_decoration_manager_v1_interface.name) == 0){
+        gzxdg_decoration_manager_v1 = static_cast<zxdg_decoration_manager_v1*>(
+            wl_registry_bind(
+                wl_registry, name, &zxdg_decoration_manager_v1_interface, 1
+            ));
+    }
 }
 
 static void registry_global_remove(void *data, wl_registry *wl_registry, uint32_t name)
@@ -185,6 +197,10 @@ void WaylandTest()
 	xdg_surface_add_listener(gxdg_surface, &xdgsurface_listener, nullptr);
 
 	gxdg_toplevel = xdg_surface_get_toplevel(gxdg_surface);
+
+    gzxdg_toplevel_decoration_v1 = zxdg_decoration_manager_v1_get_toplevel_decoration(gzxdg_decoration_manager_v1, gxdg_toplevel);
+
+    zxdg_toplevel_decoration_v1_set_mode(gzxdg_toplevel_decoration_v1, ZXDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE);
 
 	xdg_toplevel_set_title(gxdg_toplevel, "Greaper Wayland Test");
 	
