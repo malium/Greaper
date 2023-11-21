@@ -10,7 +10,7 @@
 #include <wayland-client.h>
 #include "xdg-shell-client-protocol.h"
 #include "xdg-decoration-unstable-v1.h"
-#include <vector>
+#include <map>
 #include <string>
 
 static wl_display* gwl_display = nullptr;
@@ -143,13 +143,13 @@ struct wlinterface
 	std::string name;
 	uint32_t version;
 };
-static std::vector<wlinterface> gwlinterfaces{};
+static std::map<uint32_t, wlinterface> gwlinterfaces{};
 
 static void registry_global(void *data, wl_registry *wl_registry,
         uint32_t name, const char *interface, uint32_t version)
 {
-	gwlinterfaces.push_back(wlinterface{std::string{interface}, version});
-	printf("Registry:%s\n", interface);
+    gwlinterfaces.insert_or_assign(name, wlinterface{std::string{interface}, version});
+	printf("Registry %d: %s v%d\n", name, interface, version);
     if (strcmp(interface, wl_shm_interface.name) == 0) {
         gwl_shm = static_cast<wl_shm*>(wl_registry_bind(
                 wl_registry, name, &wl_shm_interface, 1));
@@ -174,7 +174,6 @@ static void registry_global(void *data, wl_registry *wl_registry,
 
 static void registry_global_remove(void *data, wl_registry *wl_registry, uint32_t name)
 {
-    /* This space deliberately left blank */
 	printf("RegistryRemove\n");
 }
 
