@@ -53,3 +53,4 @@ obj/**
 out/**
 bin/**
 build/**
+External/wayland-protocols
