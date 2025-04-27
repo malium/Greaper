@@ -10,3 +10,6 @@
 [submodule "cJSON"]
 	path = cJSON
 	url = https://github.com/malium/cJSON
+[submodule "External/tomlplusplus"]
+	path = External/tomlplusplus
+	url = https://github.com/marzer/tomlplusplus.git
