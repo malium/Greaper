@@ -3,8 +3,6 @@ set(TESTAPP_OUTPUT_NAME "TestApplication")
 
 function(generate_wayland_protocols target output_dir protocol_dir)
 	message(STATUS "Generating wayland-protocols...")
-	message(STATUS ${output_dir})
-	message(STATUS ${protocol_dir})
 	find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
 	file(GLOB_RECURSE PROTOCOL_FILES "${protocol_dir}/*.xml")
 	foreach(PROTOCOL_FILE ${PROTOCOL_FILES})
@@ -69,8 +67,8 @@ set_target_properties(TestApp PROPERTIES
 						RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${PROJECT_SOURCE_DIR}/bin
 						OUTPUT_NAME ${TESTAPP_OUTPUT_NAME}
 						LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin
-						CXX_STANDARD 17
-						C_STANDARD 11)
+						CXX_STANDARD 23
+						C_STANDARD 17)
 
 target_compile_definitions(TestApp PRIVATE $<CONFIG>)
 if(MSVC)
