@@ -8,8 +8,8 @@
 #include <string.h>
 #include <time.h>
 #include <wayland-client.h>
-#include "../External/wayland-protocols/xdg-shell-client-protocol.h"
-#include "../External/wayland-protocols/xdg-decoration-unstable-v1.h"
+#include "../External/wayland-protocols/xdg-shell-protocol.h"
+#include "../External/wayland-protocols/xdg-decoration-unstable-v1-protocol.h"
 #include <map>
 #include <string>
 

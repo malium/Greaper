@@ -1,6 +1,27 @@
 
 set(TESTAPP_OUTPUT_NAME "TestApplication")
 
+function(generate_wayland_protocols target output_dir protocol_dir)
+	message(STATUS "Generating wayland-protocols...")
+	message(STATUS ${output_dir})
+	message(STATUS ${protocol_dir})
+	find_program(WAYLAND_SCANNER wayland-scanner REQUIRED)
+	file(GLOB_RECURSE PROTOCOL_FILES "${protocol_dir}/*.xml")
+	foreach(PROTOCOL_FILE ${PROTOCOL_FILES})
+		get_filename_component(PROTOCOL_NAME ${PROTOCOL_FILE} NAME_WE)
+		execute_process(
+			COMMAND ${WAYLAND_SCANNER} client-header "${PROTOCOL_FILE}" "${output_dir}/${PROTOCOL_NAME}-protocol.h"
+		)
+		execute_process(
+			COMMAND ${WAYLAND_SCANNER} private-code "${PROTOCOL_FILE}" "${output_dir}/${PROTOCOL_NAME}-protocol.c"
+		)
+		list(APPEND generated_headers "${output_dir}/${PROTOCOL_NAME}-protocol.h")
+		target_sources(${target} PRIVATE ${output_dir}/${PROTOCOL_NAME}-protocol.c)
+	endforeach()
+	target_include_directories(${target} PRIVATE ${output_dir})
+	set_source_files_properties(${generated_headers} PROPERTIES HEADER_FILE_ONLY TRUE)
+endfunction()
+
 if(WIN32)
 	string(APPEND TESTAPP_OUTPUT_NAME "Win")
 else()
@@ -28,15 +49,15 @@ else()
 	find_package(PkgConfig REQUIRED)
 	
 	pkg_check_modules(WAYLAND_PROTOCOLS REQUIRED wayland-protocols)
-	include_directories(${WAYLAND_PROTOCOLS_INCLUDE_DIRS})
-
-	message(STATUS ${WAYLAND_PROTOCOLS_INCLUDE_DIRS})
 	
-	#find_package(Wayland REQUIRED)
-
 	list(REMOVE_ITEM TESTAPP_SOURCES ${TO_REMOVE})
-
+	
 	add_executable(TestApp ${TESTAPP_SOURCES})
+
+	set(generated_protocol_dir "${PROJECT_SOURCE_DIR}/External/wayland-protocols")
+	file(MAKE_DIRECTORY ${generated_protocol_dir})
+	
+	generate_wayland_protocols(TestApp ${generated_protocol_dir} "/usr/share/wayland-protocols/")
 
 	target_link_libraries(TestApp cJSON wayland-client)
 endif()

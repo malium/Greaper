@@ -3,7 +3,7 @@
 *   All Rights Reserved.                                                           *
 ***********************************************************************************/
 
-#include "../GreaperCore/Public/CorePrerequisites.h"
+#include "../GreaperCore/Public/CorePrerequisites.hpp"
 #include "../GreaperCore/Public/Library.h"
 #include "../GreaperCore/Public/IGreaperLibrary.h"
 #include "../GreaperCore/Public/IApplication.h"
