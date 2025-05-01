@@ -144,6 +144,7 @@ struct wlinterface
 	std::string name;
 	uint32_t version;
 };
+
 static std::map<uint32_t, wlinterface> gwlinterfaces{};
 
 static void registry_global(void *data, wl_registry *wl_registry,
