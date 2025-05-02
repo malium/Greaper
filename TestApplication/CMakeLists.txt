@@ -76,6 +76,9 @@ set_target_properties(TestApp PROPERTIES
 						CXX_STANDARD 23
 						C_STANDARD 17)
 
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+						
 target_compile_definitions(TestApp PRIVATE $<CONFIG>)
 if(MSVC)
 	set(MSVC_COMPILE_OPTIONS "/sdl;/Gm-;/EHa;/GF;/Zc:inline;/Zc:forScope;/Zc:wchar_t;/permissive-;/openmp-;/GR;/GS")
@@ -90,5 +93,6 @@ if(MSVC)
 					"mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\Manifest.xml\" -outputresource:\"${PROJECT_SOURCE_DIR}\\bin\\${TESTAPP_OUTPUT_NAME}.exe\"\;\#1
 					COMMENT "Adding custom manifest...")
 elseif(CMAKE_COMPILER_IS_GNUCC)
-	target_link_options(TestApp PRIVATE -lstdc++ -luuid)
+	target_link_libraries(TestApp stdc++ uuid)
+	#target_link_options(TestApp PRIVATE -lstdc++ -luuid)
 endif()

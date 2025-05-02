@@ -6,6 +6,7 @@
 #include "../GreaperCore/Public/CorePrerequisites.hpp"
 #include "../GreaperCore/Public/Reflection/ComplexType.hpp"
 #include "../GreaperCore/Public/Reflection/ContainerType.hpp"
+#include "../GreaperCore/Public/MemoryStream.hpp"
 #include <ostream>
 #include <iostream>
 
@@ -146,4 +147,32 @@ void ComplexTypeTest()
 		return;
 	}
 	std::cout << str_ret.value() << std::endl;
+
+	greaper::ComplexClass ee{0, "", 0.f, {}};
+	greaper::MemoryStream ms {};
+
+	auto stream_ret = CC_RTI::ToStream(cc, ms);
+	if (!stream_ret.has_value())
+	{
+		std::cout << "ERROR" << stream_ret.error() << std::endl;
+		return;
+	}
+	std::cout << "Written " << stream_ret.value() << "bytes" << std::endl;
+
+	ms.Seek(0);
+	auto stream_ret2 = CC_RTI::FromStream(ee, ms);
+	if (!stream_ret2.has_value())
+	{
+		std::cout << "ERROR" << stream_ret2.error() << std::endl;
+		return;
+	}
+	std::cout << "Read " << stream_ret2.value() << "bytes" << std::endl;
+
+	auto str_ret2 = CC_RTI::ToString(ee);
+	if (!str_ret2.has_value())
+	{
+		std::cout << "ERROR" << str_ret2.error() << std::endl;
+		return;
+	}
+	std::cout << str_ret2.value() << std::endl;
 }
