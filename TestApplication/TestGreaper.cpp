@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include "../GreaperCore/Public/Uuid.hpp"
 
 #if 0
 #if PLT_WINDOWS
@@ -287,5 +288,42 @@ void GreaperTest()
 
 	return EXIT_SUCCESS;
 #endif
+
+	using namespace greaper;
+
+	auto uuid = Uuid::GenerateRandom();
+
+	using refl_uuid = refl::TypeInfo<decltype(uuid)>::Type;
+
+	auto json_ret = refl_uuid::CreateJSON(uuid, "TestUuid"sv);
+
+	if (!json_ret.has_value())
+	{
+		std::cout << "ERROR: " << json_ret.error() << std::endl;
+		return;
+	}
+	auto json = json_ret.value();
+	std::cout << cJSON_Print(json.get()) << std::endl;
+
+	Uuid test{};
+	auto json_ret2 = refl_uuid::FromJSON(test, json.get(), "TestUuid"sv);
+	if (!json_ret2.has_value())
+	{
+		std::cout << "ERROR: " << json_ret2.error() << std::endl;
+		return;
+	}
+	if (uuid != test)
+	{
+		std::cout << std::format("Uuid converted to JSON and back, expected '{}', obtained '{}'", uuid.ToString(),
+			test.ToString()) << std::endl;
+		return;
+	}
+
+	
+	
+	
+
+
+
 	std::cout << "Test under construction" << std::endl;
 }

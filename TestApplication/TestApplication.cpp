@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
 ENUMERATION(TESTS, Greaper, Wayland, Math);
 
-constexpr auto TestToRun = TESTS_t::Wayland;
+constexpr auto TestToRun = TESTS_t::Greaper;
 
 extern void WaylandTest();
 extern void MathTest();
@@ -47,9 +47,6 @@ extern void GreaperTest();
 int MainCode(void* hInstance, int argc, char** argv)
 {
 	using namespace greaper;
-	const bool RunTests = true;
-	const bool RunWindow = false;
-	const bool RunWaylandTest = PLT_LINUX;
 
 	switch (TestToRun)
 	{

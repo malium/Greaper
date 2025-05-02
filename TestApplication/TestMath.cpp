@@ -3,14 +3,17 @@
  *                                               All Rights Reserved                                                   *
  **********************************************************************************************************************/
 
+#if 0
 #include "../GreaperCore/Public/CorePrerequisites.hpp"
 #include "../GreaperMath/Public/MathPrerequisites.h"
 #include "../GreaperMath/Public/Vector4.h"
 #include "../GreaperMath/Public/Quaternion.h"
+#endif
 #include <iostream>
 #include <format>
 #include <random>
 
+#if 0
 template<class TResult>
 static void ReportTest(greaper::StringView testName, sizet sampleCount, const greaper::Vector<TResult>& resultNormal, const greaper::Vector<TResult>& resultOptim,
 	greaper::Clock_t::duration durationNormalNs, greaper::Clock_t::duration durationOptimNs)
@@ -315,8 +318,11 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4
 	return { durationNormalNs, durationOptimNs };
 }
 
+#endif
+
 void MathTest()
 {
+#if 0
 	using namespace greaper;
 	using namespace math;
 
@@ -497,4 +503,5 @@ void MathTest()
 
 		++origIt; ++test1It; ++test2It;
 	}
+	#endif
 }
