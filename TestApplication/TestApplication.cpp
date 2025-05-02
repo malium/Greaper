@@ -36,13 +36,14 @@ int main(int argc, char* argv[])
 }
 #endif
 
-ENUMERATION(TESTS, Greaper, Wayland, Math);
+ENUMERATION(TESTS, Greaper, Wayland, Math, ComplexType);
 
-constexpr auto TestToRun = TESTS_t::Greaper;
+constexpr auto TestToRun = TESTS_t::ComplexType;
 
 extern void WaylandTest();
 extern void MathTest();
 extern void GreaperTest();
+extern void ComplexTypeTest();
 
 int MainCode(void* hInstance, int argc, char** argv)
 {
@@ -58,6 +59,9 @@ int MainCode(void* hInstance, int argc, char** argv)
 		break;
 	case TESTS_t::Math:
 		MathTest();
+		break;
+	case TESTS_t::ComplexType:
+		ComplexTypeTest();
 		break;
 	default:
 		std::cout << "No test selected!" << std::endl;
