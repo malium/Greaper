@@ -4,11 +4,9 @@
  **********************************************************************************************************************/
 
 #if 0
-#include "../GreaperCore/Public/CorePrerequisites.hpp"
-#include "../GreaperMath/Public/MathPrerequisites.h"
-#include "../GreaperMath/Public/Vector4.h"
 #include "../GreaperMath/Public/Quaternion.h"
 #endif
+#include "../GreaperMath/Public/Vector2.hpp"
 #include <iostream>
 #include <format>
 #include <random>
@@ -504,4 +502,16 @@ void MathTest()
 		++origIt; ++test1It; ++test2It;
 	}
 	#endif
+
+	greaper::math::Vector2b vec {1,0};
+	using vec_refl = greaper::refl::TypeInfo_t<decltype(vec)>;
+	auto json_ret = vec_refl::Type::CreateJSON(vec, vec_refl::Name);
+	if (!json_ret.has_value())
+	{
+		std::cout << "ERROR" << json_ret.error() << std::endl;
+		return;
+	}
+	auto json = json_ret.value();
+
+	std::cout << cJSON_Print(json.get()) << std::endl;
 }

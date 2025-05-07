@@ -38,7 +38,7 @@ int main(int argc, char* argv[])
 
 ENUMERATION(TESTS, Greaper, Wayland, Math, ComplexType);
 
-constexpr auto TestToRun = TESTS_t::ComplexType;
+constexpr auto TestToRun = TESTS_t::Math;
 
 extern void WaylandTest();
 extern void MathTest();

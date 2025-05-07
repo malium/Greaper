@@ -22,7 +22,8 @@ namespace greaper
 	class ComplexClass
 	{
 	public:
-		inline ComplexClass(int32 i = 15, String s = "hi", float f = 0.5f, Vector<SimpleStruct> vec = { SimpleStruct{25,7.25f,"value"} })
+		inline ComplexClass(int32 i = 15, String s = "hi", float f = 0.5f,
+			Vector<SimpleStruct> vec = { SimpleStruct{25,7.25f,"value"} })
 			:m_Int(i)
 			,m_String(std::move(s))
 			,m_Float(f),
@@ -53,8 +54,8 @@ namespace greaper
 
 		friend refl::ComplexType<ComplexClass>;
 	};
-	
 }
+
 namespace greaper::refl
 {
 	enum TestReflectedID : ReflectedTypeID_t
@@ -62,54 +63,53 @@ namespace greaper::refl
 		RTI_SimpleStruct = 1000,
 		RTI_ComplexClass,
 	};
+}
 
+CREATE_TYPEINFO_CNAME(greaper::SimpleStruct, greaper::refl::RTI_SimpleStruct, ComplexType, "SimpleStruct");
+CREATE_TYPEINFO_CNAME(greaper::ComplexClass, greaper::refl::RTI_ComplexClass, ComplexType, "ComplexClass");
+
+namespace greaper
+{
 	template<>
-	struct TypeInfo<greaper::SimpleStruct>
-	{
-		static constexpr ReflectedTypeID_t ID = RTI_SimpleStruct;
-		using Type = ComplexType<SimpleStruct>;
-		static constexpr StringView Name = "SimpleStruct"sv;
-	};
-	template<>
-	struct TypeInfo<greaper::ComplexClass>
-	{
-		static constexpr ReflectedTypeID_t ID = RTI_ComplexClass;
-		using Type = ComplexType<ComplexClass>;
-		static constexpr StringView Name = "ComplexClass"sv;
-	};
-	template<>
-	const Vector<std::shared_ptr<IField>> ComplexType<SimpleStruct>::Fields = {
-		std::make_shared<TField<int32>>("i32"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->i32); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((SimpleStruct*)obj)->i32 = *((const int32*)value); }
+	const Vector<std::shared_ptr<refl::IField>> refl::ComplexType<SimpleStruct>::Fields = {
+		std::make_shared<refl::TField<int32>>("i32"sv, 
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->i32); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((SimpleStruct*)obj)->i32 = *((const int32*)value); }
 		),
-		std::make_shared<TField<float>>("f32"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->f32); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((SimpleStruct*)obj)->f32 = *((const float*)value); }
+		std::make_shared<refl::TField<float>>("f32"sv, 
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->f32); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((SimpleStruct*)obj)->f32 = *((const float*)value); }
 		),
-		std::make_shared<TField<String>>("Name"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->Name); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((SimpleStruct*)obj)->Name = *((const String*)value); }
+		std::make_shared<refl::TField<String>>("Name"sv, 
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->Name); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((SimpleStruct*)obj)->Name = *((const String*)value); }
 		)
 	};
 
 	template<>
-	const Vector<std::shared_ptr<IField>> ComplexType<ComplexClass>::Fields = {
+	const Vector<std::shared_ptr<refl::IField>> refl::ComplexType<ComplexClass>::Fields = {
 		std::make_shared<TField<int32>>("Int"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Int); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((ComplexClass*)obj)->m_Int = *((const int32*)value); }
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Int); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((ComplexClass*)obj)->m_Int = *((const int32*)value); }
 		),
-		std::make_shared<TField<String>>("String"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_String); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((ComplexClass*)obj)->m_String = *((const String*)value); }
+		std::make_shared<refl::TField<String>>("String"sv, 
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_String); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((ComplexClass*)obj)->m_String = *((const String*)value); }
 		),
-		std::make_shared<TField<float>>("Float"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Float); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((ComplexClass*)obj)->m_Float = *((const float*)value); }
+		std::make_shared<refl::TField<float>>("Float"sv, 
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Float); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((ComplexClass*)obj)->m_Float = *((const float*)value); }
 		),
-		std::make_shared<TField<Vector<SimpleStruct>>>("Vector"sv, 
-			(IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Vector); },
-			(IField::SetValueFn)[](void* obj, const void* value) -> void { ((ComplexClass*)obj)->m_Vector = *((const Vector<SimpleStruct>*)value); }
+		std::make_shared<refl::TField<Vector<SimpleStruct>>>("Vector"sv, 
+			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Vector); },
+			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
+				void { ((ComplexClass*)obj)->m_Vector = *((const Vector<SimpleStruct>*)value); }
 		),
 	};
 }
