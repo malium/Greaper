@@ -3,31 +3,19 @@
  *                                               All Rights Reserved                                                   *
  **********************************************************************************************************************/
 
-#if 0
-#include "../GreaperMath/Public/Quaternion.h"
-#endif
+#include "../GreaperMath/Public/Quaternion.hpp"
 #include "../GreaperMath/Public/Vector2.hpp"
 #include <iostream>
 #include <format>
 #include <random>
 
-#if 0
 template<class TResult>
-static void ReportTest(greaper::StringView testName, sizet sampleCount, const greaper::Vector<TResult>& resultNormal, const greaper::Vector<TResult>& resultOptim,
-	greaper::Clock_t::duration durationNormalNs, greaper::Clock_t::duration durationOptimNs)
+static void ReportTest(greaper::StringView testName, sizet sampleCount, const greaper::Vector<TResult>& resultNormal,
+	const greaper::Vector<TResult>& resultOptim, greaper::Clock_t::duration durationNormalNs,
+	greaper::Clock_t::duration durationOptimNs)
 {
 	using namespace greaper;
 	using namespace math;
-
-	const achar* outputTxt = nullptr;
-	if constexpr (std::is_same_v<TResult, int32>)
-		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%" PRId32 " optim:%" PRId32 ".\n";
-	else if constexpr (std::is_same_v<TResult, int64>)
-		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%" PRId64 " optim:%" PRId64 ".\n";
-	else if constexpr (std::is_same_v<TResult, float>)
-		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%f optim:%f.\n";
-	else if constexpr (std::is_same_v<TResult, double>)
-		outputTxt = "%s: Sample %" PRIuPTR " was not verified normal:%lf optim:%lf.\n";
 
 	if constexpr (std::is_integral_v<TResult>)
 	{
@@ -37,7 +25,8 @@ static void ReportTest(greaper::StringView testName, sizet sampleCount, const gr
 			auto optim = resultOptim[i];
 			if (normal != optim)
 			{
-				std::cout << Format(outputTxt, testName.data(), i, normal, optim);
+				std::cout << std::format("{}: Sample {} was not verified normal:{} optim:{}.\n",
+					testName, i, normal, optim);
 			}
 		}
 	}
@@ -49,7 +38,8 @@ static void ReportTest(greaper::StringView testName, sizet sampleCount, const gr
 			auto optim = resultOptim[i];
 			if (!IsNearlyEqual(normal, optim))
 			{
-				std::cout << Format(outputTxt, testName.data(), i, normal, optim);
+				std::cout << std::format("{}: Sample {} was not verified normal:{} optim:{}.\n",
+					testName, i, normal, optim);
 			}
 		}
 	}
@@ -60,12 +50,14 @@ static void ReportTest(greaper::StringView testName, sizet sampleCount, const gr
 	if (durationNormalNs.count() < durationOptimNs.count())
 	{
 		auto times = float((double)durationOptimNs.count() / (double)durationNormalNs.count());
-		std::cout << Format("%s:\tNormal was %.3f times faster, NORM:%.3fns OPTM:%.3fns.\n", testName.data(), times, normAvg, optiAvg);
+		std::cout << std::format("{}:\tNormal was {:.3f} times faster, NORM:{:.3f}ns OPTM:{:.3f}ns.\n",
+			testName, times, normAvg, optiAvg);
 	}
 	else if (durationNormalNs.count() > durationOptimNs.count())
 	{
 		auto times = float((double)durationNormalNs.count() / (double)durationOptimNs.count());
-		std::cout << Format("%s:\tOptim was %.3f times faster, NORM:%.3fns OPTM:%.3fns.\n", testName.data(), times, normAvg, optiAvg);
+		std::cout << std::format("{}:\tOptim was {:.3f} times faster, NORM:{:.3f}ns OPTM:{:.3f}ns.\n",
+			testName, times, normAvg, optiAvg);
 	}
 }
 
@@ -163,7 +155,9 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> CeilIn
 	for (sizet i = 0; i < sampleCount; ++i)
 	{
 		//resultOptim[i] = -(_mm_cvt_ss2si(_mm_set_ss(-0.5f - (samples[i] + samples[i]))) >> 1);
-		resultOptim[i] = _mm_cvt_ss2si(_mm_round_ss(_mm_setzero_ps(), _mm_set_ss(samples[i]), (_MM_FROUND_CEIL | _MM_FROUND_NO_EXC)));
+		auto zero = _mm_setzero_ps();
+		auto val = _mm_set_ss(samples[i]);
+		resultOptim[i] = _mm_cvt_ss2si(_mm_round_ss(zero, val, (_MM_FROUND_CEIL | _MM_FROUND_NO_EXC)));
 	}
 	Timepoint_t endOptim = Clock_t::now();
 
@@ -180,6 +174,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> Log2DT
 	using namespace math;
 
 	static constexpr double ONEOVERLOG2 = 1.4426950408889634;
+	
 
 	Timepoint_t beginNormal = Clock_t::now();
 	for (sizet i = 0; i < sampleCount; ++i)
@@ -316,11 +311,8 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4
 	return { durationNormalNs, durationOptimNs };
 }
 
-#endif
-
 void MathTest()
 {
-#if 0
 	using namespace greaper;
 	using namespace math;
 
@@ -342,7 +334,7 @@ void MathTest()
 
 	Vector<Vector4f> samplesV4;
 	samplesV4.resize(sampleCount, Vector4f{});
-	VectorAligned<__m128> samplesSSE;
+	Vector<__m128> samplesSSE;
 	samplesSSE.resize(sampleCount, __m128{});
 
 	Vector<int32> resultNormal, resultOptim;
@@ -454,7 +446,9 @@ void MathTest()
 	auto edeg4 = erad4 * RAD2DEG<prec>;
 	auto edeg5 = erad5 * RAD2DEG<prec>;
 
-	auto quatArray = Vector<std::pair<QuaternionReal<prec>, Vector3Real<prec>>>{ {qf0,edeg0}, {qf1, edeg1}, {qf2, edeg2}, {qf3, edeg3}, {qf4, edeg4}, {qf5, edeg5} };
+	auto quatArray = Vector<std::pair<QuaternionReal<prec>, Vector3Real<prec>>>{ 
+		{qf0,edeg0}, {qf1, edeg1}, {qf2, edeg2}, {qf3, edeg3}, {qf4, edeg4}, {qf5, edeg5}
+	};
 	decltype(quatArray) testArray, testArray2{};
 
 	using typeInfo = typename refl::TypeInfo_t<decltype(quatArray)>::Type;
@@ -501,7 +495,6 @@ void MathTest()
 
 		++origIt; ++test1It; ++test2It;
 	}
-	#endif
 
 	greaper::math::Vector2b vec {1,0};
 	using vec_refl = greaper::refl::TypeInfo_t<decltype(vec)>;
