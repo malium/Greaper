@@ -57,13 +57,14 @@ else()
 	
 	add_executable(TestApp ${TESTAPP_SOURCES})
 
-	set(generated_protocol_dir "${PROJECT_SOURCE_DIR}/External/wayland-protocols")
-	file(MAKE_DIRECTORY ${generated_protocol_dir})
-
-	generate_wayland_protocols(TestApp ${generated_protocol_dir} "/usr/share/wayland-protocols/"
-		"xdg-shell;xdg-decoration-unstable-v1")
-
-	target_link_libraries(TestApp cJSON wayland-client)
+#	set(generated_protocol_dir "${PROJECT_SOURCE_DIR}/External/wayland-protocols")
+#	file(MAKE_DIRECTORY ${generated_protocol_dir})
+#
+#	generate_wayland_protocols(TestApp ${generated_protocol_dir} "/usr/share/wayland-protocols/"
+#		"xdg-shell;xdg-decoration-unstable-v1")
+#
+#	target_link_libraries(TestApp cJSON wayland-client)
+target_link_libraries(TestApp cJSON)
 endif()
 
 set_target_properties(TestApp PROPERTIES
