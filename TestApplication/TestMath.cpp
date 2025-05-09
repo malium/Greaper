@@ -4,10 +4,13 @@
  **********************************************************************************************************************/
 
 #include "../GreaperMath/Public/Quaternion.hpp"
-#include "../GreaperMath/Public/Vector2.hpp"
+#include "../GreaperMath/Public/Vector4.hpp"
+#include "../GreaperCore/Public/MemoryStream.hpp"
 #include <iostream>
 #include <format>
 #include <random>
+
+#define USE_SSE 0
 
 template<class TResult>
 static void ReportTest(greaper::StringView testName, sizet sampleCount, const greaper::Vector<TResult>& resultNormal,
@@ -221,6 +224,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> InvSqr
 	return { durationNormalNs, durationOptimNs };
 }
 
+#if USE_SSE
 static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> LenghtV4FTest(sizet sampleCount,
 	const greaper::Vector<greaper::math::Vector4f>& samplesV4, const greaper::VectorAligned<__m128>& samplesSSE,
 	greaper::Vector<float>& resultNormal, greaper::Vector<float>& resultOptim)
@@ -310,6 +314,7 @@ static std::tuple<greaper::Clock_t::duration, greaper::Clock_t::duration> DistV4
 
 	return { durationNormalNs, durationOptimNs };
 }
+#endif 
 
 void MathTest()
 {
@@ -332,10 +337,12 @@ void MathTest()
 	samplesPD.resize(sampleCount, 0.0);
 	samplesPD64.resize(sampleCount, 0.0);
 
+#if USE_SSE
 	Vector<Vector4f> samplesV4;
 	samplesV4.resize(sampleCount, Vector4f{});
 	Vector<__m128> samplesSSE;
 	samplesSSE.resize(sampleCount, __m128{});
+#endif
 
 	Vector<int32> resultNormal, resultOptim;
 	resultNormal.resize(sampleCount, 0);
@@ -381,6 +388,7 @@ void MathTest()
 		samplesPF64[i] = distributionPF64(generator);
 		samplesPD64[i] = distributionPD64(generator);
 
+#if USE_SSE
 		auto f0 = distributionV4(generator);
 		auto f1 = distributionV4(generator);
 		auto f2 = distributionV4(generator);
@@ -388,6 +396,7 @@ void MathTest()
 
 		samplesV4[i].Set(f0, f1, f2, f3);
 		samplesSSE[i] = _mm_set_ps(f0, f1, f2, f3);
+#endif
 	}
 
 	Clock_t::duration durNorm, durOpt;
@@ -409,6 +418,7 @@ void MathTest()
 	std::tie(durNorm, durOpt) = InvSqrtFTest(sampleCount, samplesPF, resultNormalF, resultOptimF);
 	ReportTest("InvSqrtFTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
 
+#if USE_SSE
 	std::tie(durNorm, durOpt) = LenghtV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
 	ReportTest("LenghtV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
 
@@ -417,6 +427,7 @@ void MathTest()
 
 	std::tie(durNorm, durOpt) = DistV4FTest(sampleCount, samplesV4, samplesSSE, resultNormalF, resultOptimF);
 	ReportTest("DistV4FTest"sv, sampleCount, resultNormalF, resultOptimF, durNorm, durOpt);
+#endif
 
 	using prec = double;
 	auto odeg = Vector3Real<prec>(90, -60, 15);
@@ -453,26 +464,47 @@ void MathTest()
 
 	using typeInfo = typename refl::TypeInfo_t<decltype(quatArray)>::Type;
 
-	auto json = typeInfo::CreateJSON(quatArray, "quatMap"sv);
-	auto text = SPtr<char>(cJSON_Print(json.get()));
+	auto json_ret = typeInfo::CreateJSON(quatArray, "quatMap"sv);
+	if (!json_ret.has_value())
+	{
+		std::cout << json_ret.error() << std::endl;
+		return ;
+	}
+	auto text = std::shared_ptr<char>(cJSON_Print(json_ret.value().get()), cJSON_free);
+
 	std::cout << text.get() << std::endl;
-	auto parsed = SPtr<cJSON>(cJSON_Parse(text.get()), cJSON_Delete);
-	auto parseRes = typeInfo::FromJSON(testArray, parsed.get(), "quatMap"sv);
+	auto parsed = std::shared_ptr<cJSON>(cJSON_Parse(text.get()), cJSON_Delete);
+	auto ret_parse = typeInfo::FromJSON(testArray, parsed.get(), "quatMap"sv);
 
-	if (parseRes.HasFailed())
-		std::cout << parseRes.GetFailMessage() << std::endl;
+	if (!ret_parse.has_value())
+	{
+		std::cout << ret_parse.error() << std::endl;
+		return ;
+	}
 
-	MemoryStream ms{ (uint64)typeInfo::StaticSize + (uint64)typeInfo::GetDynamicSize(quatArray) };
+	auto ret_quatArrayDynSize = typeInfo::GetDynamicSize(quatArray);
+	if (!ret_quatArrayDynSize.has_value())
+	{
+		std::cout << ret_quatArrayDynSize.error() << std::endl;
+		return ;
+	}
+	MemoryStream ms{ (uint64)typeInfo::StaticSize + (uint64)ret_quatArrayDynSize.value() };
 	
 	auto res = typeInfo::ToStream(quatArray, ms);
-	if (res.HasFailed())
-		std::cout << res.GetFailMessage() << std::endl;
+	if (!res.has_value())
+	{
+		std::cout << res.error() << std::endl;
+		return ;
+	}
 
 	ms.Seek(0);
 
-	res = typeInfo::FromStream(testArray2, ms);
-	if (res.HasFailed())
-		std::cout << res.GetFailMessage() << std::endl;
+	auto res2 = typeInfo::FromStream(testArray2, ms);
+	if (!res2.has_value())
+	{
+		std::cout << res2.error() << std::endl;
+		return ;
+	}
 
 	auto origIt = quatArray.begin();
 	auto test1It = testArray.begin();
@@ -489,22 +521,51 @@ void MathTest()
 		using test2TypeInfo = refl::TypeInfo_t<decltype(test2)>::Type;
 
 		if (orig != test1)
-			std::cout << std::format("Badly JSON stream quaternion, expected: '{}' obtained: '{}'.", origTypeInfo::ToString(orig), test1TypeInfo::ToString(test1)) << std::endl;
+		{
+			auto ret_strorig = origTypeInfo::ToString(orig);
+			if(!ret_strorig.has_value())
+			{
+				std::cout << "ERROR: Could not obtain the string representation of MathTest origTypeInfo::ToString(orig), " << ret_strorig.error() << std::endl;
+				return;
+			}
+			auto ret_strtest1 = test1TypeInfo::ToString(test1);
+			if(!ret_strtest1.has_value())
+			{
+				std::cout << "ERROR: Could not obtain the string representation of MathTest test1TypeInfo::ToString(test1), " << ret_strtest1.error() << std::endl;
+				return;
+			}
+			std::cout << std::format("Badly JSON stream quaternion, expected: '{}' obtained: '{}'.", ret_strorig.value(), ret_strtest1.value()) << std::endl;
+		}
 		if (orig != test2)
-			std::cout << std::format("Badly Memory stream quaternion, expected: '{}' obtained: '{}'.", origTypeInfo::ToString(orig), test2TypeInfo::ToString(test2)) << std::endl;
+		{
+			auto ret_strorig = origTypeInfo::ToString(orig);
+			if(!ret_strorig.has_value())
+			{
+				std::cout << "ERROR: Could not obtain the string representation of MathTest origTypeInfo::ToString(orig), " << ret_strorig.error() << std::endl;
+				return;
+			}
+			auto ret_strtest2 = test2TypeInfo::ToString(test2);
+			if(!ret_strtest2.has_value())
+			{
+				std::cout << "ERROR: Could not obtain the string representation of MathTest test2TypeInfo::ToString(test2), " << ret_strtest2.error() << std::endl;
+				return;
+			}
+			std::cout << std::format("Badly Memory stream quaternion, expected: '{}' obtained: '{}'.", ret_strorig.value(), ret_strtest2.value()) << std::endl;
+		}
 
 		++origIt; ++test1It; ++test2It;
 	}
 
 	greaper::math::Vector2b vec {1,0};
 	using vec_refl = greaper::refl::TypeInfo_t<decltype(vec)>;
-	auto json_ret = vec_refl::Type::CreateJSON(vec, vec_refl::Name);
-	if (!json_ret.has_value())
+	auto ret_json = vec_refl::Type::CreateJSON(vec, vec_refl::Name);
+	if (!ret_json.has_value())
 	{
-		std::cout << "ERROR" << json_ret.error() << std::endl;
+		std::cout << "ERROR" << ret_json.error() << std::endl;
 		return;
 	}
-	auto json = json_ret.value();
+	auto json = ret_json.value();
+	auto text = std::shared_ptr<char>(cJSON_Print(json.get()), cJSON_Delete);
 
-	std::cout << cJSON_Print(json.get()) << std::endl;
+	std::cout << text.get() << std::endl;
 }
