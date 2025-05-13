@@ -565,7 +565,7 @@ void MathTest()
 		return;
 	}
 	auto json = ret_json.value();
-	auto text = std::shared_ptr<char>(cJSON_Print(json.get()), cJSON_Delete);
+	auto text2 = std::shared_ptr<char>(cJSON_Print(json.get()), cJSON_free);
 
-	std::cout << text.get() << std::endl;
+	std::cout << text2.get() << std::endl;
 }
