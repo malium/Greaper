@@ -14,6 +14,9 @@ int main(int argc, char* argv[])
 {
 	void* hInstance = nullptr;
 	hInstance = (void*)GetModuleHandleW(nullptr);
+
+	achar* lpCmdLine = nullptr;
+
 	return MainCode(hInstance, argc, argv);
 }
 #else /* !_CONSOLE */
@@ -21,7 +24,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, UNUSED HINSTANCE hPrevInstance, LPSTR lp
 {
 	int argc = 0;
 
-	auto argv = greaper::UPtr<LPSTR>(CommandLineToArgvA(lpCmdLine, &argc), &FreeArgvA);
+	auto argv = std::unique_ptr<achar*>(CommandLineToArgvA(lpCmdLine, &argc), &FreeArgvA);
 	if (argv == nullptr)
 		return EXIT_FAILURE;
 
@@ -38,14 +41,14 @@ int main(int argc, char* argv[])
 
 ENUMERATION(TESTS, Greaper, Wayland, Math, ComplexType);
 
-constexpr auto TestToRun = TESTS_t::Math;
+constexpr auto TestToRun = TESTS_t::ComplexType;
 
 extern void WaylandTest();
 extern void MathTest();
 extern void GreaperTest();
 extern void ComplexTypeTest();
 
-int MainCode(void* hInstance, int argc, char** argv)
+int MainCode(UNUSED void* hInstance, UNUSED int argc, UNUSED char** argv)
 {
 	using namespace greaper;
 

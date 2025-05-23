@@ -89,6 +89,7 @@ if(MSVC)
 	target_compile_options(TestApp PRIVATE ${MSVC_COMPILE_OPTIONS})
 	target_compile_definitions(TestApp PRIVATE _CONSOLE=1)
 	target_link_options(TestApp PRIVATE /SUBSYSTEM:CONSOLE /MANIFEST:NO)
+	target_link_libraries(TestApp Rpcrt4)
 	
 	add_custom_command(TARGET TestApp POST_BUILD COMMAND 
 					"mt.exe" -manifest \"${CMAKE_CURRENT_SOURCE_DIR}\\Manifest.xml\" -outputresource:\"${PROJECT_SOURCE_DIR}\\bin\\${TESTAPP_OUTPUT_NAME}.exe\"\;\#1

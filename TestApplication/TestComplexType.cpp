@@ -72,45 +72,17 @@ namespace greaper
 {
 	template<>
 	const Vector<std::shared_ptr<refl::IField>> refl::ComplexType<SimpleStruct>::Fields = {
-		std::make_shared<refl::TField<int32>>("i32"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->i32); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((SimpleStruct*)obj)->i32 = *((const int32*)value); }
-		),
-		std::make_shared<refl::TField<float>>("f32"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->f32); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((SimpleStruct*)obj)->f32 = *((const float*)value); }
-		),
-		std::make_shared<refl::TField<String>>("Name"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((SimpleStruct*)obj)->Name); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((SimpleStruct*)obj)->Name = *((const String*)value); }
-		)
+		CREATE_FIELD(i32, int32, greaper::SimpleStruct),
+		CREATE_FIELD(f32, float, greaper::SimpleStruct),
+		CREATE_FIELD(Name, greaper::String, greaper::SimpleStruct)
 	};
 
 	template<>
 	const Vector<std::shared_ptr<refl::IField>> refl::ComplexType<ComplexClass>::Fields = {
-		std::make_shared<TField<int32>>("Int"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Int); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((ComplexClass*)obj)->m_Int = *((const int32*)value); }
-		),
-		std::make_shared<refl::TField<String>>("String"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_String); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((ComplexClass*)obj)->m_String = *((const String*)value); }
-		),
-		std::make_shared<refl::TField<float>>("Float"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Float); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((ComplexClass*)obj)->m_Float = *((const float*)value); }
-		),
-		std::make_shared<refl::TField<Vector<SimpleStruct>>>("Vector"sv, 
-			(refl::IField::GetValueFn)[](const void* obj) -> const void* { return &(((ComplexClass*)obj)->m_Vector); },
-			(refl::IField::SetValueFn)[](void* obj, const void* value) -> 
-				void { ((ComplexClass*)obj)->m_Vector = *((const Vector<SimpleStruct>*)value); }
-		),
+		CREATE_FIELD_CUSTOM_NAME(m_Int, Int, int32, greaper::ComplexClass),
+		CREATE_FIELD_CUSTOM_NAME(m_String, String, greaper::String, greaper::ComplexClass),
+		CREATE_FIELD_CUSTOM_NAME(m_Float, Float, float, greaper::ComplexClass),
+		CREATE_FIELD_CUSTOM_NAME(m_Vector, Vector, greaper::Vector<greaper::SimpleStruct>, greaper::ComplexClass)
 	};
 }
 
@@ -129,7 +101,9 @@ void ComplexTypeTest()
 	}
 	auto json = json_ret.value();
 
-	std::cout << cJSON_Print(json.get()) << std::endl;
+	auto json_str = std::shared_ptr<achar>(cJSON_Print(json.get()), cJSON_free);
+
+	std::cout << json_str.get() << std::endl;
 
 	greaper::ComplexClass dd{0, "", 0.f, {}};
 

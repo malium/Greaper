@@ -3,6 +3,9 @@
  *                                               All Rights Reserved                                                   *
  **********************************************************************************************************************/
 
+#include "../GreaperCore/Public/CorePrerequisites.hpp"
+
+#if PLT_LINUX
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -218,3 +221,12 @@ void WaylandTest()
 
 	wl_display_disconnect(gwl_display);
 }
+
+#else
+
+void WaylandTest()
+{
+	printf("Test only available on Linux platforms running Wayland.");
+}
+
+#endif
