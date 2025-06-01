@@ -430,8 +430,8 @@ void MathTest()
 #endif
 
 	using prec = double;
-	auto odeg = Vector3Real<prec>(90, -60, 15);
-	auto orad = odeg * DEG2RAD<prec>;
+	constexpr auto odeg = Vector3Real<prec>(90, -60, 15);
+	constexpr auto orad = odeg * DEG2RAD<prec>;
 
 	auto q0 = QuaternionReal<prec>::FromEuler(orad.X, 0, 0);
 	auto q1 = QuaternionReal<prec>::FromEuler(0, orad.Y, 0);
